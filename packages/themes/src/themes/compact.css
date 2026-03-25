@@ -1,0 +1,178 @@
+/* ============================================================================
+   @yable/themes — Compact Theme
+   Dense, data-heavy variant. Optimized for displaying maximum information
+   in minimum space. Think Bloomberg terminal meets modern design.
+
+   Usage:
+     import '@yable/themes'
+     import '@yable/themes/compact.css'
+     <Table className="yable-theme-compact" />
+   ============================================================================ */
+
+.yable-theme-compact,
+.yable[data-theme="compact"] {
+  /* Surface — light gray background for data density */
+  --yable-bg: #ffffff;
+  --yable-bg-header: #f3f4f6;
+  --yable-bg-footer: #f3f4f6;
+  --yable-bg-row-alt: rgba(0, 0, 0, 0.018);
+  --yable-bg-row-hover: rgba(0, 0, 0, 0.035);
+  --yable-bg-row-selected: rgba(16, 185, 129, 0.06);
+  --yable-bg-pinned: #fafafa;
+
+  /* Text — slightly smaller, sharper */
+  --yable-text-primary: #1f2937;
+  --yable-text-secondary: #6b7280;
+  --yable-text-tertiary: #9ca3af;
+  --yable-text-header: #374151;
+
+  /* Borders — more visible for dense data */
+  --yable-border-color: #e5e7eb;
+  --yable-border-color-strong: #d1d5db;
+  --yable-border-radius: 6px;
+
+  /* Tight spacing */
+  --yable-cell-padding-x: 8px;
+  --yable-cell-padding-y: 4px;
+  --yable-header-padding-x: 8px;
+  --yable-header-padding-y: 6px;
+
+  /* Small sizes */
+  --yable-row-min-height: 28px;
+  --yable-header-min-height: 30px;
+
+  /* Typography — smaller, monospace-friendly */
+  --yable-font-size: 12px;
+  --yable-font-size-sm: 11px;
+  --yable-font-size-header: 11px;
+  --yable-line-height: 1.4;
+
+  /* Accent — green for a data/financial feel */
+  --yable-accent: #10b981;
+  --yable-accent-hover: #059669;
+  --yable-accent-light: rgba(16, 185, 129, 0.08);
+  --yable-accent-text: #ffffff;
+
+  /* Shadows — minimal */
+  --yable-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --yable-shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  /* Form controls — extra small */
+  --yable-input-height: 24px;
+  --yable-input-padding-x: 6px;
+  --yable-input-font-size: 12px;
+  --yable-input-border-radius: 3px;
+
+  /* Checkbox — small */
+  --yable-checkbox-size: 14px;
+  --yable-checkbox-radius: 2px;
+
+  /* Pagination — compact */
+  --yable-pagination-button-size: 26px;
+  --yable-pagination-button-radius: 4px;
+  --yable-pagination-gap: 2px;
+
+  /* Resize handle */
+  --yable-resize-handle-width: 3px;
+}
+
+/* Headers — bold, borderline industrial */
+.yable-theme-compact .yable-th,
+.yable[data-theme="compact"] .yable-th {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+  font-weight: var(--yable-font-weight-semibold);
+  color: var(--yable-text-secondary);
+  background: var(--yable-bg-header);
+}
+
+/* All rows get separators */
+.yable-theme-compact .yable-tr:not(:last-child) .yable-td,
+.yable[data-theme="compact"] .yable-tr:not(:last-child) .yable-td {
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+/* Also add vertical borders for the spreadsheet feel */
+.yable-theme-compact .yable-th,
+.yable[data-theme="compact"] .yable-th,
+.yable-theme-compact .yable-td,
+.yable[data-theme="compact"] .yable-td {
+  border-right: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable-theme-compact .yable-th:last-child,
+.yable[data-theme="compact"] .yable-th:last-child,
+.yable-theme-compact .yable-td:last-child,
+.yable[data-theme="compact"] .yable-td:last-child {
+  border-right: none;
+}
+
+/* Number cells — monospace */
+.yable-theme-compact [data-type="number"],
+.yable[data-theme="compact"] [data-type="number"] {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ── Compact Dark Mode ───────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  .yable-theme-compact:not([data-yable-theme="light"]),
+  .yable[data-theme="compact"]:not([data-yable-theme="light"]) {
+    --yable-bg: #0d0f14;
+    --yable-bg-header: #141720;
+    --yable-bg-footer: #141720;
+    --yable-bg-row-alt: rgba(255, 255, 255, 0.02);
+    --yable-bg-row-hover: rgba(255, 255, 255, 0.04);
+    --yable-bg-row-selected: rgba(16, 185, 129, 0.1);
+    --yable-bg-pinned: #111318;
+
+    --yable-text-primary: #d1d5db;
+    --yable-text-secondary: #9ca3af;
+    --yable-text-tertiary: #6b7280;
+    --yable-text-header: #9ca3af;
+
+    --yable-border-color: #1f2937;
+    --yable-border-color-strong: #374151;
+
+    --yable-accent: #34d399;
+    --yable-accent-hover: #6ee7b7;
+    --yable-accent-light: rgba(52, 211, 153, 0.1);
+
+    --yable-input-border: #374151;
+    --yable-input-border-hover: #4b5563;
+    --yable-input-bg-focus: #1a1d28;
+    --yable-checkbox-border: #4b5563;
+    --yable-checkbox-bg: #1f2937;
+  }
+}
+
+[data-yable-theme="dark"] .yable-theme-compact,
+[data-yable-theme="dark"] .yable[data-theme="compact"] {
+  --yable-bg: #0d0f14;
+  --yable-bg-header: #141720;
+  --yable-bg-footer: #141720;
+  --yable-bg-row-alt: rgba(255, 255, 255, 0.02);
+  --yable-bg-row-hover: rgba(255, 255, 255, 0.04);
+  --yable-bg-row-selected: rgba(16, 185, 129, 0.1);
+  --yable-bg-pinned: #111318;
+
+  --yable-text-primary: #d1d5db;
+  --yable-text-secondary: #9ca3af;
+  --yable-text-tertiary: #6b7280;
+  --yable-text-header: #9ca3af;
+
+  --yable-border-color: #1f2937;
+  --yable-border-color-strong: #374151;
+
+  --yable-accent: #34d399;
+  --yable-accent-hover: #6ee7b7;
+  --yable-accent-light: rgba(52, 211, 153, 0.1);
+
+  --yable-input-border: #374151;
+  --yable-input-border-hover: #4b5563;
+  --yable-input-bg-focus: #1a1d28;
+  --yable-checkbox-border: #4b5563;
+  --yable-checkbox-bg: #1f2937;
+}

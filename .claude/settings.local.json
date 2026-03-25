@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(kirby)",
+      "Skill(kirby:*)",
+      "WebFetch(domain:www.ag-grid.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(git -C /Users/macbookpro-kirby/Desktop/Coding/table log --oneline -5)",
+      "Bash(pnpm --version:*)",
+      "Bash(node --version:*)",
+      "Bash(npm:*)",
+      "Bash(npx --version:*)",
+      "Bash(source:*)",
+      "Bash(nvm current:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm --filter @yable/core build:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
+      "Bash(export PATH=\"$HOME/.local/share/pnpm:$HOME/.nvm/versions/node/*/bin:$PATH\")",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(pnpm --filter @yable/themes build:*)",
+      "Bash(pnpm --filter @yable/react build:*)",
+      "Bash(pnpm --filter @yable/vanilla build:*)",
+      "Bash(export PATH:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/bin:/bin:$PATH\")",
+      "Bash(pnpm --filter @yable/react-demo build:*)",
+      "Bash(pnpm --filter @yable/core test:*)",
+      "Bash(pnpm test:ci:*)"
+    ]
+  }
+}

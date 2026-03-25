@@ -1,0 +1,102 @@
+/* ============================================================================
+   @yable/themes — Utility Classes
+   Modifier classes for common table configurations.
+   Apply these on the .yable container element.
+   ============================================================================ */
+
+/* ── Striped Rows ────────────────────────────────────────────────────────── */
+
+.yable--striped .yable-tbody .yable-tr:nth-child(even) {
+  background: var(--yable-bg-row-alt);
+}
+
+.yable--striped .yable-tbody .yable-tr:nth-child(even):hover {
+  background: var(--yable-bg-row-hover);
+}
+
+/* ── Bordered ────────────────────────────────────────────────────────────── */
+
+.yable--bordered .yable-th,
+.yable--bordered .yable-td {
+  border-right: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable--bordered .yable-th:last-child,
+.yable--bordered .yable-td:last-child {
+  border-right: none;
+}
+
+/* ── Compact ─────────────────────────────────────────────────────────────── */
+
+.yable--compact {
+  --yable-cell-padding-x: 10px;
+  --yable-cell-padding-y: 6px;
+  --yable-header-padding-x: 10px;
+  --yable-header-padding-y: 6px;
+  --yable-row-min-height: 32px;
+  --yable-header-min-height: 32px;
+  --yable-font-size: 12px;
+  --yable-font-size-header: 11px;
+}
+
+/* ── Relaxed ─────────────────────────────────────────────────────────────── */
+
+.yable--relaxed {
+  --yable-cell-padding-x: 20px;
+  --yable-cell-padding-y: 14px;
+  --yable-header-padding-x: 20px;
+  --yable-header-padding-y: 14px;
+  --yable-row-min-height: 52px;
+  --yable-header-min-height: 52px;
+}
+
+/* ── No Border ───────────────────────────────────────────────────────────── */
+
+.yable--borderless {
+  border: none;
+  border-radius: 0;
+}
+
+/* ── Rounded ─────────────────────────────────────────────────────────────── */
+
+.yable--rounded {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ── Full Width ──────────────────────────────────────────────────────────── */
+
+.yable--full-width .yable-table {
+  table-layout: auto;
+}
+
+/* ── Nowrap Off (allow text wrapping) ────────────────────────────────────── */
+
+.yable--wrap .yable-td,
+.yable--wrap .yable-th {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+/* ── Fixed Height with Scroll ────────────────────────────────────────────── */
+
+.yable--scrollable {
+  max-height: var(--yable-max-height, 600px);
+  overflow-y: auto;
+}
+
+/* ── Dense Headers (no uppercase, smaller weight) ────────────────────────── */
+
+.yable--plain-headers .yable-th {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: var(--yable-font-weight-medium);
+  font-size: var(--yable-font-size);
+}
+
+/* ── Hover Row Highlight Off ─────────────────────────────────────────────── */
+
+.yable--no-hover .yable-tr:hover {
+  background: var(--yable-bg-row);
+}

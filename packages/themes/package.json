@@ -1,0 +1,19 @@
+{
+  "name": "@yable/themes",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.css",
+  "exports": {
+    ".": "./dist/index.css",
+    "./default.css": "./dist/themes/default.css",
+    "./stripe.css": "./dist/themes/stripe.css",
+    "./compact.css": "./dist/themes/compact.css",
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "clean": "rm -rf dist"
+  }
+}

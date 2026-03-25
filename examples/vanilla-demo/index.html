@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yable — Vanilla JS Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafafa;
+      color: #111;
+      padding: 40px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    h1 span { color: #2563eb; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 32px; }
+    #table-container { margin-top: 16px; }
+    .event-log {
+      margin-top: 24px;
+      padding: 16px;
+      background: #1a1a1a;
+      color: #a3e635;
+      border-radius: 8px;
+      font-family: 'SF Mono', Menlo, monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .event-log p { margin: 2px 0; opacity: 0.8; }
+    .event-log p:last-child { opacity: 1; }
+  </style>
+</head>
+<body>
+  <h1>Yable<span>Tables</span></h1>
+  <p class="subtitle">Vanilla JS adapter demo — sorting, pagination, click events</p>
+  <div id="table-container"></div>
+  <div id="event-log" class="event-log"><p>Click on cells or rows to see events...</p></div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

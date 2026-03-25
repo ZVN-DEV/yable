@@ -1,0 +1,236 @@
+/* ============================================================================
+   @yable/themes — Design Tokens
+   CSS custom properties for the entire YableTables design system.
+   Override these to customize any visual property.
+   ============================================================================ */
+
+:root {
+  /* ── Surface Colors ────────────────────────────────────────────────────── */
+  --yable-bg: #ffffff;
+  --yable-bg-header: #fafafa;
+  --yable-bg-footer: #fafafa;
+  --yable-bg-row: transparent;
+  --yable-bg-row-alt: rgba(0, 0, 0, 0.015);
+  --yable-bg-row-hover: rgba(0, 0, 0, 0.025);
+  --yable-bg-row-selected: rgba(59, 130, 246, 0.06);
+  --yable-bg-row-expanded: rgba(0, 0, 0, 0.01);
+  --yable-bg-cell-editing: #ffffff;
+  --yable-bg-pinned: #fdfdfd;
+
+  /* ── Text Colors ───────────────────────────────────────────────────────── */
+  --yable-text-primary: #111827;
+  --yable-text-secondary: #6b7280;
+  --yable-text-tertiary: #9ca3af;
+  --yable-text-header: #374151;
+  --yable-text-disabled: #d1d5db;
+  --yable-text-link: #2563eb;
+  --yable-text-placeholder: #9ca3af;
+
+  /* ── Border ────────────────────────────────────────────────────────────── */
+  --yable-border-color: #e5e7eb;
+  --yable-border-color-strong: #d1d5db;
+  --yable-border-width: 1px;
+  --yable-border-radius: 8px;
+  --yable-border-radius-sm: 4px;
+
+  /* ── Spacing ───────────────────────────────────────────────────────────── */
+  --yable-cell-padding-x: 16px;
+  --yable-cell-padding-y: 10px;
+  --yable-header-padding-x: 16px;
+  --yable-header-padding-y: 10px;
+
+  /* ── Typography ────────────────────────────────────────────────────────── */
+  --yable-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --yable-font-size: 13px;
+  --yable-font-size-sm: 12px;
+  --yable-font-size-header: 12px;
+  --yable-font-weight-normal: 400;
+  --yable-font-weight-medium: 500;
+  --yable-font-weight-semibold: 600;
+  --yable-line-height: 1.5;
+
+  /* ── Sizing ────────────────────────────────────────────────────────────── */
+  --yable-row-height: auto;
+  --yable-row-min-height: 40px;
+  --yable-header-height: auto;
+  --yable-header-min-height: 40px;
+  --yable-resize-handle-width: 4px;
+  --yable-resize-handle-color: transparent;
+  --yable-resize-handle-color-active: var(--yable-accent);
+
+  /* ── Accent / Interactive ──────────────────────────────────────────────── */
+  --yable-accent: #2563eb;
+  --yable-accent-hover: #1d4ed8;
+  --yable-accent-light: rgba(37, 99, 235, 0.08);
+  --yable-accent-text: #ffffff;
+
+  /* ── Shadows ───────────────────────────────────────────────────────────── */
+  --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --yable-shadow-pinned: 4px 0 8px -2px rgba(0, 0, 0, 0.06);
+
+  /* ── Transitions ───────────────────────────────────────────────────────── */
+  --yable-transition-fast: 100ms ease;
+  --yable-transition: 150ms ease;
+  --yable-transition-slow: 250ms ease;
+
+  /* ── Form Controls (in-cell) ───────────────────────────────────────────── */
+  --yable-input-bg: transparent;
+  --yable-input-bg-hover: rgba(0, 0, 0, 0.03);
+  --yable-input-bg-focus: #ffffff;
+  --yable-input-border: #d1d5db;
+  --yable-input-border-hover: #9ca3af;
+  --yable-input-border-focus: var(--yable-accent);
+  --yable-input-border-radius: 4px;
+  --yable-input-height: 28px;
+  --yable-input-padding-x: 8px;
+  --yable-input-font-size: var(--yable-font-size);
+  --yable-input-shadow-focus: 0 0 0 2px var(--yable-accent-light);
+
+  /* ── Checkbox / Toggle ─────────────────────────────────────────────────── */
+  --yable-checkbox-size: 16px;
+  --yable-checkbox-border: #d1d5db;
+  --yable-checkbox-bg: #ffffff;
+  --yable-checkbox-bg-checked: var(--yable-accent);
+  --yable-checkbox-border-checked: var(--yable-accent);
+  --yable-checkbox-checkmark: #ffffff;
+  --yable-checkbox-radius: 3px;
+
+  /* ── Pagination ────────────────────────────────────────────────────────── */
+  --yable-pagination-gap: 4px;
+  --yable-pagination-button-size: 32px;
+  --yable-pagination-button-radius: 6px;
+  --yable-pagination-button-bg: transparent;
+  --yable-pagination-button-bg-hover: rgba(0, 0, 0, 0.04);
+  --yable-pagination-button-bg-active: var(--yable-accent);
+  --yable-pagination-button-text: var(--yable-text-secondary);
+  --yable-pagination-button-text-active: var(--yable-accent-text);
+
+  /* ── Sort Indicator ────────────────────────────────────────────────────── */
+  --yable-sort-icon-size: 14px;
+  --yable-sort-icon-color: var(--yable-text-tertiary);
+  --yable-sort-icon-color-active: var(--yable-text-primary);
+
+  /* ── Selection ─────────────────────────────────────────────────────────── */
+  --yable-selection-border-color: var(--yable-accent);
+
+  /* ── Empty / Loading State ─────────────────────────────────────────────── */
+  --yable-empty-padding: 48px;
+  --yable-empty-text-color: var(--yable-text-tertiary);
+  --yable-loading-shimmer: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.04) 25%,
+    rgba(0, 0, 0, 0.08) 37%,
+    rgba(0, 0, 0, 0.04) 63%
+  );
+
+  /* ── Z-Index Layers ────────────────────────────────────────────────────── */
+  --yable-z-header: 10;
+  --yable-z-pinned: 20;
+  --yable-z-resize: 30;
+  --yable-z-overlay: 40;
+}
+
+/* ── Dark Mode (auto via prefers-color-scheme) ───────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-yable-theme="light"]) {
+    --yable-bg: #0f1117;
+    --yable-bg-header: #161821;
+    --yable-bg-footer: #161821;
+    --yable-bg-row: transparent;
+    --yable-bg-row-alt: rgba(255, 255, 255, 0.02);
+    --yable-bg-row-hover: rgba(255, 255, 255, 0.035);
+    --yable-bg-row-selected: rgba(59, 130, 246, 0.1);
+    --yable-bg-row-expanded: rgba(255, 255, 255, 0.02);
+    --yable-bg-cell-editing: #1a1d28;
+    --yable-bg-pinned: #13151d;
+
+    --yable-text-primary: #e5e7eb;
+    --yable-text-secondary: #9ca3af;
+    --yable-text-tertiary: #6b7280;
+    --yable-text-header: #d1d5db;
+    --yable-text-disabled: #4b5563;
+    --yable-text-link: #60a5fa;
+    --yable-text-placeholder: #6b7280;
+
+    --yable-border-color: #1f2937;
+    --yable-border-color-strong: #374151;
+
+    --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --yable-shadow-pinned: 4px 0 8px -2px rgba(0, 0, 0, 0.3);
+
+    --yable-accent: #3b82f6;
+    --yable-accent-hover: #60a5fa;
+    --yable-accent-light: rgba(59, 130, 246, 0.15);
+
+    --yable-input-bg: transparent;
+    --yable-input-bg-hover: rgba(255, 255, 255, 0.04);
+    --yable-input-bg-focus: #1a1d28;
+    --yable-input-border: #374151;
+    --yable-input-border-hover: #4b5563;
+
+    --yable-checkbox-border: #4b5563;
+    --yable-checkbox-bg: #1f2937;
+
+    --yable-pagination-button-bg-hover: rgba(255, 255, 255, 0.06);
+
+    --yable-loading-shimmer: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 25%,
+      rgba(255, 255, 255, 0.06) 37%,
+      rgba(255, 255, 255, 0.03) 63%
+    );
+  }
+}
+
+/* ── Dark Mode (manual override) ─────────────────────────────────────────── */
+[data-yable-theme="dark"] {
+  --yable-bg: #0f1117;
+  --yable-bg-header: #161821;
+  --yable-bg-footer: #161821;
+  --yable-bg-row: transparent;
+  --yable-bg-row-alt: rgba(255, 255, 255, 0.02);
+  --yable-bg-row-hover: rgba(255, 255, 255, 0.035);
+  --yable-bg-row-selected: rgba(59, 130, 246, 0.1);
+  --yable-bg-row-expanded: rgba(255, 255, 255, 0.02);
+  --yable-bg-cell-editing: #1a1d28;
+  --yable-bg-pinned: #13151d;
+
+  --yable-text-primary: #e5e7eb;
+  --yable-text-secondary: #9ca3af;
+  --yable-text-tertiary: #6b7280;
+  --yable-text-header: #d1d5db;
+  --yable-text-disabled: #4b5563;
+  --yable-text-link: #60a5fa;
+  --yable-text-placeholder: #6b7280;
+
+  --yable-border-color: #1f2937;
+  --yable-border-color-strong: #374151;
+
+  --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --yable-shadow-pinned: 4px 0 8px -2px rgba(0, 0, 0, 0.3);
+
+  --yable-accent: #3b82f6;
+  --yable-accent-hover: #60a5fa;
+  --yable-accent-light: rgba(59, 130, 246, 0.15);
+
+  --yable-input-bg: transparent;
+  --yable-input-bg-hover: rgba(255, 255, 255, 0.04);
+  --yable-input-bg-focus: #1a1d28;
+  --yable-input-border: #374151;
+  --yable-input-border-hover: #4b5563;
+
+  --yable-checkbox-border: #4b5563;
+  --yable-checkbox-bg: #1f2937;
+
+  --yable-pagination-button-bg-hover: rgba(255, 255, 255, 0.06);
+
+  --yable-loading-shimmer: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.06) 37%,
+    rgba(255, 255, 255, 0.03) 63%
+  );
+}

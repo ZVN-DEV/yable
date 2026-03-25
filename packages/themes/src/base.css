@@ -1,0 +1,719 @@
+/* ============================================================================
+   @yable/themes — Base Styles
+   Structural CSS shared by all themes. Handles layout, ARIA, and
+   foundational table mechanics. Does NOT include visual "flavor" —
+   that's the job of individual theme files.
+   ============================================================================ */
+
+/* ── Table Container ─────────────────────────────────────────────────────── */
+
+.yable {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+  border-radius: var(--yable-border-radius);
+  border: var(--yable-border-width) solid var(--yable-border-color);
+  background: var(--yable-bg);
+  font-family: var(--yable-font-family);
+  font-size: var(--yable-font-size);
+  line-height: var(--yable-line-height);
+  color: var(--yable-text-primary);
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.yable *,
+.yable *::before,
+.yable *::after {
+  box-sizing: border-box;
+}
+
+/* ── Table Element ───────────────────────────────────────────────────────── */
+
+.yable-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.yable-thead {
+  position: relative;
+}
+
+.yable-header-row {
+  background: var(--yable-bg-header);
+}
+
+.yable-th {
+  position: relative;
+  padding: var(--yable-header-padding-y) var(--yable-header-padding-x);
+  min-height: var(--yable-header-min-height);
+  font-size: var(--yable-font-size-header);
+  font-weight: var(--yable-font-weight-semibold);
+  color: var(--yable-text-header);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color-strong);
+  user-select: none;
+  vertical-align: middle;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.yable-th[data-sortable="true"] {
+  cursor: pointer;
+}
+
+.yable-th[data-sortable="true"]:hover {
+  background: var(--yable-bg-row-hover);
+}
+
+/* Header content wrapper */
+.yable-th-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: calc(var(--yable-header-min-height) - var(--yable-header-padding-y) * 2);
+}
+
+/* ── Sort Indicator ──────────────────────────────────────────────────────── */
+
+.yable-sort-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--yable-sort-icon-size);
+  height: var(--yable-sort-icon-size);
+  color: var(--yable-sort-icon-color);
+  transition: color var(--yable-transition-fast),
+              transform var(--yable-transition-fast);
+}
+
+.yable-sort-indicator[data-active="true"] {
+  color: var(--yable-sort-icon-color-active);
+}
+
+.yable-sort-indicator[data-direction="desc"] {
+  transform: rotate(180deg);
+}
+
+.yable-sort-badge {
+  font-size: 9px;
+  font-weight: var(--yable-font-weight-semibold);
+  color: var(--yable-text-tertiary);
+  margin-left: 2px;
+}
+
+/* ── Resize Handle ───────────────────────────────────────────────────────── */
+
+.yable-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: calc(var(--yable-resize-handle-width) * 2);
+  cursor: col-resize;
+  z-index: var(--yable-z-resize);
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yable-resize-handle::after {
+  content: '';
+  width: var(--yable-resize-handle-width);
+  height: 50%;
+  border-radius: 2px;
+  background: var(--yable-resize-handle-color);
+  transition: background var(--yable-transition-fast),
+              height var(--yable-transition-fast);
+}
+
+.yable-resize-handle:hover::after,
+.yable-resize-handle[data-resizing="true"]::after {
+  background: var(--yable-resize-handle-color-active);
+  height: 70%;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+.yable-tbody {
+  background: var(--yable-bg);
+}
+
+/* ── Row ─────────────────────────────────────────────────────────────────── */
+
+.yable-tr {
+  background: var(--yable-bg-row);
+  min-height: var(--yable-row-min-height);
+  transition: background-color var(--yable-transition-fast);
+}
+
+.yable-tr:not(:last-child) .yable-td {
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable-tr:hover {
+  background: var(--yable-bg-row-hover);
+}
+
+.yable-tr[data-selected="true"] {
+  background: var(--yable-bg-row-selected);
+}
+
+.yable-tr[data-selected="true"]:hover {
+  background: var(--yable-bg-row-selected);
+}
+
+.yable-tr[data-expanded="true"] {
+  background: var(--yable-bg-row-expanded);
+}
+
+.yable-tr[data-clickable="true"] {
+  cursor: pointer;
+}
+
+/* ── Cell ────────────────────────────────────────────────────────────────── */
+
+.yable-td {
+  padding: var(--yable-cell-padding-y) var(--yable-cell-padding-x);
+  min-height: var(--yable-row-min-height);
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yable-td[data-editing="true"] {
+  padding: 4px 6px;
+  background: var(--yable-bg-cell-editing);
+}
+
+/* ── Column Pinning ──────────────────────────────────────────────────────── */
+
+.yable-th[data-pinned="left"],
+.yable-td[data-pinned="left"] {
+  position: sticky;
+  left: var(--yable-pin-offset, 0px);
+  z-index: var(--yable-z-pinned);
+  background: var(--yable-bg-pinned);
+}
+
+.yable-th[data-pinned="right"],
+.yable-td[data-pinned="right"] {
+  position: sticky;
+  right: var(--yable-pin-offset, 0px);
+  z-index: var(--yable-z-pinned);
+  background: var(--yable-bg-pinned);
+}
+
+/* Shadow on last left-pinned and first right-pinned */
+.yable-th[data-pinned-edge="left"],
+.yable-td[data-pinned-edge="left"] {
+  box-shadow: var(--yable-shadow-pinned);
+  clip-path: inset(0 -10px 0 0);
+}
+
+.yable-th[data-pinned-edge="right"],
+.yable-td[data-pinned-edge="right"] {
+  box-shadow: calc(var(--yable-shadow-pinned) * -1);
+  clip-path: inset(0 0 0 -10px);
+}
+
+/* ── Sticky Header ───────────────────────────────────────────────────────── */
+
+.yable--sticky-header .yable-thead .yable-th {
+  position: sticky;
+  top: 0;
+  z-index: var(--yable-z-header);
+  background: var(--yable-bg-header);
+}
+
+/* Pinned + sticky header stacks z-index */
+.yable--sticky-header .yable-th[data-pinned] {
+  z-index: calc(var(--yable-z-header) + var(--yable-z-pinned));
+}
+
+/* ── Row Pinning ─────────────────────────────────────────────────────────── */
+
+.yable-tr[data-pinned="top"] {
+  position: sticky;
+  top: 0;
+  z-index: calc(var(--yable-z-pinned) - 1);
+  background: var(--yable-bg-pinned);
+  box-shadow: 0 1px 0 var(--yable-border-color);
+}
+
+.yable-tr[data-pinned="bottom"] {
+  position: sticky;
+  bottom: 0;
+  z-index: calc(var(--yable-z-pinned) - 1);
+  background: var(--yable-bg-pinned);
+  box-shadow: 0 -1px 0 var(--yable-border-color);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+
+.yable-tfoot {
+  background: var(--yable-bg-footer);
+}
+
+.yable-tfoot .yable-td {
+  font-weight: var(--yable-font-weight-semibold);
+  border-top: var(--yable-border-width) solid var(--yable-border-color-strong);
+  border-bottom: none;
+}
+
+/* ── Expanded Row Detail ─────────────────────────────────────────────────── */
+
+.yable-expand-row {
+  background: var(--yable-bg-row-expanded);
+}
+
+.yable-expand-row .yable-td {
+  padding: 16px var(--yable-cell-padding-x);
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable-expand-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--yable-text-secondary);
+  transition: transform var(--yable-transition-fast),
+              color var(--yable-transition-fast);
+  padding: 0;
+  border-radius: var(--yable-border-radius-sm);
+}
+
+.yable-expand-toggle:hover {
+  color: var(--yable-text-primary);
+  background: var(--yable-bg-row-hover);
+}
+
+.yable-expand-toggle[data-expanded="true"] {
+  transform: rotate(90deg);
+}
+
+/* ── Form Controls (in-cell editing) ─────────────────────────────────────── */
+
+.yable-input {
+  width: 100%;
+  height: var(--yable-input-height);
+  padding: 0 var(--yable-input-padding-x);
+  background: var(--yable-input-bg);
+  border: var(--yable-border-width) solid var(--yable-input-border);
+  border-radius: var(--yable-input-border-radius);
+  font-family: inherit;
+  font-size: var(--yable-input-font-size);
+  color: var(--yable-text-primary);
+  outline: none;
+  transition: border-color var(--yable-transition-fast),
+              background var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
+}
+
+.yable-input:hover {
+  background: var(--yable-input-bg-hover);
+  border-color: var(--yable-input-border-hover);
+}
+
+.yable-input:focus {
+  background: var(--yable-input-bg-focus);
+  border-color: var(--yable-input-border-focus);
+  box-shadow: var(--yable-input-shadow-focus);
+}
+
+.yable-input::placeholder {
+  color: var(--yable-text-placeholder);
+}
+
+/* Always-editable: inputs blend into cells */
+.yable-input--inline {
+  border-color: transparent;
+  background: transparent;
+  border-radius: 0;
+}
+
+.yable-input--inline:hover {
+  border-color: var(--yable-input-border);
+  background: var(--yable-input-bg-hover);
+}
+
+.yable-input--inline:focus {
+  border-color: var(--yable-input-border-focus);
+  background: var(--yable-input-bg-focus);
+  box-shadow: var(--yable-input-shadow-focus);
+  border-radius: var(--yable-input-border-radius);
+}
+
+/* Select */
+.yable-select {
+  appearance: none;
+  width: 100%;
+  height: var(--yable-input-height);
+  padding: 0 calc(var(--yable-input-padding-x) + 16px) 0 var(--yable-input-padding-x);
+  background: var(--yable-input-bg);
+  border: var(--yable-border-width) solid var(--yable-input-border);
+  border-radius: var(--yable-input-border-radius);
+  font-family: inherit;
+  font-size: var(--yable-input-font-size);
+  color: var(--yable-text-primary);
+  outline: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%236b7280'%3E%3Cpath d='M6 8.5L1.5 4h9L6 8.5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px;
+  transition: border-color var(--yable-transition-fast),
+              background-color var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
+}
+
+.yable-select:hover {
+  border-color: var(--yable-input-border-hover);
+}
+
+.yable-select:focus {
+  border-color: var(--yable-input-border-focus);
+  box-shadow: var(--yable-input-shadow-focus);
+}
+
+/* Checkbox */
+.yable-checkbox {
+  appearance: none;
+  width: var(--yable-checkbox-size);
+  height: var(--yable-checkbox-size);
+  border: var(--yable-border-width) solid var(--yable-checkbox-border);
+  border-radius: var(--yable-checkbox-radius);
+  background: var(--yable-checkbox-bg);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background var(--yable-transition-fast),
+              border-color var(--yable-transition-fast);
+}
+
+.yable-checkbox:checked {
+  background: var(--yable-checkbox-bg-checked);
+  border-color: var(--yable-checkbox-border-checked);
+}
+
+.yable-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--yable-checkbox-checkmark);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.yable-checkbox:indeterminate {
+  background: var(--yable-checkbox-bg-checked);
+  border-color: var(--yable-checkbox-border-checked);
+}
+
+.yable-checkbox:indeterminate::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  right: 3px;
+  height: 1.5px;
+  background: var(--yable-checkbox-checkmark);
+  transform: translateY(-50%);
+}
+
+.yable-checkbox:hover {
+  border-color: var(--yable-input-border-hover);
+}
+
+.yable-checkbox:focus-visible {
+  box-shadow: var(--yable-input-shadow-focus);
+}
+
+/* Toggle / Switch */
+.yable-toggle {
+  appearance: none;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--yable-border-color-strong);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--yable-transition);
+  border: none;
+  flex-shrink: 0;
+}
+
+.yable-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: transform var(--yable-transition);
+}
+
+.yable-toggle:checked {
+  background: var(--yable-accent);
+}
+
+.yable-toggle:checked::after {
+  transform: translateX(16px);
+}
+
+.yable-toggle:focus-visible {
+  box-shadow: var(--yable-input-shadow-focus);
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+
+.yable-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px var(--yable-cell-padding-x);
+  font-size: var(--yable-font-size-sm);
+  color: var(--yable-text-secondary);
+  border-top: var(--yable-border-width) solid var(--yable-border-color);
+  background: var(--yable-bg-footer);
+}
+
+.yable-pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yable-pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: var(--yable-pagination-gap);
+}
+
+.yable-pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--yable-pagination-button-size);
+  height: var(--yable-pagination-button-size);
+  padding: 0 8px;
+  border: none;
+  border-radius: var(--yable-pagination-button-radius);
+  background: var(--yable-pagination-button-bg);
+  color: var(--yable-pagination-button-text);
+  font-family: inherit;
+  font-size: var(--yable-font-size-sm);
+  font-weight: var(--yable-font-weight-medium);
+  cursor: pointer;
+  transition: background var(--yable-transition-fast),
+              color var(--yable-transition-fast);
+  user-select: none;
+}
+
+.yable-pagination-btn:hover:not(:disabled) {
+  background: var(--yable-pagination-button-bg-hover);
+}
+
+.yable-pagination-btn[data-active="true"] {
+  background: var(--yable-pagination-button-bg-active);
+  color: var(--yable-pagination-button-text-active);
+}
+
+.yable-pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.yable-pagination-select {
+  appearance: none;
+  height: var(--yable-pagination-button-size);
+  padding: 0 24px 0 8px;
+  border: var(--yable-border-width) solid var(--yable-border-color);
+  border-radius: var(--yable-pagination-button-radius);
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--yable-font-size-sm);
+  color: var(--yable-text-secondary);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%236b7280'%3E%3Cpath d='M6 8.5L1.5 4h9L6 8.5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 10px;
+}
+
+/* ── Global Filter ───────────────────────────────────────────────────────── */
+
+.yable-global-filter {
+  padding: 12px var(--yable-cell-padding-x);
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable-global-filter-input {
+  width: 100%;
+  max-width: 320px;
+  height: 32px;
+  padding: 0 10px 0 32px;
+  background: var(--yable-input-bg-hover);
+  border: var(--yable-border-width) solid transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: var(--yable-font-size);
+  color: var(--yable-text-primary);
+  outline: none;
+  transition: border-color var(--yable-transition-fast),
+              background var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%239ca3af'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85-.017.016zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 14px;
+}
+
+.yable-global-filter-input:focus {
+  border-color: var(--yable-input-border-focus);
+  background: var(--yable-input-bg-focus);
+  box-shadow: var(--yable-input-shadow-focus);
+}
+
+.yable-global-filter-input::placeholder {
+  color: var(--yable-text-placeholder);
+}
+
+/* ── Empty State ─────────────────────────────────────────────────────────── */
+
+.yable-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--yable-empty-padding);
+  color: var(--yable-empty-text-color);
+  text-align: center;
+}
+
+.yable-empty-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.yable-empty-message {
+  font-size: var(--yable-font-size);
+  font-weight: var(--yable-font-weight-medium);
+}
+
+.yable-empty-detail {
+  font-size: var(--yable-font-size-sm);
+  margin-top: 4px;
+}
+
+/* ── Loading State ───────────────────────────────────────────────────────── */
+
+.yable-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.yable-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--yable-bg);
+  opacity: 0.5;
+  z-index: var(--yable-z-overlay);
+}
+
+.yable-skeleton {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--yable-loading-shimmer);
+  background-size: 200% 100%;
+  animation: yable-shimmer 1.5s infinite linear;
+}
+
+@keyframes yable-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Selection Column ────────────────────────────────────────────────────── */
+
+.yable-th--selection,
+.yable-td--selection {
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  padding: 0;
+  text-align: center;
+}
+
+/* ── Accessibility ───────────────────────────────────────────────────────── */
+
+.yable [role="columnheader"][aria-sort] {
+  cursor: pointer;
+}
+
+.yable:focus-within .yable-tr:focus-visible {
+  outline: 2px solid var(--yable-accent);
+  outline-offset: -2px;
+}
+
+.yable-td:focus-visible {
+  outline: 2px solid var(--yable-accent);
+  outline-offset: -2px;
+}
+
+/* Screen reader only */
+.yable-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Virtual Scroll Container ────────────────────────────────────────────── */
+
+.yable-virtual {
+  position: relative;
+  overflow: auto;
+}
+
+.yable-virtual-inner {
+  position: relative;
+  width: 100%;
+}
+
+.yable-virtual-row {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
