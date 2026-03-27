@@ -34,11 +34,11 @@ export function createColumnHelper<
     },
 
     display: (column: DisplayColumnDef<TData, unknown>): ColumnDef<TData, unknown> => {
-      return column as any
+      return column
     },
 
     group: (column: GroupColumnDef<TData, unknown>): ColumnDef<TData, unknown> => {
-      return column as any
+      return column
     },
   }
 }

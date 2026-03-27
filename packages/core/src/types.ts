@@ -208,8 +208,10 @@ export interface TableOptions<TData extends RowData> {
   onStateChange?: OnChangeFn<TableState>
   initialState?: Partial<TableState>
   getRowId?: (row: TData, index: number, parent?: Row<TData>) => string
-  _features?: TableFeature<TData>[]
   debugAll?: boolean
+
+  // Locale
+  locale?: Record<string, string>
 
   // Row model getters (provided by features)
   getCoreRowModel?: (table: Table<TData>) => () => RowModel<TData>
@@ -657,6 +659,9 @@ export interface Table<TData extends RowData> {
 
   // Event Emitter
   events: EventEmitter<YableEventMap<TData>>
+
+  // Locale API
+  getLocaleString: (key: string) => string
 }
 
 // ---------------------------------------------------------------------------

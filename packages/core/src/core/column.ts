@@ -4,10 +4,31 @@ import type {
   RowData,
   Column,
   ColumnDef,
+  ColumnDefExtensions,
   Table,
   ColumnPinningPosition,
+  SortingFn,
+  FilterFn,
 } from '../types'
 import { resolveColumnId, memo } from '../utils'
+import { resolveSortingFn, resolveFilterFn } from './resolvers'
+import { sortingFns } from '../sortingFns'
+import { filterFns } from '../filterFns'
+
+// ---------------------------------------------------------------------------
+// Helper: safely access ColumnDefExtensions properties from a ColumnDef union
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract extension properties from a ColumnDef.
+ * All four union variants include ColumnDefExtensions (GroupColumnDef uses Partial),
+ * so casting to the extensions interface is safe for optional property reads.
+ */
+function getExtensions<TData extends RowData, TValue>(
+  columnDef: ColumnDef<TData, TValue>
+): Partial<ColumnDefExtensions<TData, TValue>> {
+  return columnDef as Partial<ColumnDefExtensions<TData, TValue>>
+}
 
 export function createColumn<TData extends RowData, TValue = unknown>(
   table: Table<TData>,
@@ -16,28 +37,29 @@ export function createColumn<TData extends RowData, TValue = unknown>(
   parent?: Column<TData, unknown>
 ): Column<TData, TValue> {
   const id = resolveColumnId(columnDef)
+  const ext = getExtensions(columnDef)
 
   const column: Column<TData, TValue> = {
     id,
-    columnDef: columnDef as any,
+    columnDef,
     depth,
-    parent: parent as any,
+    parent,
     columns: [],
-    accessorFn: undefined as any,
+    accessorFn: undefined,
 
     // Gets populated by features via createColumn hooks
     getSize: () => {
       const state = table.getState()
       const sizing = state.columnSizing?.[id]
-      return sizing ?? (columnDef as any).size ?? 150
+      return sizing ?? ext.size ?? 150
     },
     getStart: () => 0,
     getAfter: () => 0,
 
     getFlatColumns: memo(
       () => [column.columns],
-      (subColumns) => {
-        const result: Column<TData, any>[] = [column as any]
+      (subColumns: Column<TData, unknown>[]) => {
+        const result: Column<TData, unknown>[] = [column as Column<TData, unknown>]
         for (const sub of subColumns) {
           result.push(...sub.getFlatColumns())
         }
@@ -48,9 +70,9 @@ export function createColumn<TData extends RowData, TValue = unknown>(
 
     getLeafColumns: memo(
       () => [column.columns],
-      (subColumns) => {
-        if (subColumns.length === 0) return [column as any]
-        const result: Column<TData, any>[] = []
+      (subColumns: Column<TData, unknown>[]) => {
+        if (subColumns.length === 0) return [column as Column<TData, unknown>]
+        const result: Column<TData, unknown>[] = []
         for (const sub of subColumns) {
           result.push(...sub.getLeafColumns())
         }
@@ -72,21 +94,33 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       return false
     },
     getCanSort: () => {
-      return (columnDef as any).enableSorting !== false
+      return ext.enableSorting !== false
     },
     getCanMultiSort: () => {
-      return (columnDef as any).enableMultiSort ?? true
+      return true
     },
     getSortIndex: () => {
       const sorting = table.getState().sorting
       return sorting?.findIndex((s) => s.id === id) ?? -1
     },
-    getSortingFn: () => {
-      return undefined as any // Set by RowSorting feature
+
+    // T1-04: Wire sortingFn from column def
+    getSortingFn: (): SortingFn<TData> => {
+      const resolved = resolveSortingFn<TData>(
+        ext.sortingFn as string | SortingFn<TData> | undefined,
+        table.options.sortingFns
+      )
+      if (resolved) return resolved
+
+      // Auto-detect: fall back to built-in 'auto' which uses alphanumeric
+      return column.getAutoSortingFn()
     },
-    getAutoSortingFn: () => {
-      return undefined as any
+
+    getAutoSortingFn: (): SortingFn<TData> => {
+      // Default to alphanumeric sorting
+      return sortingFns.alphanumeric as SortingFn<TData>
     },
+
     getAutoSortDir: () => {
       return 'asc'
     },
@@ -113,8 +147,10 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     getToggleSortingHandler: () => {
       if (!column.getCanSort()) return undefined
       return (e: unknown) => {
-        const event = e as MouseEvent
-        column.toggleSorting(undefined, event?.shiftKey)
+        const isMulti = e && typeof e === 'object' && 'shiftKey' in e
+          ? !!(e as { shiftKey: boolean }).shiftKey
+          : false
+        column.toggleSorting(undefined, isMulti)
       }
     },
 
@@ -127,7 +163,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       const filters = table.getState().columnFilters
       return filters?.find((f) => f.id === id)?.value
     },
-    setFilterValue: (value: any) => {
+    setFilterValue: (value: unknown) => {
       table.setColumnFilters((old) => {
         const existing = old.find((f) => f.id === id)
         if (existing) {
@@ -141,17 +177,25 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       })
     },
     getCanFilter: () => {
-      return (columnDef as any).enableColumnFilter !== false
+      return ext.enableColumnFilter !== false
     },
     getCanGlobalFilter: () => {
-      return (columnDef as any).enableGlobalFilter !== false
+      return ext.enableGlobalFilter !== false
     },
-    getFilterFn: () => {
-      return undefined as any // Set by ColumnFiltering feature
+
+    // T1-04: Wire filterFn from column def
+    getFilterFn: (): FilterFn<TData> | undefined => {
+      return resolveFilterFn<TData>(
+        ext.filterFn as string | FilterFn<TData> | undefined,
+        table.options.filterFns
+      )
     },
-    getAutoFilterFn: () => {
-      return undefined as any
+
+    getAutoFilterFn: (): FilterFn<TData> | undefined => {
+      // Default to includesString filter
+      return filterFns.includesString as FilterFn<TData>
     },
+
     getFilterIndex: () => {
       const filters = table.getState().columnFilters
       return filters?.findIndex((f) => f.id === id) ?? -1
@@ -163,7 +207,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       return visibility?.[id] !== false
     },
     getCanHide: () => {
-      return (columnDef as any).enableHiding !== false
+      return ext.enableHiding !== false
     },
     toggleVisibility: (value?: boolean) => {
       table.setColumnVisibility((old) => ({
@@ -185,7 +229,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       return false
     },
     getCanPin: () => {
-      return (columnDef as any).enablePinning !== false
+      return ext.enablePinning !== false
     },
     pin: (position: ColumnPinningPosition) => {
       table.setColumnPinning((old) => {
@@ -206,7 +250,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
 
     // Resizing
     getCanResize: () => {
-      return (columnDef as any).enableResizing !== false
+      return ext.enableResizing !== false
     },
     getIsResizing: () => {
       return table.getState().columnSizingInfo?.isResizingColumn === id
@@ -232,7 +276,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       return table.getState().grouping?.indexOf(id) ?? -1
     },
     getCanGroup: () => {
-      return (columnDef as any).enableGrouping !== false
+      return ext.enableGrouping !== false
     },
     toggleGrouping: () => {
       table.setGrouping((old) => {
@@ -246,18 +290,18 @@ export function createColumn<TData extends RowData, TValue = unknown>(
 
   // Set up accessor function
   if ('accessorFn' in columnDef && columnDef.accessorFn) {
-    column.accessorFn = columnDef.accessorFn as any
+    column.accessorFn = columnDef.accessorFn
   } else if ('accessorKey' in columnDef && columnDef.accessorKey) {
     const key = columnDef.accessorKey as string
     column.accessorFn = ((row: TData) => {
       const parts = key.split('.')
-      let value: any = row
+      let value: unknown = row
       for (const part of parts) {
         if (value == null) return undefined
-        value = value[part]
+        value = (value as Record<string, unknown>)[part]
       }
-      return value
-    }) as any
+      return value as TValue
+    })
   }
 
   return column

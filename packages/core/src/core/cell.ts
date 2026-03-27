@@ -45,7 +45,7 @@ export function createCell<TData extends RowData, TValue = unknown>(
       )
     },
     getIsAlwaysEditable: () => {
-      return !!(column.columnDef as any).meta?.alwaysEditable
+      return !!column.columnDef.meta?.alwaysEditable
     },
   }
 

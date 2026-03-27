@@ -63,7 +63,7 @@ export const sortingFns = {
   ): number => {
     const a = rowA.getValue(columnId)
     const b = rowB.getValue(columnId)
-    return compareBasic(a as any, b as any)
+    return compareBasic(a as number | string, b as number | string)
   },
 } as const satisfies Record<string, SortingFn<any>>
 
