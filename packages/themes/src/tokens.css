@@ -2,6 +2,27 @@
    @yable/themes — Design Tokens
    CSS custom properties for the entire YableTables design system.
    Override these to customize any visual property.
+
+   Token Map (for createTheme() theme builder):
+     bg            -> --yable-bg
+     bgHeader      -> --yable-bg-header
+     bgFooter      -> --yable-bg-footer
+     bgRow         -> --yable-bg-row
+     bgRowAlt      -> --yable-bg-row-alt
+     bgRowHover    -> --yable-bg-row-hover
+     bgRowSelected -> --yable-bg-row-selected
+     bgCellEditing -> --yable-bg-cell-editing
+     bgPinned      -> --yable-bg-pinned
+     textPrimary   -> --yable-text-primary
+     textSecondary -> --yable-text-secondary
+     textTertiary  -> --yable-text-tertiary
+     textHeader    -> --yable-text-header
+     borderColor   -> --yable-border-color
+     borderColorStrong -> --yable-border-color-strong
+     accent        -> --yable-accent
+     accentHover   -> --yable-accent-hover
+     accentLight   -> --yable-accent-light
+     accentText    -> --yable-accent-text
    ============================================================================ */
 
 :root {
@@ -129,6 +150,14 @@
   --yable-z-pinned: 20;
   --yable-z-resize: 30;
   --yable-z-overlay: 40;
+  --yable-z-tooltip: 9999;
+  --yable-z-context-menu: 9999;
+
+  /* ── Cell Flash ──────────────────────────────────────────────────────── */
+  --yable-flash-up-color: rgba(34, 197, 94, 0.25);
+  --yable-flash-down-color: rgba(239, 68, 68, 0.25);
+  --yable-flash-change-color: rgba(59, 130, 246, 0.2);
+  --yable-flash-duration: 700ms;
 }
 
 /* ── Dark Mode (auto via prefers-color-scheme) ───────────────────────────── */

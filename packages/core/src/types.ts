@@ -149,12 +149,30 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   editable?: boolean | ((row: Row<TData>) => boolean)
   editConfig?: CellEditConfig<TData, TValue>
 
+  // Row spanning
+  rowSpan?: (
+    row: Row<TData>,
+    rows: Row<TData>[],
+    rowIndex: number
+  ) => number | undefined
+
   // Styling
   cellClassName?:
     | string
     | ((ctx: CellContext<TData, TValue>) => string | undefined)
   headerClassName?: string
   footerClassName?: string
+
+  // Tooltip
+  tooltip?: boolean | string | ((ctx: CellContext<TData, TValue>) => string)
+  headerTooltip?: string
+  tooltipDelay?: number
+
+  // Cell Flash
+  enableCellFlash?: boolean
+  flashDuration?: number
+  flashUpColor?: string
+  flashDownColor?: string
 }
 
 export interface ColumnMeta {
@@ -318,6 +336,32 @@ export interface TableOptions<TData extends RowData> {
   // Export options
   enableExport?: boolean
 
+  // Undo/Redo options
+  enableUndoRedo?: boolean
+  undoStackSize?: number
+
+  // Clipboard options
+  enableClipboard?: boolean
+  clipboardOptions?: ClipboardOptions
+
+  // Fill Handle options
+  enableFillHandle?: boolean
+
+  // Formula options
+  enableFormulas?: boolean
+
+  // Row dragging options
+  enableRowDragging?: boolean
+  onRowReorder?: (event: { fromIndex: number; toIndex: number; rowId: string }) => void
+
+  // Tree data options
+  getDataPath?: (row: TData) => string[]
+  treeData?: boolean
+
+  // Pivot options
+  enablePivot?: boolean
+  pivotConfig?: PivotConfig
+
   // Row styling
   rowClassName?: string | ((row: Row<TData>) => string | undefined)
   rowStyle?: React.CSSProperties | ((row: Row<TData>) => React.CSSProperties)
@@ -357,6 +401,11 @@ export interface TableState {
   rowPinning: RowPinningState
   grouping: GroupingState
   editing: EditingState
+  undoRedo: UndoRedoState
+  fillHandle: FillHandleState
+  formulas: FormulaState
+  rowDrag: RowDragState
+  pivot: PivotState
 }
 
 // Sorting
@@ -477,6 +526,99 @@ export type GroupingState = string[]
 export interface EditingState {
   activeCell?: { rowId: string; columnId: string }
   pendingValues: Record<string, Record<string, unknown>>
+  /** Set of row IDs currently being edited in full-row mode */
+  editingRows?: string[]
+}
+
+// Undo/Redo
+export interface UndoRedoState {
+  undoStack: UndoAction[]
+  redoStack: UndoAction[]
+  maxSize: number
+}
+
+export interface UndoAction {
+  type: 'cell-edit'
+  rowId: string
+  columnId: string
+  oldValue: unknown
+  newValue: unknown
+  timestamp: number
+}
+
+// Row Drag
+export interface RowDragState {
+  /** The row id currently being dragged, or null */
+  draggingRowId: string | null
+  /** The row id that is the current drop target */
+  overRowId: string | null
+  /** Position of the drop indicator relative to the target row */
+  dropPosition: 'before' | 'after' | null
+}
+
+// Pivot
+export interface PivotConfig {
+  /** Fields to use as row groups */
+  rowFields: { field: string; label?: string }[]
+  /** Fields to use as column groups (generate dynamic columns) */
+  columnFields: { field: string; label?: string }[]
+  /** Fields to aggregate as values */
+  valueFields: {
+    field: string
+    aggregation: string | AggregationFn<any>
+    label?: string
+  }[]
+  /** Whether to show row subtotals */
+  showRowSubtotals?: boolean
+  /** Whether to show column subtotals */
+  showColumnSubtotals?: boolean
+  /** Whether to show grand total row */
+  showGrandTotal?: boolean
+}
+
+export interface PivotState {
+  /** Whether pivot mode is active */
+  enabled: boolean
+  /** Pivot configuration */
+  config: PivotConfig
+  /** Expanded row groups (by path key) */
+  expandedRowGroups: Record<string, boolean>
+  /** Expanded column groups (by path key) */
+  expandedColumnGroups: Record<string, boolean>
+}
+
+// Clipboard
+export interface ClipboardOptions {
+  /** Column delimiter for copy/paste. Default: '\t' (tab, for Excel compatibility) */
+  delimiter?: string
+  /** Row delimiter for copy/paste. Default: '\n' */
+  rowDelimiter?: string
+  /** Include column headers when copying. Default: false */
+  includeHeaders?: boolean
+}
+
+// Fill Handle
+export interface FillHandleState {
+  /** Whether a fill drag is in progress */
+  isDragging: boolean
+  /** Source cell position (row index, column index) */
+  sourceCell?: { rowIndex: number; columnIndex: number }
+  /** Current drag target cell position */
+  targetCell?: { rowIndex: number; columnIndex: number }
+  /** Fill direction */
+  direction?: 'down' | 'right' | 'up' | 'left'
+}
+
+// Formulas
+export interface FormulaState {
+  /** Whether formulas are enabled */
+  enabled: boolean
+  /** Map of cell ID -> raw formula string (e.g. '=SUM(A1:A10)') */
+  formulas: Record<string, string>
+  /** Map of cell ID -> computed value */
+  computedValues: Record<string, unknown>
+  /** Map of cell ID -> error message (if evaluation failed) */
+  errors: Record<string, string>
 }
 
 // Aggregation
@@ -657,6 +799,40 @@ export interface Table<TData extends RowData> {
   // Export API
   exportData: (options?: ExportOptions) => string
 
+  // Undo/Redo API
+  undo: () => void
+  redo: () => void
+  canUndo: () => boolean
+  canRedo: () => boolean
+  clearUndoHistory: () => void
+
+  // Clipboard API
+  copyToClipboard: (options?: ClipboardOptions) => string
+  pasteFromClipboard: (text: string, targetRowId: string, targetColumnId: string, options?: ClipboardOptions) => void
+  cutCells: (options?: ClipboardOptions) => string
+
+  // Fill Handle API
+  fillRange: (
+    sourceRange: { startRow: number; startCol: number; endRow: number; endCol: number },
+    targetRange: { startRow: number; startCol: number; endRow: number; endCol: number }
+  ) => void
+
+  // Formula API
+  setFormula: (rowId: string, columnId: string, formula: string) => void
+  getFormula: (rowId: string, columnId: string) => string | undefined
+  evaluateFormulas: () => void
+
+  // Row Dragging API
+  moveRow: (fromIndex: number, toIndex: number) => void
+
+  // Row Editing API (full row)
+  startRowEditing: (rowId: string) => void
+  commitRowEdit: (rowId: string) => void
+  cancelRowEdit: (rowId: string) => void
+
+  // Pivot API
+  getPivotRowModel: () => RowModel<TData>
+
   // Event Emitter
   events: EventEmitter<YableEventMap<TData>>
 
@@ -833,6 +1009,11 @@ export interface Row<TData extends RowData> {
   groupingValue?: unknown
   getGroupingValue: (columnId: string) => unknown
   getLeafRows: () => Row<TData>[]
+
+  // Tree data extensions
+  getParentRow: () => Row<TData> | undefined
+  getTreeDepth: () => number
+  isLeaf: () => boolean
 }
 
 export type RowPinningPosition = 'top' | 'bottom' | false
@@ -853,6 +1034,9 @@ export interface Cell<TData extends RowData, TValue = unknown> {
   // Editing
   getIsEditing: () => boolean
   getIsAlwaysEditable: () => boolean
+
+  // Row spanning
+  getRowSpan: () => number | undefined
 }
 
 export interface CellContext<TData extends RowData, TValue = unknown> {
@@ -904,6 +1088,19 @@ export interface YableEventMap<TData extends RowData> {
   'filter:change': FilterChangeEvent
   'page:change': PageChangeEvent
   'state:change': StateChangeEvent
+  'undo': UndoRedoEvent
+  'redo': UndoRedoEvent
+  'clipboard:copy': ClipboardEvent_
+  'clipboard:paste': ClipboardEvent_
+  'clipboard:cut': ClipboardEvent_
+  'fill': FillEvent
+  'cell:flash': CellFlashEvent
+  'row:drag:start': RowDragEvent<TData>
+  'row:drag:end': RowDragEndEvent<TData>
+  'row:reorder': RowReorderEvent
+  'row:edit:start': RowEditEvent<TData>
+  'row:edit:commit': RowEditCommitEvent<TData>
+  'row:edit:cancel': RowEditEvent<TData>
 }
 
 export interface CellClickEvent<TData extends RowData> {
@@ -956,6 +1153,31 @@ export interface StateChangeEvent {
   previousState: TableState
 }
 
+export interface UndoRedoEvent {
+  action: UndoAction
+  state: UndoRedoState
+}
+
+export interface ClipboardEvent_ {
+  text: string
+  cells: { rowId: string; columnId: string; value: unknown }[]
+}
+
+export interface FillEvent {
+  sourceRange: { startRow: number; startCol: number; endRow: number; endCol: number }
+  targetRange: { startRow: number; startCol: number; endRow: number; endCol: number }
+  filledValues: { rowId: string; columnId: string; value: unknown }[]
+}
+
+export interface CellFlashEvent {
+  columnId: string
+  rowId: string
+  direction: 'up' | 'down' | 'change'
+  previousValue: unknown
+  newValue: unknown
+  timestamp: number
+}
+
 // ---------------------------------------------------------------------------
 // Export Options
 // ---------------------------------------------------------------------------
@@ -967,6 +1189,43 @@ export interface ExportOptions {
   includeHeaders?: boolean
   delimiter?: string
   fileName?: string
+}
+
+// ---------------------------------------------------------------------------
+// Row Drag Events
+// ---------------------------------------------------------------------------
+
+export interface RowDragEvent<TData extends RowData> {
+  rowId: string
+  rowIndex: number
+  row: Row<TData>
+}
+
+export interface RowDragEndEvent<TData extends RowData> {
+  rowId: string
+  row: Row<TData>
+  cancelled: boolean
+}
+
+export interface RowReorderEvent {
+  fromIndex: number
+  toIndex: number
+  rowId: string
+}
+
+// ---------------------------------------------------------------------------
+// Row Edit Events
+// ---------------------------------------------------------------------------
+
+export interface RowEditEvent<TData extends RowData> {
+  rowId: string
+  row: Row<TData>
+}
+
+export interface RowEditCommitEvent<TData extends RowData> {
+  rowId: string
+  row: Row<TData>
+  values: Record<string, unknown>
 }
 
 // ---------------------------------------------------------------------------

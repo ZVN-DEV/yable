@@ -15,6 +15,56 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./features/rowSpanning": {
+      "import": {
+        "types": "./dist/features/rowSpanning.d.ts",
+        "default": "./dist/features/rowSpanning.js"
+      },
+      "require": {
+        "types": "./dist/features/rowSpanning.d.cts",
+        "default": "./dist/features/rowSpanning.cjs"
+      }
+    },
+    "./features/rowDragging": {
+      "import": {
+        "types": "./dist/features/rowDragging.d.ts",
+        "default": "./dist/features/rowDragging.js"
+      },
+      "require": {
+        "types": "./dist/features/rowDragging.d.cts",
+        "default": "./dist/features/rowDragging.cjs"
+      }
+    },
+    "./features/fullRowEditing": {
+      "import": {
+        "types": "./dist/features/fullRowEditing.d.ts",
+        "default": "./dist/features/fullRowEditing.js"
+      },
+      "require": {
+        "types": "./dist/features/fullRowEditing.d.cts",
+        "default": "./dist/features/fullRowEditing.cjs"
+      }
+    },
+    "./features/treeData": {
+      "import": {
+        "types": "./dist/features/treeData.d.ts",
+        "default": "./dist/features/treeData.js"
+      },
+      "require": {
+        "types": "./dist/features/treeData.d.cts",
+        "default": "./dist/features/treeData.cjs"
+      }
+    },
+    "./features/pivot": {
+      "import": {
+        "types": "./dist/features/pivot.d.ts",
+        "default": "./dist/features/pivot.js"
+      },
+      "require": {
+        "types": "./dist/features/pivot.d.cts",
+        "default": "./dist/features/pivot.cjs"
+      }
     }
   },
   "files": ["dist"],

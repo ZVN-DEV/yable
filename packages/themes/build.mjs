@@ -17,6 +17,12 @@ function build() {
     ['src/themes/default.css', 'dist/themes/default.css'],
     ['src/themes/stripe.css', 'dist/themes/stripe.css'],
     ['src/themes/compact.css', 'dist/themes/compact.css'],
+    ['src/themes/midnight.css', 'dist/themes/midnight.css'],
+    ['src/themes/ocean.css', 'dist/themes/ocean.css'],
+    ['src/themes/rose.css', 'dist/themes/rose.css'],
+    ['src/themes/forest.css', 'dist/themes/forest.css'],
+    ['src/themes/mono.css', 'dist/themes/mono.css'],
+    ['src/rtl.css', 'dist/rtl.css'],
   ]
 
   for (const [src, dest] of files) {

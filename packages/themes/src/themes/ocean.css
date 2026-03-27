@@ -1,0 +1,147 @@
+/* ============================================================================
+   @yable/themes — Ocean Theme
+   Blue/teal palette with aqua accents. Inspired by oceanic depths
+   and the calm of deep water.
+
+   Usage:
+     import '@yable/themes'
+     import '@yable/themes/ocean.css'
+     <Table theme="ocean" />
+   ============================================================================ */
+
+.yable-theme-ocean,
+.yable[data-theme="ocean"] {
+  /* Surface — deep teal */
+  --yable-bg: #ffffff;
+  --yable-bg-header: #f0fdfa;
+  --yable-bg-footer: #f0fdfa;
+  --yable-bg-row: transparent;
+  --yable-bg-row-alt: rgba(20, 184, 166, 0.02);
+  --yable-bg-row-hover: rgba(20, 184, 166, 0.04);
+  --yable-bg-row-selected: rgba(6, 182, 212, 0.06);
+  --yable-bg-row-expanded: rgba(20, 184, 166, 0.02);
+  --yable-bg-cell-editing: #ffffff;
+  --yable-bg-pinned: #f7fffe;
+
+  /* Text */
+  --yable-text-primary: #0f172a;
+  --yable-text-secondary: #5f7a89;
+  --yable-text-tertiary: #94a3b8;
+  --yable-text-header: #0d9488;
+  --yable-text-disabled: #cbd5e1;
+  --yable-text-link: #0891b2;
+  --yable-text-placeholder: #94a3b8;
+
+  /* Borders — soft teal edges */
+  --yable-border-color: #e2f1ee;
+  --yable-border-color-strong: #b2dfdb;
+  --yable-border-radius: 10px;
+
+  /* Accent — aqua cyan */
+  --yable-accent: #0891b2;
+  --yable-accent-hover: #0e7490;
+  --yable-accent-light: rgba(8, 145, 178, 0.07);
+  --yable-accent-text: #ffffff;
+
+  /* Shadows — cool teal tint */
+  --yable-shadow: 0 1px 3px rgba(13, 148, 136, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --yable-shadow-lg: 0 6px 20px rgba(13, 148, 136, 0.08);
+  --yable-shadow-pinned: 4px 0 10px -2px rgba(13, 148, 136, 0.08);
+
+  /* Form */
+  --yable-input-border: #b2dfdb;
+  --yable-input-border-hover: #80cbc4;
+  --yable-input-shadow-focus: 0 0 0 3px rgba(8, 145, 178, 0.1);
+
+  /* Checkbox */
+  --yable-checkbox-border: #b2dfdb;
+  --yable-checkbox-radius: 4px;
+
+  /* Pagination */
+  --yable-pagination-button-radius: 8px;
+}
+
+/* Header styling — teal color */
+.yable-theme-ocean .yable-th,
+.yable[data-theme="ocean"] .yable-th {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: var(--yable-font-size-sm);
+  font-weight: var(--yable-font-weight-semibold);
+  color: var(--yable-text-header);
+}
+
+.yable-theme-ocean .yable-tr:not(:last-child) .yable-td,
+.yable[data-theme="ocean"] .yable-tr:not(:last-child) .yable-td {
+  border-bottom-color: var(--yable-border-color);
+}
+
+/* ── Ocean Dark Mode ────────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  .yable-theme-ocean:not([data-yable-theme="light"]),
+  .yable[data-theme="ocean"]:not([data-yable-theme="light"]) {
+    --yable-bg: #0a1419;
+    --yable-bg-header: #0d1a22;
+    --yable-bg-footer: #0d1a22;
+    --yable-bg-row-alt: rgba(20, 184, 166, 0.03);
+    --yable-bg-row-hover: rgba(20, 184, 166, 0.06);
+    --yable-bg-row-selected: rgba(6, 182, 212, 0.1);
+    --yable-bg-cell-editing: #0f1e28;
+    --yable-bg-pinned: #0c171e;
+
+    --yable-text-primary: #e0f2f1;
+    --yable-text-secondary: #80cbc4;
+    --yable-text-tertiary: #4db6ac;
+    --yable-text-header: #5eead4;
+
+    --yable-border-color: #1a3038;
+    --yable-border-color-strong: #264a55;
+
+    --yable-accent: #22d3ee;
+    --yable-accent-hover: #67e8f9;
+    --yable-accent-light: rgba(34, 211, 238, 0.12);
+
+    --yable-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    --yable-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.5);
+
+    --yable-input-border: #264a55;
+    --yable-input-border-hover: #367a75;
+    --yable-input-bg-focus: #0f1e28;
+    --yable-checkbox-border: #367a75;
+    --yable-checkbox-bg: #1a3038;
+  }
+}
+
+[data-yable-theme="dark"] .yable-theme-ocean,
+[data-yable-theme="dark"] .yable[data-theme="ocean"] {
+  --yable-bg: #0a1419;
+  --yable-bg-header: #0d1a22;
+  --yable-bg-footer: #0d1a22;
+  --yable-bg-row-alt: rgba(20, 184, 166, 0.03);
+  --yable-bg-row-hover: rgba(20, 184, 166, 0.06);
+  --yable-bg-row-selected: rgba(6, 182, 212, 0.1);
+  --yable-bg-cell-editing: #0f1e28;
+  --yable-bg-pinned: #0c171e;
+
+  --yable-text-primary: #e0f2f1;
+  --yable-text-secondary: #80cbc4;
+  --yable-text-tertiary: #4db6ac;
+  --yable-text-header: #5eead4;
+
+  --yable-border-color: #1a3038;
+  --yable-border-color-strong: #264a55;
+
+  --yable-accent: #22d3ee;
+  --yable-accent-hover: #67e8f9;
+  --yable-accent-light: rgba(34, 211, 238, 0.12);
+
+  --yable-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --yable-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.5);
+
+  --yable-input-border: #264a55;
+  --yable-input-border-hover: #367a75;
+  --yable-input-bg-focus: #0f1e28;
+  --yable-checkbox-border: #367a75;
+  --yable-checkbox-bg: #1a3038;
+}

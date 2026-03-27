@@ -1,0 +1,180 @@
+/* ============================================================================
+   @yable/themes — RTL (Right-to-Left) Support
+   Mirrors layout, pinning, resize handles, sort indicators, and
+   all directional properties for RTL languages (Arabic, Hebrew, etc.).
+
+   Usage:
+     import '@yable/themes/rtl.css'
+     <Table direction="rtl" />
+   ============================================================================ */
+
+/* ── Base RTL Layout ────────────────────────────────────────────────────── */
+
+.yable--rtl {
+  direction: rtl;
+}
+
+.yable--rtl .yable-table {
+  direction: rtl;
+}
+
+/* ── Header: Text alignment and content flow ────────────────────────────── */
+
+.yable--rtl .yable-th {
+  text-align: right;
+}
+
+.yable--rtl .yable-th-content {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+/* ── Sort indicator position ────────────────────────────────────────────── */
+
+.yable--rtl .yable-sort-badge {
+  margin-left: 0;
+  margin-right: 2px;
+}
+
+/* ── Resize handle: Mirror to left edge ─────────────────────────────────── */
+
+.yable--rtl .yable-resize-handle {
+  right: auto;
+  left: 0;
+}
+
+/* ── Column pinning: Swap left/right ────────────────────────────────────── */
+
+.yable--rtl .yable-th[data-pinned="left"],
+.yable--rtl .yable-td[data-pinned="left"] {
+  left: auto;
+  right: var(--yable-pin-offset, 0px);
+}
+
+.yable--rtl .yable-th[data-pinned="right"],
+.yable--rtl .yable-td[data-pinned="right"] {
+  right: auto;
+  left: var(--yable-pin-offset, 0px);
+}
+
+/* Pinned shadow edges — mirror */
+.yable--rtl .yable-th[data-pinned-edge="left"],
+.yable--rtl .yable-td[data-pinned-edge="left"] {
+  box-shadow: calc(var(--yable-shadow-pinned) * -1);
+  clip-path: inset(0 0 0 -10px);
+}
+
+.yable--rtl .yable-th[data-pinned-edge="right"],
+.yable--rtl .yable-td[data-pinned-edge="right"] {
+  box-shadow: var(--yable-shadow-pinned);
+  clip-path: inset(0 -10px 0 0);
+}
+
+/* ── Pagination: Reverse button order ───────────────────────────────────── */
+
+.yable--rtl .yable-pagination {
+  flex-direction: row-reverse;
+}
+
+.yable--rtl .yable-pagination-pages {
+  flex-direction: row-reverse;
+}
+
+.yable--rtl .yable-pagination-info {
+  flex-direction: row-reverse;
+}
+
+/* Flip pagination arrow SVGs */
+.yable--rtl .yable-pagination-btn svg {
+  transform: scaleX(-1);
+}
+
+/* ── Global Filter: Search icon on right ────────────────────────────────── */
+
+.yable--rtl .yable-global-filter-input {
+  padding: 0 32px 0 10px;
+  background-position: right 10px center;
+  text-align: right;
+}
+
+/* ── Pagination Select: Arrow on left ───────────────────────────────────── */
+
+.yable--rtl .yable-pagination-select {
+  padding: 0 8px 0 24px;
+  background-position: left 6px center;
+}
+
+/* ── Select element in cells ────────────────────────────────────────────── */
+
+.yable--rtl .yable-select {
+  padding: 0 var(--yable-input-padding-x) 0 calc(var(--yable-input-padding-x) + 16px);
+  background-position: left 6px center;
+}
+
+/* ── Expand toggle ──────────────────────────────────────────────────────── */
+
+.yable--rtl .yable-expand-toggle[data-expanded="true"] {
+  transform: rotate(-90deg);
+}
+
+/* ── Bordered: Mirror border side ───────────────────────────────────────── */
+
+.yable--rtl.yable--bordered .yable-th,
+.yable--rtl.yable--bordered .yable-td {
+  border-right: none;
+  border-left: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable--rtl.yable--bordered .yable-th:last-child,
+.yable--rtl.yable--bordered .yable-td:last-child {
+  border-left: none;
+}
+
+/* ── Sidebar: Slide from left in RTL ────────────────────────────────────── */
+
+.yable--rtl .yable-sidebar {
+  right: auto;
+  left: 0;
+  border-right: 1px solid var(--yable-border-color);
+  border-left: none;
+  transform: translateX(-100%);
+}
+
+.yable--rtl .yable-sidebar--open {
+  transform: translateX(0);
+}
+
+/* ── Context menu: Submenu opens to left ────────────────────────────────── */
+
+.yable--rtl .yable-ctx-submenu {
+  left: auto;
+  right: 100%;
+}
+
+.yable--rtl .yable-ctx-item-arrow svg {
+  transform: scaleX(-1);
+}
+
+.yable--rtl .yable-ctx-item-shortcut {
+  margin-left: 0;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+/* ── Status bar ─────────────────────────────────────────────────────────── */
+
+.yable--rtl .yable-status-bar {
+  flex-direction: row-reverse;
+}
+
+/* ── Sidebar drag handle ────────────────────────────────────────────────── */
+
+.yable--rtl .yable-sidebar-column-item {
+  flex-direction: row-reverse;
+}
+
+.yable--rtl .yable-sidebar-drag-handle {
+  margin-left: 8px;
+  margin-right: 0;
+}

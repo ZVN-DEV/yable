@@ -8,7 +8,14 @@
     "./default.css": "./dist/themes/default.css",
     "./stripe.css": "./dist/themes/stripe.css",
     "./compact.css": "./dist/themes/compact.css",
-    "./tokens.css": "./dist/tokens.css"
+    "./midnight.css": "./dist/themes/midnight.css",
+    "./ocean.css": "./dist/themes/ocean.css",
+    "./rose.css": "./dist/themes/rose.css",
+    "./forest.css": "./dist/themes/forest.css",
+    "./mono.css": "./dist/themes/mono.css",
+    "./tokens.css": "./dist/tokens.css",
+    "./rtl.css": "./dist/rtl.css",
+    "./createTheme": "./src/createTheme.ts"
   },
   "files": ["dist"],
   "scripts": {

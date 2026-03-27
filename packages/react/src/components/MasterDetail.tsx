@@ -1,0 +1,50 @@
+// @yable/react — Master Detail Component
+// Detail panel container for expanded rows with nested table support.
+
+import React from 'react'
+import type { RowData, Row, Table } from '@yable/core'
+
+interface MasterDetailProps<TData extends RowData> {
+  row: Row<TData>
+  table: Table<TData>
+  /** Number of columns to span (full table width) */
+  colSpan: number
+  /** Custom render function for the detail panel */
+  renderDetailPanel?: (row: Row<TData>) => React.ReactNode
+  /** Optional animation class */
+  animationClass?: string
+}
+
+export function MasterDetail<TData extends RowData>({
+  row,
+  table,
+  colSpan,
+  renderDetailPanel,
+  animationClass,
+}: MasterDetailProps<TData>) {
+  // Determine what to render in the detail panel
+  const renderer =
+    renderDetailPanel ?? (table.options as any).renderDetailPanel
+
+  if (!renderer) return null
+
+  const content = renderer(row)
+  if (content == null) return null
+
+  const classes = [
+    'yable-detail-row',
+    animationClass,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return (
+    <tr className={classes} data-detail-for={row.id}>
+      <td className="yable-detail-cell" colSpan={colSpan}>
+        <div className="yable-detail-panel">
+          {content}
+        </div>
+      </td>
+    </tr>
+  )
+}

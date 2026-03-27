@@ -21,7 +21,20 @@ export function createCell<TData extends RowData, TValue = unknown>(
     column,
 
     getValue: () => {
-      return row.getValue(columnId) as TValue
+      // Check for formula computed value first
+      const rawValue = row.getValue(columnId)
+      if (
+        typeof rawValue === 'string' &&
+        rawValue.startsWith('=') &&
+        typeof table.getFormula === 'function'
+      ) {
+        // Formula cell: get computed value from pending values
+        const pendingValue = table.getPendingValue(row.id, columnId)
+        if (pendingValue !== undefined) {
+          return pendingValue as TValue
+        }
+      }
+      return rawValue as TValue
     },
 
     renderValue: () => {
@@ -46,6 +59,21 @@ export function createCell<TData extends RowData, TValue = unknown>(
     },
     getIsAlwaysEditable: () => {
       return !!column.columnDef.meta?.alwaysEditable
+    },
+
+    getRowSpan: () => {
+      // Row span is resolved externally via resolveRowSpans and
+      // consumed by the renderer. This method provides a hook
+      // for the column def's rowSpan callback if present.
+      const rowSpanFn = (column.columnDef as any).rowSpan
+      if (typeof rowSpanFn === 'function') {
+        const rows = table.getRowModel().rows
+        const rowIndex = rows.findIndex((r) => r.id === row.id)
+        if (rowIndex >= 0) {
+          return rowSpanFn(row, rows, rowIndex)
+        }
+      }
+      return undefined
     },
   }
 

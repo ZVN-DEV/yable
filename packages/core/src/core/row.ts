@@ -201,6 +201,22 @@ export function createRow<TData extends RowData>(
       collect(row.subRows)
       return leaves
     },
+
+    // Tree data extensions
+    getParentRow: () => {
+      if (!parentId) return undefined
+      try {
+        return table.getRow(parentId, true)
+      } catch {
+        return undefined
+      }
+    },
+    getTreeDepth: () => {
+      return (row as any)._treeDepth ?? depth
+    },
+    isLeaf: () => {
+      return (row as any)._isLeaf ?? row.subRows.length === 0
+    },
   }
 
   return row

@@ -1,0 +1,143 @@
+/* ============================================================================
+   @yable/themes — Midnight Theme
+   Dark-first design with deep navy backgrounds and electric blue accents.
+   Inspired by modern developer tools and dark IDE aesthetics.
+
+   Usage:
+     import '@yable/themes'
+     import '@yable/themes/midnight.css'
+     <Table theme="midnight" />
+   ============================================================================ */
+
+.yable-theme-midnight,
+.yable[data-theme="midnight"] {
+  /* Surface — deep navy dark-first */
+  --yable-bg: #0b0e1a;
+  --yable-bg-header: #0f1326;
+  --yable-bg-footer: #0f1326;
+  --yable-bg-row: transparent;
+  --yable-bg-row-alt: rgba(99, 179, 255, 0.02);
+  --yable-bg-row-hover: rgba(99, 179, 255, 0.05);
+  --yable-bg-row-selected: rgba(56, 139, 253, 0.12);
+  --yable-bg-row-expanded: rgba(99, 179, 255, 0.03);
+  --yable-bg-cell-editing: #131832;
+  --yable-bg-pinned: #0d1020;
+
+  /* Text — crisp whites with blue undertones */
+  --yable-text-primary: #e6edf3;
+  --yable-text-secondary: #8b949e;
+  --yable-text-tertiary: #565d67;
+  --yable-text-header: #79c0ff;
+  --yable-text-disabled: #3d4450;
+  --yable-text-link: #58a6ff;
+  --yable-text-placeholder: #565d67;
+
+  /* Borders — subtle navy edges */
+  --yable-border-color: #1b2240;
+  --yable-border-color-strong: #2a3460;
+  --yable-border-radius: 8px;
+
+  /* Accent — electric blue */
+  --yable-accent: #388bfd;
+  --yable-accent-hover: #58a6ff;
+  --yable-accent-light: rgba(56, 139, 253, 0.15);
+  --yable-accent-text: #ffffff;
+
+  /* Shadows — deep glow */
+  --yable-shadow: 0 1px 4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 139, 253, 0.05);
+  --yable-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --yable-shadow-pinned: 4px 0 12px -2px rgba(0, 0, 0, 0.5);
+
+  /* Spacing */
+  --yable-cell-padding-x: 16px;
+  --yable-cell-padding-y: 11px;
+  --yable-header-padding-x: 16px;
+  --yable-header-padding-y: 10px;
+
+  /* Sizing */
+  --yable-row-min-height: 42px;
+  --yable-header-min-height: 40px;
+
+  /* Typography */
+  --yable-font-size: 13px;
+  --yable-font-size-sm: 12px;
+  --yable-font-size-header: 11px;
+
+  /* Form controls */
+  --yable-input-bg: rgba(255, 255, 255, 0.03);
+  --yable-input-bg-hover: rgba(255, 255, 255, 0.06);
+  --yable-input-bg-focus: #131832;
+  --yable-input-border: #2a3460;
+  --yable-input-border-hover: #3d4f8a;
+  --yable-input-border-focus: var(--yable-accent);
+  --yable-input-shadow-focus: 0 0 0 3px rgba(56, 139, 253, 0.15);
+
+  /* Checkbox */
+  --yable-checkbox-border: #3d4f8a;
+  --yable-checkbox-bg: #1b2240;
+
+  /* Pagination */
+  --yable-pagination-button-radius: 6px;
+  --yable-pagination-button-bg-hover: rgba(99, 179, 255, 0.08);
+}
+
+/* Header styling */
+.yable-theme-midnight .yable-th,
+.yable[data-theme="midnight"] .yable-th {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: var(--yable-font-size-header);
+  font-weight: var(--yable-font-weight-medium);
+  color: var(--yable-text-header);
+  border-bottom: 1px solid var(--yable-border-color-strong);
+}
+
+/* Rows */
+.yable-theme-midnight .yable-tr:not(:last-child) .yable-td,
+.yable[data-theme="midnight"] .yable-tr:not(:last-child) .yable-td {
+  border-bottom: 1px solid var(--yable-border-color);
+}
+
+/* Border style */
+.yable-theme-midnight,
+.yable[data-theme="midnight"] {
+  border: 1px solid var(--yable-border-color-strong);
+}
+
+/* ── Midnight Light Variant ─────────────────────────────────────────────── */
+
+[data-yable-theme="light"] .yable-theme-midnight,
+[data-yable-theme="light"] .yable[data-theme="midnight"] {
+  --yable-bg: #f0f3f8;
+  --yable-bg-header: #e4e9f2;
+  --yable-bg-footer: #e4e9f2;
+  --yable-bg-row-alt: rgba(30, 58, 138, 0.02);
+  --yable-bg-row-hover: rgba(30, 58, 138, 0.04);
+  --yable-bg-row-selected: rgba(56, 139, 253, 0.08);
+  --yable-bg-cell-editing: #ffffff;
+  --yable-bg-pinned: #eaeff5;
+
+  --yable-text-primary: #1e293b;
+  --yable-text-secondary: #64748b;
+  --yable-text-tertiary: #94a3b8;
+  --yable-text-header: #1e40af;
+  --yable-text-placeholder: #94a3b8;
+
+  --yable-border-color: #cbd5e1;
+  --yable-border-color-strong: #94a3b8;
+
+  --yable-accent: #2563eb;
+  --yable-accent-hover: #1d4ed8;
+  --yable-accent-light: rgba(37, 99, 235, 0.08);
+
+  --yable-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
+  --yable-shadow-lg: 0 4px 12px rgba(30, 58, 138, 0.12);
+
+  --yable-input-bg: transparent;
+  --yable-input-bg-hover: rgba(0, 0, 0, 0.03);
+  --yable-input-bg-focus: #ffffff;
+  --yable-input-border: #cbd5e1;
+  --yable-input-border-hover: #94a3b8;
+  --yable-checkbox-border: #94a3b8;
+  --yable-checkbox-bg: #ffffff;
+}

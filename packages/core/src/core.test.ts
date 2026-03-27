@@ -67,6 +67,16 @@ function createTestTable(overrides: Partial<TableOptions<Person>> = {}) {
     rowPinning: { top: [], bottom: [] },
     grouping: [],
     editing: { activeCell: undefined, pendingValues: {} },
+    undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
+    fillHandle: { isDragging: false },
+    formulas: { enabled: false, formulas: {}, computedValues: {}, errors: {} },
+    rowDrag: { draggingRowId: null, overRowId: null, dropPosition: null },
+    pivot: {
+      enabled: false,
+      config: { rowFields: [], columnFields: [], valueFields: [] },
+      expandedRowGroups: {},
+      expandedColumnGroups: {},
+    },
     ...overrides.initialState,
   }
 
