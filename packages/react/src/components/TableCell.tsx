@@ -1,6 +1,6 @@
 // @yable/react — Table Cell Component
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import type { RowData, Table, Cell } from '@yable/core'
 
 interface TableCellProps<TData extends RowData> {
@@ -53,29 +53,47 @@ export function TableCell<TData extends RowData>({
     }
   }
 
-  const handleClick = (e: React.MouseEvent) => {
-    table.events.emit('cell:click', {
-      cell,
-      row: cell.row,
-      column: cell.column,
-      event: e.nativeEvent,
-    } as any)
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      table.events.emit('cell:click', {
+        cell,
+        row: cell.row,
+        column: cell.column,
+        event: e.nativeEvent,
+      } as any)
 
-    // Start editing on click if column is editable
-    const editable = (column.columnDef as any).editable
-    if (editable && !isAlwaysEditable && !isEditing) {
-      table.startEditing(cell.row.id, column.id)
-    }
-  }
+      // Start editing on click if column is editable
+      const editable = (column.columnDef as any).editable
+      if (editable && !isAlwaysEditable && !isEditing) {
+        table.startEditing(cell.row.id, column.id)
+      }
+    },
+    [table, cell, column, isAlwaysEditable, isEditing]
+  )
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    table.events.emit('cell:dblclick', {
-      cell,
-      row: cell.row,
-      column: cell.column,
-      event: e.nativeEvent,
-    } as any)
-  }
+  const handleDoubleClick = useCallback(
+    (e: React.MouseEvent) => {
+      table.events.emit('cell:dblclick', {
+        cell,
+        row: cell.row,
+        column: cell.column,
+        event: e.nativeEvent,
+      } as any)
+    },
+    [table, cell]
+  )
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      table.events.emit('cell:contextmenu', {
+        cell,
+        row: cell.row,
+        column: cell.column,
+        event: e.nativeEvent,
+      } as any)
+    },
+    [table, cell]
+  )
 
   return (
     <td
@@ -86,6 +104,7 @@ export function TableCell<TData extends RowData>({
       data-column-id={column.id}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
     >
       {content}
     </td>

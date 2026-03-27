@@ -1,6 +1,6 @@
 // @yable/react — useTable hook
 
-import { useState, useRef, useMemo, useCallback } from 'react'
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import {
   createTable,
   functionalUpdate,
@@ -11,6 +11,21 @@ import {
   type Table,
   type Updater,
 } from '@yable/core'
+
+/**
+ * Shallow-compare two objects. Returns true if all own keys are strictly equal.
+ */
+function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boolean {
+  if (a === b) return true
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+  if (keysA.length !== keysB.length) return false
+  for (const key of keysA) {
+    if (!Object.prototype.hasOwnProperty.call(b, key)) return false
+    if ((a as any)[key] !== (b as any)[key]) return false
+  }
+  return true
+}
 
 export function useTable<TData extends RowData>(
   options: TableOptions<TData>
@@ -45,32 +60,43 @@ export function useTable<TData extends RowData>(
   const stateRef = useRef(state)
   stateRef.current = state
 
+  // Track previous options to avoid recomputing when consumer passes
+  // a structurally identical but referentially new options object
+  const prevOptionsRef = useRef(options)
+  const stableOptions = useMemo(() => {
+    if (shallowEqual(prevOptionsRef.current as any, options as any)) {
+      return prevOptionsRef.current
+    }
+    prevOptionsRef.current = options
+    return options
+  }, [options])
+
   const resolvedState = useMemo(
     () => ({
       ...state,
-      ...options.state,
+      ...stableOptions.state,
     }),
-    [state, options.state]
+    [state, stableOptions.state]
   )
 
   const onStateChange = useCallback(
     (updater: Updater<TableState>) => {
-      if (options.onStateChange) {
-        options.onStateChange(updater)
+      if (stableOptions.onStateChange) {
+        stableOptions.onStateChange(updater)
       } else {
         setState((prev) => functionalUpdate(updater, prev))
       }
     },
-    [options.onStateChange]
+    [stableOptions.onStateChange]
   )
 
   const resolvedOptions: TableOptions<TData> = useMemo(
     () => ({
-      ...options,
+      ...stableOptions,
       state: resolvedState,
       onStateChange,
     }),
-    [options, resolvedState, onStateChange]
+    [stableOptions, resolvedState, onStateChange]
   )
 
   // Create or update the table instance
@@ -86,6 +112,15 @@ export function useTable<TData extends RowData>(
       onStateChange,
     }) as TableOptionsResolved<TData>)
   }
+
+  // Clean up event listeners on unmount to prevent memory leaks in SPAs
+  useEffect(() => {
+    return () => {
+      if (tableRef.current) {
+        tableRef.current.events.removeAllListeners()
+      }
+    }
+  }, [])
 
   return tableRef.current
 }
