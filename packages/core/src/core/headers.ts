@@ -55,8 +55,8 @@ export function createHeader<TData extends RowData, TValue = unknown>(
     }),
 
     getLeafHeaders: () => {
-      const leaves: Header<TData, any>[] = []
-      const recurse = (h: Header<TData, any>) => {
+      const leaves: Header<TData, unknown>[] = []
+      const recurse = (h: Header<TData, unknown>) => {
         if (h.subHeaders.length === 0) {
           leaves.push(h)
         } else {
@@ -65,7 +65,7 @@ export function createHeader<TData extends RowData, TValue = unknown>(
           }
         }
       }
-      recurse(header as any)
+      recurse(header as Header<TData, unknown>)
       return leaves
     },
 
@@ -97,7 +97,7 @@ export function createHeader<TData extends RowData, TValue = unknown>(
 
           table.setColumnSizingInfo((old) => ({
             ...old,
-            isResizingColumn: false as any,
+            isResizingColumn: false,
           }))
         }
 

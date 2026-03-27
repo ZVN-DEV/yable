@@ -28,8 +28,17 @@ export function createRow<TData extends RowData>(
     // Value access
     getValue: <TValue = unknown>(columnId: string): TValue => {
       const column = table.getColumn(columnId)
-      if (!column?.accessorFn) return undefined as any
-      return column.accessorFn(original, rowIndex) as TValue
+      if (!column?.accessorFn) return undefined as TValue
+      // T1-09: Wrap accessorFn in try-catch
+      try {
+        return column.accessorFn(original, rowIndex) as TValue
+      } catch (err) {
+        console.error(
+          `[yable] accessorFn threw for column "${columnId}", row "${id}":`,
+          err
+        )
+        return undefined as TValue
+      }
     },
     renderValue: <TValue = unknown>(columnId: string): TValue => {
       return row.getValue(columnId)

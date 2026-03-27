@@ -71,12 +71,12 @@ export function getDeepValue<T, K extends DeepKeys<T>>(
   key: K
 ): DeepValue<T, K> {
   const parts = (key as string).split('.')
-  let current: any = obj
+  let current: unknown = obj
   for (const part of parts) {
-    if (current == null) return undefined as any
-    current = current[part]
+    if (current == null) return undefined as DeepValue<T, K>
+    current = (current as Record<string, unknown>)[part]
   }
-  return current
+  return current as DeepValue<T, K>
 }
 
 // ---------------------------------------------------------------------------
@@ -104,8 +104,8 @@ export function resolveColumnId<TData extends RowData>(
 export function resolveRowId<TData extends RowData>(
   row: TData,
   index: number,
-  getRowId?: (originalRow: TData, index: number, parent?: any) => string,
-  parent?: any
+  getRowId?: (originalRow: TData, index: number, parent?: unknown) => string,
+  parent?: unknown
 ): string {
   if (getRowId) return getRowId(row, index, parent)
   return String(index)
@@ -123,7 +123,7 @@ export function getCellValue<TData extends RowData>(
     return columnDef.accessorFn(row, 0)
   }
   if ('accessorKey' in columnDef && columnDef.accessorKey) {
-    return getDeepValue(row, columnDef.accessorKey as any)
+    return getDeepValue(row, columnDef.accessorKey as DeepKeys<TData>)
   }
   return undefined
 }
@@ -137,15 +137,17 @@ export function shallowEqual<T>(a: T, b: T): boolean {
   if (typeof a !== 'object' || typeof b !== 'object') return false
   if (a === null || b === null) return false
 
-  const keysA = Object.keys(a as any)
-  const keysB = Object.keys(b as any)
+  const objA = a as Record<string, unknown>
+  const objB = b as Record<string, unknown>
+  const keysA = Object.keys(objA)
+  const keysB = Object.keys(objB)
 
   if (keysA.length !== keysB.length) return false
 
   for (const key of keysA) {
     if (
       !Object.prototype.hasOwnProperty.call(b, key) ||
-      !Object.is((a as any)[key], (b as any)[key])
+      !Object.is(objA[key], objB[key])
     ) {
       return false
     }

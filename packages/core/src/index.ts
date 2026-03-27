@@ -102,6 +102,7 @@ export type {
 // ---------------------------------------------------------------------------
 
 export { createTable } from './core/table'
+export { resolveSortingFn, resolveFilterFn } from './core/resolvers'
 export { createColumn } from './core/column'
 export { createRow } from './core/row'
 export { createCell } from './core/cell'
@@ -153,3 +154,17 @@ export type { BuiltInAggregationFn } from './aggregationFns'
 // ---------------------------------------------------------------------------
 
 export { EventEmitterImpl } from './events/EventEmitter'
+
+// ---------------------------------------------------------------------------
+// Locale / i18n
+// ---------------------------------------------------------------------------
+
+export { en } from './i18n/en'
+export type { YableLocale } from './i18n/en'
+export {
+  createLocale,
+  setDefaultLocale,
+  getDefaultLocale,
+  resetLocale,
+} from './i18n/locales'
+export type { PartialLocale } from './i18n/locales'

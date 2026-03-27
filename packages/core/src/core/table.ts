@@ -11,6 +11,7 @@ import type {
   Row,
   RowModel,
   HeaderGroup,
+  Header,
   Updater,
   ExportOptions,
   SortingState,
@@ -33,6 +34,11 @@ import { createColumn } from './column'
 import { createRow } from './row'
 import { buildHeaderGroups } from './headers'
 import { EventEmitterImpl } from '../events/EventEmitter'
+import { getDefaultLocale } from '../i18n/locales'
+import type { YableLocale } from '../i18n/en'
+
+// Re-export resolvers for convenience (they live in resolvers.ts to avoid circular deps)
+export { resolveSortingFn, resolveFilterFn } from './resolvers'
 
 // ---------------------------------------------------------------------------
 // Initial State
@@ -49,7 +55,7 @@ const getInitialState = (): TableState => ({
   columnPinning: { left: [], right: [] },
   columnSizing: {},
   columnSizingInfo: {
-    isResizingColumn: false as any,
+    isResizingColumn: false,
     startOffset: null,
     startSize: null,
     deltaOffset: null,
@@ -59,8 +65,23 @@ const getInitialState = (): TableState => ({
   expanded: {},
   rowPinning: { top: [], bottom: [] },
   grouping: [],
-  editing: null as any,
+  editing: { activeCell: undefined, pendingValues: {} },
 })
+
+// ---------------------------------------------------------------------------
+// Locale support on Table interface (augmentation)
+// ---------------------------------------------------------------------------
+
+/** Extended table with locale support */
+interface TableWithLocale<TData extends RowData> extends Table<TData> {
+  getLocaleString: (key: keyof YableLocale) => string
+}
+
+// ---------------------------------------------------------------------------
+// Large-row-count warning (fires at most once per table instance)
+// ---------------------------------------------------------------------------
+
+let _maxRowsWarned = false
 
 // ---------------------------------------------------------------------------
 // createTable
@@ -69,6 +90,10 @@ const getInitialState = (): TableState => ({
 export function createTable<TData extends RowData>(
   options: TableOptions<TData>
 ): Table<TData> {
+  // T1-05: Guard data
+  const safeData = options.data ?? []
+  const safeColumns = options.columns ?? []
+
   const events = new EventEmitterImpl<YableEventMap<TData>>()
 
   // Resolve options with defaults
@@ -98,7 +123,12 @@ export function createTable<TData extends RowData>(
     enableMultiSort: true,
     enableSortingRemoval: true,
     maxMultiSortColCount: Number.MAX_SAFE_INTEGER,
-    isMultiSortEvent: (e: unknown) => (e as MouseEvent)?.shiftKey,
+    isMultiSortEvent: (e: unknown) => {
+      if (e && typeof e === 'object' && 'shiftKey' in e) {
+        return !!(e as { shiftKey: boolean }).shiftKey
+      }
+      return false
+    },
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
     debugAll: false,
@@ -107,25 +137,30 @@ export function createTable<TData extends RowData>(
     debugColumns: false,
     debugRows: false,
     ...options,
+    data: safeData,
+    columns: safeColumns,
   } as TableOptionsResolved<TData>
 
   // Internal state (used when no external state is provided)
   let _internalState: TableState = getInitialState()
 
+  // T1-10: per-instance warning flag
+  let _largeDatasetWarned = false
+
   // ---------------------------------------------------------------------------
   // Table Instance
   // ---------------------------------------------------------------------------
 
-  const table: Table<TData> = {
+  const table = {
     options: resolvedOptions,
 
     // State
-    getState: () => {
+    getState: (): TableState => {
       return {
         ...getInitialState(),
         ..._internalState,
         ...resolvedOptions.state,
-      } as TableState
+      }
     },
     setState: (updater: Updater<TableState>) => {
       const newState = functionalUpdate(updater, table.getState())
@@ -142,71 +177,73 @@ export function createTable<TData extends RowData>(
     },
 
     // Column API — populated below
-    getAllColumns: () => [],
-    getAllFlatColumns: () => [],
-    getAllLeafColumns: () => [],
-    getColumn: () => undefined,
-    getVisibleFlatColumns: () => [],
-    getVisibleLeafColumns: () => [],
-    getLeftVisibleLeafColumns: () => [],
-    getRightVisibleLeafColumns: () => [],
-    getCenterVisibleLeafColumns: () => [],
+    getAllColumns: (): Column<TData, unknown>[] => [],
+    getAllFlatColumns: (): Column<TData, unknown>[] => [],
+    getAllLeafColumns: (): Column<TData, unknown>[] => [],
+    getColumn: (_columnId: string): Column<TData, unknown> | undefined => undefined,
+    getVisibleFlatColumns: (): Column<TData, unknown>[] => [],
+    getVisibleLeafColumns: (): Column<TData, unknown>[] => [],
+    getLeftVisibleLeafColumns: (): Column<TData, unknown>[] => [],
+    getRightVisibleLeafColumns: (): Column<TData, unknown>[] => [],
+    getCenterVisibleLeafColumns: (): Column<TData, unknown>[] => [],
 
     // Header API — populated below
-    getHeaderGroups: () => [],
-    getLeftHeaderGroups: () => [],
-    getRightHeaderGroups: () => [],
-    getCenterHeaderGroups: () => [],
-    getFooterGroups: () => [],
-    getLeftFooterGroups: () => [],
-    getRightFooterGroups: () => [],
-    getCenterFooterGroups: () => [],
+    getHeaderGroups: (): HeaderGroup<TData>[] => [],
+    getLeftHeaderGroups: (): HeaderGroup<TData>[] => [],
+    getRightHeaderGroups: (): HeaderGroup<TData>[] => [],
+    getCenterHeaderGroups: (): HeaderGroup<TData>[] => [],
+    getFooterGroups: (): HeaderGroup<TData>[] => [],
+    getLeftFooterGroups: (): HeaderGroup<TData>[] => [],
+    getRightFooterGroups: (): HeaderGroup<TData>[] => [],
+    getCenterFooterGroups: (): HeaderGroup<TData>[] => [],
 
     // Row Model API — populated below
-    getCoreRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getRow: () => undefined as any,
-    getFilteredRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getPreFilteredRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getSortedRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getPreSortedRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getPaginationRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getPrePaginationRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getGroupedRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getPreGroupedRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
-    getPreExpandedRowModel: () => ({ rows: [], flatRows: [], rowsById: {} }),
+    getCoreRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getRow: (id: string, _searchAll?: boolean): Row<TData> => {
+      throw new Error(`[yable] Row with id "${id}" not found.`)
+    },
+    getFilteredRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getPreFilteredRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getSortedRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getPreSortedRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getPaginationRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getPrePaginationRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getGroupedRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getPreGroupedRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
+    getPreExpandedRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
 
     // Pagination
-    getPageCount: () => {
+    getPageCount: (): number => {
       const state = table.getState()
       if (resolvedOptions.pageCount !== undefined) return resolvedOptions.pageCount
       const rowModel = table.getPrePaginationRowModel()
       return Math.ceil(rowModel.rows.length / state.pagination.pageSize)
     },
-    getCanPreviousPage: () => table.getState().pagination.pageIndex > 0,
-    getCanNextPage: () => {
+    getCanPreviousPage: (): boolean => table.getState().pagination.pageIndex > 0,
+    getCanNextPage: (): boolean => {
       const state = table.getState()
       return state.pagination.pageIndex < table.getPageCount() - 1
     },
     previousPage: () => {
-      table.setPageIndex((old) => Math.max(old - 1, 0))
+      table.setPageIndex((old: number) => Math.max(old - 1, 0))
     },
     nextPage: () => {
-      table.setPageIndex((old) => Math.min(old + 1, table.getPageCount() - 1))
+      table.setPageIndex((old: number) => Math.min(old + 1, table.getPageCount() - 1))
     },
     firstPage: () => table.setPageIndex(0),
     lastPage: () => table.setPageIndex(table.getPageCount() - 1),
-    getRowCount: () => {
+    getRowCount: (): number => {
       return resolvedOptions.rowCount ?? table.getPrePaginationRowModel().rows.length
     },
     setPageIndex: (updater: Updater<number>) => {
-      table.setPagination((old) => {
+      table.setPagination((old: PaginationState) => {
         const newPageIndex = functionalUpdate(updater, old.pageIndex)
         return { ...old, pageIndex: newPageIndex }
       })
     },
     setPageSize: (size: number) => {
-      table.setPagination((old) => ({ ...old, pageSize: size, pageIndex: 0 }))
+      table.setPagination((old: PaginationState) => ({ ...old, pageSize: size, pageIndex: 0 }))
     },
     resetPageIndex: (defaultState?: boolean) => {
       table.setPageIndex(defaultState ? 0 : table.getState().pagination.pageIndex)
@@ -222,53 +259,53 @@ export function createTable<TData extends RowData>(
       )
     },
 
-    // Sorting API
-    setSorting: makeStateUpdater('sorting', {} as any) as any,
+    // Sorting API (placeholder — wired below)
+    setSorting: (_updater: Updater<SortingState>) => {},
     resetSorting: (defaultState?: boolean) => {
       table.setSorting(defaultState ? [] : table.getState().sorting)
     },
 
-    // Filtering API
-    setColumnFilters: makeStateUpdater('columnFilters', {} as any) as any,
+    // Filtering API (placeholder — wired below)
+    setColumnFilters: (_updater: Updater<ColumnFiltersState>) => {},
     resetColumnFilters: (defaultState?: boolean) => {
       table.setColumnFilters(defaultState ? [] : table.getState().columnFilters)
     },
-    setGlobalFilter: makeStateUpdater('globalFilter', {} as any) as any,
+    setGlobalFilter: (_updater: Updater<string>) => {},
     resetGlobalFilter: (defaultState?: boolean) => {
       table.setGlobalFilter(defaultState ? '' : table.getState().globalFilter)
     },
 
     // Selection API
-    getSelectedRowModel: () => {
+    getSelectedRowModel: (): RowModel<TData> => {
       const selection = table.getState().rowSelection
       const rowModel = table.getRowModel()
       const rows = rowModel.flatRows.filter((row) => selection[row.id])
       return { rows, flatRows: rows, rowsById: Object.fromEntries(rows.map((r) => [r.id, r])) }
     },
-    getFilteredSelectedRowModel: () => table.getSelectedRowModel(),
-    getGroupedSelectedRowModel: () => table.getSelectedRowModel(),
-    getIsAllRowsSelected: () => {
+    getFilteredSelectedRowModel: (): RowModel<TData> => table.getSelectedRowModel(),
+    getGroupedSelectedRowModel: (): RowModel<TData> => table.getSelectedRowModel(),
+    getIsAllRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
       return rowModel.flatRows.length > 0 && rowModel.flatRows.every((row) => selection[row.id])
     },
-    getIsSomeRowsSelected: () => {
+    getIsSomeRowsSelected: (): boolean => {
       const selection = table.getState().rowSelection
       return Object.keys(selection).length > 0 && !table.getIsAllRowsSelected()
     },
-    getIsAllPageRowsSelected: () => {
+    getIsAllPageRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
       return rowModel.rows.length > 0 && rowModel.rows.every((row) => selection[row.id])
     },
-    getIsSomePageRowsSelected: () => {
+    getIsSomePageRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
       return rowModel.rows.some((row) => selection[row.id]) && !table.getIsAllPageRowsSelected()
     },
     toggleAllRowsSelected: (value?: boolean) => {
       const rowModel = table.getPrePaginationRowModel()
-      table.setRowSelection((old) => {
+      table.setRowSelection((old: RowSelectionState) => {
         const next = { ...old }
         const shouldSelect = value ?? !table.getIsAllRowsSelected()
         for (const row of rowModel.flatRows) {
@@ -283,7 +320,7 @@ export function createTable<TData extends RowData>(
     },
     toggleAllPageRowsSelected: (value?: boolean) => {
       const rowModel = table.getRowModel()
-      table.setRowSelection((old) => {
+      table.setRowSelection((old: RowSelectionState) => {
         const next = { ...old }
         const shouldSelect = value ?? !table.getIsAllPageRowsSelected()
         for (const row of rowModel.rows) {
@@ -296,19 +333,19 @@ export function createTable<TData extends RowData>(
         return next
       })
     },
-    setRowSelection: makeStateUpdater('rowSelection', {} as any) as any,
+    setRowSelection: (_updater: Updater<RowSelectionState>) => {},
     resetRowSelection: (defaultState?: boolean) => {
       table.setRowSelection(defaultState ? {} : table.getState().rowSelection)
     },
 
     // Visibility API
-    setColumnVisibility: makeStateUpdater('columnVisibility', {} as any) as any,
+    setColumnVisibility: (_updater: Updater<VisibilityState>) => {},
     resetColumnVisibility: (defaultState?: boolean) => {
       table.setColumnVisibility(defaultState ? {} : table.getState().columnVisibility)
     },
     toggleAllColumnsVisible: (value?: boolean) => {
       const allColumns = table.getAllLeafColumns()
-      table.setColumnVisibility((old) => {
+      table.setColumnVisibility((old: VisibilityState) => {
         const next = { ...old }
         const shouldShow = value ?? !table.getIsAllColumnsVisible()
         for (const col of allColumns) {
@@ -317,27 +354,27 @@ export function createTable<TData extends RowData>(
         return next
       })
     },
-    getIsAllColumnsVisible: () => {
+    getIsAllColumnsVisible: (): boolean => {
       return table.getAllLeafColumns().every((col) => col.getIsVisible())
     },
-    getIsSomeColumnsVisible: () => {
+    getIsSomeColumnsVisible: (): boolean => {
       return table.getAllLeafColumns().some((col) => col.getIsVisible())
     },
 
     // Column Order API
-    setColumnOrder: makeStateUpdater('columnOrder', {} as any) as any,
+    setColumnOrder: (_updater: Updater<ColumnOrderState>) => {},
     resetColumnOrder: (defaultState?: boolean) => {
       table.setColumnOrder(defaultState ? [] : table.getState().columnOrder)
     },
 
     // Column Pinning API
-    setColumnPinning: makeStateUpdater('columnPinning', {} as any) as any,
+    setColumnPinning: (_updater: Updater<ColumnPinningState>) => {},
     resetColumnPinning: (defaultState?: boolean) => {
       table.setColumnPinning(
         defaultState ? { left: [], right: [] } : table.getState().columnPinning
       )
     },
-    getIsSomeColumnsPinned: (position?: 'left' | 'right') => {
+    getIsSomeColumnsPinned: (position?: 'left' | 'right'): boolean => {
       const pinning = table.getState().columnPinning
       if (position === 'left') return (pinning.left?.length ?? 0) > 0
       if (position === 'right') return (pinning.right?.length ?? 0) > 0
@@ -345,26 +382,26 @@ export function createTable<TData extends RowData>(
     },
 
     // Column Sizing API
-    setColumnSizing: makeStateUpdater('columnSizing', {} as any) as any,
-    setColumnSizingInfo: makeStateUpdater('columnSizingInfo', {} as any) as any,
+    setColumnSizing: (_updater: Updater<ColumnSizingState>) => {},
+    setColumnSizingInfo: (_updater: Updater<ColumnSizingInfoState>) => {},
     resetColumnSizing: (defaultState?: boolean) => {
       table.setColumnSizing(defaultState ? {} : table.getState().columnSizing)
     },
-    getTotalSize: () => {
+    getTotalSize: (): number => {
       return table.getVisibleFlatColumns().reduce((sum, col) => sum + col.getSize(), 0)
     },
-    getLeftTotalSize: () => {
+    getLeftTotalSize: (): number => {
       return table.getLeftVisibleLeafColumns().reduce((sum, col) => sum + col.getSize(), 0)
     },
-    getRightTotalSize: () => {
+    getRightTotalSize: (): number => {
       return table.getRightVisibleLeafColumns().reduce((sum, col) => sum + col.getSize(), 0)
     },
-    getCenterTotalSize: () => {
+    getCenterTotalSize: (): number => {
       return table.getCenterVisibleLeafColumns().reduce((sum, col) => sum + col.getSize(), 0)
     },
 
     // Expanding API
-    setExpanded: makeStateUpdater('expanded', {} as any) as any,
+    setExpanded: (_updater: Updater<ExpandedState>) => {},
     resetExpanded: (defaultState?: boolean) => {
       table.setExpanded(defaultState ? {} : table.getState().expanded)
     },
@@ -383,57 +420,60 @@ export function createTable<TData extends RowData>(
         table.setExpanded({})
       }
     },
-    getCanSomeRowsExpand: () => {
+    getCanSomeRowsExpand: (): boolean => {
       return table.getPreExpandedRowModel().flatRows.some((r) => r.getCanExpand())
     },
-    getIsAllRowsExpanded: () => {
+    getIsAllRowsExpanded: (): boolean => {
       const rowModel = table.getPreExpandedRowModel()
       const expanded = table.getState().expanded
       if (expanded === true) return true
       const expandableRows = rowModel.flatRows.filter((r) => r.subRows.length > 0)
-      return expandableRows.length > 0 && expandableRows.every((r) => (expanded as Record<string, boolean>)[r.id])
+      if (expandableRows.length === 0) return false
+      const expandedRecord = expanded as Record<string, boolean>
+      return expandableRows.every((r) => expandedRecord[r.id])
     },
-    getIsSomeRowsExpanded: () => {
+    getIsSomeRowsExpanded: (): boolean => {
       const expanded = table.getState().expanded
       if (expanded === true) return true
       return Object.keys(expanded as Record<string, boolean>).length > 0
     },
-    getExpandedDepth: () => {
+    getExpandedDepth: (): number => {
       const expanded = table.getState().expanded
       if (expanded === true) return Infinity
       let maxDepth = 0
+      const expandedRecord = expanded as Record<string, boolean>
       const rowModel = table.getPreExpandedRowModel()
       for (const row of rowModel.flatRows) {
-        if ((expanded as Record<string, boolean>)[row.id]) {
+        if (expandedRecord[row.id]) {
           maxDepth = Math.max(maxDepth, row.depth)
         }
       }
       return maxDepth
     },
-    getExpandedRowModel: () => table.getCoreRowModel(),
+    getExpandedRowModel: (): RowModel<TData> => table.getCoreRowModel(),
 
     // Row Pinning API
-    setRowPinning: makeStateUpdater('rowPinning', {} as any) as any,
+    setRowPinning: (_updater: Updater<RowPinningState>) => {},
     resetRowPinning: (defaultState?: boolean) => {
       table.setRowPinning(
         defaultState ? { top: [], bottom: [] } : table.getState().rowPinning
       )
     },
-    getTopRows: () => {
+    getTopRows: (): Row<TData>[] => {
       const pinning = table.getState().rowPinning
       const rowModel = table.getCoreRowModel()
       return (pinning.top ?? [])
         .map((id) => rowModel.rowsById[id])
-        .filter(Boolean) as Row<TData>[]
+        .filter((row): row is Row<TData> => row !== undefined)
     },
-    getBottomRows: () => {
+    getBottomRows: (): Row<TData>[] => {
       const pinning = table.getState().rowPinning
       const rowModel = table.getCoreRowModel()
       return (pinning.bottom ?? [])
         .map((id) => rowModel.rowsById[id])
-        .filter(Boolean) as Row<TData>[]
+        .filter((row): row is Row<TData> => row !== undefined)
     },
-    getCenterRows: () => {
+    getCenterRows: (): Row<TData>[] => {
       const pinning = table.getState().rowPinning
       const rowModel = table.getRowModel()
       const pinned = new Set([...(pinning.top ?? []), ...(pinning.bottom ?? [])])
@@ -441,19 +481,20 @@ export function createTable<TData extends RowData>(
     },
 
     // Grouping API
-    setGrouping: makeStateUpdater('grouping', {} as any) as any,
+    setGrouping: (_updater: Updater<GroupingState>) => {},
     resetGrouping: (defaultState?: boolean) => {
       table.setGrouping(defaultState ? [] : table.getState().grouping)
     },
 
-    // Internal
+    // Internal — T1-11: _features kept on the interface for forward-compatibility
+    // but not wired to a plugin system yet
     _features: [],
     initialState: getInitialState(),
 
     // Editing API
-    setEditing: makeStateUpdater('editing', {} as any) as any,
+    setEditing: (_updater: Updater<EditingState>) => {},
     startEditing: (rowId: string, columnId: string) => {
-      table.setEditing((old: any) => ({
+      table.setEditing((old: EditingState) => ({
         ...old,
         activeCell: { rowId, columnId },
       }))
@@ -461,14 +502,14 @@ export function createTable<TData extends RowData>(
     commitEdit: () => {
       const editing = table.getState().editing
       if (editing?.activeCell) {
-        table.setEditing((old: any) => ({
+        table.setEditing((old: EditingState) => ({
           ...old,
           activeCell: undefined,
         }))
       }
     },
     cancelEdit: () => {
-      table.setEditing((old: any) => ({
+      table.setEditing((old: EditingState) => ({
         ...old,
         activeCell: undefined,
       }))
@@ -476,61 +517,62 @@ export function createTable<TData extends RowData>(
     resetEditing: (defaultState?: boolean) => {
       table.setEditing(
         defaultState
-          ? { pendingValues: {} } as EditingState
+          ? { activeCell: undefined, pendingValues: {} }
           : table.getState().editing
       )
     },
     setPendingValue: (rowId: string, columnId: string, value: unknown) => {
-      table.setEditing((old: any) => ({
+      table.setEditing((old: EditingState) => ({
         ...old,
         pendingValues: {
-          ...(old?.pendingValues ?? {}),
+          ...old.pendingValues,
           [rowId]: {
-            ...((old?.pendingValues ?? {})[rowId] ?? {}),
+            ...(old.pendingValues[rowId] ?? {}),
             [columnId]: value,
           },
         },
       }))
     },
-    getPendingValue: (rowId: string, columnId: string) => {
-      const editing = table.getState().editing as any
-      return editing?.pendingValues?.[rowId]?.[columnId]
+    getPendingValue: (rowId: string, columnId: string): unknown | undefined => {
+      const editing = table.getState().editing
+      return editing.pendingValues?.[rowId]?.[columnId]
     },
-    getPendingRow: (rowId: string) => {
-      const editing = table.getState().editing as any
-      return editing?.pendingValues?.[rowId] as any
+    getPendingRow: (rowId: string): Partial<TData> | undefined => {
+      const editing = table.getState().editing
+      return editing.pendingValues?.[rowId] as Partial<TData> | undefined
     },
-    getAllPendingChanges: () => {
-      const editing = table.getState().editing as any
-      return editing?.pendingValues ?? {}
+    getAllPendingChanges: (): Record<string, Partial<TData>> => {
+      const editing = table.getState().editing
+      return (editing.pendingValues ?? {}) as Record<string, Partial<TData>>
     },
-    hasPendingChanges: () => {
+    hasPendingChanges: (): boolean => {
       return Object.keys(table.getAllPendingChanges()).length > 0
     },
-    isValid: () => {
+    isValid: (): boolean => {
       return Object.keys(table.getValidationErrors()).length === 0
     },
     commitAllPending: () => {
       const changes = table.getAllPendingChanges()
       resolvedOptions.onEditCommit?.(changes)
-      table.setEditing((old: any) => ({
+      table.setEditing((old: EditingState) => ({
         ...old,
         pendingValues: {},
       }))
     },
     discardAllPending: () => {
-      table.setEditing((old: any) => ({
+      table.setEditing((old: EditingState) => ({
         ...old,
         pendingValues: {},
       }))
     },
-    getValidationErrors: () => {
-      const editing = table.getState().editing as any
-      return editing?.validationErrors ?? {}
+    getValidationErrors: (): Record<string, Record<string, string>> => {
+      // Validation errors are not yet tracked in EditingState;
+      // return empty until a validation feature is wired up.
+      return {}
     },
 
     // Export API
-    exportData: (opts?: ExportOptions) => {
+    exportData: (opts?: ExportOptions): string => {
       const rowModel = opts?.allRows ? table.getPrePaginationRowModel() : table.getRowModel()
       const columns = opts?.columns
         ? table.getAllLeafColumns().filter((col) => opts.columns!.includes(col.id))
@@ -563,19 +605,36 @@ export function createTable<TData extends RowData>(
       return ''
     },
 
-    // Pagination state setters
-    setPagination: makeStateUpdater('pagination', {} as any) as any,
+    // Pagination state setters (placeholder — wired below)
+    setPagination: (_updater: Updater<PaginationState>) => {},
 
     // Events
     events,
-  }
+
+    // T1-06: Locale support
+    getLocaleString: (key: keyof YableLocale): string => {
+      // Check for per-table locale option first
+      const tableLocale = (resolvedOptions as TableOptionsResolved<TData> & { locale?: Partial<YableLocale> }).locale
+      if (tableLocale && key in tableLocale) {
+        return tableLocale[key] as string
+      }
+      // Fall back to global default locale
+      return getDefaultLocale()[key]
+    },
+  } as Table<TData> & { getLocaleString: (key: keyof YableLocale) => string }
 
   // ---------------------------------------------------------------------------
   // Wire up state updaters to use table instance
   // ---------------------------------------------------------------------------
 
-  const wireUpdater = <V>(key: string) => {
-    return makeStateUpdater(key as any, table as any) as (updater: Updater<V>) => void
+  const tableInstance = table as Table<TData> & {
+    setState: (updater: Updater<TableState>) => void
+    getState: () => TableState
+    options: TableOptionsResolved<TData>
+  }
+
+  const wireUpdater = <V>(key: keyof TableState) => {
+    return makeStateUpdater(key, tableInstance) as (updater: Updater<V>) => void
   }
 
   table.setSorting = wireUpdater<SortingState>('sorting')
@@ -594,26 +653,28 @@ export function createTable<TData extends RowData>(
   table.setPagination = wireUpdater<PaginationState>('pagination')
 
   // ---------------------------------------------------------------------------
-  // Column Processing
+  // Column Processing — T1-01: Build columnMap for O(1) lookup
   // ---------------------------------------------------------------------------
 
   const processColumns = memo(
     () => [resolvedOptions.columns, resolvedOptions.state?.columnOrder],
-    (columnDefs) => {
-      const allColumns: Column<TData, any>[] = []
-      const allFlatColumns: Column<TData, any>[] = []
+    (columnDefs: ColumnDef<TData>[]) => {
+      const allColumns: Column<TData, unknown>[] = []
+      const allFlatColumns: Column<TData, unknown>[] = []
+      const columnMap = new Map<string, Column<TData, unknown>>()
 
       const processColumnDef = (
-        colDef: ColumnDef<TData, any>,
+        colDef: ColumnDef<TData>,
         depth: number,
-        parent?: Column<TData, any>
-      ): Column<TData, any> => {
+        parent?: Column<TData, unknown>
+      ): Column<TData, unknown> => {
         const column = createColumn(table, colDef, depth, parent)
         allColumns.push(column)
+        columnMap.set(column.id, column)
 
         if ('columns' in colDef && colDef.columns?.length) {
-          column.columns = colDef.columns.map((subDef) =>
-            processColumnDef(subDef as any, depth + 1, column)
+          column.columns = colDef.columns.map((subDef: ColumnDef<TData>) =>
+            processColumnDef(subDef, depth + 1, column)
           )
         } else {
           allFlatColumns.push(column)
@@ -622,13 +683,14 @@ export function createTable<TData extends RowData>(
         return column
       }
 
-      const topLevel = columnDefs.map((def: any) => processColumnDef(def, 0))
+      const topLevel = columnDefs.map((def: ColumnDef<TData>) => processColumnDef(def, 0))
 
       return {
         topLevel,
         allColumns,
         allFlatColumns,
         allLeafColumns: allFlatColumns,
+        columnMap,
       }
     },
     { key: 'processColumns' }
@@ -637,17 +699,18 @@ export function createTable<TData extends RowData>(
   table.getAllColumns = () => processColumns().allColumns
   table.getAllFlatColumns = () => processColumns().allFlatColumns
   table.getAllLeafColumns = () => processColumns().allLeafColumns
-  table.getColumn = (id: string) => processColumns().allColumns.find((c) => c.id === id)
+  // T1-01: O(1) column lookup via Map instead of linear .find()
+  table.getColumn = (id: string) => processColumns().columnMap.get(id)
 
   // Visible columns with ordering and pinning
   table.getVisibleFlatColumns = memo(
     () => [table.getAllLeafColumns(), table.getState().columnVisibility, table.getState().columnOrder],
-    (allLeaf: Column<TData, any>[]) => {
-      let cols = allLeaf.filter((col: Column<TData, any>) => col.getIsVisible())
+    (allLeaf: Column<TData, unknown>[]) => {
+      let cols = allLeaf.filter((col) => col.getIsVisible())
       const order = table.getState().columnOrder
       if (order.length) {
         const orderMap = new Map(order.map((id: string, i: number) => [id, i]))
-        cols = cols.sort((a: Column<TData, any>, b: Column<TData, any>) => {
+        cols = cols.sort((a, b) => {
           const ai = orderMap.get(a.id) ?? Infinity
           const bi = orderMap.get(b.id) ?? Infinity
           return ai - bi
@@ -662,28 +725,28 @@ export function createTable<TData extends RowData>(
 
   table.getLeftVisibleLeafColumns = memo(
     () => [table.getVisibleFlatColumns(), table.getState().columnPinning],
-    (visible: Column<TData, any>[]) => {
+    (visible: Column<TData, unknown>[]) => {
       const pinned = table.getState().columnPinning.left ?? []
-      return visible.filter((col: Column<TData, any>) => pinned.includes(col.id))
+      return visible.filter((col) => pinned.includes(col.id))
     },
     { key: 'getLeftVisibleLeafColumns' }
   )
 
   table.getRightVisibleLeafColumns = memo(
     () => [table.getVisibleFlatColumns(), table.getState().columnPinning],
-    (visible: Column<TData, any>[]) => {
+    (visible: Column<TData, unknown>[]) => {
       const pinned = table.getState().columnPinning.right ?? []
-      return visible.filter((col: Column<TData, any>) => pinned.includes(col.id))
+      return visible.filter((col) => pinned.includes(col.id))
     },
     { key: 'getRightVisibleLeafColumns' }
   )
 
   table.getCenterVisibleLeafColumns = memo(
     () => [table.getVisibleFlatColumns(), table.getState().columnPinning],
-    (visible: Column<TData, any>[]) => {
+    (visible: Column<TData, unknown>[]) => {
       const left = new Set(table.getState().columnPinning.left ?? [])
       const right = new Set(table.getState().columnPinning.right ?? [])
-      return visible.filter((col: Column<TData, any>) => !left.has(col.id) && !right.has(col.id))
+      return visible.filter((col) => !left.has(col.id) && !right.has(col.id))
     },
     { key: 'getCenterVisibleLeafColumns' }
   )
@@ -705,7 +768,7 @@ export function createTable<TData extends RowData>(
       if (leftIds.size === 0) return []
       return groups.map((group: HeaderGroup<TData>) => ({
         ...group,
-        headers: group.headers.filter((h: any) => leftIds.has(h.column.id)),
+        headers: group.headers.filter((h: Header<TData, unknown>) => leftIds.has(h.column.id)),
       }))
     },
     { key: 'getLeftHeaderGroups' }
@@ -718,7 +781,7 @@ export function createTable<TData extends RowData>(
       if (rightIds.size === 0) return []
       return groups.map((group: HeaderGroup<TData>) => ({
         ...group,
-        headers: group.headers.filter((h: any) => rightIds.has(h.column.id)),
+        headers: group.headers.filter((h: Header<TData, unknown>) => rightIds.has(h.column.id)),
       }))
     },
     { key: 'getRightHeaderGroups' }
@@ -732,7 +795,7 @@ export function createTable<TData extends RowData>(
       return groups.map((group: HeaderGroup<TData>) => ({
         ...group,
         headers: group.headers.filter(
-          (h: any) => !leftIds.has(h.column.id) && !rightIds.has(h.column.id)
+          (h: Header<TData, unknown>) => !leftIds.has(h.column.id) && !rightIds.has(h.column.id)
         ),
       }))
     },
@@ -748,14 +811,34 @@ export function createTable<TData extends RowData>(
   // Row Model Pipeline
   // ---------------------------------------------------------------------------
 
-  // 1. Core Row Model — raw data → Row[]
+  // 1. Core Row Model — raw data -> Row[]
   table.getCoreRowModel = memo(
     () => [resolvedOptions.data],
     (data: TData[]) => {
-      const rows: Row<TData>[] = data.map((original: TData, index: number) => {
-        const id = resolvedOptions.getRowId
-          ? resolvedOptions.getRowId(original, index)
-          : String(index)
+      // T1-05: guard against null/undefined data
+      const safeData = data ?? []
+
+      // T1-10: Large dataset warning
+      if (safeData.length > 10_000 && !resolvedOptions.enableVirtualization && !_largeDatasetWarned) {
+        _largeDatasetWarned = true
+        console.warn(
+          `Yable: Rendering ${safeData.length} rows without virtualization. Consider enabling virtualization for better performance.`
+        )
+      }
+
+      const rows: Row<TData>[] = safeData.map((original: TData, index: number) => {
+        let id: string
+        if (resolvedOptions.getRowId) {
+          // T1-09: Wrap user callback in try-catch
+          try {
+            id = resolvedOptions.getRowId(original, index)
+          } catch (err) {
+            console.error(`[yable] getRowId threw for row at index ${index}:`, err)
+            id = String(index)
+          }
+        } else {
+          id = String(index)
+        }
 
         return createRow(table, id, original, index, 0)
       })
@@ -789,18 +872,28 @@ export function createTable<TData extends RowData>(
 
       // Apply column filters
       for (const filter of columnFilters) {
+        // T1-05: Skip invalid column IDs silently
         const column = table.getColumn(filter.id)
         if (!column) continue
 
         filtered = filtered.filter((row: Row<TData>) => {
-          const value = row.getValue(filter.id)
           const filterFn = column.getFilterFn()
 
           if (filterFn) {
-            return filterFn(row, filter.id, filter.value, () => {})
+            // T1-09: Wrap user-provided filterFn in try-catch
+            try {
+              return filterFn(row, filter.id, filter.value, () => {})
+            } catch (err) {
+              console.error(
+                `[yable] filterFn threw for column "${filter.id}", row "${row.id}":`,
+                err
+              )
+              return true // safe default: include the row
+            }
           }
 
           // Default string include filter
+          const value = row.getValue(filter.id)
           return String(value ?? '')
             .toLowerCase()
             .includes(String(filter.value ?? '').toLowerCase())
@@ -811,7 +904,7 @@ export function createTable<TData extends RowData>(
       if (globalFilter) {
         const searchStr = String(globalFilter).toLowerCase()
         filtered = filtered.filter((row: Row<TData>) => {
-          return table.getAllLeafColumns().some((col: Column<TData, any>) => {
+          return table.getAllLeafColumns().some((col) => {
             const value = row.getValue(col.id)
             return String(value ?? '').toLowerCase().includes(searchStr)
           })
@@ -842,21 +935,30 @@ export function createTable<TData extends RowData>(
 
       const sorted = [...filteredModel.rows].sort((a, b) => {
         for (const sort of sorting) {
+          // T1-05: Skip invalid column IDs silently
           const column = table.getColumn(sort.id)
           if (!column) continue
-
-          const aVal = a.getValue(sort.id)
-          const bVal = b.getValue(sort.id)
 
           // Custom sort function
           const sortFn = column.getSortingFn()
           if (sortFn) {
-            const result = sortFn(a, b, sort.id)
-            if (result !== 0) return sort.desc ? -result : result
-            continue
+            // T1-09: Wrap user-provided sortFn in try-catch
+            try {
+              const result = sortFn(a, b, sort.id)
+              if (result !== 0) return sort.desc ? -result : result
+              continue
+            } catch (err) {
+              console.error(
+                `[yable] sortingFn threw for column "${sort.id}":`,
+                err
+              )
+              continue // safe default: treat as equal
+            }
           }
 
           // Default comparison
+          const aVal = a.getValue(sort.id)
+          const bVal = b.getValue(sort.id)
           const result = defaultCompare(aVal, bVal)
           if (result !== 0) return sort.desc ? -result : result
         }
