@@ -58,8 +58,14 @@ export type {
   TableHeaderCellProps,
 } from './types'
 
-// Hook
+// Hooks
 export { useTable } from './useTable'
+export { useVirtualization } from './hooks/useVirtualization'
+export type {
+  VirtualRow,
+  UseVirtualizationOptions,
+  UseVirtualizationResult,
+} from './hooks/useVirtualization'
 
 // Context
 export { useTableContext, TableProvider } from './context'
@@ -73,6 +79,7 @@ export { TableFooter } from './components/TableFooter'
 export { Pagination } from './components/Pagination'
 export { GlobalFilter } from './components/GlobalFilter'
 export { SortIndicator } from './components/SortIndicator'
+export { ErrorBoundary, CellErrorBoundary } from './components/ErrorBoundary'
 
 // Form components
 export { CellInput } from './form/CellInput'

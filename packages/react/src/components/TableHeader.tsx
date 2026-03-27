@@ -1,6 +1,6 @@
 // @yable/react — Table Header Component
 
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import type { RowData, Table, Header as HeaderType } from '@yable/core'
 import { SortIndicator } from './SortIndicator'
 
@@ -44,22 +44,39 @@ function HeaderCell<TData extends RowData>({
         ? (column.columnDef.header as Function)(header.getContext())
         : column.columnDef.header ?? header.id
 
-  const style: React.CSSProperties = {
-    width: header.getSize(),
-    minWidth: column.columnDef.minSize,
-    maxWidth: column.columnDef.maxSize,
-  }
-
-  // Column pinning offset
-  const pinned = column.getIsPinned()
-  if (pinned) {
-    style.position = 'sticky'
-    if (pinned === 'left') {
-      style.left = header.getStart('left')
-    } else {
-      style.right = header.getStart('right')
+  const style = useMemo((): React.CSSProperties => {
+    const s: React.CSSProperties = {
+      width: header.getSize(),
+      minWidth: column.columnDef.minSize,
+      maxWidth: column.columnDef.maxSize,
     }
-  }
+
+    const pinned = column.getIsPinned()
+    if (pinned) {
+      s.position = 'sticky'
+      if (pinned === 'left') {
+        s.left = header.getStart('left')
+      } else {
+        s.right = header.getStart('right')
+      }
+    }
+
+    return s
+  }, [header, column])
+
+  const pinned = column.getIsPinned()
+
+  const resizeHandler = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      const handler = header.getResizeHandler()
+      if (handler) (handler as any)(e)
+    },
+    [header]
+  )
+
+  const handleResizeClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+  }, [])
 
   return (
     <th
@@ -94,9 +111,9 @@ function HeaderCell<TData extends RowData>({
         <div
           className="yable-resize-handle"
           data-resizing={column.getIsResizing() || undefined}
-          onMouseDown={header.getResizeHandler() as any}
-          onTouchStart={header.getResizeHandler() as any}
-          onClick={(e) => e.stopPropagation()}
+          onMouseDown={resizeHandler}
+          onTouchStart={resizeHandler}
+          onClick={handleResizeClick}
         />
       )}
     </th>
