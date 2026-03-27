@@ -2,8 +2,7 @@
 // UI for configuring pivot table fields: dragging fields between
 // rows, columns, and values zones.
 
-import React, { useState, useCallback } from 'react'
-import type { RowData, Column } from '@yable/core'
+import { useState, useCallback } from 'react'
 
 // ---------------------------------------------------------------------------
 // Types

@@ -38,7 +38,7 @@ export function useCellFlash<TData extends RowData>(
         enableCellFlash: (col.columnDef as any).enableCellFlash ?? false,
       }))
 
-      const getRowId = table.options.getRowId ?? ((row: TData, i: number) => String(i))
+      const getRowId = table.options.getRowId ?? ((_row: TData, i: number) => String(i))
       const newFlashes = detectCellChanges(prevData, currentData, columns, getRowId)
 
       if (newFlashes.size > 0) {

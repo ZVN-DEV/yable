@@ -99,7 +99,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "/Users/macbookpro-kirby/Desktop/Coding/table",
+    "outputFileTracingRoot": "/Users/macbookpro-kirby/Desktop/Coding/ZVN/table",
     "experimental": {
       "useSkewCookie": false,
       "cacheLife": {
@@ -294,10 +294,10 @@
       "@yable/themes"
     ],
     "turbopack": {
-      "root": "/Users/macbookpro-kirby/Desktop/Coding/table"
+      "root": "/Users/macbookpro-kirby/Desktop/Coding/ZVN/table"
     }
   },
-  "appDir": "/Users/macbookpro-kirby/Desktop/Coding/table/examples/react-demo",
+  "appDir": "/Users/macbookpro-kirby/Desktop/Coding/ZVN/table/examples/react-demo",
   "relativeAppDir": "examples/react-demo",
   "files": [
     ".next/routes-manifest.json",

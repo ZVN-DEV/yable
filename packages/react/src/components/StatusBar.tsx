@@ -1,7 +1,6 @@
 // @yable/react — Status Bar Component
 // Footer bar showing: total row count, selected count, filtered count, aggregations.
 
-import React from 'react'
 import type { RowData, Table } from '@yable/core'
 import type { StatusBarPanelConfig } from '../types'
 import { StatusBarPanelComponent } from './StatusBarPanel'

@@ -1,7 +1,6 @@
 // @yable/react — Sidebar / Tool Panels Component
 // Slides in from right with tab interface for Columns and Filters panels.
 
-import React from 'react'
 import type { RowData, Table } from '@yable/core'
 import { ColumnsPanel } from './ColumnsPanel'
 import { FiltersPanel } from './FiltersPanel'

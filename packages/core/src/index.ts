@@ -89,6 +89,22 @@ export type {
   FilterChangeEvent,
   PageChangeEvent,
   StateChangeEvent,
+  RowEditEvent,
+  RowEditCommitEvent,
+  CellFlashEvent,
+  RowDragEvent,
+  RowDragEndEvent,
+  RowReorderEvent,
+  ClipboardOptions,
+
+  // Feature state types
+  UndoRedoState,
+  UndoAction,
+  FillHandleState,
+  FormulaState,
+  RowDragState,
+  PivotState,
+  PivotConfig,
 
   // Export
   ExportOptions,
@@ -154,6 +170,13 @@ export type { BuiltInAggregationFn } from './aggregationFns'
 // ---------------------------------------------------------------------------
 
 export { EventEmitterImpl } from './events/EventEmitter'
+
+// ---------------------------------------------------------------------------
+// Features (re-exports)
+// ---------------------------------------------------------------------------
+
+export { detectCellChanges } from './features/cellFlash'
+export type { CellFlashInfo } from './features/cellFlash'
 
 // ---------------------------------------------------------------------------
 // Locale / i18n

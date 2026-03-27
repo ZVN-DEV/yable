@@ -297,7 +297,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       const parts = key.split('.')
       let value: unknown = row
       for (const part of parts) {
-        if (value == null) return undefined
+        if (value == null) return undefined as unknown as TValue
         value = (value as Record<string, unknown>)[part]
       }
       return value as TValue

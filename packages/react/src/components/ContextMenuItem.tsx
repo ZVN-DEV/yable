@@ -1,6 +1,6 @@
 // @yable/react — Context Menu Item Component
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 
 export interface ContextMenuItemDef {
   id: string

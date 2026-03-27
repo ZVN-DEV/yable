@@ -128,13 +128,13 @@ export function FlashCell({
   // SECURITY: Validate custom color props before setting as CSS custom properties
   if (flash.direction === 'up' && upColor) {
     const validated = safeColor(upColor, DEFAULT_UP_COLOR, 'upColor')
-    if (validated) style['--yable-flash-up-color' as any] = validated
+    if (validated) (style as Record<string, string>)['--yable-flash-up-color'] = validated
   } else if (flash.direction === 'down' && downColor) {
     const validated = safeColor(downColor, DEFAULT_DOWN_COLOR, 'downColor')
-    if (validated) style['--yable-flash-down-color' as any] = validated
+    if (validated) (style as Record<string, string>)['--yable-flash-down-color'] = validated
   } else if (flash.direction === 'change' && changeColor) {
     const validated = safeColor(changeColor, DEFAULT_CHANGE_COLOR, 'changeColor')
-    if (validated) style['--yable-flash-change-color' as any] = validated
+    if (validated) (style as Record<string, string>)['--yable-flash-change-color'] = validated
   }
 
   return (

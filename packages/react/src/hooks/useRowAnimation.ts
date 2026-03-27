@@ -2,7 +2,7 @@
 // Animated transitions on sort/filter/group changes.
 // Tracks row positions and applies CSS transform transitions.
 
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useCallback } from 'react'
 import type { RowData, Table } from '@yable/core'
 
 export interface UseRowAnimationOptions {
@@ -20,7 +20,7 @@ interface RowPosition {
 }
 
 export function useRowAnimation<TData extends RowData>(
-  table: Table<TData>,
+  _table: Table<TData>,
   options: UseRowAnimationOptions = {}
 ) {
   const { enabled = false, duration = 250, easing = 'ease' } = options

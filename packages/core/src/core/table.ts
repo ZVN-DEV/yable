@@ -66,22 +66,23 @@ const getInitialState = (): TableState => ({
   rowPinning: { top: [], bottom: [] },
   grouping: [],
   editing: { activeCell: undefined, pendingValues: {} },
+  undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
+  fillHandle: { isDragging: false },
+  formulas: { enabled: false, formulas: {}, computedValues: {}, errors: {} },
+  rowDrag: { draggingRowId: null, overRowId: null, dropPosition: null },
+  pivot: {
+    enabled: false,
+    config: { rowFields: [], columnFields: [], valueFields: [] },
+    expandedRowGroups: {},
+    expandedColumnGroups: {},
+  },
 })
 
 // ---------------------------------------------------------------------------
 // Locale support on Table interface (augmentation)
 // ---------------------------------------------------------------------------
 
-/** Extended table with locale support */
-interface TableWithLocale<TData extends RowData> extends Table<TData> {
-  getLocaleString: (key: keyof YableLocale) => string
-}
-
-// ---------------------------------------------------------------------------
-// Large-row-count warning (fires at most once per table instance)
-// ---------------------------------------------------------------------------
-
-let _maxRowsWarned = false
+// (locale support is added directly to the table instance below)
 
 // ---------------------------------------------------------------------------
 // createTable
@@ -151,7 +152,8 @@ export function createTable<TData extends RowData>(
   // Table Instance
   // ---------------------------------------------------------------------------
 
-  const table = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- built up incrementally, typed on return
+  const table: any = {
     options: resolvedOptions,
 
     // State
@@ -279,15 +281,15 @@ export function createTable<TData extends RowData>(
     getSelectedRowModel: (): RowModel<TData> => {
       const selection = table.getState().rowSelection
       const rowModel = table.getRowModel()
-      const rows = rowModel.flatRows.filter((row) => selection[row.id])
-      return { rows, flatRows: rows, rowsById: Object.fromEntries(rows.map((r) => [r.id, r])) }
+      const rows = rowModel.flatRows.filter((row: Row<TData>) => selection[row.id])
+      return { rows, flatRows: rows, rowsById: Object.fromEntries(rows.map((r: Row<TData>) => [r.id, r])) }
     },
     getFilteredSelectedRowModel: (): RowModel<TData> => table.getSelectedRowModel(),
     getGroupedSelectedRowModel: (): RowModel<TData> => table.getSelectedRowModel(),
     getIsAllRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
-      return rowModel.flatRows.length > 0 && rowModel.flatRows.every((row) => selection[row.id])
+      return rowModel.flatRows.length > 0 && rowModel.flatRows.every((row: Row<TData>) => selection[row.id])
     },
     getIsSomeRowsSelected: (): boolean => {
       const selection = table.getState().rowSelection
@@ -296,12 +298,12 @@ export function createTable<TData extends RowData>(
     getIsAllPageRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
-      return rowModel.rows.length > 0 && rowModel.rows.every((row) => selection[row.id])
+      return rowModel.rows.length > 0 && rowModel.rows.every((row: Row<TData>) => selection[row.id])
     },
     getIsSomePageRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
-      return rowModel.rows.some((row) => selection[row.id]) && !table.getIsAllPageRowsSelected()
+      return rowModel.rows.some((row: Row<TData>) => selection[row.id]) && !table.getIsAllPageRowsSelected()
     },
     toggleAllRowsSelected: (value?: boolean) => {
       const rowModel = table.getPrePaginationRowModel()
@@ -355,10 +357,10 @@ export function createTable<TData extends RowData>(
       })
     },
     getIsAllColumnsVisible: (): boolean => {
-      return table.getAllLeafColumns().every((col) => col.getIsVisible())
+      return table.getAllLeafColumns().every((col: Column<TData, unknown>) => col.getIsVisible())
     },
     getIsSomeColumnsVisible: (): boolean => {
-      return table.getAllLeafColumns().some((col) => col.getIsVisible())
+      return table.getAllLeafColumns().some((col: Column<TData, unknown>) => col.getIsVisible())
     },
 
     // Column Order API
@@ -388,16 +390,16 @@ export function createTable<TData extends RowData>(
       table.setColumnSizing(defaultState ? {} : table.getState().columnSizing)
     },
     getTotalSize: (): number => {
-      return table.getVisibleFlatColumns().reduce((sum, col) => sum + col.getSize(), 0)
+      return table.getVisibleFlatColumns().reduce((sum: number, col: Column<TData, unknown>) => sum + col.getSize(), 0)
     },
     getLeftTotalSize: (): number => {
-      return table.getLeftVisibleLeafColumns().reduce((sum, col) => sum + col.getSize(), 0)
+      return table.getLeftVisibleLeafColumns().reduce((sum: number, col: Column<TData, unknown>) => sum + col.getSize(), 0)
     },
     getRightTotalSize: (): number => {
-      return table.getRightVisibleLeafColumns().reduce((sum, col) => sum + col.getSize(), 0)
+      return table.getRightVisibleLeafColumns().reduce((sum: number, col: Column<TData, unknown>) => sum + col.getSize(), 0)
     },
     getCenterTotalSize: (): number => {
-      return table.getCenterVisibleLeafColumns().reduce((sum, col) => sum + col.getSize(), 0)
+      return table.getCenterVisibleLeafColumns().reduce((sum: number, col: Column<TData, unknown>) => sum + col.getSize(), 0)
     },
 
     // Expanding API
@@ -421,16 +423,16 @@ export function createTable<TData extends RowData>(
       }
     },
     getCanSomeRowsExpand: (): boolean => {
-      return table.getPreExpandedRowModel().flatRows.some((r) => r.getCanExpand())
+      return table.getPreExpandedRowModel().flatRows.some((r: Row<TData>) => r.getCanExpand())
     },
     getIsAllRowsExpanded: (): boolean => {
       const rowModel = table.getPreExpandedRowModel()
       const expanded = table.getState().expanded
       if (expanded === true) return true
-      const expandableRows = rowModel.flatRows.filter((r) => r.subRows.length > 0)
+      const expandableRows = rowModel.flatRows.filter((r: Row<TData>) => r.subRows.length > 0)
       if (expandableRows.length === 0) return false
       const expandedRecord = expanded as Record<string, boolean>
-      return expandableRows.every((r) => expandedRecord[r.id])
+      return expandableRows.every((r: Row<TData>) => expandedRecord[r.id])
     },
     getIsSomeRowsExpanded: (): boolean => {
       const expanded = table.getState().expanded
@@ -463,21 +465,21 @@ export function createTable<TData extends RowData>(
       const pinning = table.getState().rowPinning
       const rowModel = table.getCoreRowModel()
       return (pinning.top ?? [])
-        .map((id) => rowModel.rowsById[id])
-        .filter((row): row is Row<TData> => row !== undefined)
+        .map((id: string) => rowModel.rowsById[id])
+        .filter((row: Row<TData> | undefined): row is Row<TData> => row !== undefined)
     },
     getBottomRows: (): Row<TData>[] => {
       const pinning = table.getState().rowPinning
       const rowModel = table.getCoreRowModel()
       return (pinning.bottom ?? [])
-        .map((id) => rowModel.rowsById[id])
-        .filter((row): row is Row<TData> => row !== undefined)
+        .map((id: string) => rowModel.rowsById[id])
+        .filter((row: Row<TData> | undefined): row is Row<TData> => row !== undefined)
     },
     getCenterRows: (): Row<TData>[] => {
       const pinning = table.getState().rowPinning
       const rowModel = table.getRowModel()
       const pinned = new Set([...(pinning.top ?? []), ...(pinning.bottom ?? [])])
-      return rowModel.rows.filter((row) => !pinned.has(row.id))
+      return rowModel.rows.filter((row: Row<TData>) => !pinned.has(row.id))
     },
 
     // Grouping API
@@ -575,11 +577,11 @@ export function createTable<TData extends RowData>(
     exportData: (opts?: ExportOptions): string => {
       const rowModel = opts?.allRows ? table.getPrePaginationRowModel() : table.getRowModel()
       const columns = opts?.columns
-        ? table.getAllLeafColumns().filter((col) => opts.columns!.includes(col.id))
+        ? table.getAllLeafColumns().filter((col: Column<TData, unknown>) => opts.columns!.includes(col.id))
         : table.getVisibleLeafColumns()
 
       if (opts?.format === 'json' || !opts?.format) {
-        const data = rowModel.rows.map((row) => {
+        const data = rowModel.rows.map((row: Row<TData>) => {
           const obj: Record<string, unknown> = {}
           for (const col of columns) {
             obj[col.id] = row.getValue(col.id)
@@ -590,13 +592,13 @@ export function createTable<TData extends RowData>(
       }
 
       if (opts?.format === 'csv') {
-        const headers = columns.map((col) => {
+        const headers = columns.map((col: Column<TData, unknown>) => {
           const header = typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id
           return escapeCSV(header)
         })
 
-        const rows = rowModel.rows.map((row) =>
-          columns.map((col) => escapeCSV(String(row.getValue(col.id) ?? ''))).join(',')
+        const rows = rowModel.rows.map((row: Row<TData>) =>
+          columns.map((col: Column<TData, unknown>) => escapeCSV(String(row.getValue(col.id) ?? ''))).join(',')
         )
 
         return [headers.join(','), ...rows].join('\n')
@@ -612,29 +614,23 @@ export function createTable<TData extends RowData>(
     events,
 
     // T1-06: Locale support
-    getLocaleString: (key: keyof YableLocale): string => {
+    getLocaleString: (key: string): string => {
       // Check for per-table locale option first
       const tableLocale = (resolvedOptions as TableOptionsResolved<TData> & { locale?: Partial<YableLocale> }).locale
       if (tableLocale && key in tableLocale) {
-        return tableLocale[key] as string
+        return (tableLocale as Record<string, string>)[key]
       }
       // Fall back to global default locale
-      return getDefaultLocale()[key]
+      return (getDefaultLocale() as unknown as Record<string, string>)[key] ?? key
     },
-  } as Table<TData> & { getLocaleString: (key: keyof YableLocale) => string }
+  }
 
   // ---------------------------------------------------------------------------
   // Wire up state updaters to use table instance
   // ---------------------------------------------------------------------------
 
-  const tableInstance = table as Table<TData> & {
-    setState: (updater: Updater<TableState>) => void
-    getState: () => TableState
-    options: TableOptionsResolved<TData>
-  }
-
   const wireUpdater = <V>(key: keyof TableState) => {
-    return makeStateUpdater(key, tableInstance) as (updater: Updater<V>) => void
+    return makeStateUpdater(key, table) as (updater: Updater<V>) => void
   }
 
   table.setSorting = wireUpdater<SortingState>('sorting')
@@ -706,13 +702,13 @@ export function createTable<TData extends RowData>(
   table.getVisibleFlatColumns = memo(
     () => [table.getAllLeafColumns(), table.getState().columnVisibility, table.getState().columnOrder],
     (allLeaf: Column<TData, unknown>[]) => {
-      let cols = allLeaf.filter((col) => col.getIsVisible())
+      let cols = allLeaf.filter((col: Column<TData, unknown>) => col.getIsVisible())
       const order = table.getState().columnOrder
       if (order.length) {
-        const orderMap = new Map(order.map((id: string, i: number) => [id, i]))
-        cols = cols.sort((a, b) => {
-          const ai = orderMap.get(a.id) ?? Infinity
-          const bi = orderMap.get(b.id) ?? Infinity
+        const orderMap = new Map<string, number>(order.map((id: string, i: number) => [id, i]))
+        cols = cols.sort((a: Column<TData, unknown>, b: Column<TData, unknown>) => {
+          const ai: number = orderMap.get(a.id) ?? Infinity
+          const bi: number = orderMap.get(b.id) ?? Infinity
           return ai - bi
         })
       }
@@ -904,7 +900,7 @@ export function createTable<TData extends RowData>(
       if (globalFilter) {
         const searchStr = String(globalFilter).toLowerCase()
         filtered = filtered.filter((row: Row<TData>) => {
-          return table.getAllLeafColumns().some((col) => {
+          return table.getAllLeafColumns().some((col: Column<TData, unknown>) => {
             const value = row.getValue(col.id)
             return String(value ?? '').toLowerCase().includes(searchStr)
           })
@@ -1016,7 +1012,7 @@ export function createTable<TData extends RowData>(
   table.getPreExpandedRowModel = table.getSortedRowModel
   table.getPreGroupedRowModel = table.getFilteredRowModel
 
-  return table
+  return table as Table<TData>
 }
 
 // ---------------------------------------------------------------------------

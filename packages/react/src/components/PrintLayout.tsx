@@ -20,7 +20,6 @@ export function PrintLayout<TData extends RowData>({
 }: PrintLayoutProps<TData>) {
   // Get all rows (bypass pagination)
   const allRows = table.getPrePaginationRowModel().rows
-  const columns = table.getVisibleLeafColumns()
   const headerGroups = table.getHeaderGroups()
 
   return (

@@ -1,7 +1,6 @@
 // @yable/react — Filters Panel Component
 // Summary of active filters with edit/remove capabilities.
 
-import React from 'react'
 import type { RowData, Table } from '@yable/core'
 
 interface FiltersPanelProps<TData extends RowData> {
