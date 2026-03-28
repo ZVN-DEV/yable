@@ -1,6 +1,7 @@
 // @yable/react — Print Layout Component
 // Renders a print-optimized version of the table that removes
 // sticky positioning, virtualization, and shows all rows.
+// Includes page header, timestamp, row count summary, and page-break hints.
 
 import React from 'react'
 import type { RowData, Table } from '@yable/core'
@@ -21,24 +22,33 @@ export function PrintLayout<TData extends RowData>({
   // Get all rows (bypass pagination)
   const allRows = table.getPrePaginationRowModel().rows
   const headerGroups = table.getHeaderGroups()
+  const timestamp = new Date().toLocaleString()
 
   return (
     <div className="yable-print-layout">
-      {title && (
+      {/* Print header with title and metadata */}
+      {(title || showTimestamp) && (
         <div className="yable-print-header">
-          <h2 className="yable-print-title">{title}</h2>
+          {title && <h2 className="yable-print-title">{title}</h2>}
           {showTimestamp && (
             <span className="yable-print-timestamp">
-              {new Date().toLocaleString()}
+              Printed: {timestamp}
             </span>
           )}
         </div>
       )}
 
+      {/* Summary line before the table */}
+      <div className="yable-print-summary">
+        <span className="yable-print-summary-text">
+          {allRows.length.toLocaleString()} row{allRows.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
       <table className="yable-print-table">
         <thead>
           {headerGroups.map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <tr key={headerGroup.id} className="yable-print-thead-row">
               {headerGroup.headers.map((header) => {
                 const headerContent = header.isPlaceholder
                   ? null
@@ -47,7 +57,7 @@ export function PrintLayout<TData extends RowData>({
                     : header.column.columnDef.header ?? header.id
 
                 return (
-                  <th key={header.id} colSpan={header.colSpan}>
+                  <th key={header.id} colSpan={header.colSpan} className="yable-print-th">
                     {headerContent}
                   </th>
                 )
@@ -56,8 +66,11 @@ export function PrintLayout<TData extends RowData>({
           ))}
         </thead>
         <tbody>
-          {allRows.map((row) => (
-            <tr key={row.id}>
+          {allRows.map((row, index) => (
+            <tr
+              key={row.id}
+              className={`yable-print-tr${index % 2 === 1 ? ' yable-print-tr--alt' : ''}`}
+            >
               {row.getVisibleCells().map((cell) => {
                 const cellDef = cell.column.columnDef.cell
                 const content = typeof cellDef === 'function'
@@ -65,7 +78,7 @@ export function PrintLayout<TData extends RowData>({
                   : cell.renderValue()
 
                 return (
-                  <td key={cell.id}>
+                  <td key={cell.id} className="yable-print-td">
                     {content as React.ReactNode}
                   </td>
                 )
@@ -75,8 +88,14 @@ export function PrintLayout<TData extends RowData>({
         </tbody>
       </table>
 
+      {/* Print footer */}
       <div className="yable-print-footer">
-        <span>Total rows: {allRows.length}</span>
+        <span className="yable-print-footer-count">
+          Total: {allRows.length.toLocaleString()} row{allRows.length !== 1 ? 's' : ''}
+        </span>
+        {showTimestamp && (
+          <span className="yable-print-footer-timestamp">{timestamp}</span>
+        )}
       </div>
     </div>
   )

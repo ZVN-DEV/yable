@@ -1,4 +1,5 @@
 // @yable/react — Pagination Component
+// Polished page navigation with SVG icons, page size selector, and row info.
 
 import type { RowData, Table } from '@yable/core'
 
@@ -14,6 +15,53 @@ interface PaginationProps<TData extends RowData> {
   showFirstLast?: boolean
 }
 
+/** Chevron-left icon for Previous */
+function ChevronLeftIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M8.5 3L4.5 7L8.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+/** Chevron-right icon for Next */
+function ChevronRightIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M5.5 3L9.5 7L5.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+/** Double-chevron-left icon for First Page */
+function ChevronFirstIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M9.5 3L5.5 7L9.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4.5 3V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Double-chevron-right icon for Last Page */
+function ChevronLastIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M4.5 3L8.5 7L4.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9.5 3V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Small chevron for the page size select dropdown */
+function SelectChevronIcon() {
+  return (
+    <svg className="yable-pagination-select-icon" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+      <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function Pagination<TData extends RowData>({
   table,
   showPageSize = true,
@@ -26,69 +74,86 @@ export function Pagination<TData extends RowData>({
   const totalRows = table.getPrePaginationRowModel().rows.length
   const from = pageIndex * pageSize + 1
   const to = Math.min((pageIndex + 1) * pageSize, totalRows)
+  const canPrev = table.getCanPreviousPage()
+  const canNext = table.getCanNextPage()
 
   return (
-    <div className="yable-pagination">
+    <nav className="yable-pagination" role="navigation" aria-label="Table pagination">
+      {/* Row info and page size selector */}
       {showInfo && (
         <div className="yable-pagination-info">
-          <span>
+          <span className="yable-pagination-info-text">
             {totalRows > 0
               ? `${from}\u2013${to} of ${totalRows}`
               : 'No results'}
           </span>
           {showPageSize && (
-            <select
-              className="yable-pagination-select"
-              value={pageSize}
-              onChange={(e) => {
-                table.setPageSize(Number(e.target.value))
-              }}
-            >
-              {pageSizes.map((size) => (
-                <option key={size} value={size}>
-                  {size} rows
-                </option>
-              ))}
-            </select>
+            <div className="yable-pagination-select-wrapper">
+              <select
+                className="yable-pagination-select"
+                value={pageSize}
+                onChange={(e) => {
+                  table.setPageSize(Number(e.target.value))
+                }}
+                aria-label="Rows per page"
+              >
+                {pageSizes.map((size) => (
+                  <option key={size} value={size}>
+                    {size} rows
+                  </option>
+                ))}
+              </select>
+              <SelectChevronIcon />
+            </div>
           )}
         </div>
       )}
 
+      {/* Page navigation buttons */}
       <div className="yable-pagination-pages">
         {showFirstLast && (
           <button
-            className="yable-pagination-btn"
+            type="button"
+            className="yable-pagination-btn yable-pagination-btn--nav"
             onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
+            disabled={!canPrev}
             aria-label="First page"
+            title="First page"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M9 3L5 7L9 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M4 3V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            <ChevronFirstIcon />
           </button>
         )}
 
         <button
-          className="yable-pagination-btn"
+          type="button"
+          className="yable-pagination-btn yable-pagination-btn--nav"
           onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
+          disabled={!canPrev}
           aria-label="Previous page"
+          title="Previous page"
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M8.5 3L4.5 7L8.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ChevronLeftIcon />
         </button>
 
+        {/* Page number buttons with ellipsis */}
         {getPageNumbers(pageIndex, pageCount).map((page, i) =>
           page === -1 ? (
-            <span key={`ellipsis-${i}`} className="yable-pagination-btn" style={{ cursor: 'default', opacity: 0.5 }}>
-              ...
+            <span
+              key={`ellipsis-${i}`}
+              className="yable-pagination-ellipsis"
+              aria-hidden="true"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="3" cy="7" r="1" fill="currentColor" />
+                <circle cx="7" cy="7" r="1" fill="currentColor" />
+                <circle cx="11" cy="7" r="1" fill="currentColor" />
+              </svg>
             </span>
           ) : (
             <button
+              type="button"
               key={page}
-              className="yable-pagination-btn"
+              className={`yable-pagination-btn yable-pagination-btn--page${page === pageIndex ? ' yable-pagination-btn--active' : ''}`}
               data-active={page === pageIndex ? 'true' : undefined}
               onClick={() => table.setPageIndex(page)}
               aria-label={`Page ${page + 1}`}
@@ -100,31 +165,30 @@ export function Pagination<TData extends RowData>({
         )}
 
         <button
-          className="yable-pagination-btn"
+          type="button"
+          className="yable-pagination-btn yable-pagination-btn--nav"
           onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
+          disabled={!canNext}
           aria-label="Next page"
+          title="Next page"
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M5.5 3L9.5 7L5.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ChevronRightIcon />
         </button>
 
         {showFirstLast && (
           <button
-            className="yable-pagination-btn"
+            type="button"
+            className="yable-pagination-btn yable-pagination-btn--nav"
             onClick={() => table.setPageIndex(pageCount - 1)}
-            disabled={!table.getCanNextPage()}
+            disabled={!canNext}
             aria-label="Last page"
+            title="Last page"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M10 3V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            <ChevronLastIcon />
           </button>
         )}
       </div>
-    </div>
+    </nav>
   )
 }
 

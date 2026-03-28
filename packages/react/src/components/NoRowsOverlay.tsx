@@ -1,5 +1,5 @@
 // @yable/react — No Rows Overlay Component
-// Centered message distinguishing "no data" vs "no results" (filtered).
+// Centered message with illustration SVGs, distinguishing "no data" vs "no results" (filtered).
 
 import React from 'react'
 
@@ -16,43 +16,91 @@ export interface NoRowsOverlayProps {
   isFiltered?: boolean
 }
 
-/** Default empty icon — a table/rows illustration */
+/** Default empty icon — an open box illustration */
 function DefaultEmptyIcon() {
   return (
     <svg
       className="yable-overlay-empty-icon"
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
+      width="56"
+      height="56"
+      viewBox="0 0 56 56"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <rect x="6" y="10" width="36" height="28" rx="3" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.35" />
-      <line x1="6" y1="18" x2="42" y2="18" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.25" />
-      <line x1="6" y1="26" x2="42" y2="26" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.15" />
-      <line x1="6" y1="34" x2="42" y2="34" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.1" />
-      <line x1="18" y1="10" x2="18" y2="38" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.12" />
+      {/* Box body */}
+      <path
+        d="M10 22L28 14L46 22V38L28 46L10 38V22Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeOpacity="0.25"
+      />
+      {/* Box top flap */}
+      <path
+        d="M28 14V30"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeOpacity="0.15"
+      />
+      {/* Box middle horizontal */}
+      <path
+        d="M10 22L28 30L46 22"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeOpacity="0.2"
+      />
+      {/* Lid flaps */}
+      <path
+        d="M4 20L28 10L52 20"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeOpacity="0.12"
+      />
     </svg>
   )
 }
 
-/** Default filtered/no-results icon — magnifying glass with X */
+/** Default filtered/no-results icon — magnifying glass with empty result */
 function DefaultFilteredIcon() {
   return (
     <svg
       className="yable-overlay-empty-icon"
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
+      width="56"
+      height="56"
+      viewBox="0 0 56 56"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <circle cx="22" cy="22" r="11" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.35" />
-      <line x1="30" y1="30" x2="40" y2="40" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.35" />
-      <line x1="18" y1="18" x2="26" y2="26" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.3" />
-      <line x1="26" y1="18" x2="18" y2="26" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.3" />
+      {/* Magnifying glass circle */}
+      <circle
+        cx="25"
+        cy="25"
+        r="13"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeOpacity="0.3"
+      />
+      {/* Handle */}
+      <path
+        d="M34 34L46 46"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeOpacity="0.25"
+      />
+      {/* X in center of glass */}
+      <path
+        d="M20.5 20.5L29.5 29.5M29.5 20.5L20.5 29.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeOpacity="0.25"
+      />
     </svg>
   )
 }
@@ -80,7 +128,9 @@ export function NoRowsOverlay({
 
   return (
     <div className="yable-overlay-empty" role="status">
-      {icon}
+      <div className="yable-overlay-empty-icon-wrapper">
+        {icon}
+      </div>
       <div className="yable-overlay-empty-message">
         {emptyMessage ?? defaultMessage}
       </div>

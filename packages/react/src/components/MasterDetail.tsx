@@ -1,5 +1,6 @@
 // @yable/react — Master Detail Component
-// Detail panel container for expanded rows with nested table support.
+// Detail panel container for expanded rows with slide-down animation
+// and proper accessibility semantics.
 
 import React from 'react'
 import type { RowData, Row, Table } from '@yable/core'
@@ -33,16 +34,24 @@ export function MasterDetail<TData extends RowData>({
 
   const classes = [
     'yable-detail-row',
+    'yable-detail-row--animated',
     animationClass,
   ]
     .filter(Boolean)
     .join(' ')
 
   return (
-    <tr className={classes} data-detail-for={row.id}>
-      <td className="yable-detail-cell" colSpan={colSpan}>
+    <tr
+      className={classes}
+      data-detail-for={row.id}
+      role="row"
+      aria-label={`Details for row ${row.id}`}
+    >
+      <td className="yable-detail-cell" colSpan={colSpan} role="cell">
         <div className="yable-detail-panel">
-          {content}
+          <div className="yable-detail-panel-inner">
+            {content}
+          </div>
         </div>
       </td>
     </tr>

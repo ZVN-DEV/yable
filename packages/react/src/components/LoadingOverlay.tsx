@@ -1,5 +1,5 @@
 // @yable/react — Loading Overlay Component
-// Semi-transparent overlay with animated spinner. Covers entire table.
+// Backdrop-blurred overlay with animated spinner and pulse animation.
 
 import React from 'react'
 
@@ -12,6 +12,41 @@ export interface LoadingOverlayProps {
   loadingText?: string
 }
 
+/**
+ * Animated spinner SVG with a track ring and a spinning arc.
+ * Uses CSS animation (keyframe defined in base.css) for the rotation.
+ */
+function Spinner() {
+  return (
+    <div className="yable-overlay-spinner" aria-hidden="true">
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Background track ring */}
+        <circle
+          cx="16"
+          cy="16"
+          r="13"
+          stroke="currentColor"
+          strokeOpacity="0.1"
+          strokeWidth="3"
+        />
+        {/* Spinning arc — 90 degree sweep */}
+        <path
+          d="M16 3a13 13 0 0 1 13 13"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  )
+}
+
 export function LoadingOverlay({
   loading,
   loadingComponent,
@@ -20,34 +55,16 @@ export function LoadingOverlay({
   if (!loading) return null
 
   return (
-    <div className="yable-overlay-loading" role="alert" aria-busy="true" aria-label={loadingText}>
+    <div
+      className="yable-overlay-loading"
+      role="alert"
+      aria-busy="true"
+      aria-label={loadingText}
+    >
       <div className="yable-overlay-loading-content">
         {loadingComponent ?? (
           <>
-            <div className="yable-overlay-spinner" aria-hidden="true">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeOpacity="0.15"
-                  strokeWidth="2.5"
-                />
-                <path
-                  d="M12 2a10 10 0 0 1 10 10"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
+            <Spinner />
             {loadingText && (
               <span className="yable-overlay-loading-text">{loadingText}</span>
             )}

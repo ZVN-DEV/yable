@@ -1,6 +1,7 @@
 // @yable/react — Context Menu Item Component
+// Renders a single menu item with optional icon, shortcut badge, submenu arrow, and hover states.
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 export interface ContextMenuItemDef {
   id: string
@@ -22,13 +23,29 @@ interface ContextMenuItemProps {
 export function ContextMenuItem({ item, onClose }: ContextMenuItemProps) {
   const [submenuOpen, setSubmenuOpen] = useState(false)
   const itemRef = useRef<HTMLDivElement>(null)
+  const submenuRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current)
+  }, [])
 
   if (item.separator) {
     return <div className="yable-ctx-separator" role="separator" />
   }
 
   const hasChildren = item.children && item.children.length > 0
+
+  const classes = [
+    'yable-ctx-item',
+    item.disabled && 'yable-ctx-item--disabled',
+    item.danger && 'yable-ctx-item--danger',
+    hasChildren && 'yable-ctx-item--has-submenu',
+    submenuOpen && 'yable-ctx-item--submenu-open',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const handleClick = () => {
     if (item.disabled) return
@@ -65,19 +82,23 @@ export function ContextMenuItem({ item, onClose }: ContextMenuItemProps) {
   return (
     <div
       ref={itemRef}
-      className={`yable-ctx-item ${item.disabled ? 'yable-ctx-item--disabled' : ''} ${item.danger ? 'yable-ctx-item--danger' : ''}`}
+      className={classes}
       role="menuitem"
       tabIndex={item.disabled ? -1 : 0}
       aria-disabled={item.disabled}
+      aria-haspopup={hasChildren ? 'menu' : undefined}
+      aria-expanded={hasChildren ? submenuOpen : undefined}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {item.icon && <span className="yable-ctx-item-icon">{item.icon}</span>}
+      <span className="yable-ctx-item-icon" aria-hidden="true">
+        {item.icon ?? null}
+      </span>
       <span className="yable-ctx-item-label">{item.label}</span>
       {item.shortcut && (
-        <span className="yable-ctx-item-shortcut">{item.shortcut}</span>
+        <kbd className="yable-ctx-item-shortcut">{item.shortcut}</kbd>
       )}
       {hasChildren && (
         <span className="yable-ctx-item-arrow" aria-hidden="true">
@@ -89,7 +110,8 @@ export function ContextMenuItem({ item, onClose }: ContextMenuItemProps) {
 
       {hasChildren && submenuOpen && (
         <div
-          className="yable-ctx-menu yable-ctx-submenu"
+          ref={submenuRef}
+          className="yable-ctx-menu yable-ctx-submenu yable-ctx-menu--animated"
           role="menu"
           onMouseEnter={() => clearTimeout(timerRef.current)}
           onMouseLeave={handleMouseLeave}

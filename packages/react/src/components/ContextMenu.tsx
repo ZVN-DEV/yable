@@ -183,22 +183,40 @@ export function ContextMenu<TData extends RowData>({
     : defaultItems
 
   return (
-    <div
-      ref={menuRef}
-      className="yable-ctx-menu"
-      role="menu"
-      style={{
-        position: 'fixed',
-        left: x,
-        top: y,
-        zIndex: 9999,
-      }}
-      onKeyDown={handleKeyDown}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {items.map((item) => (
-        <ContextMenuItem key={item.id} item={item} onClose={onClose} />
-      ))}
-    </div>
+    <>
+      {/* Invisible backdrop to capture outside clicks and close the menu */}
+      <div
+        className="yable-ctx-backdrop"
+        onClick={onClose}
+        onContextMenu={(e) => {
+          e.preventDefault()
+          onClose()
+        }}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9998,
+        }}
+        aria-hidden="true"
+      />
+      <div
+        ref={menuRef}
+        className="yable-ctx-menu yable-ctx-menu--animated"
+        role="menu"
+        aria-label="Context menu"
+        style={{
+          position: 'fixed',
+          left: x,
+          top: y,
+          zIndex: 9999,
+        }}
+        onKeyDown={handleKeyDown}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {items.map((item) => (
+          <ContextMenuItem key={item.id} item={item} onClose={onClose} />
+        ))}
+      </div>
+    </>
   )
 }

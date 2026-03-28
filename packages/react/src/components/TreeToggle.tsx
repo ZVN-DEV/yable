@@ -1,7 +1,8 @@
 // @yable/react — Tree Toggle Component
-// Renders indent + expand/collapse chevron for tree data rows.
+// Renders indent + animated expand/collapse chevron for tree data rows.
+// The chevron smoothly rotates 90 degrees on expand/collapse via CSS transition.
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import type { RowData, Row } from '@yable/core'
 
 interface TreeToggleProps<TData extends RowData> {
@@ -28,12 +29,15 @@ export function TreeToggle<TData extends RowData>({
 
   const indent = depth * indentWidth
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (canToggle) {
-      row.toggleExpanded()
-    }
-  }
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (canToggle) {
+        row.toggleExpanded()
+      }
+    },
+    [canToggle, row]
+  )
 
   return (
     <span
@@ -45,7 +49,7 @@ export function TreeToggle<TData extends RowData>({
       {canToggle ? (
         <button
           type="button"
-          className="yable-tree-toggle-btn"
+          className={`yable-tree-toggle-btn${isExpanded ? ' yable-tree-toggle-btn--expanded' : ''}`}
           onClick={handleClick}
           data-expanded={isExpanded || undefined}
           aria-expanded={isExpanded}
@@ -63,6 +67,10 @@ export function TreeToggle<TData extends RowData>({
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               aria-hidden="true"
+              style={{
+                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform var(--yable-transition, 150ms ease)',
+              }}
             >
               <path
                 d="M5 3L9 7L5 11"
