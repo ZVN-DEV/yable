@@ -1,9 +1,24 @@
 import type { Metadata } from 'next'
+import { Geist } from 'next/font/google'
 import '@yable/themes/default.css'
+import '@yable/themes/midnight.css'
+import '@yable/themes/stripe.css'
+import '@yable/themes/compact.css'
+import '@yable/themes/ocean.css'
+import '@yable/themes/forest.css'
+import '@yable/themes/rose.css'
+import '@yable/themes/mono.css'
+
+const geist = Geist({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist',
+})
 
 export const metadata: Metadata = {
-  title: 'Yable — React Demo',
-  description: 'YableTables React component library demo',
+  title: 'Yable — The Modern Table Library for React',
+  description:
+    'Sorting, filtering, editing, themes, virtualization, and more. A complete data table solution.',
 }
 
 export default function RootLayout({
@@ -12,22 +27,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body style={{
-        margin: 0,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-        backgroundColor: '#fafafa',
-        color: '#111',
-        minHeight: '100vh',
-      }}>
+    <html lang="en" className={geist.variable} data-yable-theme="dark">
+      <body
+        style={{
+          margin: 0,
+          fontFamily:
+            'var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+          backgroundColor: '#09090b',
+          color: '#fafafa',
+          minHeight: '100vh',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
+        }}
+      >
         {children}
       </body>
     </html>
