@@ -3,3 +3,10 @@ dist
 .turbo
 *.tsbuildinfo
 .DS_Store
+
+# Build outputs
+.next/
+dist/
+*.png
+*.jpg
+
