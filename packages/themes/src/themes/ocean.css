@@ -1,7 +1,8 @@
 /* ============================================================================
    @yable/themes — Ocean Theme
-   Blue/teal palette with aqua accents. Inspired by oceanic depths
-   and the calm of deep water.
+   Calm and fluid. Desaturated sage-teal palette with gentle transitions.
+   Think soft tide pools, not bright Caribbean. Muted teal headers,
+   borders that blend into backgrounds.
 
    Usage:
      import '@yable/themes'
@@ -11,63 +12,92 @@
 
 .yable-theme-ocean,
 .yable[data-theme="ocean"] {
-  /* Surface — deep teal */
-  --yable-bg: #ffffff;
-  --yable-bg-header: #f0fdfa;
-  --yable-bg-footer: #f0fdfa;
+  /* Surface — barely tinted white, calm */
+  --yable-bg: #fafcfb;
+  --yable-bg-header: #f2f7f6;
+  --yable-bg-footer: #f2f7f6;
   --yable-bg-row: transparent;
-  --yable-bg-row-alt: rgba(20, 184, 166, 0.02);
-  --yable-bg-row-hover: rgba(20, 184, 166, 0.04);
-  --yable-bg-row-selected: rgba(6, 182, 212, 0.06);
-  --yable-bg-row-expanded: rgba(20, 184, 166, 0.02);
+  --yable-bg-row-alt: rgba(107, 142, 135, 0.02);
+  --yable-bg-row-hover: rgba(107, 142, 135, 0.04);
+  --yable-bg-row-selected: rgba(94, 162, 155, 0.07);
+  --yable-bg-row-expanded: rgba(107, 142, 135, 0.02);
   --yable-bg-cell-editing: #ffffff;
-  --yable-bg-pinned: #f7fffe;
+  --yable-bg-pinned: #f5f9f8;
+  --yable-bg-row-drag-over: rgba(94, 162, 155, 0.1);
 
-  /* Text */
-  --yable-text-primary: #0f172a;
-  --yable-text-secondary: #5f7a89;
-  --yable-text-tertiary: #94a3b8;
-  --yable-text-header: #0d9488;
-  --yable-text-disabled: #cbd5e1;
-  --yable-text-link: #0891b2;
-  --yable-text-placeholder: #94a3b8;
+  /* Text — muted sage, not bright teal */
+  --yable-text-primary: #1a2421;
+  --yable-text-secondary: #5f756e;
+  --yable-text-tertiary: #8fa39c;
+  --yable-text-header: #4a736a;
+  --yable-text-disabled: #c5d1cd;
+  --yable-text-link: #3d7a73;
+  --yable-text-placeholder: #8fa39c;
 
-  /* Borders — soft teal edges */
-  --yable-border-color: #e2f1ee;
-  --yable-border-color-strong: #b2dfdb;
-  --yable-border-radius: 10px;
+  /* Borders — blend into the surface, barely there */
+  --yable-border-color: #e3ece9;
+  --yable-border-color-strong: #c9d9d4;
+  --yable-border-radius: 8px;
+  --yable-border-radius-lg: 12px;
 
-  /* Accent — aqua cyan */
-  --yable-accent: #0891b2;
-  --yable-accent-hover: #0e7490;
-  --yable-accent-light: rgba(8, 145, 178, 0.07);
+  /* Accent — muted sage-teal, not cyan */
+  --yable-accent: #3d8b80;
+  --yable-accent-hover: #327268;
+  --yable-accent-light: rgba(61, 139, 128, 0.06);
   --yable-accent-text: #ffffff;
 
-  /* Shadows — cool teal tint */
-  --yable-shadow: 0 1px 3px rgba(13, 148, 136, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --yable-shadow-lg: 0 6px 20px rgba(13, 148, 136, 0.08);
-  --yable-shadow-pinned: 4px 0 10px -2px rgba(13, 148, 136, 0.08);
+  /* Focus */
+  --yable-focus-ring: 0 0 0 2px #fafcfb, 0 0 0 4px rgba(61, 139, 128, 0.3);
+
+  /* Shadows — cool and subtle */
+  --yable-shadow: 0 1px 2px rgba(61, 90, 82, 0.05);
+  --yable-shadow-lg: 0 6px 20px rgba(61, 90, 82, 0.07);
+  --yable-shadow-pinned: 4px 0 10px -2px rgba(61, 90, 82, 0.06);
+
+  /* Scrollbar */
+  --yable-scrollbar-thumb: rgba(61, 139, 128, 0.15);
+  --yable-scrollbar-track: transparent;
+
+  /* Spacing */
+  --yable-cell-padding-x: 14px;
+  --yable-cell-padding-y: 10px;
+  --yable-header-padding-x: 14px;
+  --yable-header-padding-y: 11px;
 
   /* Form */
-  --yable-input-border: #b2dfdb;
-  --yable-input-border-hover: #80cbc4;
-  --yable-input-shadow-focus: 0 0 0 3px rgba(8, 145, 178, 0.1);
+  --yable-input-border: #c9d9d4;
+  --yable-input-border-hover: #9bb8b0;
+  --yable-input-shadow-focus: 0 0 0 3px rgba(61, 139, 128, 0.08);
 
   /* Checkbox */
-  --yable-checkbox-border: #b2dfdb;
+  --yable-checkbox-border: #c9d9d4;
   --yable-checkbox-radius: 4px;
 
   /* Pagination */
-  --yable-pagination-button-radius: 8px;
+  --yable-pagination-button-radius: 6px;
+  --yable-pagination-button-bg-hover: rgba(61, 139, 128, 0.06);
+
+  /* Loading */
+  --yable-loading-shimmer: linear-gradient(
+    90deg,
+    rgba(61, 139, 128, 0.025) 25%,
+    rgba(61, 139, 128, 0.05) 37%,
+    rgba(61, 139, 128, 0.025) 63%
+  );
+
+  /* Transitions — slightly slower for fluidity */
+  --yable-transition-fast: 120ms ease;
+  --yable-transition: 180ms ease;
+  --yable-transition-slow: 280ms ease;
 }
 
-/* Header styling — teal color */
+/* Header — muted sage, understated authority */
 .yable-theme-ocean .yable-th,
 .yable[data-theme="ocean"] .yable-th {
   text-transform: none;
   letter-spacing: normal;
   font-size: var(--yable-font-size-sm);
-  font-weight: var(--yable-font-weight-semibold);
+  font-weight: var(--yable-font-weight-medium);
   color: var(--yable-text-header);
 }
 
@@ -81,67 +111,99 @@
 @media (prefers-color-scheme: dark) {
   .yable-theme-ocean:not([data-yable-theme="light"]),
   .yable[data-theme="ocean"]:not([data-yable-theme="light"]) {
-    --yable-bg: #0a1419;
-    --yable-bg-header: #0d1a22;
-    --yable-bg-footer: #0d1a22;
-    --yable-bg-row-alt: rgba(20, 184, 166, 0.03);
-    --yable-bg-row-hover: rgba(20, 184, 166, 0.06);
-    --yable-bg-row-selected: rgba(6, 182, 212, 0.1);
-    --yable-bg-cell-editing: #0f1e28;
-    --yable-bg-pinned: #0c171e;
+    --yable-bg: #0b1210;
+    --yable-bg-header: #0f1916;
+    --yable-bg-footer: #0f1916;
+    --yable-bg-row-alt: rgba(94, 162, 155, 0.025);
+    --yable-bg-row-hover: rgba(94, 162, 155, 0.05);
+    --yable-bg-row-selected: rgba(94, 162, 155, 0.1);
+    --yable-bg-row-expanded: rgba(94, 162, 155, 0.02);
+    --yable-bg-cell-editing: #121e1b;
+    --yable-bg-pinned: #0d1613;
+    --yable-bg-row-drag-over: rgba(94, 162, 155, 0.12);
 
-    --yable-text-primary: #e0f2f1;
-    --yable-text-secondary: #80cbc4;
-    --yable-text-tertiary: #4db6ac;
-    --yable-text-header: #5eead4;
+    --yable-text-primary: #dce8e5;
+    --yable-text-secondary: #7d9e96;
+    --yable-text-tertiary: #506b64;
+    --yable-text-header: #82c0b6;
 
-    --yable-border-color: #1a3038;
-    --yable-border-color-strong: #264a55;
+    --yable-border-color: #1a2b27;
+    --yable-border-color-strong: #253d37;
 
-    --yable-accent: #22d3ee;
-    --yable-accent-hover: #67e8f9;
-    --yable-accent-light: rgba(34, 211, 238, 0.12);
+    --yable-accent: #5eb8ab;
+    --yable-accent-hover: #7ecec3;
+    --yable-accent-light: rgba(94, 184, 171, 0.1);
 
-    --yable-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    --yable-focus-ring: 0 0 0 2px #0b1210, 0 0 0 4px rgba(94, 184, 171, 0.35);
+
+    --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     --yable-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.5);
 
-    --yable-input-border: #264a55;
-    --yable-input-border-hover: #367a75;
-    --yable-input-bg-focus: #0f1e28;
-    --yable-checkbox-border: #367a75;
-    --yable-checkbox-bg: #1a3038;
+    --yable-scrollbar-thumb: rgba(94, 184, 171, 0.18);
+    --yable-scrollbar-track: rgba(255, 255, 255, 0.02);
+
+    --yable-input-border: #253d37;
+    --yable-input-border-hover: #356a60;
+    --yable-input-bg-focus: #121e1b;
+    --yable-checkbox-border: #356a60;
+    --yable-checkbox-bg: #1a2b27;
+
+    --yable-pagination-button-bg-hover: rgba(94, 184, 171, 0.08);
+
+    --yable-loading-shimmer: linear-gradient(
+      90deg,
+      rgba(94, 184, 171, 0.02) 25%,
+      rgba(94, 184, 171, 0.05) 37%,
+      rgba(94, 184, 171, 0.02) 63%
+    );
   }
 }
 
 [data-yable-theme="dark"] .yable-theme-ocean,
 [data-yable-theme="dark"] .yable[data-theme="ocean"] {
-  --yable-bg: #0a1419;
-  --yable-bg-header: #0d1a22;
-  --yable-bg-footer: #0d1a22;
-  --yable-bg-row-alt: rgba(20, 184, 166, 0.03);
-  --yable-bg-row-hover: rgba(20, 184, 166, 0.06);
-  --yable-bg-row-selected: rgba(6, 182, 212, 0.1);
-  --yable-bg-cell-editing: #0f1e28;
-  --yable-bg-pinned: #0c171e;
+  --yable-bg: #0b1210;
+  --yable-bg-header: #0f1916;
+  --yable-bg-footer: #0f1916;
+  --yable-bg-row-alt: rgba(94, 162, 155, 0.025);
+  --yable-bg-row-hover: rgba(94, 162, 155, 0.05);
+  --yable-bg-row-selected: rgba(94, 162, 155, 0.1);
+  --yable-bg-row-expanded: rgba(94, 162, 155, 0.02);
+  --yable-bg-cell-editing: #121e1b;
+  --yable-bg-pinned: #0d1613;
+  --yable-bg-row-drag-over: rgba(94, 162, 155, 0.12);
 
-  --yable-text-primary: #e0f2f1;
-  --yable-text-secondary: #80cbc4;
-  --yable-text-tertiary: #4db6ac;
-  --yable-text-header: #5eead4;
+  --yable-text-primary: #dce8e5;
+  --yable-text-secondary: #7d9e96;
+  --yable-text-tertiary: #506b64;
+  --yable-text-header: #82c0b6;
 
-  --yable-border-color: #1a3038;
-  --yable-border-color-strong: #264a55;
+  --yable-border-color: #1a2b27;
+  --yable-border-color-strong: #253d37;
 
-  --yable-accent: #22d3ee;
-  --yable-accent-hover: #67e8f9;
-  --yable-accent-light: rgba(34, 211, 238, 0.12);
+  --yable-accent: #5eb8ab;
+  --yable-accent-hover: #7ecec3;
+  --yable-accent-light: rgba(94, 184, 171, 0.1);
 
-  --yable-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --yable-focus-ring: 0 0 0 2px #0b1210, 0 0 0 4px rgba(94, 184, 171, 0.35);
+
+  --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   --yable-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.5);
 
-  --yable-input-border: #264a55;
-  --yable-input-border-hover: #367a75;
-  --yable-input-bg-focus: #0f1e28;
-  --yable-checkbox-border: #367a75;
-  --yable-checkbox-bg: #1a3038;
+  --yable-scrollbar-thumb: rgba(94, 184, 171, 0.18);
+  --yable-scrollbar-track: rgba(255, 255, 255, 0.02);
+
+  --yable-input-border: #253d37;
+  --yable-input-border-hover: #356a60;
+  --yable-input-bg-focus: #121e1b;
+  --yable-checkbox-border: #356a60;
+  --yable-checkbox-bg: #1a2b27;
+
+  --yable-pagination-button-bg-hover: rgba(94, 184, 171, 0.08);
+
+  --yable-loading-shimmer: linear-gradient(
+    90deg,
+    rgba(94, 184, 171, 0.02) 25%,
+    rgba(94, 184, 171, 0.05) 37%,
+    rgba(94, 184, 171, 0.02) 63%
+  );
 }

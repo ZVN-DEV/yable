@@ -13,6 +13,7 @@
      bgRowSelected -> --yable-bg-row-selected
      bgCellEditing -> --yable-bg-cell-editing
      bgPinned      -> --yable-bg-pinned
+     bgRowDragOver -> --yable-bg-row-drag-over
      textPrimary   -> --yable-text-primary
      textSecondary -> --yable-text-secondary
      textTertiary  -> --yable-text-tertiary
@@ -23,6 +24,7 @@
      accentHover   -> --yable-accent-hover
      accentLight   -> --yable-accent-light
      accentText    -> --yable-accent-text
+     focusRing     -> --yable-focus-ring
    ============================================================================ */
 
 :root {
@@ -32,33 +34,35 @@
   --yable-bg-footer: #fafafa;
   --yable-bg-row: transparent;
   --yable-bg-row-alt: rgba(0, 0, 0, 0.015);
-  --yable-bg-row-hover: rgba(0, 0, 0, 0.025);
-  --yable-bg-row-selected: rgba(59, 130, 246, 0.06);
+  --yable-bg-row-hover: rgba(0, 0, 0, 0.02);
+  --yable-bg-row-selected: rgba(37, 99, 235, 0.06);
   --yable-bg-row-expanded: rgba(0, 0, 0, 0.01);
   --yable-bg-cell-editing: #ffffff;
   --yable-bg-pinned: #fdfdfd;
+  --yable-bg-row-drag-over: rgba(37, 99, 235, 0.08);
 
   /* ── Text Colors ───────────────────────────────────────────────────────── */
-  --yable-text-primary: #111827;
-  --yable-text-secondary: #6b7280;
-  --yable-text-tertiary: #9ca3af;
-  --yable-text-header: #374151;
-  --yable-text-disabled: #d1d5db;
+  --yable-text-primary: #18181b;
+  --yable-text-secondary: #71717a;
+  --yable-text-tertiary: #a1a1aa;
+  --yable-text-header: #3f3f46;
+  --yable-text-disabled: #d4d4d8;
   --yable-text-link: #2563eb;
-  --yable-text-placeholder: #9ca3af;
+  --yable-text-placeholder: #a1a1aa;
 
   /* ── Border ────────────────────────────────────────────────────────────── */
-  --yable-border-color: #e5e7eb;
-  --yable-border-color-strong: #d1d5db;
+  --yable-border-color: #e4e4e7;
+  --yable-border-color-strong: #d4d4d8;
   --yable-border-width: 1px;
-  --yable-border-radius: 8px;
+  --yable-border-radius: 6px;
   --yable-border-radius-sm: 4px;
+  --yable-border-radius-lg: 10px;
 
   /* ── Spacing ───────────────────────────────────────────────────────────── */
-  --yable-cell-padding-x: 16px;
+  --yable-cell-padding-x: 14px;
   --yable-cell-padding-y: 10px;
-  --yable-header-padding-x: 16px;
-  --yable-header-padding-y: 10px;
+  --yable-header-padding-x: 14px;
+  --yable-header-padding-y: 11px;
 
   /* ── Typography ────────────────────────────────────────────────────────── */
   --yable-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -82,13 +86,20 @@
   /* ── Accent / Interactive ──────────────────────────────────────────────── */
   --yable-accent: #2563eb;
   --yable-accent-hover: #1d4ed8;
-  --yable-accent-light: rgba(37, 99, 235, 0.08);
+  --yable-accent-light: rgba(37, 99, 235, 0.06);
   --yable-accent-text: #ffffff;
 
+  /* ── Focus ─────────────────────────────────────────────────────────────── */
+  --yable-focus-ring: 0 0 0 2px var(--yable-bg), 0 0 0 4px var(--yable-accent);
+
   /* ── Shadows ───────────────────────────────────────────────────────────── */
-  --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --yable-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
   --yable-shadow-pinned: 4px 0 8px -2px rgba(0, 0, 0, 0.06);
+
+  /* ── Scrollbar ─────────────────────────────────────────────────────────── */
+  --yable-scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --yable-scrollbar-track: transparent;
 
   /* ── Transitions ───────────────────────────────────────────────────────── */
   --yable-transition-fast: 100ms ease;
@@ -99,8 +110,8 @@
   --yable-input-bg: transparent;
   --yable-input-bg-hover: rgba(0, 0, 0, 0.03);
   --yable-input-bg-focus: #ffffff;
-  --yable-input-border: #d1d5db;
-  --yable-input-border-hover: #9ca3af;
+  --yable-input-border: #d4d4d8;
+  --yable-input-border-hover: #a1a1aa;
   --yable-input-border-focus: var(--yable-accent);
   --yable-input-border-radius: 4px;
   --yable-input-height: 28px;
@@ -110,7 +121,7 @@
 
   /* ── Checkbox / Toggle ─────────────────────────────────────────────────── */
   --yable-checkbox-size: 16px;
-  --yable-checkbox-border: #d1d5db;
+  --yable-checkbox-border: #d4d4d8;
   --yable-checkbox-bg: #ffffff;
   --yable-checkbox-bg-checked: var(--yable-accent);
   --yable-checkbox-border-checked: var(--yable-accent);
@@ -140,9 +151,9 @@
   --yable-empty-text-color: var(--yable-text-tertiary);
   --yable-loading-shimmer: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.04) 25%,
-    rgba(0, 0, 0, 0.08) 37%,
-    rgba(0, 0, 0, 0.04) 63%
+    rgba(0, 0, 0, 0.03) 25%,
+    rgba(0, 0, 0, 0.06) 37%,
+    rgba(0, 0, 0, 0.03) 63%
   );
 
   /* ── Z-Index Layers ────────────────────────────────────────────────────── */
@@ -163,44 +174,50 @@
 /* ── Dark Mode (auto via prefers-color-scheme) ───────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root:not([data-yable-theme="light"]) {
-    --yable-bg: #0f1117;
-    --yable-bg-header: #161821;
-    --yable-bg-footer: #161821;
+    --yable-bg: #09090b;
+    --yable-bg-header: #18181b;
+    --yable-bg-footer: #18181b;
     --yable-bg-row: transparent;
     --yable-bg-row-alt: rgba(255, 255, 255, 0.02);
-    --yable-bg-row-hover: rgba(255, 255, 255, 0.035);
+    --yable-bg-row-hover: rgba(255, 255, 255, 0.03);
     --yable-bg-row-selected: rgba(59, 130, 246, 0.1);
     --yable-bg-row-expanded: rgba(255, 255, 255, 0.02);
-    --yable-bg-cell-editing: #1a1d28;
-    --yable-bg-pinned: #13151d;
+    --yable-bg-cell-editing: #1c1c1f;
+    --yable-bg-pinned: #111113;
+    --yable-bg-row-drag-over: rgba(59, 130, 246, 0.12);
 
-    --yable-text-primary: #e5e7eb;
-    --yable-text-secondary: #9ca3af;
-    --yable-text-tertiary: #6b7280;
-    --yable-text-header: #d1d5db;
-    --yable-text-disabled: #4b5563;
+    --yable-text-primary: #fafafa;
+    --yable-text-secondary: #a1a1aa;
+    --yable-text-tertiary: #71717a;
+    --yable-text-header: #d4d4d8;
+    --yable-text-disabled: #3f3f46;
     --yable-text-link: #60a5fa;
-    --yable-text-placeholder: #6b7280;
+    --yable-text-placeholder: #52525b;
 
-    --yable-border-color: #1f2937;
-    --yable-border-color-strong: #374151;
+    --yable-border-color: #27272a;
+    --yable-border-color-strong: #3f3f46;
 
-    --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --yable-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
     --yable-shadow-pinned: 4px 0 8px -2px rgba(0, 0, 0, 0.3);
 
     --yable-accent: #3b82f6;
     --yable-accent-hover: #60a5fa;
-    --yable-accent-light: rgba(59, 130, 246, 0.15);
+    --yable-accent-light: rgba(59, 130, 246, 0.12);
+
+    --yable-focus-ring: 0 0 0 2px var(--yable-bg), 0 0 0 4px var(--yable-accent);
+
+    --yable-scrollbar-thumb: rgba(255, 255, 255, 0.15);
+    --yable-scrollbar-track: transparent;
 
     --yable-input-bg: transparent;
     --yable-input-bg-hover: rgba(255, 255, 255, 0.04);
-    --yable-input-bg-focus: #1a1d28;
-    --yable-input-border: #374151;
-    --yable-input-border-hover: #4b5563;
+    --yable-input-bg-focus: #1c1c1f;
+    --yable-input-border: #3f3f46;
+    --yable-input-border-hover: #52525b;
 
-    --yable-checkbox-border: #4b5563;
-    --yable-checkbox-bg: #1f2937;
+    --yable-checkbox-border: #3f3f46;
+    --yable-checkbox-bg: #27272a;
 
     --yable-pagination-button-bg-hover: rgba(255, 255, 255, 0.06);
 
@@ -215,44 +232,50 @@
 
 /* ── Dark Mode (manual override) ─────────────────────────────────────────── */
 [data-yable-theme="dark"] {
-  --yable-bg: #0f1117;
-  --yable-bg-header: #161821;
-  --yable-bg-footer: #161821;
+  --yable-bg: #09090b;
+  --yable-bg-header: #18181b;
+  --yable-bg-footer: #18181b;
   --yable-bg-row: transparent;
   --yable-bg-row-alt: rgba(255, 255, 255, 0.02);
-  --yable-bg-row-hover: rgba(255, 255, 255, 0.035);
+  --yable-bg-row-hover: rgba(255, 255, 255, 0.03);
   --yable-bg-row-selected: rgba(59, 130, 246, 0.1);
   --yable-bg-row-expanded: rgba(255, 255, 255, 0.02);
-  --yable-bg-cell-editing: #1a1d28;
-  --yable-bg-pinned: #13151d;
+  --yable-bg-cell-editing: #1c1c1f;
+  --yable-bg-pinned: #111113;
+  --yable-bg-row-drag-over: rgba(59, 130, 246, 0.12);
 
-  --yable-text-primary: #e5e7eb;
-  --yable-text-secondary: #9ca3af;
-  --yable-text-tertiary: #6b7280;
-  --yable-text-header: #d1d5db;
-  --yable-text-disabled: #4b5563;
+  --yable-text-primary: #fafafa;
+  --yable-text-secondary: #a1a1aa;
+  --yable-text-tertiary: #71717a;
+  --yable-text-header: #d4d4d8;
+  --yable-text-disabled: #3f3f46;
   --yable-text-link: #60a5fa;
-  --yable-text-placeholder: #6b7280;
+  --yable-text-placeholder: #52525b;
 
-  --yable-border-color: #1f2937;
-  --yable-border-color-strong: #374151;
+  --yable-border-color: #27272a;
+  --yable-border-color-strong: #3f3f46;
 
-  --yable-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --yable-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --yable-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
   --yable-shadow-pinned: 4px 0 8px -2px rgba(0, 0, 0, 0.3);
 
   --yable-accent: #3b82f6;
   --yable-accent-hover: #60a5fa;
-  --yable-accent-light: rgba(59, 130, 246, 0.15);
+  --yable-accent-light: rgba(59, 130, 246, 0.12);
+
+  --yable-focus-ring: 0 0 0 2px var(--yable-bg), 0 0 0 4px var(--yable-accent);
+
+  --yable-scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --yable-scrollbar-track: transparent;
 
   --yable-input-bg: transparent;
   --yable-input-bg-hover: rgba(255, 255, 255, 0.04);
-  --yable-input-bg-focus: #1a1d28;
-  --yable-input-border: #374151;
-  --yable-input-border-hover: #4b5563;
+  --yable-input-bg-focus: #1c1c1f;
+  --yable-input-border: #3f3f46;
+  --yable-input-border-hover: #52525b;
 
-  --yable-checkbox-border: #4b5563;
-  --yable-checkbox-bg: #1f2937;
+  --yable-checkbox-border: #3f3f46;
+  --yable-checkbox-bg: #27272a;
 
   --yable-pagination-button-bg-hover: rgba(255, 255, 255, 0.06);
 
