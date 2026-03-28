@@ -2,6 +2,84 @@
    @yable/themes — Utility Classes
    Modifier classes for common table configurations.
    Apply these on the .yable container element.
+
+   Categories:
+     1. Density Modifiers    — compact, comfortable, dense
+     2. Visual Modifiers     — striped, bordered, borderless, rounded, flat, elevated
+     3. Hover Control        — hoverable (default), no-hover
+     4. Layout Modifiers     — full-width, wrap, scrollable, plain-headers
+     5. Animation Utilities  — animate-rows, row-enter, row-exit, cell flash
+     6. Scrollbar Styling    — custom scrollbar appearance
+     7. Focus Utilities      — focus-within, cell focus-visible
+     8. Responsive Behavior  — mobile-first responsive adaptations
+     9. Print Utilities      — print-optimized rendering
+   ============================================================================ */
+
+
+/* ============================================================================
+   1. DENSITY MODIFIERS
+   Control padding, font size, and row height for different data densities.
+   ============================================================================ */
+
+/* ── Compact ─────────────────────────────────────────────────────────────── */
+
+.yable--compact {
+  --yable-cell-padding-x: 8px;
+  --yable-cell-padding-y: 4px;
+  --yable-header-padding-x: 8px;
+  --yable-header-padding-y: 4px;
+  --yable-row-min-height: 32px;
+  --yable-header-min-height: 32px;
+  --yable-font-size: 12px;
+  --yable-font-size-header: 11px;
+}
+
+/* ── Comfortable ─────────────────────────────────────────────────────────── */
+
+.yable--comfortable {
+  --yable-cell-padding-x: 20px;
+  --yable-cell-padding-y: 14px;
+  --yable-header-padding-x: 20px;
+  --yable-header-padding-y: 14px;
+  --yable-row-min-height: 48px;
+  --yable-header-min-height: 48px;
+  --yable-font-size: 14px;
+  --yable-font-size-header: 13px;
+}
+
+/* ── Relaxed (alias for comfortable — preserve backward compat) ──────────── */
+
+.yable--relaxed {
+  --yable-cell-padding-x: 20px;
+  --yable-cell-padding-y: 14px;
+  --yable-header-padding-x: 20px;
+  --yable-header-padding-y: 14px;
+  --yable-row-min-height: 52px;
+  --yable-header-min-height: 52px;
+}
+
+/* ── Dense — Maximum data density ────────────────────────────────────────── */
+
+.yable--dense {
+  --yable-cell-padding-x: 6px;
+  --yable-cell-padding-y: 2px;
+  --yable-header-padding-x: 6px;
+  --yable-header-padding-y: 2px;
+  --yable-row-min-height: 24px;
+  --yable-header-min-height: 24px;
+  --yable-font-size: 11px;
+  --yable-font-size-header: 10px;
+  --yable-line-height: 1.35;
+}
+
+.yable--dense .yable-th {
+  letter-spacing: 0;
+}
+
+
+/* ============================================================================
+   2. VISUAL MODIFIERS
+   Control borders, backgrounds, corners, and shadows.
    ============================================================================ */
 
 /* ── Striped Rows ────────────────────────────────────────────────────────── */
@@ -14,7 +92,12 @@
   background: var(--yable-bg-row-hover);
 }
 
-/* ── Bordered ────────────────────────────────────────────────────────────── */
+/* Selected state takes precedence over striped */
+.yable--striped .yable-tbody .yable-tr[data-selected="true"]:nth-child(even) {
+  background: var(--yable-bg-row-selected);
+}
+
+/* ── Bordered — Full cell borders (horizontal + vertical) ────────────────── */
 
 .yable--bordered .yable-th,
 .yable--bordered .yable-td {
@@ -26,51 +109,83 @@
   border-right: none;
 }
 
-/* ── Compact ─────────────────────────────────────────────────────────────── */
-
-.yable--compact {
-  --yable-cell-padding-x: 10px;
-  --yable-cell-padding-y: 6px;
-  --yable-header-padding-x: 10px;
-  --yable-header-padding-y: 6px;
-  --yable-row-min-height: 32px;
-  --yable-header-min-height: 32px;
-  --yable-font-size: 12px;
-  --yable-font-size-header: 11px;
-}
-
-/* ── Relaxed ─────────────────────────────────────────────────────────────── */
-
-.yable--relaxed {
-  --yable-cell-padding-x: 20px;
-  --yable-cell-padding-y: 14px;
-  --yable-header-padding-x: 20px;
-  --yable-header-padding-y: 14px;
-  --yable-row-min-height: 52px;
-  --yable-header-min-height: 52px;
-}
-
-/* ── No Border ───────────────────────────────────────────────────────────── */
+/* ── Borderless — No borders at all, rely on spacing ─────────────────────── */
 
 .yable--borderless {
   border: none;
-  border-radius: 0;
+  box-shadow: none;
 }
 
-/* ── Rounded ─────────────────────────────────────────────────────────────── */
+.yable--borderless .yable-th {
+  border-bottom-color: transparent;
+}
+
+.yable--borderless .yable-tr:not(:last-child) .yable-td {
+  border-bottom-color: transparent;
+}
+
+/* ── Rounded — Extra rounded corners ─────────────────────────────────────── */
 
 .yable--rounded {
-  border-radius: 12px;
+  --yable-border-radius: 12px;
+  border-radius: var(--yable-border-radius);
   overflow: hidden;
 }
 
-/* ── Full Width ──────────────────────────────────────────────────────────── */
+/* ── Flat — No radius, no shadow (ideal for embedding) ───────────────────── */
+
+.yable--flat {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ── Elevated — Extra shadow for standalone placement ────────────────────── */
+
+.yable--elevated {
+  box-shadow: var(--yable-shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+
+/* ============================================================================
+   3. HOVER CONTROL
+   Row hover is on by default in base.css. These classes opt out.
+   ============================================================================ */
+
+/* ── Hoverable — Explicit opt-in (for clarity, matches base default) ─────── */
+
+.yable--hoverable .yable-tr:hover {
+  background: var(--yable-bg-row-hover);
+}
+
+/* ── No Hover — Disable row hover highlight ──────────────────────────────── */
+
+.yable--no-hover .yable-tr:hover {
+  background: var(--yable-bg-row);
+}
+
+/* Preserve striped pattern when hover is disabled */
+.yable--no-hover.yable--striped .yable-tbody .yable-tr:nth-child(even):hover {
+  background: var(--yable-bg-row-alt);
+}
+
+/* Preserve selected state when hover is disabled */
+.yable--no-hover .yable-tr[data-selected="true"]:hover {
+  background: var(--yable-bg-row-selected);
+}
+
+
+/* ============================================================================
+   4. LAYOUT MODIFIERS
+   Control table layout, text wrapping, and scroll behavior.
+   ============================================================================ */
+
+/* ── Full Width — Auto table layout ──────────────────────────────────────── */
 
 .yable--full-width .yable-table {
   table-layout: auto;
 }
 
-/* ── Nowrap Off (allow text wrapping) ────────────────────────────────────── */
+/* ── Wrap — Allow text wrapping in cells ─────────────────────────────────── */
 
 .yable--wrap .yable-td,
 .yable--wrap .yable-th {
@@ -79,14 +194,14 @@
   text-overflow: unset;
 }
 
-/* ── Fixed Height with Scroll ────────────────────────────────────────────── */
+/* ── Scrollable — Fixed height with vertical scroll ──────────────────────── */
 
 .yable--scrollable {
   max-height: var(--yable-max-height, 600px);
   overflow-y: auto;
 }
 
-/* ── Dense Headers (no uppercase, smaller weight) ────────────────────────── */
+/* ── Plain Headers — No uppercase, smaller weight ────────────────────────── */
 
 .yable--plain-headers .yable-th {
   text-transform: none;
@@ -95,8 +210,308 @@
   font-size: var(--yable-font-size);
 }
 
-/* ── Hover Row Highlight Off ─────────────────────────────────────────────── */
 
-.yable--no-hover .yable-tr:hover {
-  background: var(--yable-bg-row);
+/* ============================================================================
+   5. ANIMATION UTILITIES
+   Opt-in animations for row mount/unmount and cell value changes.
+   ============================================================================ */
+
+/* ── Animate Rows — Fade-in on row mount ─────────────────────────────────── */
+
+.yable--animate-rows .yable-tbody .yable-tr {
+  animation: yable-row-fade-in var(--yable-transition-slow, 250ms) ease both;
+}
+
+/* Stagger child rows for a cascade effect */
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(1) { animation-delay: 0ms; }
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(2) { animation-delay: 20ms; }
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(3) { animation-delay: 40ms; }
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(4) { animation-delay: 60ms; }
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(5) { animation-delay: 80ms; }
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(n+6) { animation-delay: 100ms; }
+
+/* ── Row Enter / Exit — Applied programmatically by the core engine ──────── */
+
+.yable-row-enter {
+  animation: yable-row-fade-in var(--yable-transition-slow, 250ms) ease both;
+}
+
+.yable-row-exit {
+  animation: yable-row-fade-out var(--yable-transition-slow, 250ms) ease both;
+  pointer-events: none;
+}
+
+/* ── Cell Flash — Value-change indicators ────────────────────────────────── */
+
+.yable-cell-flash-up {
+  animation: yable-flash-up var(--yable-flash-duration, 700ms) ease-out both;
+}
+
+.yable-cell-flash-down {
+  animation: yable-flash-down var(--yable-flash-duration, 700ms) ease-out both;
+}
+
+.yable-cell-flash-change {
+  animation: yable-flash-change var(--yable-flash-duration, 700ms) ease-out both;
+}
+
+/* Reduced motion: disable all table animations */
+@media (prefers-reduced-motion: reduce) {
+  .yable--animate-rows .yable-tbody .yable-tr,
+  .yable-row-enter,
+  .yable-row-exit,
+  .yable-cell-flash-up,
+  .yable-cell-flash-down,
+  .yable-cell-flash-change {
+    animation: none;
+  }
+}
+
+
+/* ============================================================================
+   6. SCROLLBAR STYLING
+   Custom scrollbar appearance for Webkit/Blink browsers.
+   Uses CSS variables so themes can override.
+   ============================================================================ */
+
+.yable::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.yable::-webkit-scrollbar-track {
+  background: var(--yable-scrollbar-track, transparent);
+}
+
+.yable::-webkit-scrollbar-thumb {
+  background: var(--yable-scrollbar-thumb, rgba(0, 0, 0, 0.15));
+  border-radius: 3px;
+}
+
+.yable::-webkit-scrollbar-thumb:hover {
+  background: var(--yable-scrollbar-thumb-hover, rgba(0, 0, 0, 0.25));
+}
+
+/* Firefox scrollbar styling */
+.yable {
+  scrollbar-width: thin;
+  scrollbar-color: var(--yable-scrollbar-thumb, rgba(0, 0, 0, 0.15))
+                   var(--yable-scrollbar-track, transparent);
+}
+
+/* ── Scrollbar corner (where h + v scrollbars meet) ──────────────────────── */
+
+.yable::-webkit-scrollbar-corner {
+  background: var(--yable-scrollbar-track, transparent);
+}
+
+
+/* ============================================================================
+   7. FOCUS UTILITIES
+   Keyboard navigation and accessibility focus indicators.
+   ============================================================================ */
+
+/* ── Table focus ring — Subtle outline when table has focus ──────────────── */
+
+.yable:focus-within {
+  outline: 2px solid var(--yable-accent-light, rgba(37, 99, 235, 0.08));
+  outline-offset: -2px;
+}
+
+/* Do not show focus ring when interacting with mouse */
+.yable:focus-within:not(:has(:focus-visible)) {
+  outline: none;
+}
+
+/* ── Cell focus — Clear ring for keyboard navigation ─────────────────────── */
+
+.yable-td:focus-visible,
+.yable-th:focus-visible {
+  outline: 2px solid var(--yable-accent, #2563eb);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+/* ── Input focus within cells — Prevent double ring ──────────────────────── */
+
+.yable-td:focus-within:not(:focus-visible) {
+  outline: none;
+}
+
+
+/* ============================================================================
+   8. RESPONSIVE BEHAVIOR
+   Mobile-first responsive adaptations.
+   ============================================================================ */
+
+/* ── Small screens (tablets and below) ───────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Tighter spacing on all tables */
+  .yable {
+    --yable-cell-padding-x: 10px;
+    --yable-cell-padding-y: 6px;
+    --yable-header-padding-x: 10px;
+    --yable-header-padding-y: 6px;
+    --yable-font-size: 12px;
+    --yable-font-size-header: 11px;
+  }
+
+  /* Responsive modifier: force horizontal scroll with minimum column widths */
+  .yable--responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .yable--responsive .yable-table {
+    min-width: var(--yable-responsive-min-width, 640px);
+  }
+
+  .yable--responsive .yable-th,
+  .yable--responsive .yable-td {
+    min-width: var(--yable-responsive-min-col-width, 80px);
+  }
+
+  /* Simplify pagination: hide page numbers, show only prev/next */
+  .yable-pagination-pages .yable-pagination-btn:not(:first-child):not(:last-child) {
+    display: none;
+  }
+
+  /* Collapse pagination info to a single line */
+  .yable-pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .yable-pagination-info {
+    font-size: var(--yable-font-size-sm, 12px);
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Reduce status bar density */
+  .yable-status-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  /* Sidebar takes full width on mobile */
+  .yable-sidebar {
+    width: 100% !important;
+    max-width: none;
+  }
+}
+
+/* ── Extra small screens (phones) ────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .yable {
+    --yable-cell-padding-x: 8px;
+    --yable-cell-padding-y: 4px;
+    --yable-header-padding-x: 8px;
+    --yable-header-padding-y: 4px;
+    --yable-font-size: 11px;
+    --yable-font-size-header: 10px;
+  }
+
+  /* Stack pagination controls vertically */
+  .yable-pagination {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Hide sort badges on very small screens */
+  .yable-sort-badge {
+    display: none;
+  }
+}
+
+
+/* ============================================================================
+   9. PRINT UTILITIES
+   Optimized rendering for print output.
+   ============================================================================ */
+
+@media print {
+  /* Hide interactive-only UI elements */
+  .yable-pagination,
+  .yable-global-filter,
+  .yable-sidebar,
+  .yable-ctx-menu,
+  .yable-status-bar,
+  .yable-overlay-loading,
+  .yable-resize-handle,
+  .yable-fill-handle,
+  .yable-tooltip,
+  .yable-expand-toggle {
+    display: none !important;
+  }
+
+  /* Clean table appearance */
+  .yable {
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    max-height: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .yable-table {
+    width: 100% !important;
+  }
+
+  /* Solid borders for print clarity */
+  .yable-th,
+  .yable-td {
+    border: 1px solid #cccccc !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 6px 8px !important;
+  }
+
+  .yable-th {
+    background: #f0f0f0 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Remove sticky positioning for print flow */
+  .yable-th,
+  .yable-td {
+    position: static !important;
+  }
+
+  /* Ensure header repeats on every page */
+  .yable-thead {
+    display: table-header-group;
+  }
+
+  .yable-tbody {
+    display: table-row-group;
+  }
+
+  /* Remove row hover/selection highlights */
+  .yable-tr {
+    background: none !important;
+  }
+
+  .yable-tr:nth-child(even) {
+    background: #f8f8f8 !important;
+  }
+
+  /* Remove animations */
+  .yable *,
+  .yable *::before,
+  .yable *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Avoid page breaks inside rows */
+  .yable-tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 }

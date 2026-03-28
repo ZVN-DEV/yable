@@ -1,8 +1,11 @@
 /* ============================================================================
    @yable/themes — Base Styles
-   Structural CSS shared by all themes. Handles layout, ARIA, and
-   foundational table mechanics. Does NOT include visual "flavor" —
-   that's the job of individual theme files.
+   Structural and visual CSS shared by all themes. Handles layout, ARIA,
+   foundational table mechanics, and premium default appearance.
+
+   Design direction: Swiss precision meets modern SaaS.
+   Clean, tight, functional — like Linear, Notion, or Vercel dashboards.
+   Every pixel intentional. Smooth transitions on all interactive elements.
    ============================================================================ */
 
 /* ── Table Container ─────────────────────────────────────────────────────── */
@@ -10,7 +13,7 @@
 .yable {
   position: relative;
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
   border-radius: var(--yable-border-radius);
   border: var(--yable-border-width) solid var(--yable-border-color);
   background: var(--yable-bg);
@@ -19,6 +22,7 @@
   line-height: var(--yable-line-height);
   color: var(--yable-text-primary);
   box-sizing: border-box;
+  box-shadow: var(--yable-shadow);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -29,6 +33,36 @@
   box-sizing: border-box;
 }
 
+/* ── Custom Scrollbar ────────────────────────────────────────────────────── */
+
+.yable ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.yable ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yable ::-webkit-scrollbar-thumb {
+  background: var(--yable-border-color-strong);
+  border-radius: 3px;
+}
+
+.yable ::-webkit-scrollbar-thumb:hover {
+  background: var(--yable-text-tertiary);
+}
+
+.yable ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar */
+.yable {
+  scrollbar-width: thin;
+  scrollbar-color: var(--yable-border-color-strong) transparent;
+}
+
 /* ── Table Element ───────────────────────────────────────────────────────── */
 
 .yable-table {
@@ -36,6 +70,43 @@
   border-collapse: collapse;
   border-spacing: 0;
   table-layout: fixed;
+}
+
+/* ── Main Content Area ───────────────────────────────────────────────────── */
+
+.yable-main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+/* Scrollbar on .yable-main (the actual scrolling container) */
+.yable-main::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.yable-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yable-main::-webkit-scrollbar-thumb {
+  background: var(--yable-border-color-strong);
+  border-radius: 3px;
+}
+
+.yable-main::-webkit-scrollbar-thumb:hover {
+  background: var(--yable-text-tertiary);
+}
+
+.yable-main::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.yable-main {
+  scrollbar-width: thin;
+  scrollbar-color: var(--yable-border-color-strong) transparent;
 }
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
@@ -53,17 +124,17 @@
   padding: var(--yable-header-padding-y) var(--yable-header-padding-x);
   min-height: var(--yable-header-min-height);
   font-size: var(--yable-font-size-header);
-  font-weight: var(--yable-font-weight-semibold);
+  font-weight: var(--yable-font-weight-medium);
   color: var(--yable-text-header);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-bottom: var(--yable-border-width) solid var(--yable-border-color-strong);
+  border-bottom: calc(var(--yable-border-width) + 1px) solid var(--yable-border-color-strong);
   user-select: none;
   vertical-align: middle;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  transition: background var(--yable-transition-fast);
 }
 
 .yable-th[data-sortable="true"] {
@@ -89,15 +160,23 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: var(--yable-sort-icon-size);
-  height: var(--yable-sort-icon-size);
+  width: calc(var(--yable-sort-icon-size) + 2px);
+  height: calc(var(--yable-sort-icon-size) + 2px);
   color: var(--yable-sort-icon-color);
-  transition: color var(--yable-transition-fast),
-              transform var(--yable-transition-fast);
+  opacity: 0;
+  transition: color var(--yable-transition),
+              transform var(--yable-transition),
+              opacity var(--yable-transition);
+}
+
+/* Show sort indicator on header hover */
+.yable-th[data-sortable="true"]:hover .yable-sort-indicator {
+  opacity: 0.4;
 }
 
 .yable-sort-indicator[data-active="true"] {
   color: var(--yable-sort-icon-color-active);
+  opacity: 1;
 }
 
 .yable-sort-indicator[data-direction="desc"] {
@@ -107,7 +186,14 @@
 .yable-sort-badge {
   font-size: 9px;
   font-weight: var(--yable-font-weight-semibold);
-  color: var(--yable-text-tertiary);
+  color: var(--yable-accent);
+  background: var(--yable-accent-light);
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   margin-left: 2px;
 }
 
@@ -130,14 +216,18 @@
 .yable-resize-handle::after {
   content: '';
   width: var(--yable-resize-handle-width);
-  height: 50%;
+  height: 0%;
   border-radius: 2px;
   background: var(--yable-resize-handle-color);
-  transition: background var(--yable-transition-fast),
-              height var(--yable-transition-fast);
+  transition: background var(--yable-transition),
+              height var(--yable-transition);
 }
 
-.yable-resize-handle:hover::after,
+.yable-resize-handle:hover::after {
+  background: var(--yable-border-color-strong);
+  height: 50%;
+}
+
 .yable-resize-handle[data-resizing="true"]::after {
   background: var(--yable-resize-handle-color-active);
   height: 70%;
@@ -154,7 +244,7 @@
 .yable-tr {
   background: var(--yable-bg-row);
   min-height: var(--yable-row-min-height);
-  transition: background-color var(--yable-transition-fast);
+  transition: background-color var(--yable-transition);
 }
 
 .yable-tr:not(:last-child) .yable-td {
@@ -167,6 +257,7 @@
 
 .yable-tr[data-selected="true"] {
   background: var(--yable-bg-row-selected);
+  box-shadow: inset 2px 0 0 0 var(--yable-accent);
 }
 
 .yable-tr[data-selected="true"]:hover {
@@ -181,6 +272,35 @@
   cursor: pointer;
 }
 
+/* Striped rows — barely perceptible */
+.yable--striped .yable-tr:nth-child(even) {
+  background: var(--yable-bg-row-alt);
+}
+
+.yable--striped .yable-tr:nth-child(even):hover {
+  background: var(--yable-bg-row-hover);
+}
+
+/* Bordered variant — visible column separators */
+.yable--bordered .yable-th + .yable-th,
+.yable--bordered .yable-td + .yable-td {
+  border-left: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+/* Compact variant */
+.yable--compact .yable-th {
+  padding: 6px var(--yable-header-padding-x);
+}
+
+.yable--compact .yable-td {
+  padding: 4px var(--yable-cell-padding-x);
+}
+
+.yable--compact .yable-th,
+.yable--compact .yable-td {
+  min-height: 32px;
+}
+
 /* ── Cell ────────────────────────────────────────────────────────────────── */
 
 .yable-td {
@@ -190,11 +310,17 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: background var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
 }
 
 .yable-td[data-editing="true"] {
   padding: 4px 6px;
   background: var(--yable-bg-cell-editing);
+  box-shadow: inset 0 0 0 2px var(--yable-accent),
+              0 0 0 3px var(--yable-accent-light);
+  z-index: 2;
+  position: relative;
 }
 
 /* ── Column Pinning ──────────────────────────────────────────────────────── */
@@ -268,8 +394,9 @@
 
 .yable-tfoot .yable-td {
   font-weight: var(--yable-font-weight-semibold);
-  border-top: var(--yable-border-width) solid var(--yable-border-color-strong);
+  border-top: calc(var(--yable-border-width) + 1px) solid var(--yable-border-color-strong);
   border-bottom: none;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Expanded Row Detail ─────────────────────────────────────────────────── */
@@ -287,14 +414,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border: none;
   background: none;
   cursor: pointer;
   color: var(--yable-text-secondary);
-  transition: transform var(--yable-transition-fast),
-              color var(--yable-transition-fast);
+  transition: transform var(--yable-transition),
+              color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
   padding: 0;
   border-radius: var(--yable-border-radius-sm);
 }
@@ -306,6 +434,7 @@
 
 .yable-expand-toggle[data-expanded="true"] {
   transform: rotate(90deg);
+  color: var(--yable-accent);
 }
 
 /* ── Form Controls (in-cell editing) ─────────────────────────────────────── */
@@ -404,7 +533,8 @@
   position: relative;
   flex-shrink: 0;
   transition: background var(--yable-transition-fast),
-              border-color var(--yable-transition-fast);
+              border-color var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
 }
 
 .yable-checkbox:checked {
@@ -494,7 +624,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px var(--yable-cell-padding-x);
+  padding: 10px var(--yable-cell-padding-x);
   font-size: var(--yable-font-size-sm);
   color: var(--yable-text-secondary);
   border-top: var(--yable-border-width) solid var(--yable-border-color);
@@ -505,6 +635,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--yable-text-tertiary);
+  font-variant-numeric: tabular-nums;
 }
 
 .yable-pagination-pages {
@@ -520,7 +652,7 @@
   min-width: var(--yable-pagination-button-size);
   height: var(--yable-pagination-button-size);
   padding: 0 8px;
-  border: none;
+  border: var(--yable-border-width) solid transparent;
   border-radius: var(--yable-pagination-button-radius);
   background: var(--yable-pagination-button-bg);
   color: var(--yable-pagination-button-text);
@@ -529,77 +661,131 @@
   font-weight: var(--yable-font-weight-medium);
   cursor: pointer;
   transition: background var(--yable-transition-fast),
-              color var(--yable-transition-fast);
+              color var(--yable-transition-fast),
+              border-color var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
   user-select: none;
+  font-variant-numeric: tabular-nums;
 }
 
-.yable-pagination-btn:hover:not(:disabled) {
+.yable-pagination-btn:hover:not(:disabled):not([data-active="true"]) {
   background: var(--yable-pagination-button-bg-hover);
+  border-color: var(--yable-border-color);
 }
 
 .yable-pagination-btn[data-active="true"] {
   background: var(--yable-pagination-button-bg-active);
   color: var(--yable-pagination-button-text-active);
+  border-color: var(--yable-pagination-button-bg-active);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .yable-pagination-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .yable-pagination-select {
   appearance: none;
   height: var(--yable-pagination-button-size);
-  padding: 0 24px 0 8px;
+  padding: 0 28px 0 10px;
   border: var(--yable-border-width) solid var(--yable-border-color);
   border-radius: var(--yable-pagination-button-radius);
-  background: transparent;
+  background: var(--yable-bg);
   font-family: inherit;
   font-size: var(--yable-font-size-sm);
   color: var(--yable-text-secondary);
   cursor: pointer;
+  outline: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%236b7280'%3E%3Cpath d='M6 8.5L1.5 4h9L6 8.5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 6px center;
+  background-position: right 8px center;
   background-size: 10px;
+  transition: border-color var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
+}
+
+.yable-pagination-select:hover {
+  border-color: var(--yable-input-border-hover);
+}
+
+.yable-pagination-select:focus {
+  border-color: var(--yable-input-border-focus);
+  box-shadow: var(--yable-input-shadow-focus);
+}
+
+/* "Rows per page" label */
+.yable-pagination-label {
+  color: var(--yable-text-tertiary);
+  font-size: var(--yable-font-size-sm);
+  white-space: nowrap;
 }
 
 /* ── Global Filter ───────────────────────────────────────────────────────── */
 
 .yable-global-filter {
-  padding: 12px var(--yable-cell-padding-x);
+  padding: 10px var(--yable-cell-padding-x);
   border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+  background: var(--yable-bg);
 }
 
 .yable-global-filter-input {
   width: 100%;
   max-width: 320px;
-  height: 32px;
-  padding: 0 10px 0 32px;
+  height: 34px;
+  padding: 0 10px 0 34px;
   background: var(--yable-input-bg-hover);
   border: var(--yable-border-width) solid transparent;
-  border-radius: 6px;
+  border-radius: 8px;
   font-family: inherit;
   font-size: var(--yable-font-size);
   color: var(--yable-text-primary);
   outline: none;
-  transition: border-color var(--yable-transition-fast),
-              background var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%239ca3af'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85-.017.016zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E");
+  transition: border-color var(--yable-transition),
+              background var(--yable-transition),
+              box-shadow var(--yable-transition),
+              width var(--yable-transition-slow);
+  /* Search icon via background-image */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7' cy='7' r='4.5'/%3E%3Cpath d='M10.5 10.5L14 14'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: 10px center;
-  background-size: 14px;
+  background-size: 15px;
+}
+
+.yable-global-filter-input:hover {
+  border-color: var(--yable-border-color);
 }
 
 .yable-global-filter-input:focus {
   border-color: var(--yable-input-border-focus);
-  background: var(--yable-input-bg-focus);
+  background-color: var(--yable-input-bg-focus);
   box-shadow: var(--yable-input-shadow-focus);
 }
 
 .yable-global-filter-input::placeholder {
   color: var(--yable-text-placeholder);
+}
+
+/* Clear button inside filter */
+.yable-global-filter-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  color: var(--yable-text-tertiary);
+  cursor: pointer;
+  border-radius: 50%;
+  margin-left: -30px;
+  transition: color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
+}
+
+.yable-global-filter-clear:hover {
+  color: var(--yable-text-primary);
+  background: var(--yable-bg-row-hover);
 }
 
 /* ── Empty State ─────────────────────────────────────────────────────────── */
@@ -612,23 +798,28 @@
   padding: var(--yable-empty-padding);
   color: var(--yable-empty-text-color);
   text-align: center;
+  min-height: 200px;
 }
 
 .yable-empty-icon {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 12px;
-  opacity: 0.4;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+  color: var(--yable-text-tertiary);
 }
 
 .yable-empty-message {
   font-size: var(--yable-font-size);
   font-weight: var(--yable-font-weight-medium);
+  color: var(--yable-text-secondary);
 }
 
 .yable-empty-detail {
   font-size: var(--yable-font-size-sm);
-  margin-top: 4px;
+  margin-top: 6px;
+  color: var(--yable-text-tertiary);
+  max-width: 320px;
 }
 
 /* ── Loading State ───────────────────────────────────────────────────────── */
@@ -664,9 +855,9 @@
 
 .yable-th--selection,
 .yable-td--selection {
-  width: 40px;
-  min-width: 40px;
-  max-width: 40px;
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
   padding: 0;
   text-align: center;
 }
@@ -708,12 +899,14 @@
   right: -3px;
   width: 7px;
   height: 7px;
-  background: var(--yable-accent, #3b82f6);
-  border: 1px solid #fff;
+  background: var(--yable-accent);
+  border: 1.5px solid var(--yable-bg);
   cursor: crosshair;
-  z-index: var(--yable-z-resize, 10);
+  z-index: var(--yable-z-resize);
   border-radius: 1px;
   pointer-events: auto;
+  transition: width var(--yable-transition-fast),
+              height var(--yable-transition-fast);
 }
 
 .yable-fill-handle:hover {
@@ -724,19 +917,19 @@
 }
 
 .yable-fill-highlight {
-  background: var(--yable-accent, #3b82f6);
+  background: var(--yable-accent);
   opacity: 0.08;
   pointer-events: none;
 }
 
 .yable-td--fill-source {
-  outline: 2px solid var(--yable-accent, #3b82f6);
+  outline: 2px solid var(--yable-accent);
   outline-offset: -2px;
 }
 
 .yable-td--fill-target {
-  background: color-mix(in srgb, var(--yable-accent, #3b82f6) 6%, transparent);
-  border: 1px dashed var(--yable-accent, #3b82f6);
+  background: color-mix(in srgb, var(--yable-accent) 6%, transparent);
+  border: 1px dashed var(--yable-accent);
 }
 
 /* ============================================================================
@@ -753,22 +946,22 @@
   border: none;
   background: none;
   cursor: grab;
-  color: var(--yable-text-tertiary, #9ca3af);
-  border-radius: var(--yable-border-radius-sm, 4px);
-  transition: color var(--yable-transition-fast, 150ms ease),
-              background var(--yable-transition-fast, 150ms ease);
+  color: var(--yable-text-tertiary);
+  border-radius: var(--yable-border-radius-sm);
+  transition: color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
   flex-shrink: 0;
 }
 
 .yable-row-drag-handle:hover {
-  color: var(--yable-text-primary, #111827);
-  background: var(--yable-bg-row-hover, #f3f4f6);
+  color: var(--yable-text-primary);
+  background: var(--yable-bg-row-hover);
 }
 
 .yable-row-drag-handle:active,
 .yable-row-drag-handle--dragging {
   cursor: grabbing;
-  color: var(--yable-accent, #3b82f6);
+  color: var(--yable-accent);
 }
 
 .yable-row-drag-cell {
@@ -781,15 +974,15 @@
 
 .yable-row-drag-dragging {
   opacity: 0.4;
-  background: var(--yable-bg-row-hover, #f3f4f6);
+  background: var(--yable-bg-row-hover);
 }
 
 .yable-row-drag-over-before {
-  box-shadow: inset 0 2px 0 0 var(--yable-accent, #3b82f6);
+  box-shadow: inset 0 2px 0 0 var(--yable-accent);
 }
 
 .yable-row-drag-over-after {
-  box-shadow: inset 0 -2px 0 0 var(--yable-accent, #3b82f6);
+  box-shadow: inset 0 -2px 0 0 var(--yable-accent);
 }
 
 /* ============================================================================
@@ -813,18 +1006,18 @@
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--yable-text-secondary, #6b7280);
-  border-radius: var(--yable-border-radius-sm, 4px);
-  transition: transform var(--yable-transition-fast, 150ms ease),
-              color var(--yable-transition-fast, 150ms ease),
-              background var(--yable-transition-fast, 150ms ease);
+  color: var(--yable-text-secondary);
+  border-radius: var(--yable-border-radius-sm);
+  transition: transform var(--yable-transition),
+              color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
   flex-shrink: 0;
   margin-right: 4px;
 }
 
 .yable-tree-toggle-btn:hover {
-  color: var(--yable-text-primary, #111827);
-  background: var(--yable-bg-row-hover, #f3f4f6);
+  color: var(--yable-text-primary);
+  background: var(--yable-bg-row-hover);
 }
 
 .yable-tree-toggle-btn[data-expanded="true"] {
@@ -843,7 +1036,7 @@
   margin-right: 4px;
 }
 
-/* Tree depth visual line guides (optional) */
+/* Tree depth visual indentation */
 .yable-tr[data-tree-depth="1"] .yable-tree-toggle {
   padding-left: 20px;
 }
@@ -869,16 +1062,16 @@
    ============================================================================ */
 
 .yable-detail-row {
-  background: var(--yable-bg-row-expanded, #f9fafb);
+  background: var(--yable-bg-row-expanded);
 }
 
 .yable-detail-cell {
   padding: 0;
-  border-bottom: var(--yable-border-width, 1px) solid var(--yable-border-color, #e5e7eb);
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
 }
 
 .yable-detail-panel {
-  padding: 16px var(--yable-cell-padding-x, 12px);
+  padding: 16px var(--yable-cell-padding-x);
 }
 
 .yable-detail-expand-icon {
@@ -891,21 +1084,22 @@
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--yable-text-secondary, #6b7280);
-  border-radius: var(--yable-border-radius-sm, 4px);
-  transition: transform var(--yable-transition, 200ms ease),
-              color var(--yable-transition-fast, 150ms ease),
-              background var(--yable-transition-fast, 150ms ease);
+  color: var(--yable-text-secondary);
+  border-radius: var(--yable-border-radius-sm);
+  transition: transform var(--yable-transition),
+              color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
   flex-shrink: 0;
 }
 
 .yable-detail-expand-icon:hover {
-  color: var(--yable-text-primary, #111827);
-  background: var(--yable-bg-row-hover, #f3f4f6);
+  color: var(--yable-text-primary);
+  background: var(--yable-bg-row-hover);
 }
 
 .yable-detail-expand-icon--expanded {
   transform: rotate(180deg);
+  color: var(--yable-accent);
 }
 
 /* ============================================================================
@@ -916,17 +1110,23 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding: 12px var(--yable-cell-padding-x, 12px);
-  border-bottom: var(--yable-border-width, 1px) solid var(--yable-border-color, #e5e7eb);
-  background: var(--yable-bg-footer, #f9fafb);
+  padding: 12px var(--yable-cell-padding-x);
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+  background: var(--yable-bg-footer);
 }
 
 .yable-pivot-zone {
   min-height: 60px;
-  padding: 8px;
-  border: 1px dashed var(--yable-border-color, #e5e7eb);
-  border-radius: var(--yable-border-radius, 6px);
-  background: var(--yable-bg, #ffffff);
+  padding: 10px;
+  border: 1px dashed var(--yable-border-color);
+  border-radius: var(--yable-border-radius);
+  background: var(--yable-bg);
+  transition: border-color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
+}
+
+.yable-pivot-zone:hover {
+  border-color: var(--yable-border-color-strong);
 }
 
 .yable-pivot-zone--available {
@@ -934,12 +1134,12 @@
 }
 
 .yable-pivot-zone-label {
-  font-size: var(--yable-font-size-sm, 12px);
-  font-weight: var(--yable-font-weight-semibold, 600);
-  color: var(--yable-text-secondary, #6b7280);
+  font-size: var(--yable-font-size-sm);
+  font-weight: var(--yable-font-weight-semibold);
+  color: var(--yable-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .yable-pivot-zone-items {
@@ -949,8 +1149,8 @@
 }
 
 .yable-pivot-zone-empty {
-  font-size: var(--yable-font-size-sm, 12px);
-  color: var(--yable-text-placeholder, #9ca3af);
+  font-size: var(--yable-font-size-sm);
+  color: var(--yable-text-placeholder);
   font-style: italic;
   padding: 4px 0;
 }
@@ -960,20 +1160,22 @@
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: var(--yable-bg-row-hover, #f3f4f6);
-  border: 1px solid var(--yable-border-color, #e5e7eb);
-  border-radius: var(--yable-border-radius-sm, 4px);
-  font-size: var(--yable-font-size-sm, 12px);
-  color: var(--yable-text-primary, #111827);
+  background: var(--yable-bg-row-hover);
+  border: 1px solid var(--yable-border-color);
+  border-radius: var(--yable-border-radius-sm);
+  font-size: var(--yable-font-size-sm);
+  color: var(--yable-text-primary);
   cursor: grab;
   user-select: none;
-  transition: background var(--yable-transition-fast, 150ms ease),
-              box-shadow var(--yable-transition-fast, 150ms ease);
+  transition: background var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast),
+              border-color var(--yable-transition-fast);
 }
 
 .yable-pivot-field:hover {
-  background: var(--yable-bg, #ffffff);
+  background: var(--yable-bg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-color: var(--yable-border-color-strong);
 }
 
 .yable-pivot-field:active {
@@ -994,42 +1196,42 @@
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--yable-text-tertiary, #9ca3af);
+  color: var(--yable-text-tertiary);
   font-size: 12px;
   line-height: 1;
   border-radius: 50%;
-  transition: color var(--yable-transition-fast, 150ms ease),
-              background var(--yable-transition-fast, 150ms ease);
+  transition: color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
 }
 
 .yable-pivot-field-remove:hover {
-  color: var(--yable-text-primary, #111827);
-  background: var(--yable-border-color, #e5e7eb);
+  color: var(--yable-text-primary);
+  background: var(--yable-border-color);
 }
 
 .yable-pivot-agg-select {
   appearance: none;
   padding: 1px 4px;
-  border: 1px solid var(--yable-border-color, #e5e7eb);
-  border-radius: var(--yable-border-radius-sm, 4px);
-  background: var(--yable-bg, #ffffff);
+  border: 1px solid var(--yable-border-color);
+  border-radius: var(--yable-border-radius-sm);
+  background: var(--yable-bg);
   font-size: 11px;
-  color: var(--yable-text-secondary, #6b7280);
+  color: var(--yable-text-secondary);
   cursor: pointer;
 }
 
 .yable-pivot-field--value {
-  background: color-mix(in srgb, var(--yable-accent, #3b82f6) 10%, transparent);
-  border-color: color-mix(in srgb, var(--yable-accent, #3b82f6) 30%, transparent);
+  background: color-mix(in srgb, var(--yable-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--yable-accent) 30%, transparent);
 }
 
 /* Row editing state */
 .yable-tr--row-editing {
-  background: var(--yable-bg-cell-editing, #fefce8);
+  background: var(--yable-bg-cell-editing);
 }
 
 .yable-tr--row-editing .yable-td {
-  border-color: color-mix(in srgb, var(--yable-accent, #3b82f6) 20%, transparent);
+  border-color: color-mix(in srgb, var(--yable-accent) 20%, transparent);
 }
 
 /* ── Formula Cell ────────────────────────────────────────────────────────── */
@@ -1038,16 +1240,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px var(--yable-cell-padding-x, 12px);
-  background: var(--yable-bg-header, #f9fafb);
-  border-bottom: var(--yable-border-width, 1px) solid var(--yable-border-color, #e5e7eb);
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: var(--yable-font-size-sm, 12px);
+  padding: 4px var(--yable-cell-padding-x);
+  background: var(--yable-bg-header);
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: var(--yable-font-size-sm);
 }
 
 .yable-formula-bar-label {
-  font-weight: var(--yable-font-weight-semibold, 600);
-  color: var(--yable-text-secondary, #6b7280);
+  font-weight: var(--yable-font-weight-semibold);
+  color: var(--yable-text-secondary);
   user-select: none;
   min-width: 24px;
   text-align: center;
@@ -1057,18 +1259,20 @@
   flex: 1;
   height: 24px;
   padding: 0 6px;
-  background: var(--yable-input-bg, #fff);
-  border: var(--yable-border-width, 1px) solid var(--yable-input-border, #d1d5db);
-  border-radius: var(--yable-input-border-radius, 4px);
+  background: var(--yable-input-bg);
+  border: var(--yable-border-width) solid var(--yable-input-border);
+  border-radius: var(--yable-input-border-radius);
   font-family: inherit;
   font-size: inherit;
-  color: var(--yable-text-primary, #111827);
+  color: var(--yable-text-primary);
   outline: none;
+  transition: border-color var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
 }
 
 .yable-formula-bar-input:focus {
-  border-color: var(--yable-input-border-focus, #3b82f6);
-  box-shadow: var(--yable-input-shadow-focus, 0 0 0 2px rgba(59, 130, 246, 0.15));
+  border-color: var(--yable-input-border-focus);
+  box-shadow: var(--yable-input-shadow-focus);
 }
 
 .yable-formula-cell {
@@ -1076,9 +1280,9 @@
 }
 
 .yable-formula-error {
-  color: var(--yable-danger, #ef4444);
+  color: #ef4444;
   font-style: italic;
-  font-size: var(--yable-font-size-sm, 12px);
+  font-size: var(--yable-font-size-sm);
 }
 
 /* ── Virtual Scroll Container ────────────────────────────────────────────── */
@@ -1111,12 +1315,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--yable-bg);
-  opacity: 0.85;
+  background: color-mix(in srgb, var(--yable-bg) 80%, transparent);
   z-index: var(--yable-z-overlay);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   pointer-events: all;
+  animation: yable-overlay-fade-in 200ms ease;
+}
+
+@keyframes yable-overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .yable-overlay-loading-content {
@@ -1128,7 +1337,7 @@
 
 .yable-overlay-spinner {
   color: var(--yable-accent);
-  animation: yable-spin 0.8s linear infinite;
+  animation: yable-spin 0.75s linear infinite;
 }
 
 .yable-overlay-loading-text {
@@ -1155,7 +1364,7 @@
   padding: var(--yable-empty-padding);
   color: var(--yable-empty-text-color);
   text-align: center;
-  min-height: 180px;
+  min-height: 200px;
 }
 
 .yable-overlay-empty-icon {
@@ -1163,11 +1372,12 @@
   height: 48px;
   margin-bottom: 16px;
   color: var(--yable-text-tertiary);
+  opacity: 0.35;
 }
 
 .yable-overlay-empty-message {
-  font-size: var(--yable-font-size);
-  font-weight: var(--yable-font-weight-semibold);
+  font-size: 14px;
+  font-weight: var(--yable-font-weight-medium);
   color: var(--yable-text-secondary);
   margin-bottom: 4px;
 }
@@ -1176,6 +1386,7 @@
   font-size: var(--yable-font-size-sm);
   color: var(--yable-text-tertiary);
   max-width: 320px;
+  line-height: 1.5;
 }
 
 /* ============================================================================
@@ -1185,16 +1396,16 @@
 
 .yable-tooltip {
   position: fixed;
-  z-index: 9999;
+  z-index: var(--yable-z-tooltip);
   pointer-events: none;
-  animation: yable-tooltip-fade-in 120ms ease;
+  animation: yable-tooltip-enter 150ms ease;
 }
 
 .yable-tooltip-content {
-  padding: 5px 10px;
+  padding: 6px 12px;
   background: var(--yable-text-primary);
   color: var(--yable-bg);
-  font-size: 12px;
+  font-size: var(--yable-font-size-sm);
   font-weight: var(--yable-font-weight-medium);
   border-radius: 6px;
   white-space: nowrap;
@@ -1233,14 +1444,14 @@
   top: calc(50% - 4px);
 }
 
-@keyframes yable-tooltip-fade-in {
+@keyframes yable-tooltip-enter {
   from {
     opacity: 0;
-    transform: translateY(2px);
+    transform: translateY(4px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -1254,14 +1465,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px var(--yable-cell-padding-x);
-  font-size: var(--yable-font-size-sm);
+  padding: 6px var(--yable-cell-padding-x);
+  font-size: 11px;
   color: var(--yable-text-tertiary);
   border-top: var(--yable-border-width) solid var(--yable-border-color);
   background: var(--yable-bg-footer);
   position: sticky;
   bottom: 0;
   z-index: 5;
+  letter-spacing: 0.01em;
 }
 
 .yable-status-bar-section {
@@ -1279,7 +1491,7 @@
 .yable-status-panel-icon {
   display: flex;
   align-items: center;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .yable-status-panel-label {
@@ -1319,7 +1531,7 @@
 
 @keyframes yable-flash-up {
   0% {
-    background: var(--yable-flash-up-color, rgba(34, 197, 94, 0.25));
+    background: var(--yable-flash-up-color);
   }
   100% {
     background: transparent;
@@ -1328,7 +1540,7 @@
 
 @keyframes yable-flash-down {
   0% {
-    background: var(--yable-flash-down-color, rgba(239, 68, 68, 0.25));
+    background: var(--yable-flash-down-color);
   }
   100% {
     background: transparent;
@@ -1337,7 +1549,7 @@
 
 @keyframes yable-flash-change {
   0% {
-    background: var(--yable-flash-change-color, rgba(59, 130, 246, 0.2));
+    background: var(--yable-flash-change-color);
   }
   100% {
     background: transparent;
@@ -1388,22 +1600,29 @@
   background: var(--yable-bg);
   border: var(--yable-border-width) solid var(--yable-border-color);
   border-radius: 8px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12),
+              0 2px 8px rgba(0, 0, 0, 0.06);
   font-size: var(--yable-font-size-sm);
-  animation: yable-ctx-appear 100ms ease;
+  animation: yable-ctx-appear 120ms ease;
   overflow: hidden;
 }
 
 @media (prefers-color-scheme: dark) {
-  .yable-ctx-menu {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  :root:not([data-yable-theme="light"]) .yable-ctx-menu {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.2);
   }
+}
+
+[data-yable-theme="dark"] .yable-ctx-menu {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4),
+              0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes yable-ctx-appear {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
@@ -1422,7 +1641,8 @@
   user-select: none;
   outline: none;
   color: var(--yable-text-primary);
-  transition: background var(--yable-transition-fast);
+  transition: background var(--yable-transition-fast),
+              color var(--yable-transition-fast);
 }
 
 .yable-ctx-item:hover,
@@ -1467,6 +1687,7 @@
   font-size: 11px;
   color: var(--yable-text-tertiary);
   font-family: -apple-system, system-ui, sans-serif;
+  letter-spacing: 0.02em;
 }
 
 .yable-ctx-item-arrow {
@@ -1495,13 +1716,6 @@
    Prefix: yable-sidebar-*
    ============================================================================ */
 
-.yable-main {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  overflow: auto;
-}
-
 .yable--sidebar-open {
   display: flex;
 }
@@ -1516,11 +1730,11 @@
   border-left: 1px solid var(--yable-border-color);
   z-index: calc(var(--yable-z-overlay) + 5);
   transform: translateX(100%);
-  transition: transform 200ms ease;
+  transition: transform var(--yable-transition-slow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.06);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
 }
 
 .yable-sidebar--open {
@@ -1555,7 +1769,8 @@
   font-weight: var(--yable-font-weight-medium);
   cursor: pointer;
   border-radius: 6px;
-  transition: color var(--yable-transition-fast), background var(--yable-transition-fast);
+  transition: color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
 }
 
 .yable-sidebar-tab:hover {
@@ -1579,7 +1794,8 @@
   color: var(--yable-text-tertiary);
   cursor: pointer;
   border-radius: 6px;
-  transition: color var(--yable-transition-fast), background var(--yable-transition-fast);
+  transition: color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
 }
 
 .yable-sidebar-close:hover {
@@ -1591,6 +1807,25 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* Sidebar content scrollbar */
+.yable-sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.yable-sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yable-sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--yable-border-color-strong);
+  border-radius: 2px;
+}
+
+.yable-sidebar-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--yable-border-color-strong) transparent;
 }
 
 .yable-sidebar-panel {
@@ -1612,7 +1847,9 @@
   font-size: var(--yable-font-size-sm);
   color: var(--yable-text-primary);
   outline: none;
-  transition: border-color var(--yable-transition-fast), background var(--yable-transition-fast);
+  transition: border-color var(--yable-transition-fast),
+              background var(--yable-transition-fast),
+              box-shadow var(--yable-transition-fast);
 }
 
 .yable-sidebar-search-input:focus {
@@ -1641,7 +1878,9 @@
   font-size: 11px;
   font-weight: var(--yable-font-weight-medium);
   cursor: pointer;
-  transition: all var(--yable-transition-fast);
+  transition: color var(--yable-transition-fast),
+              background var(--yable-transition-fast),
+              border-color var(--yable-transition-fast);
 }
 
 .yable-sidebar-action-btn:hover {
@@ -1747,6 +1986,11 @@
   background: var(--yable-bg-row-hover);
   border-radius: 6px;
   gap: 8px;
+  transition: background var(--yable-transition-fast);
+}
+
+.yable-sidebar-filter-item:hover {
+  background: var(--yable-bg-row-alt);
 }
 
 .yable-sidebar-filter-info {
@@ -1784,7 +2028,8 @@
   cursor: pointer;
   border-radius: 4px;
   flex-shrink: 0;
-  transition: all var(--yable-transition-fast);
+  transition: color var(--yable-transition-fast),
+              background var(--yable-transition-fast);
 }
 
 .yable-sidebar-filter-remove:hover {
@@ -1872,12 +2117,13 @@
     position: static !important;
   }
 
-  /* Show all rows */
+  /* Show all rows, remove decorative styles */
   .yable-print-mode {
     max-height: none !important;
     overflow: visible !important;
     border: none !important;
     box-shadow: none !important;
+    border-radius: 0 !important;
   }
 
   .yable-print-mode .yable-table {
@@ -1903,6 +2149,11 @@
     background: #f5f5f5 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    border-bottom: 2px solid #000 !important;
+  }
+
+  .yable-print-mode .yable-td {
+    border-bottom: 1px solid #ccc !important;
   }
 
   /* Reset colors for print */
@@ -1910,4 +2161,224 @@
     color: #000 !important;
     background: #fff !important;
   }
+
+  .yable-print-mode .yable-tr[data-selected="true"] {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+}
+
+/* ============================================================================
+   RTL SUPPORT
+   Mirror layout for right-to-left languages.
+   ============================================================================ */
+
+.yable--rtl .yable-th {
+  text-align: right;
+}
+
+.yable--rtl .yable-resize-handle {
+  right: auto;
+  left: 0;
+}
+
+.yable--rtl .yable-tr[data-selected="true"] {
+  box-shadow: inset -2px 0 0 0 var(--yable-accent);
+}
+
+.yable--rtl .yable-sidebar {
+  right: auto;
+  left: 0;
+  border-left: none;
+  border-right: 1px solid var(--yable-border-color);
+  transform: translateX(-100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+}
+
+.yable--rtl .yable-sidebar--open {
+  transform: translateX(0);
+}
+
+/* ============================================================================
+   ERROR STATE
+   ============================================================================ */
+
+.yable-error-cell {
+  color: #ef4444;
+  font-style: italic;
+  font-size: var(--yable-font-size-sm);
+}
+
+/* ============================================================================
+   ADDITIONAL CLASSES
+   Used by React components — structural/modifier variants.
+   ============================================================================ */
+
+/* Context menu extras */
+.yable-ctx-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--yable-z-context-menu) - 1);
+}
+
+.yable-ctx-item--has-submenu {
+  padding-right: 28px;
+}
+
+.yable-ctx-item--submenu-open {
+  background: var(--yable-bg-row-hover);
+}
+
+.yable-ctx-menu--animated {
+  animation: yable-ctx-appear 120ms ease;
+}
+
+/* Global filter extras */
+.yable-global-filter--has-value .yable-global-filter-input {
+  padding-right: 32px;
+}
+
+.yable-global-filter-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--yable-text-tertiary);
+  display: flex;
+  align-items: center;
+}
+
+/* Pagination extras */
+.yable-pagination-btn--active {
+  background: var(--yable-pagination-button-bg-active);
+  color: var(--yable-pagination-button-text-active);
+  border-color: var(--yable-pagination-button-bg-active);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.yable-pagination-btn--nav {
+  background: transparent;
+}
+
+.yable-pagination-btn--page {
+  font-variant-numeric: tabular-nums;
+}
+
+.yable-pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--yable-pagination-button-size);
+  height: var(--yable-pagination-button-size);
+  color: var(--yable-text-tertiary);
+  font-size: var(--yable-font-size-sm);
+  user-select: none;
+  letter-spacing: 0.1em;
+}
+
+.yable-pagination-info-text {
+  color: var(--yable-text-tertiary);
+  font-size: var(--yable-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.yable-pagination-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.yable-pagination-select-icon {
+  display: flex;
+  align-items: center;
+  color: var(--yable-text-tertiary);
+  pointer-events: none;
+}
+
+/* Pivot zone values */
+.yable-pivot-zone--values {
+  border-color: color-mix(in srgb, var(--yable-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--yable-accent) 3%, var(--yable-bg));
+}
+
+/* Status bar section variants */
+.yable-status-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.yable-status-bar-center {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.yable-status-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.yable-status-bar-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--yable-border-color);
+}
+
+/* Sidebar panel variants */
+.yable-sidebar-columns,
+.yable-sidebar-filters {
+  /* These are semantic class hooks; layout comes from .yable-sidebar-panel */
+}
+
+/* Tooltip position variants */
+.yable-tooltip--top,
+.yable-tooltip--bottom,
+.yable-tooltip--left,
+.yable-tooltip--right {
+  /* Positioned via JS; these are hooks for direction-aware animations */
+}
+
+.yable-tooltip-arrow-svg {
+  position: absolute;
+  display: block;
+  color: var(--yable-text-primary);
+}
+
+/* Virtual scroll */
+.yable-virtual-scroll-container {
+  position: relative;
+  overflow: auto;
+  will-change: transform;
+}
+
+.yable-virtual-scroll-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.yable-virtual-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yable-virtual-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--yable-border-color-strong);
+  border-radius: 3px;
+}
+
+.yable-virtual-scroll-container::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.yable-virtual-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--yable-border-color-strong) transparent;
+}
+
+.yable-virtual-spacer {
+  width: 100%;
+  pointer-events: none;
 }
