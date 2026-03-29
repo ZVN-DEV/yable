@@ -1,7 +1,7 @@
 // @yable/react — Table Body Component
 
 import React, { useCallback, useRef } from 'react'
-import type { RowData, Table, Row } from '@yable/core'
+import type { Column, RowData, Table, Row } from '@yable/core'
 import { TableCell } from './TableCell'
 import { CellErrorBoundary } from './ErrorBoundary'
 import { useVirtualization } from '../hooks/useVirtualization'
@@ -16,6 +16,9 @@ export function TableBody<TData extends RowData>({
   clickableRows,
 }: TableBodyProps<TData>) {
   const rows = table.getRowModel().rows
+  const visibleColumns = table.getVisibleLeafColumns()
+  const activeCell = table.getState().editing.activeCell
+  const focusedCell = table.getFocusedCell()
   const options = table.options
   const enableVirtualization = options.enableVirtualization ?? false
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -36,11 +39,20 @@ export function TableBody<TData extends RowData>({
     // Non-virtualized: render all rows directly
     return (
       <tbody className="yable-tbody">
-        {rows.map((row) => (
+        {rows.map((row, rowIndex) => (
           <MemoizedTableRow
             key={row.id}
             row={row}
             table={table}
+            rowIndex={rowIndex}
+            visibleColumns={visibleColumns}
+            isSelected={row.getIsSelected()}
+            isExpanded={row.getIsExpanded()}
+            activeColumnId={activeCell?.rowId === row.id ? activeCell.columnId : undefined}
+            focusedColumnIndex={
+              focusedCell?.rowIndex === rowIndex ? focusedCell.columnIndex : null
+            }
+            hasFocusedCell={focusedCell !== null}
             clickable={clickableRows}
           />
         ))}
@@ -59,7 +71,7 @@ export function TableBody<TData extends RowData>({
       <tr style={{ height: 0, padding: 0, border: 'none' }}>
         <td
           style={{ height: 0, padding: 0, border: 'none' }}
-          colSpan={table.getVisibleLeafColumns().length}
+          colSpan={visibleColumns.length}
         >
           <div
             ref={scrollContainerRef}
@@ -93,6 +105,19 @@ export function TableBody<TData extends RowData>({
                         key={row.id}
                         row={row}
                         table={table}
+                        rowIndex={vRow.index}
+                        visibleColumns={visibleColumns}
+                        isSelected={row.getIsSelected()}
+                        isExpanded={row.getIsExpanded()}
+                        activeColumnId={
+                          activeCell?.rowId === row.id ? activeCell.columnId : undefined
+                        }
+                        focusedColumnIndex={
+                          focusedCell?.rowIndex === vRow.index
+                            ? focusedCell.columnIndex
+                            : null
+                        }
+                        hasFocusedCell={focusedCell !== null}
                         clickable={clickableRows}
                         virtualStyle={{
                           position: 'absolute' as const,
@@ -122,6 +147,13 @@ export function TableBody<TData extends RowData>({
 interface TableRowProps<TData extends RowData> {
   row: Row<TData>
   table: Table<TData>
+  rowIndex: number
+  visibleColumns: Column<TData, unknown>[]
+  isSelected: boolean
+  isExpanded: boolean
+  activeColumnId?: string
+  focusedColumnIndex: number | null
+  hasFocusedCell: boolean
   clickable?: boolean
   virtualStyle?: React.CSSProperties
 }
@@ -129,11 +161,16 @@ interface TableRowProps<TData extends RowData> {
 function TableRowInner<TData extends RowData>({
   row,
   table,
+  rowIndex,
+  visibleColumns,
+  isSelected,
+  isExpanded,
+  activeColumnId,
+  focusedColumnIndex,
+  hasFocusedCell,
   clickable,
   virtualStyle,
 }: TableRowProps<TData>) {
-  const isSelected = row.getIsSelected()
-  const isExpanded = row.getIsExpanded()
   const visibleCells = row.getVisibleCells()
 
   const handleClick = useCallback(
@@ -177,23 +214,36 @@ function TableRowInner<TData extends RowData>({
         data-expanded={isExpanded || undefined}
         data-clickable={clickable || undefined}
         data-row-id={row.id}
+        data-row-index={rowIndex}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onContextMenu={handleContextMenu}
       >
-        {visibleCells.map((cell) => (
-          <CellErrorBoundary
-            key={cell.id}
-            resetKeys={[cell.getValue(), cell.getIsEditing()]}
-          >
-            <TableCell cell={cell} table={table} />
-          </CellErrorBoundary>
-        ))}
+        {visibleCells.map((cell, columnIndex) => {
+          const isFocused = focusedColumnIndex === columnIndex
+          const isTabStop = isFocused || (!hasFocusedCell && rowIndex === 0 && columnIndex === 0)
+
+          return (
+            <CellErrorBoundary
+              key={cell.id}
+              resetKeys={[cell.getValue(), activeColumnId === cell.column.id, isFocused]}
+            >
+              <TableCell
+                cell={cell}
+                table={table}
+                rowIndex={rowIndex}
+                columnIndex={columnIndex}
+                isFocused={isFocused}
+                isTabStop={isTabStop}
+              />
+            </CellErrorBoundary>
+          )
+        })}
       </tr>
 
       {isExpanded && (
         <tr className="yable-expand-row">
-          <td className="yable-td" colSpan={visibleCells.length}>
+          <td className="yable-td" colSpan={visibleColumns.length}>
             {typeof (row as any)._renderExpanded === 'function'
               ? (row as any)._renderExpanded()
               : null}
@@ -213,17 +263,28 @@ function areRowPropsEqual<TData extends RowData>(
   // Different row identity
   if (prev.row.id !== next.row.id) return false
 
+  // Current row-model position changed
+  if (prev.rowIndex !== next.rowIndex) return false
+
+  // Visible columns or ordering changed
+  if (prev.visibleColumns !== next.visibleColumns) return false
+
   // Data reference changed — re-render
   if (prev.row.original !== next.row.original) return false
 
   // Selection state
-  if (prev.row.getIsSelected() !== next.row.getIsSelected()) return false
+  if (prev.isSelected !== next.isSelected) return false
 
   // Expansion state
-  if (prev.row.getIsExpanded() !== next.row.getIsExpanded()) return false
+  if (prev.isExpanded !== next.isExpanded) return false
 
   // Clickable prop
   if (prev.clickable !== next.clickable) return false
+
+  // Focus / edit state for this row
+  if (prev.activeColumnId !== next.activeColumnId) return false
+  if (prev.focusedColumnIndex !== next.focusedColumnIndex) return false
+  if (prev.hasFocusedCell !== next.hasFocusedCell) return false
 
   // Virtual positioning
   if (prev.virtualStyle !== next.virtualStyle) {
@@ -231,15 +292,6 @@ function areRowPropsEqual<TData extends RowData>(
     if (!prev.virtualStyle || !next.virtualStyle) return false
     if (prev.virtualStyle.transform !== next.virtualStyle.transform) return false
     if (prev.virtualStyle.height !== next.virtualStyle.height) return false
-  }
-
-  // Check if any cell is in editing state — editing state changes need re-render
-  const prevCells = prev.row.getVisibleCells()
-  const nextCells = next.row.getVisibleCells()
-  if (prevCells.length !== nextCells.length) return false
-
-  for (let i = 0; i < prevCells.length; i++) {
-    if (prevCells[i].getIsEditing() !== nextCells[i].getIsEditing()) return false
   }
 
   // Table reference changed (e.g., options update)

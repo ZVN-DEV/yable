@@ -13,6 +13,7 @@ import { StatusBar } from './StatusBar'
 import { Sidebar } from './Sidebar'
 import { ContextMenu } from './ContextMenu'
 import { useContextMenu } from '../hooks/useContextMenu'
+import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation'
 
 export function Table<TData extends RowData>({
   table,
@@ -71,6 +72,7 @@ export function Table<TData extends RowData>({
 
   // Context menu
   const contextMenu = useContextMenu()
+  useKeyboardNavigation(table, { containerRef })
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
