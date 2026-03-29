@@ -323,6 +323,12 @@
   position: relative;
 }
 
+.yable-td.yable-cell--focused:not([data-editing="true"]) {
+  box-shadow: var(--yable-focus-ring);
+  position: relative;
+  z-index: calc(var(--yable-z-pinned) + 1);
+}
+
 /* ── Column Pinning ──────────────────────────────────────────────────────── */
 
 .yable-th[data-pinned="left"],

@@ -47,6 +47,10 @@ export type {
   RowDragState,
   PivotConfig,
   PivotState,
+  KeyboardNavigationCell,
+  KeyboardNavigationState,
+  KeyboardNavigationDirection,
+  KeyboardNavigationAction,
   RowDragEvent,
   RowDragEndEvent,
   RowReorderEvent,
@@ -121,6 +125,8 @@ export { CellDatePicker } from './form/CellDatePicker'
 // Feature hooks
 export { useClipboard } from './hooks/useClipboard'
 export type { UseClipboardOptions } from './hooks/useClipboard'
+export { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
+export type { UseKeyboardNavigationOptions } from './hooks/useKeyboardNavigation'
 export { useFillHandle } from './hooks/useFillHandle'
 export type { FillHandleDragState, UseFillHandleOptions, UseFillHandleReturn } from './hooks/useFillHandle'
 

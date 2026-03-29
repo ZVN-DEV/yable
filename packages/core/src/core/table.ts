@@ -27,6 +27,9 @@ import type {
   RowPinningState,
   GroupingState,
   EditingState,
+  KeyboardNavigationAction,
+  KeyboardNavigationCell,
+  KeyboardNavigationState,
   YableEventMap,
 } from '../types'
 import { functionalUpdate, memo, makeStateUpdater } from '../utils'
@@ -36,6 +39,11 @@ import { buildHeaderGroups } from './headers'
 import { EventEmitterImpl } from '../events/EventEmitter'
 import { getDefaultLocale } from '../i18n/locales'
 import type { YableLocale } from '../i18n/en'
+import {
+  getCellPositionByIds,
+  getNextFocusedCell,
+  normalizeFocusedCell,
+} from '../features/keyboardNavigation'
 
 // Re-export resolvers for convenience (they live in resolvers.ts to avoid circular deps)
 export { resolveSortingFn, resolveFilterFn } from './resolvers'
@@ -66,6 +74,7 @@ const getInitialState = (): TableState => ({
   rowPinning: { top: [], bottom: [] },
   grouping: [],
   editing: { activeCell: undefined, pendingValues: {} },
+  keyboardNavigation: { focusedCell: null },
   undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
   fillHandle: { isDragging: false },
   formulas: { enabled: false, formulas: {}, computedValues: {}, errors: {} },
@@ -114,6 +123,7 @@ export function createTable<TData extends RowData>(
     enableHiding: true,
     enableGrouping: false,
     enableExpanding: true,
+    enableKeyboardNavigation: true,
     manualSorting: false,
     manualFiltering: false,
     manualPagination: false,
@@ -496,6 +506,11 @@ export function createTable<TData extends RowData>(
     // Editing API
     setEditing: (_updater: Updater<EditingState>) => {},
     startEditing: (rowId: string, columnId: string) => {
+      const focusedCell = getCellPositionByIds(table, rowId, columnId)
+      if (focusedCell) {
+        table.setFocusedCell(focusedCell)
+      }
+
       table.setEditing((old: EditingState) => ({
         ...old,
         activeCell: { rowId, columnId },
@@ -504,17 +519,36 @@ export function createTable<TData extends RowData>(
     commitEdit: () => {
       const editing = table.getState().editing
       if (editing?.activeCell) {
+        const focusedCell = getCellPositionByIds(
+          table,
+          editing.activeCell.rowId,
+          editing.activeCell.columnId
+        )
+
         table.setEditing((old: EditingState) => ({
           ...old,
           activeCell: undefined,
         }))
+
+        if (focusedCell) {
+          table.setFocusedCell(focusedCell)
+        }
       }
     },
     cancelEdit: () => {
+      const editing = table.getState().editing
+      const focusedCell = editing?.activeCell
+        ? getCellPositionByIds(table, editing.activeCell.rowId, editing.activeCell.columnId)
+        : null
+
       table.setEditing((old: EditingState) => ({
         ...old,
         activeCell: undefined,
       }))
+
+      if (focusedCell) {
+        table.setFocusedCell(focusedCell)
+      }
     },
     resetEditing: (defaultState?: boolean) => {
       table.setEditing(
@@ -571,6 +605,35 @@ export function createTable<TData extends RowData>(
       // Validation errors are not yet tracked in EditingState;
       // return empty until a validation feature is wired up.
       return {}
+    },
+
+    // Keyboard Navigation API
+    setKeyboardNavigation: (_updater: Updater<KeyboardNavigationState>) => {},
+    getFocusedCell: () => {
+      return normalizeFocusedCell(table, table.getState().keyboardNavigation?.focusedCell)
+    },
+    setFocusedCell: (cell: KeyboardNavigationCell | null) => {
+      const normalized = normalizeFocusedCell(table, cell)
+      table.setKeyboardNavigation((old: KeyboardNavigationState) => ({
+        ...old,
+        focusedCell: normalized,
+      }))
+    },
+    clearFocusedCell: () => {
+      table.setKeyboardNavigation((old: KeyboardNavigationState) => ({
+        ...old,
+        focusedCell: null,
+      }))
+    },
+    moveFocus: (action: KeyboardNavigationAction) => {
+      const nextCell = getNextFocusedCell(table, table.getFocusedCell(), action)
+      table.setFocusedCell(nextCell)
+      return nextCell
+    },
+    resetKeyboardNavigation: (defaultState?: boolean) => {
+      table.setKeyboardNavigation(
+        defaultState ? { focusedCell: null } : table.getState().keyboardNavigation
+      )
     },
 
     // Export API
@@ -646,6 +709,7 @@ export function createTable<TData extends RowData>(
   table.setRowPinning = wireUpdater<RowPinningState>('rowPinning')
   table.setGrouping = wireUpdater<GroupingState>('grouping')
   table.setEditing = wireUpdater<EditingState>('editing')
+  table.setKeyboardNavigation = wireUpdater<KeyboardNavigationState>('keyboardNavigation')
   table.setPagination = wireUpdater<PaginationState>('pagination')
 
   // ---------------------------------------------------------------------------

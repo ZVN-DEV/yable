@@ -94,6 +94,7 @@ export function createTableDOM<TData extends RowData>(
     rowPinning: { top: [], bottom: [] },
     grouping: [],
     editing: { activeCell: undefined, pendingValues: {} },
+    keyboardNavigation: { focusedCell: null },
     undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
     fillHandle: { isDragging: false },
     formulas: { enabled: false, formulas: {}, computedValues: {}, errors: {} },

@@ -327,6 +327,10 @@ export interface TableOptions<TData extends RowData> {
   onEditingChange?: OnChangeFn<EditingState>
   onEditCommit?: (changes: Record<string, Partial<TData>>) => void
 
+  // Keyboard navigation options
+  enableKeyboardNavigation?: boolean
+  onKeyboardNavigationChange?: OnChangeFn<KeyboardNavigationState>
+
   // Virtualization options
   enableVirtualization?: boolean
   rowHeight?: number | ((index: number) => number)
@@ -401,6 +405,7 @@ export interface TableState {
   rowPinning: RowPinningState
   grouping: GroupingState
   editing: EditingState
+  keyboardNavigation: KeyboardNavigationState
   undoRedo: UndoRedoState
   fillHandle: FillHandleState
   formulas: FormulaState
@@ -529,6 +534,42 @@ export interface EditingState {
   /** Set of row IDs currently being edited in full-row mode */
   editingRows?: string[]
 }
+
+// Keyboard Navigation
+export interface KeyboardNavigationCell {
+  rowIndex: number
+  columnIndex: number
+}
+
+export interface KeyboardNavigationState {
+  focusedCell: KeyboardNavigationCell | null
+}
+
+export type KeyboardNavigationDirection = 'up' | 'down' | 'left' | 'right'
+
+export type KeyboardNavigationAction =
+  | {
+      type: 'arrow'
+      direction: KeyboardNavigationDirection
+      ctrlKey?: boolean
+    }
+  | {
+      type: 'tab'
+      shiftKey?: boolean
+    }
+  | {
+      type: 'home'
+      ctrlKey?: boolean
+    }
+  | {
+      type: 'end'
+      ctrlKey?: boolean
+    }
+  | {
+      type: 'page'
+      direction: 'up' | 'down'
+      pageSize: number
+    }
 
 // Undo/Redo
 export interface UndoRedoState {
@@ -795,6 +836,14 @@ export interface Table<TData extends RowData> {
   isValid: () => boolean
   setEditing: (updater: Updater<EditingState>) => void
   resetEditing: (defaultState?: boolean) => void
+
+  // Keyboard Navigation API
+  getFocusedCell: () => KeyboardNavigationCell | null
+  setFocusedCell: (cell: KeyboardNavigationCell | null) => void
+  clearFocusedCell: () => void
+  moveFocus: (action: KeyboardNavigationAction) => KeyboardNavigationCell | null
+  setKeyboardNavigation: (updater: Updater<KeyboardNavigationState>) => void
+  resetKeyboardNavigation: (defaultState?: boolean) => void
 
   // Export API
   exportData: (options?: ExportOptions) => string

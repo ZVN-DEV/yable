@@ -42,6 +42,7 @@ function makeTableWithState(
     rowPinning: { top: [], bottom: [] },
     grouping: [],
     editing: { activeCell: undefined, pendingValues: {} },
+    keyboardNavigation: { focusedCell: null },
     ...stateOverrides,
   }
 

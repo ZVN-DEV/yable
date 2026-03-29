@@ -56,6 +56,10 @@ export type {
   RowPinningState,
   GroupingState,
   EditingState,
+  KeyboardNavigationCell,
+  KeyboardNavigationState,
+  KeyboardNavigationDirection,
+  KeyboardNavigationAction,
   AggregationFn,
   AggregationFnOption,
 
@@ -177,6 +181,16 @@ export { EventEmitterImpl } from './events/EventEmitter'
 
 export { detectCellChanges } from './features/cellFlash'
 export type { CellFlashInfo } from './features/cellFlash'
+export {
+  canCellEnterEditMode,
+  getCellPositionByIds,
+  getFirstKeyboardCell,
+  getLastKeyboardCell,
+  getNextFocusedCell,
+  getResolvedFocusedCell,
+  normalizeFocusedCell,
+} from './features/keyboardNavigation'
+export type { ResolvedKeyboardNavigationCell } from './features/keyboardNavigation'
 
 // ---------------------------------------------------------------------------
 // Locale / i18n
