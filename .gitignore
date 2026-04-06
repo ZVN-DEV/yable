@@ -10,3 +10,6 @@ dist/
 *.png
 *.jpg
 
+# Playwright MCP artifacts
+.playwright-mcp/
+
