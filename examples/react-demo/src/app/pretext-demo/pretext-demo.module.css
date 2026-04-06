@@ -1,0 +1,399 @@
+/* ============================================================================
+   Pretext + Yable Demo
+   Proves pixel-perfect variable-height virtualization using Pretext.
+   Dark, technical aesthetic — the data speaks for itself.
+   ============================================================================ */
+
+.page {
+  --px-bg: #08080a;
+  --px-surface: #111114;
+  --px-surface-2: #18181c;
+  --px-border: rgba(255, 255, 255, 0.08);
+  --px-text: #e8e6e3;
+  --px-text-soft: rgba(232, 230, 227, 0.65);
+  --px-text-muted: rgba(232, 230, 227, 0.38);
+  --px-accent: #22d3ee;
+  --px-accent-soft: rgba(34, 211, 238, 0.12);
+  --px-green: #34d399;
+  --px-green-soft: rgba(52, 211, 153, 0.12);
+  --px-amber: #fbbf24;
+  --px-red: #f87171;
+
+  min-height: 100vh;
+  background: var(--px-bg);
+  color: var(--px-text);
+  font-family: var(--font-body), -apple-system, system-ui, sans-serif;
+  padding: 0 32px 64px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 32px 0 24px;
+  border-bottom: 1px solid var(--px-border);
+  margin-bottom: 24px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display), serif;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--px-accent), #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--px-text-muted);
+}
+
+.backLink {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--px-text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid var(--px-border);
+  border-radius: 6px;
+  transition: all 120ms ease;
+}
+
+.backLink:hover {
+  color: var(--px-text-soft);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* ── Controls ────────────────────────────────────────────────────────────── */
+
+.controls {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 16px;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.controlLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--px-text-muted);
+}
+
+.btnGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border: 1px solid var(--px-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--px-text-muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.btn:hover {
+  color: var(--px-text-soft);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.btnActive {
+  background: var(--px-accent-soft);
+  border-color: var(--px-accent);
+  color: var(--px-text);
+}
+
+/* ── Stats Bar ───────────────────────────────────────────────────────────── */
+
+.stats {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--px-border);
+  border-radius: 6px;
+  background: var(--px-surface);
+}
+
+.statLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--px-text-muted);
+}
+
+.statValue {
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--px-text);
+}
+
+.statHighlight {
+  color: var(--px-accent);
+}
+
+/* ── Mode Indicator ──────────────────────────────────────────────────────── */
+
+.modeIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.modePretext {
+  background: var(--px-green-soft);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: var(--px-green);
+}
+
+.modeFixed {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: var(--px-amber);
+}
+
+.modeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--px-green);
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+.modeDotFixed {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--px-amber);
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ── Table ────────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  border: 1px solid var(--px-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--px-surface);
+  margin-bottom: 32px;
+}
+
+.tableWrap :global(.yable) {
+  font-family: var(--font-body), sans-serif;
+  font-size: 13px;
+  border-radius: 0;
+  border: none;
+}
+
+/* ── Cell Styles ──────────────────────────────────────────────────────────── */
+
+.cellTitle {
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.cellExcerpt {
+  color: var(--px-text-soft);
+  line-height: 1.5;
+  display: block;
+}
+
+.cellAuthor {
+  color: var(--px-accent);
+  font-size: 12px;
+}
+
+.cellCategory {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--px-accent-soft);
+  color: var(--px-accent);
+}
+
+.cellNumeric {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.statusBadge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status_published {
+  background: var(--px-green-soft);
+  color: var(--px-green);
+}
+
+.status_published::before {
+  background: var(--px-green);
+}
+
+.status_draft {
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--px-amber);
+}
+
+.status_draft::before {
+  background: var(--px-amber);
+}
+
+.status_review {
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+}
+
+.status_review::before {
+  background: #818cf8;
+}
+
+/* ── Explainer ───────────────────────────────────────────────────────────── */
+
+.explainer {
+  padding-top: 16px;
+}
+
+.explainerTitle {
+  margin: 0 0 20px;
+  font-family: var(--font-display), serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--px-text);
+}
+
+.explainerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.explainerCard {
+  position: relative;
+  padding: 20px;
+  border: 1px solid var(--px-border);
+  border-radius: 10px;
+  background: var(--px-surface);
+}
+
+.explainerCard h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--px-accent);
+}
+
+.explainerCard p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--px-text-soft);
+}
+
+.explainerStep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--px-accent-soft);
+  color: var(--px-accent);
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .page {
+    padding: 0 16px 48px;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stats {
+    flex-wrap: wrap;
+  }
+
+  .explainerGrid {
+    grid-template-columns: 1fr;
+  }
+}

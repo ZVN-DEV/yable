@@ -9,5 +9,5 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   minify: false,
-  external: ['react', 'react-dom', '@yable/core', '@yable/themes'],
+  external: ['react', 'react-dom', '@yable/core', '@yable/themes', '@chenglou/pretext'],
 })

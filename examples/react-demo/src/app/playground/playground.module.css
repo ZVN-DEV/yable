@@ -1,0 +1,559 @@
+/* ============================================================================
+   Yable Playground — Interactive Table Workbench
+   Aesthetic: Developer tool meets design studio. Think Figma's inspector
+   panel crossed with a recording studio mixer. Clean, functional, precise.
+   ============================================================================ */
+
+.playground {
+  --pg-bg: #0a0a0c;
+  --pg-surface: #111114;
+  --pg-surface-2: #18181c;
+  --pg-surface-3: #1f1f24;
+  --pg-border: rgba(255, 255, 255, 0.08);
+  --pg-border-strong: rgba(255, 255, 255, 0.14);
+  --pg-text: #e8e6e3;
+  --pg-text-soft: rgba(232, 230, 227, 0.7);
+  --pg-text-muted: rgba(232, 230, 227, 0.42);
+  --pg-accent: #6366f1;
+  --pg-accent-soft: rgba(99, 102, 241, 0.14);
+  --pg-success: #34d399;
+  --pg-warning: #fbbf24;
+  --pg-danger: #f87171;
+
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--pg-bg);
+  color: var(--pg-text);
+  font-family: var(--font-body), -apple-system, system-ui, sans-serif;
+}
+
+/* ── Control Panel ─────────────────────────────────────────────────────── */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--pg-surface);
+  border-right: 1px solid var(--pg-border);
+  overflow-y: auto;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.panelHeader {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.panelTitle {
+  margin: 0;
+  font-family: var(--font-display), serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.panelSub {
+  margin: 6px 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pg-text-muted);
+}
+
+/* ── Sections ──────────────────────────────────────────────────────────── */
+
+.section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pg-text-muted);
+}
+
+/* ── Theme Grid ────────────────────────────────────────────────────────── */
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.themeSwatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--pg-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pg-text-soft);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.themeSwatch:hover {
+  border-color: var(--pg-border-strong);
+  background: var(--pg-surface-2);
+}
+
+.themeSwatchActive {
+  border-color: var(--pg-accent);
+  background: var(--pg-accent-soft);
+  color: var(--pg-text);
+}
+
+.swatchDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.swatchLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Toggle Buttons ────────────────────────────────────────────────────── */
+
+.toggleRow {
+  display: flex;
+  gap: 4px;
+}
+
+.toggleBtn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--pg-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pg-text-muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.toggleBtn:hover {
+  color: var(--pg-text-soft);
+  border-color: var(--pg-border-strong);
+}
+
+.toggleBtnActive {
+  background: var(--pg-accent-soft);
+  border-color: var(--pg-accent);
+  color: var(--pg-text);
+}
+
+/* ── Switch ────────────────────────────────────────────────────────────── */
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.switchLabel {
+  font-size: 13px;
+  color: var(--pg-text-soft);
+}
+
+.switchTrack {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--pg-border-strong);
+  background: var(--pg-surface-3);
+  position: relative;
+  cursor: pointer;
+  transition: all 160ms ease;
+  padding: 0;
+}
+
+.switchTrackOn {
+  background: var(--pg-accent);
+  border-color: var(--pg-accent);
+}
+
+.switchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--pg-text);
+  transition: transform 160ms ease;
+}
+
+.switchTrackOn .switchThumb {
+  transform: translateX(16px);
+  background: #fff;
+}
+
+/* ── Dataset Buttons ───────────────────────────────────────────────────── */
+
+.datasetGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.datasetBtn {
+  padding: 6px 10px;
+  border: 1px solid var(--pg-border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--pg-text-muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.datasetBtn:hover {
+  color: var(--pg-text-soft);
+  border-color: var(--pg-border-strong);
+}
+
+.datasetBtnActive {
+  background: var(--pg-accent-soft);
+  border-color: var(--pg-accent);
+  color: var(--pg-text);
+}
+
+/* ── Stats ─────────────────────────────────────────────────────────────── */
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.statCard {
+  padding: 10px;
+  border: 1px solid var(--pg-border);
+  border-radius: 6px;
+  background: var(--pg-surface-2);
+}
+
+.statLabel {
+  display: block;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pg-text-muted);
+  margin-bottom: 4px;
+}
+
+.statValue {
+  display: block;
+  font-family: var(--font-display), serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--pg-text);
+}
+
+.statAccent {
+  color: var(--pg-warning);
+}
+
+/* ── Panel Footer ──────────────────────────────────────────────────────── */
+
+.panelFooter {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--pg-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footerBrand {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--pg-text-muted);
+}
+
+.footerVersion {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--pg-text-muted);
+  padding: 3px 8px;
+  border: 1px solid var(--pg-border);
+  border-radius: 4px;
+}
+
+/* ── Stage (Table Area) ────────────────────────────────────────────────── */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 20px 24px;
+}
+
+.stageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.stageInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.stageThemeLabel {
+  font-family: var(--font-display), serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.stagePropList {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--pg-text-muted);
+}
+
+/* ── Edit Actions ──────────────────────────────────────────────────────── */
+
+.editActions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnDiscard,
+.btnSave {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.btnDiscard {
+  border: 1px solid var(--pg-border-strong);
+  background: transparent;
+  color: var(--pg-text-soft);
+}
+
+.btnDiscard:hover {
+  border-color: var(--pg-danger);
+  color: var(--pg-danger);
+}
+
+.btnSave {
+  border: 1px solid var(--pg-accent);
+  background: var(--pg-accent);
+  color: #fff;
+}
+
+.btnSave:hover {
+  opacity: 0.88;
+}
+
+/* ── Search Bar ────────────────────────────────────────────────────────── */
+
+.searchBar {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--pg-text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.searchBar input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px 0 42px;
+  border: 1px solid var(--pg-border) !important;
+  border-radius: 8px !important;
+  background: var(--pg-surface) !important;
+  color: var(--pg-text) !important;
+  font-family: var(--font-body), sans-serif !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+  transition: border-color 120ms ease;
+}
+
+.searchBar input::placeholder {
+  color: var(--pg-text-muted);
+}
+
+.searchBar input:focus {
+  border-color: var(--pg-accent) !important;
+  outline: none;
+}
+
+/* ── Table Container ───────────────────────────────────────────────────── */
+
+.tableContainer {
+  flex: 1;
+  border: 1px solid var(--pg-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--pg-surface);
+}
+
+.tableContainer :global(.yable) {
+  font-family: var(--font-body), sans-serif;
+  font-size: 13px;
+  border-radius: 0;
+  border: none;
+}
+
+.tableContainer :global(.yable-pagination) {
+  border-top: 1px solid var(--pg-border);
+}
+
+/* ── Cell Styles ───────────────────────────────────────────────────────── */
+
+.cellName {
+  font-weight: 500;
+}
+
+.cellEmail {
+  color: var(--pg-accent);
+  font-size: 12px;
+}
+
+.cellNumeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.cellCurrency {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.cellDepartment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  background: var(--pg-accent-soft);
+  color: var(--pg-accent);
+}
+
+.cellRating {
+  color: var(--pg-warning);
+  letter-spacing: 2px;
+  font-size: 14px;
+}
+
+.statusDot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.statusDot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusActive {
+  color: var(--pg-success);
+}
+
+.statusActive::before {
+  background: var(--pg-success);
+}
+
+.statusInactive {
+  color: var(--pg-danger);
+}
+
+.statusInactive::before {
+  background: var(--pg-danger);
+}
+
+/* ── Light Mode ─────────────────────────────────────────────────────── */
+
+.playground[data-yable-theme="light"] {
+  --pg-bg: #f5f5f7;
+  --pg-surface: #ffffff;
+  --pg-surface-2: #f0f0f3;
+  --pg-surface-3: #e8e8ec;
+  --pg-border: rgba(0, 0, 0, 0.09);
+  --pg-border-strong: rgba(0, 0, 0, 0.16);
+  --pg-text: #1a1a1e;
+  --pg-text-soft: rgba(26, 26, 30, 0.72);
+  --pg-text-muted: rgba(26, 26, 30, 0.42);
+  --pg-accent: #6366f1;
+  --pg-accent-soft: rgba(99, 102, 241, 0.1);
+  --pg-success: #059669;
+  --pg-warning: #d97706;
+  --pg-danger: #dc2626;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .playground {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--pg-border);
+  }
+
+  .themeGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stage {
+    min-height: auto;
+  }
+}

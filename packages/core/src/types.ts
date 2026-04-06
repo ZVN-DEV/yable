@@ -336,6 +336,10 @@ export interface TableOptions<TData extends RowData> {
   rowHeight?: number | ((index: number) => number)
   overscan?: number
   estimateRowHeight?: number
+  /** Pre-computed row heights from Pretext measurement (Float64Array indexed by row) */
+  pretextHeights?: Float64Array | null
+  /** Pre-computed prefix sums for O(log n) scroll lookups */
+  pretextPrefixSums?: Float64Array | null
 
   // Export options
   enableExport?: boolean

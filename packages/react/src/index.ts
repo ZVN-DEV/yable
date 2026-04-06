@@ -100,6 +100,12 @@ export type {
   UseVirtualizationOptions,
   UseVirtualizationResult,
 } from './hooks/useVirtualization'
+export { usePretextMeasurement } from './hooks/usePretextMeasurement'
+export type {
+  CellMeasurement,
+  UsePretextMeasurementOptions,
+  UsePretextMeasurementResult,
+} from './hooks/usePretextMeasurement'
 
 // Context
 export { useTableContext, TableProvider } from './context'
@@ -115,12 +121,37 @@ export { GlobalFilter } from './components/GlobalFilter'
 export { SortIndicator } from './components/SortIndicator'
 export { ErrorBoundary, CellErrorBoundary } from './components/ErrorBoundary'
 
-// Form components
+// Form components (editing)
 export { CellInput } from './form/CellInput'
 export { CellSelect } from './form/CellSelect'
 export { CellCheckbox } from './form/CellCheckbox'
 export { CellToggle } from './form/CellToggle'
 export { CellDatePicker } from './form/CellDatePicker'
+
+// Display cell types (styled data — no custom components needed)
+export {
+  CellBadge,
+  CellCurrency,
+  CellStatus,
+  CellNumeric,
+  CellRating,
+  CellBoolean,
+  CellProgress,
+  CellDate,
+  CellLink,
+} from './cells'
+export type {
+  CellBadgeProps,
+  CellCurrencyProps,
+  CellStatusProps,
+  CellNumericProps,
+  CellRatingProps,
+  CellBooleanProps,
+  CellProgressProps,
+  CellDateProps,
+  CellLinkProps,
+  CellMeasureRecipe,
+} from './cells'
 
 // Feature hooks
 export { useClipboard } from './hooks/useClipboard'

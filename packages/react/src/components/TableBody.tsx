@@ -26,6 +26,8 @@ export function TableBody<TData extends RowData>({
   const rowHeight = options.rowHeight ?? 40
   const overscan = options.overscan ?? 5
   const estimateRowHeight = options.estimateRowHeight
+  const pretextHeights = options.pretextHeights ?? null
+  const pretextPrefixSums = options.pretextPrefixSums ?? null
 
   const { virtualRows, totalHeight } = useVirtualization({
     containerRef: scrollContainerRef,
@@ -33,6 +35,8 @@ export function TableBody<TData extends RowData>({
     rowHeight,
     overscan,
     estimateRowHeight,
+    pretextHeights,
+    pretextPrefixSums,
   })
 
   if (!enableVirtualization) {
@@ -61,8 +65,11 @@ export function TableBody<TData extends RowData>({
   }
 
   // Virtualized rendering
-  const fixedRowHeight = typeof rowHeight === 'number' ? rowHeight : undefined
-  const containerHeight = fixedRowHeight
+  const hasPretextData = !!(pretextHeights && pretextPrefixSums)
+  const fixedRowHeight = typeof rowHeight === 'number' && !hasPretextData ? rowHeight : undefined
+  const containerHeight = hasPretextData
+    ? Math.min(totalHeight, 800) // Pretext: use real total, cap at 800px viewport
+    : fixedRowHeight
     ? Math.min(totalHeight, fixedRowHeight * 20) // Default visible area ~20 rows
     : 600 // Fallback for variable heights
 

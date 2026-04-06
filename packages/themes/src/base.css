@@ -2388,3 +2388,213 @@
   width: 100%;
   pointer-events: none;
 }
+
+/* ============================================================================
+   Display Cell Types — Styled cell primitives for common data patterns.
+   These use theme tokens so they adapt to any theme automatically.
+   ============================================================================ */
+
+/* ── CellBadge ──────────────────────────────────────────────────────────── */
+
+.yable-cell-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.yable-cell-badge--soft.yable-cell-badge--default { background: var(--yable-bg-hover); color: var(--yable-text-secondary); }
+.yable-cell-badge--soft.yable-cell-badge--accent { background: var(--yable-accent-bg, rgba(99, 102, 241, 0.1)); color: var(--yable-accent); }
+.yable-cell-badge--soft.yable-cell-badge--success { background: rgba(52, 211, 153, 0.1); color: #34d399; }
+.yable-cell-badge--soft.yable-cell-badge--warning { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
+.yable-cell-badge--soft.yable-cell-badge--danger { background: rgba(248, 113, 113, 0.1); color: #f87171; }
+.yable-cell-badge--soft.yable-cell-badge--info { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+
+.yable-cell-badge--solid.yable-cell-badge--default { background: var(--yable-text-secondary); color: var(--yable-bg); }
+.yable-cell-badge--solid.yable-cell-badge--accent { background: var(--yable-accent); color: #fff; }
+.yable-cell-badge--solid.yable-cell-badge--success { background: #34d399; color: #0a2e1f; }
+.yable-cell-badge--solid.yable-cell-badge--warning { background: #fbbf24; color: #422006; }
+.yable-cell-badge--solid.yable-cell-badge--danger { background: #f87171; color: #2a0a0a; }
+.yable-cell-badge--solid.yable-cell-badge--info { background: #38bdf8; color: #082f49; }
+
+.yable-cell-badge--outline { background: transparent; border: 1px solid currentColor; }
+
+/* ── CellCurrency ───────────────────────────────────────────────────────── */
+
+.yable-cell-currency {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.yable-cell-currency--positive { color: #34d399; }
+.yable-cell-currency--negative { color: #f87171; }
+
+/* ── CellStatus ─────────────────────────────────────────────────────────── */
+
+.yable-cell-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.yable-cell-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.yable-cell-status--success { color: #34d399; }
+.yable-cell-status--success::before { background: #34d399; }
+.yable-cell-status--warning { color: #fbbf24; }
+.yable-cell-status--warning::before { background: #fbbf24; }
+.yable-cell-status--danger { color: #f87171; }
+.yable-cell-status--danger::before { background: #f87171; }
+.yable-cell-status--info { color: #38bdf8; }
+.yable-cell-status--info::before { background: #38bdf8; }
+.yable-cell-status--default { color: var(--yable-text-secondary); }
+.yable-cell-status--default::before { background: var(--yable-text-secondary); }
+
+/* ── CellNumeric ────────────────────────────────────────────────────────── */
+
+.yable-cell-numeric {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.yable-cell-numeric__unit {
+  margin-left: 2px;
+  font-size: 0.85em;
+  color: var(--yable-text-secondary);
+}
+
+.yable-cell-numeric--positive { color: #34d399; }
+.yable-cell-numeric--negative { color: #f87171; }
+
+/* ── CellRating ─────────────────────────────────────────────────────────── */
+
+.yable-cell-rating {
+  white-space: nowrap;
+  letter-spacing: 2px;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.yable-cell-rating__filled {
+  color: #fbbf24;
+}
+
+.yable-cell-rating__empty {
+  color: var(--yable-border-color-strong);
+}
+
+/* ── CellBoolean ────────────────────────────────────────────────────────── */
+
+.yable-cell-boolean {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.yable-cell-boolean--dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.yable-cell-boolean--success { color: #34d399; }
+.yable-cell-boolean--success.yable-cell-boolean--dot::before { background: #34d399; }
+.yable-cell-boolean--danger { color: #f87171; }
+.yable-cell-boolean--danger.yable-cell-boolean--dot::before { background: #f87171; }
+
+.yable-cell-boolean--badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.yable-cell-boolean--badge.yable-cell-boolean--success { background: rgba(52, 211, 153, 0.1); }
+.yable-cell-boolean--badge.yable-cell-boolean--danger { background: rgba(248, 113, 113, 0.1); }
+
+/* ── CellProgress ───────────────────────────────────────────────────────── */
+
+.yable-cell-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 60px;
+}
+
+.yable-cell-progress__track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--yable-bg-hover);
+  overflow: hidden;
+}
+
+.yable-cell-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 200ms ease;
+}
+
+.yable-cell-progress--accent .yable-cell-progress__fill { background: var(--yable-accent); }
+.yable-cell-progress--default .yable-cell-progress__fill { background: var(--yable-text-secondary); }
+.yable-cell-progress--success .yable-cell-progress__fill { background: #34d399; }
+.yable-cell-progress--warning .yable-cell-progress__fill { background: #fbbf24; }
+.yable-cell-progress--danger .yable-cell-progress__fill { background: #f87171; }
+
+.yable-cell-progress__label {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8em;
+  color: var(--yable-text-secondary);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ── CellDate ───────────────────────────────────────────────────────────── */
+
+.yable-cell-date {
+  white-space: nowrap;
+  color: var(--yable-text-secondary);
+}
+
+/* ── CellLink ───────────────────────────────────────────────────────────── */
+
+.yable-cell-link {
+  color: var(--yable-accent);
+  text-decoration: none;
+  transition: opacity 120ms ease;
+}
+
+.yable-cell-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.yable-cell-link__icon {
+  margin-left: 3px;
+  font-size: 0.85em;
+}
