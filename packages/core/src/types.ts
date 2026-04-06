@@ -134,6 +134,9 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   // Resizing
   enableResizing?: boolean
 
+  // Reordering — drag the column header to a new position
+  enableReorder?: boolean
+
   // Selection (for checkbox column)
   enableMultiRowSelection?: boolean
 
@@ -311,6 +314,7 @@ export interface TableOptions<TData extends RowData> {
   onColumnVisibilityChange?: OnChangeFn<VisibilityState>
 
   // Column ordering options
+  enableColumnReorder?: boolean
   onColumnOrderChange?: OnChangeFn<ColumnOrderState>
 
   // Column pinning options
@@ -949,6 +953,9 @@ export interface Column<TData extends RowData, TValue = unknown> {
   getCanResize: () => boolean
   getIsResizing: () => boolean
   resetSize: () => void
+
+  // Reordering
+  getCanReorder: () => boolean
 
   // Sorting
   getCanSort: () => boolean

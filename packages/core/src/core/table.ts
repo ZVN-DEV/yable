@@ -120,6 +120,7 @@ export function createTable<TData extends RowData>(
     enableSubRowSelection: true,
     enableRowPinning: false,
     enableColumnResizing: true,
+    enableColumnReorder: true,
     enableHiding: true,
     enableGrouping: false,
     enableExpanding: true,
@@ -816,7 +817,12 @@ export function createTable<TData extends RowData>(
   // ---------------------------------------------------------------------------
 
   table.getHeaderGroups = memo(
-    () => [table.getAllColumns(), table.getState().columnVisibility, table.getState().columnPinning],
+    () => [
+      table.getAllColumns(),
+      table.getState().columnVisibility,
+      table.getState().columnPinning,
+      table.getState().columnOrder,
+    ],
     () => buildHeaderGroups(table, processColumns().topLevel),
     { key: 'getHeaderGroups' }
   )

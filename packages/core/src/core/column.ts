@@ -263,6 +263,15 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       })
     },
 
+    // Reordering
+    getCanReorder: () => {
+      // Disabled by an explicit per-column opt-out, or by the table option,
+      // or for placeholder/group columns (no leaf id to reorder).
+      if (ext.enableReorder === false) return false
+      if (table.options.enableColumnReorder === false) return false
+      return true
+    },
+
     // Faceting
     getFacetedRowModel: () => table.getRowModel(),
     getFacetedUniqueValues: () => new Map(),

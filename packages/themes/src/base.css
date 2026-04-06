@@ -233,6 +233,50 @@
   height: 70%;
 }
 
+/* ── Column Reorder ──────────────────────────────────────────────────────── */
+
+.yable-th[data-reorderable="true"] {
+  cursor: grab;
+}
+
+.yable-th[data-reorderable="true"]:active {
+  cursor: grabbing;
+}
+
+/* When sortable AND reorderable, sort cursor wins on the content area so the
+   header still feels clickable. The drag is initiated from a mousedown that
+   moves; a click without movement still triggers the sort. */
+.yable-th[data-sortable="true"][data-reorderable="true"] {
+  cursor: pointer;
+}
+
+/* Drop indicator — a 2px accent bar on the leading or trailing edge of the
+   target column. Drawn by a child of the th so it doesn't shift layout. */
+.yable-th[data-drag-over]::before,
+.yable-th[data-drag-over]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--yable-accent);
+  pointer-events: none;
+  z-index: calc(var(--yable-z-resize) + 1);
+}
+
+.yable-th[data-drag-over="left"]::before {
+  left: -1px;
+}
+
+.yable-th[data-drag-over="right"]::after {
+  right: -1px;
+}
+
+.yable-th[data-drag-over="left"]::after,
+.yable-th[data-drag-over="right"]::before {
+  display: none;
+}
+
 /* ── Body ────────────────────────────────────────────────────────────────── */
 
 .yable-tbody {

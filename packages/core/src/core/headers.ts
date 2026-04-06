@@ -134,6 +134,20 @@ export function buildHeaderGroups<TData extends RowData>(
 
   const headerGroups: HeaderGroup<TData>[] = []
 
+  // Apply user-controlled column order. The order list may not include every
+  // column (e.g. saved before a new column was added), so unknown ids fall to
+  // the end in their original definition order.
+  const order = table.getState().columnOrder
+  const sortByOrder = (cols: Column<TData, unknown>[]) => {
+    if (!order || order.length === 0) return cols
+    const orderMap = new Map<string, number>(order.map((id, i) => [id, i]))
+    return [...cols].sort((a, b) => {
+      const ai = orderMap.get(a.id) ?? Infinity
+      const bi = orderMap.get(b.id) ?? Infinity
+      return ai - bi
+    })
+  }
+
   // For simple flat columns (no groups), just create one header group
   if (maxDepth === 0) {
     const headerGroup: HeaderGroup<TData> = {
@@ -142,7 +156,7 @@ export function buildHeaderGroups<TData extends RowData>(
       headers: [],
     }
 
-    headerGroup.headers = allColumns
+    headerGroup.headers = sortByOrder(allColumns)
       .filter((col) => col.getIsVisible())
       .map((column, index) =>
         createHeader(table, column, {
