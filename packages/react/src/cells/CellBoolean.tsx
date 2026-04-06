@@ -2,7 +2,14 @@
 // Visual true/false indicator with dot, badge, or icon modes.
 
 import type { RowData, CellContext } from '@yable/core'
-import type { CellBooleanProps } from './types'
+import type { CellBooleanProps, CellMeasureRecipe } from './types'
+
+/** Boolean indicator: short single-line label, sometimes with a dot. */
+export const measureRecipe: CellMeasureRecipe = {
+  font: '500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  lineHeight: 20,
+  padding: 20,
+}
 
 export function CellBoolean<TData extends RowData, TValue>({
   context,

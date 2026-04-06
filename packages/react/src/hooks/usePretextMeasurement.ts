@@ -29,6 +29,12 @@ export interface CellMeasurement {
   lineHeight: number
   /** Vertical padding in px (top + bottom) */
   padding?: number
+  /**
+   * If true, this column never wraps text — Pretext skips text measurement
+   * for it and contributes a constant `lineHeight + padding` to every row.
+   * Use this for visual cells like progress bars and rating stars.
+   */
+  fixedHeight?: boolean
 }
 
 export interface UsePretextMeasurementOptions {
@@ -108,6 +114,7 @@ export function usePretextMeasurement({
   const preparedCacheRef = useRef<Map<string, PreparedText>>(new Map())
 
   // Phase 1: prepare() — runs when data or fonts change
+  // Fixed-height columns are skipped here entirely (no text measurement needed).
   const preparedCells = useMemo(() => {
     if (!pretext || !enabled || data.length === 0 || columns.length === 0) return null
 
@@ -117,6 +124,7 @@ export function usePretextMeasurement({
 
     for (let r = 0; r < data.length; r++) {
       for (const col of columns) {
+        if (col.fixedHeight) continue
         const text = getCellText(data[r], col.columnId)
         if (!text) continue
         const key = `${text}|${col.font}`
@@ -133,11 +141,11 @@ export function usePretextMeasurement({
     return result
     // Re-run when data changes or fonts change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pretext, enabled, data, columns.map((c) => `${c.columnId}:${c.font}`).join('|')])
+  }, [pretext, enabled, data, columns.map((c) => `${c.columnId}:${c.font}:${c.fixedHeight ? 'F' : 'T'}`).join('|')])
 
   // Phase 2: layout() — runs when column widths change (pure math, instant)
   const measurement = useMemo(() => {
-    if (!pretext || !preparedCells || preparedCells.length === 0) {
+    if (!pretext || !preparedCells) {
       return { rowHeights: null, prefixSums: null, totalHeight: 0 }
     }
 
@@ -148,7 +156,22 @@ export function usePretextMeasurement({
     const colMap = new Map<string, CellMeasurement>()
     for (const col of columns) colMap.set(col.columnId, col)
 
-    // Layout every cell and take max height per row
+    // Seed every row with the tallest fixed-height column contribution.
+    // These don't depend on text, so they can be applied up front in O(rows).
+    let fixedFloor = 0
+    for (const col of columns) {
+      if (col.fixedHeight) {
+        const h = col.lineHeight + (col.padding ?? 0)
+        if (h > fixedFloor) fixedFloor = h
+      }
+    }
+    if (fixedFloor > 0) {
+      for (let r = 0; r < data.length; r++) {
+        if (fixedFloor > rowHeights[r]) rowHeights[r] = fixedFloor
+      }
+    }
+
+    // Layout every text cell and take max height per row
     for (const { rowIndex, columnId, prepared } of preparedCells) {
       const col = colMap.get(columnId)
       if (!col) continue

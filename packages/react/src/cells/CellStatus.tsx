@@ -2,7 +2,14 @@
 // Renders a status dot + label for state indicators.
 
 import type { RowData, CellContext } from '@yable/core'
-import type { CellStatusProps } from './types'
+import type { CellStatusProps, CellMeasureRecipe } from './types'
+
+/** Status pill: short, single-line label paired with a color dot. */
+export const measureRecipe: CellMeasureRecipe = {
+  font: '500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  lineHeight: 20,
+  padding: 20,
+}
 
 const DEFAULT_COLOR_MAP: Record<string, string> = {
   active: 'success',

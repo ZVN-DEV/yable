@@ -3,7 +3,14 @@
 
 import { useMemo } from 'react'
 import type { RowData, CellContext } from '@yable/core'
-import type { CellNumericProps } from './types'
+import type { CellNumericProps, CellMeasureRecipe } from './types'
+
+/** Right-aligned tabular number. Always single-line. */
+export const measureRecipe: CellMeasureRecipe = {
+  font: '400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  lineHeight: 20,
+  padding: 20,
+}
 
 export function CellNumeric<TData extends RowData, TValue>({
   context,

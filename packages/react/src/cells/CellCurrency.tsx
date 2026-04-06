@@ -3,7 +3,17 @@
 
 import { useMemo } from 'react'
 import type { RowData, CellContext } from '@yable/core'
-import type { CellCurrencyProps } from './types'
+import type { CellCurrencyProps, CellMeasureRecipe } from './types'
+
+/**
+ * Currency cells render numbers using tabular figures and never wrap.
+ * Treated as a single text line with theme-default body font.
+ */
+export const measureRecipe: CellMeasureRecipe = {
+  font: '400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  lineHeight: 20,
+  padding: 20,
+}
 
 export function CellCurrency<TData extends RowData, TValue>({
   context,

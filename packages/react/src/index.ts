@@ -106,6 +106,20 @@ export type {
   UsePretextMeasurementOptions,
   UsePretextMeasurementResult,
 } from './hooks/usePretextMeasurement'
+export {
+  useAutoMeasurements,
+  resolveMeasureRecipe,
+} from './hooks/useAutoMeasurements'
+export type { AutoMeasurementsOptions } from './hooks/useAutoMeasurements'
+export {
+  useTableRowHeights,
+  DEFAULT_TEXT_RECIPE,
+} from './hooks/useTableRowHeights'
+export type { UseTableRowHeightsOptions } from './hooks/useTableRowHeights'
+export {
+  getMeasureRecipeForCellType,
+  getRegisteredCellTypes,
+} from './cells/resolver'
 
 // Context
 export { useTableContext, TableProvider } from './context'

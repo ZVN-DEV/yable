@@ -12,6 +12,12 @@ export interface CellMeasureRecipe {
   lineHeight: number
   /** Cell padding (top + bottom) in px */
   padding: number
+  /**
+   * If true, the cell renders at a fixed visual height regardless of text content
+   * (e.g. progress bar, rating stars). Pretext will return `lineHeight + padding`
+   * as the row contribution and skip text measurement entirely.
+   */
+  fixedHeight?: boolean
 }
 
 /** Base props shared by all display cell types */

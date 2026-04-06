@@ -2,7 +2,14 @@
 // Clickable link cell with external link support.
 
 import type { RowData, CellContext } from '@yable/core'
-import type { CellLinkProps } from './types'
+import type { CellLinkProps, CellMeasureRecipe } from './types'
+
+/** Link cells render the target text/URL on a single line. */
+export const measureRecipe: CellMeasureRecipe = {
+  font: '400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  lineHeight: 20,
+  padding: 20,
+}
 
 export function CellLink<TData extends RowData, TValue>({
   context,

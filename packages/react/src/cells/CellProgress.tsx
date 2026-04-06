@@ -2,7 +2,18 @@
 // Inline progress bar for percentage or bounded numeric values.
 
 import type { RowData, CellContext } from '@yable/core'
-import type { CellProgressProps } from './types'
+import type { CellProgressProps, CellMeasureRecipe } from './types'
+
+/**
+ * Progress cells render a fixed-height bar (and optional label).
+ * `fixedHeight` tells Pretext to skip text measurement entirely.
+ */
+export const measureRecipe: CellMeasureRecipe = {
+  font: '400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  lineHeight: 20,
+  padding: 20,
+  fixedHeight: true,
+}
 
 export function CellProgress<TData extends RowData, TValue>({
   context,

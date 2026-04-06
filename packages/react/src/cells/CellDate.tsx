@@ -3,7 +3,14 @@
 
 import { useMemo } from 'react'
 import type { RowData, CellContext } from '@yable/core'
-import type { CellDateProps } from './types'
+import type { CellDateProps, CellMeasureRecipe } from './types'
+
+/** Date cells render a single line of formatted text. */
+export const measureRecipe: CellMeasureRecipe = {
+  font: '400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+  lineHeight: 20,
+  padding: 20,
+}
 
 const PRESETS: Record<string, Intl.DateTimeFormatOptions> = {
   short: { month: 'numeric', day: 'numeric', year: '2-digit' },

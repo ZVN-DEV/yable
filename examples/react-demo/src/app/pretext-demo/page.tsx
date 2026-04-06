@@ -1,15 +1,12 @@
 'use client'
 
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import {
   useTable,
   Table,
   createColumnHelper,
-  usePretextMeasurement,
-  CellBadge,
-  CellNumeric,
-  CellStatus,
-  type CellMeasurement,
+  useTableRowHeights,
+  type CellMeasureRecipe,
 } from '@yable/react'
 import s from './pretext-demo.module.css'
 
@@ -83,19 +80,39 @@ function generateArticles(count: number): Article[] {
 }
 
 /* ── Column Definitions ────────────────────────────────────────────────── */
+//
+// This demo intentionally uses the *declarative* cell-type system. Pretext
+// auto-measurement reads each column's `cellType` (or per-column
+// `measureRecipe` override) to derive font/lineHeight/padding without the
+// page having to hand-write a single CellMeasurement object.
 
 const columnHelper = createColumnHelper<Article>()
+
+// Wide free-text columns (title, excerpt) need IBM Plex font. We override
+// the measure recipe so Pretext measures with the exact font that renders.
+const TITLE_RECIPE: CellMeasureRecipe = {
+  font: '500 13px "IBM Plex Sans", sans-serif',
+  lineHeight: 20,
+  padding: 16,
+}
+const EXCERPT_RECIPE: CellMeasureRecipe = {
+  font: '400 13px "IBM Plex Sans", sans-serif',
+  lineHeight: 20,
+  padding: 16,
+}
 
 const columns = [
   columnHelper.accessor('title', {
     header: 'Title',
     cell: (info: any) => <span className={s.cellTitle}>{info.getValue()}</span>,
     size: 250,
+    measureRecipe: TITLE_RECIPE,
   }),
   columnHelper.accessor('excerpt', {
     header: 'Excerpt',
     cell: (info: any) => <span className={s.cellExcerpt}>{info.getValue()}</span>,
     size: 400,
+    measureRecipe: EXCERPT_RECIPE,
   }),
   columnHelper.accessor('author', {
     header: 'Author',
@@ -104,17 +121,18 @@ const columns = [
   }),
   columnHelper.accessor('category', {
     header: 'Category',
-    cell: (info: any) => <CellBadge context={info} variant="accent" appearance="soft" />,
+    cellType: 'badge',
+    cellTypeProps: { variant: 'accent', appearance: 'soft' },
     size: 120,
   }),
   columnHelper.accessor('wordCount', {
     header: 'Words',
-    cell: (info: any) => <CellNumeric context={info} />,
+    cellType: 'numeric',
     size: 80,
   }),
   columnHelper.accessor('status', {
     header: 'Status',
-    cell: (info: any) => <CellStatus context={info} />,
+    cellType: 'status',
     size: 100,
   }),
 ]
@@ -129,12 +147,6 @@ const DATASETS: Record<string, number> = {
   '10,000': 10000,
 }
 
-/* ── The body font used in yable tables (IBM Plex Sans from layout.tsx) ── */
-
-const TABLE_FONT = '400 13px "IBM Plex Sans", sans-serif'
-const TABLE_LINE_HEIGHT = 20
-const CELL_PADDING = 16 // 8px top + 8px bottom
-
 /* ── Page ──────────────────────────────────────────────────────────────── */
 
 export default function PretextDemoPage() {
@@ -142,18 +154,8 @@ export default function PretextDemoPage() {
   const [usePretextMode, setUsePretextMode] = useState(true)
   const data = useMemo(() => generateArticles(DATASETS[dataSize]), [dataSize])
 
-  // Define which columns need text measurement
-  const cellMeasurements: CellMeasurement[] = useMemo(() => [
-    { columnId: 'title', width: 250, font: '500 13px "IBM Plex Sans", sans-serif', lineHeight: TABLE_LINE_HEIGHT, padding: CELL_PADDING },
-    { columnId: 'excerpt', width: 400, font: TABLE_FONT, lineHeight: TABLE_LINE_HEIGHT, padding: CELL_PADDING },
-  ], [])
-
-  // Extract text from row for measurement
-  const getCellText = useCallback((row: Article, columnId: string) => {
-    return String((row as any)[columnId] ?? '')
-  }, [])
-
-  // Pretext measurement
+  // One call. No CellMeasurement[]. No font strings. No padding numbers.
+  // The hook reads each column's cellType / measureRecipe to figure it out.
   const {
     rowHeights,
     prefixSums,
@@ -161,10 +163,9 @@ export default function PretextDemoPage() {
     ready: pretextReady,
     prepareTimeMs,
     layoutTimeMs,
-  } = usePretextMeasurement({
+  } = useTableRowHeights({
     data,
-    columns: cellMeasurements,
-    getCellText,
+    columns,
     minRowHeight: 40,
     enabled: usePretextMode,
   })
@@ -174,8 +175,8 @@ export default function PretextDemoPage() {
     columns,
     getRowId: (row) => String(row.id),
     enableVirtualization: true,
-    pretextHeights: usePretextMode && pretextReady ? rowHeights : undefined,
-    pretextPrefixSums: usePretextMode && pretextReady ? prefixSums : undefined,
+    pretextHeights: usePretextMode && pretextReady ? rowHeights ?? undefined : undefined,
+    pretextPrefixSums: usePretextMode && pretextReady ? prefixSums ?? undefined : undefined,
     rowHeight: 40,
     // Disable pagination so all rows go to virtualizer
     initialState: { pagination: { pageIndex: 0, pageSize: 100_000 } },

@@ -235,6 +235,16 @@
   border: none;
 }
 
+/* Pretext computes wrapped row heights — let cells actually wrap so the
+   computed heights match what's visible on screen. */
+.tableWrap :global(.yable-td) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  vertical-align: top;
+  align-items: flex-start;
+}
+
 /* ── Cell Styles ──────────────────────────────────────────────────────────── */
 
 .cellTitle {

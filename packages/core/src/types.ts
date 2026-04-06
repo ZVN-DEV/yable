@@ -172,6 +172,23 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   cellType?: 'badge' | 'currency' | 'status' | 'numeric' | 'rating' | 'boolean' | 'progress' | 'date' | 'link'
   cellTypeProps?: Record<string, unknown>
 
+  // Pretext measure recipe — used by Pretext auto-measurement to compute row heights.
+  // If omitted, the recipe for `cellType` is used; if neither is set, the column is
+  // measured with the table's default text recipe.
+  measureRecipe?: {
+    /** CSS font string, e.g. "500 13px Inter" */
+    font: string
+    /** Line height in px */
+    lineHeight: number
+    /** Cell vertical padding (top + bottom) in px */
+    padding: number
+    /**
+     * If true, this column does not wrap text — Pretext skips text measurement
+     * and contributes a constant `lineHeight + padding` per row.
+     */
+    fixedHeight?: boolean
+  }
+
   // Cell Flash
   enableCellFlash?: boolean
   flashDuration?: number
