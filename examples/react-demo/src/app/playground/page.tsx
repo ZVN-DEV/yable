@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import {
   useTable,
   Table,
@@ -242,6 +242,23 @@ export default function PlaygroundPage() {
     getRowId: (row) => String(row.id),
   })
 
+  // Sync color scheme to <html> so CSS theme selectors work correctly
+  // (only one ancestor data-yable-theme should exist at a time)
+  useEffect(() => {
+    document.documentElement.setAttribute('data-yable-theme', colorScheme)
+  }, [colorScheme])
+
+  // Toggle pagination: show all rows when pagination is off
+  useEffect(() => {
+    if (!showPagination) {
+      table.setPageSize(data.length)
+      table.setPageIndex(0)
+    } else {
+      table.setPageSize(10)
+      table.setPageIndex(0)
+    }
+  }, [showPagination, data.length, table])
+
   const selectedCount = Object.keys(table.getState().rowSelection).length
   const pendingChanges = table.getAllPendingChanges()
   const hasPending = table.hasPendingChanges()
@@ -253,7 +270,7 @@ export default function PlaygroundPage() {
   }, [hasPending, table])
 
   return (
-    <div className={s.playground} data-yable-theme={colorScheme}>
+    <div className={s.playground}>
       {/* ── Control Panel ──────────────────────────────────────────────── */}
       <aside className={s.panel}>
         <div className={s.panelHeader}>
