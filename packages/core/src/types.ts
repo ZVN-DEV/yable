@@ -168,6 +168,10 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   headerTooltip?: string
   tooltipDelay?: number
 
+  // Declarative cell type — renders built-in display cell without a cell function
+  cellType?: 'badge' | 'currency' | 'status' | 'numeric' | 'rating' | 'boolean' | 'progress' | 'date' | 'link'
+  cellTypeProps?: Record<string, unknown>
+
   // Cell Flash
   enableCellFlash?: boolean
   flashDuration?: number

@@ -7,6 +7,7 @@ import {
   type Table,
   type Cell,
 } from '@yable/core'
+import { resolveCellType } from '../cells/resolver'
 
 interface TableCellProps<TData extends RowData> {
   cell: Cell<TData, unknown>
@@ -48,23 +49,15 @@ export function TableCell<TData extends RowData>({
 
   // Determine cell content
   let content: React.ReactNode
+  const cellDef = column.columnDef.cell
+  const cellType = column.columnDef.cellType
 
-  if (isEditing || isAlwaysEditable) {
-    // Use cell renderer for edit mode (form components)
-    const cellDef = column.columnDef.cell
-    if (typeof cellDef === 'function') {
-      content = (cellDef as Function)(cell.getContext())
-    } else {
-      content = cell.renderValue() as React.ReactNode
-    }
+  if (typeof cellDef === 'function') {
+    content = (cellDef as Function)(cell.getContext())
+  } else if (cellType && !(isEditing || isAlwaysEditable)) {
+    content = resolveCellType(cellType, cell.getContext(), column.columnDef.cellTypeProps)
   } else {
-    // Read-only mode
-    const cellDef = column.columnDef.cell
-    if (typeof cellDef === 'function') {
-      content = (cellDef as Function)(cell.getContext())
-    } else {
-      content = cell.renderValue() as React.ReactNode
-    }
+    content = cell.renderValue() as React.ReactNode
   }
 
   const handleClick = useCallback(

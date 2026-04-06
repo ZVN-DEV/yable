@@ -9,14 +9,6 @@ import {
   CellInput,
   CellSelect,
   CellCheckbox,
-  CellCurrency,
-  CellDate,
-  CellBoolean,
-  CellRating,
-  CellBadge,
-  CellNumeric,
-  CellStatus,
-  CellProgress,
   CellLink,
   createColumnHelper,
   type ColumnDef,
@@ -151,7 +143,7 @@ function buildColumns(editable: boolean, showSelection: boolean): ColumnDef<Empl
     }),
     columnHelper.accessor('age', {
       header: 'Age',
-      cell: (info: any) => <CellNumeric context={info} />,
+      cellType: 'numeric',
       size: 70,
     }),
     columnHelper.accessor('department', {
@@ -163,7 +155,9 @@ function buildColumns(editable: boolean, showSelection: boolean): ColumnDef<Empl
               options={departments.map((d) => ({ label: d, value: d }))}
             />
           )
-        : (info: any) => <CellBadge context={info} variant="accent" appearance="soft" />,
+        : undefined,
+      cellType: 'badge',
+      cellTypeProps: { variant: 'accent', appearance: 'soft' },
       editable,
       editConfig: editable
         ? { type: 'select', options: departments.map((d) => ({ label: d, value: d })) }
@@ -173,24 +167,26 @@ function buildColumns(editable: boolean, showSelection: boolean): ColumnDef<Empl
     }),
     columnHelper.accessor('role', {
       header: 'Role',
-      cell: (info: any) => info.getValue(),
       size: 170,
     }),
     columnHelper.accessor('salary', {
       header: 'Salary',
-      cell: (info: any) => <CellCurrency context={info} />,
+      cellType: 'currency',
       size: 120,
     }),
     columnHelper.accessor('startDate', {
       header: 'Start Date',
-      cell: (info: any) => <CellDate context={info} format="medium" />,
+      cellType: 'date',
+      cellTypeProps: { format: 'medium' },
       size: 130,
     }),
     columnHelper.accessor('active', {
       header: 'Active',
       cell: editable
         ? (info: any) => <CellCheckbox context={info} />
-        : (info: any) => <CellBoolean context={info} mode="dot" />,
+        : undefined,
+      cellType: 'boolean',
+      cellTypeProps: { mode: 'dot' },
       editable,
       editConfig: editable ? { type: 'checkbox' } : undefined,
       meta: editable ? { alwaysEditable: true } : undefined,
@@ -198,12 +194,13 @@ function buildColumns(editable: boolean, showSelection: boolean): ColumnDef<Empl
     }),
     columnHelper.accessor('rating', {
       header: 'Rating',
-      cell: (info: any) => <CellRating context={info} />,
+      cellType: 'rating',
       size: 90,
     }),
     columnHelper.accessor('completion', {
       header: 'Progress',
-      cell: (info: any) => <CellProgress context={info} variant="accent" />,
+      cellType: 'progress',
+      cellTypeProps: { variant: 'accent' },
       size: 130,
     })
   )
