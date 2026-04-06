@@ -4,6 +4,7 @@ import {
   IBM_Plex_Mono,
   IBM_Plex_Sans,
 } from 'next/font/google'
+import './globals.css'
 import '@yable/themes'
 import '@yable/themes/default.css'
 import '@yable/themes/midnight.css'

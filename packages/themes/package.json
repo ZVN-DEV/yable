@@ -15,9 +15,11 @@
     "./mono.css": "./dist/themes/mono.css",
     "./tokens.css": "./dist/tokens.css",
     "./rtl.css": "./dist/rtl.css",
+    "./tailwind.css": "./dist/tailwind.css",
+    "./tailwind-preset": "./src/tailwind-preset.ts",
     "./createTheme": "./src/createTheme.ts"
   },
-  "files": ["dist"],
+  "files": ["dist", "src/tailwind-preset.ts"],
   "scripts": {
     "build": "node build.mjs",
     "dev": "node build.mjs --watch",

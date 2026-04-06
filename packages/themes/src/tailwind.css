@@ -1,0 +1,69 @@
+/* ============================================================================
+   @yable/themes — Tailwind v4 Theme Bridge
+   ============================================================================
+
+   Imports Yable's CSS custom properties into Tailwind's `@theme` namespace
+   so consumers can write utilities like `bg-yable-bg`, `text-yable-primary`,
+   `border-yable`, `rounded-yable`, etc. in their components.
+
+   Usage (Tailwind v4):
+
+       @import "tailwindcss";
+       @import "@yable/themes";
+       @import "@yable/themes/tailwind.css";
+
+   The middle import provides the base table CSS + token defaults; this file
+   re-exposes those tokens to Tailwind so utility classes resolve to live
+   CSS variables (i.e. they automatically follow the active theme).
+   ============================================================================ */
+
+@theme inline {
+  /* ── Surface colors ─────────────────────────────────────────────── */
+  --color-yable-bg: var(--yable-bg);
+  --color-yable-bg-header: var(--yable-bg-header);
+  --color-yable-bg-footer: var(--yable-bg-footer);
+  --color-yable-bg-row: var(--yable-bg-row);
+  --color-yable-bg-row-alt: var(--yable-bg-row-alt);
+  --color-yable-bg-row-hover: var(--yable-bg-row-hover);
+  --color-yable-bg-row-selected: var(--yable-bg-row-selected);
+  --color-yable-bg-row-expanded: var(--yable-bg-row-expanded);
+  --color-yable-bg-cell-editing: var(--yable-bg-cell-editing);
+  --color-yable-bg-pinned: var(--yable-bg-pinned);
+
+  /* ── Text colors ────────────────────────────────────────────────── */
+  --color-yable-text: var(--yable-text-primary);
+  --color-yable-text-secondary: var(--yable-text-secondary);
+  --color-yable-text-tertiary: var(--yable-text-tertiary);
+  --color-yable-text-header: var(--yable-text-header);
+  --color-yable-text-disabled: var(--yable-text-disabled);
+  --color-yable-text-link: var(--yable-text-link);
+  --color-yable-text-placeholder: var(--yable-text-placeholder);
+
+  /* ── Borders ────────────────────────────────────────────────────── */
+  --color-yable-border: var(--yable-border-color);
+  --color-yable-border-strong: var(--yable-border-color-strong);
+
+  /* ── Accent / interactive ───────────────────────────────────────── */
+  --color-yable-accent: var(--yable-accent);
+  --color-yable-accent-hover: var(--yable-accent-hover);
+  --color-yable-accent-light: var(--yable-accent-light);
+  --color-yable-accent-text: var(--yable-accent-text);
+  --color-yable-focus-ring: var(--yable-focus-ring);
+
+  /* ── Spacing tokens ─────────────────────────────────────────────── */
+  --spacing-yable-cell-x: var(--yable-cell-padding-x);
+  --spacing-yable-cell-y: var(--yable-cell-padding-y);
+  --spacing-yable-header-x: var(--yable-header-padding-x);
+  --spacing-yable-header-y: var(--yable-header-padding-y);
+
+  /* ── Border radius ──────────────────────────────────────────────── */
+  --radius-yable: var(--yable-border-radius);
+  --radius-yable-sm: var(--yable-border-radius-sm);
+  --radius-yable-lg: var(--yable-border-radius-lg);
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  --font-yable: var(--yable-font-family);
+  --text-yable: var(--yable-font-size);
+  --text-yable-sm: var(--yable-font-size-sm);
+  --text-yable-header: var(--yable-font-size-header);
+}

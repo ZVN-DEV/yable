@@ -23,6 +23,7 @@ function build() {
     ['src/themes/forest.css', 'dist/themes/forest.css'],
     ['src/themes/mono.css', 'dist/themes/mono.css'],
     ['src/rtl.css', 'dist/rtl.css'],
+    ['src/tailwind.css', 'dist/tailwind.css'],
   ]
 
   for (const [src, dest] of files) {

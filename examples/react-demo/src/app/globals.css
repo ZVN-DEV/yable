@@ -1,0 +1,6 @@
+/* Tailwind v4 + Yable theme bridge.
+   Tailwind utilities are scoped to elements that opt in via the
+   `tw-scope` class so they don't affect existing demos. */
+
+@import "tailwindcss";
+@import "@yable/themes/tailwind.css";
