@@ -220,7 +220,6 @@ describe('filterTreeData', () => {
 describe('sortTreeData', () => {
   it('should sort nodes at each level independently', () => {
     const tree = buildTreeFromPaths(flatLocations, getLocationPath)
-    const usa = tree[0]!
 
     // Sort children by name descending
     const sorted = sortTreeData(tree, (a, b) =>

@@ -1,5 +1,9 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
+import {
+  Cormorant_Garamond,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+} from 'next/font/google'
 import '@yable/themes/default.css'
 import '@yable/themes/midnight.css'
 import '@yable/themes/stripe.css'
@@ -9,16 +13,31 @@ import '@yable/themes/forest.css'
 import '@yable/themes/rose.css'
 import '@yable/themes/mono.css'
 
-const geist = Geist({
+const display = Cormorant_Garamond({
   subsets: ['latin'],
+  weight: ['500', '600', '700'],
   display: 'swap',
-  variable: '--font-geist',
+  variable: '--font-display',
+})
+
+const body = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-body',
+})
+
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-mono',
 })
 
 export const metadata: Metadata = {
-  title: 'Yable — The Modern Table Library for React',
+  title: 'Yable Demo — Spreadsheet-Grade Tables With Taste',
   description:
-    'Sorting, filtering, editing, themes, virtualization, and more. A complete data table solution.',
+    'A live editorial showcase for Yable: sorting, filtering, editing, themes, and a stronger visual front door for the package.',
 }
 
 export default function RootLayout({
@@ -27,14 +46,17 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={geist.variable} data-yable-theme="dark">
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      data-yable-theme="dark"
+    >
       <body
         style={{
           margin: 0,
-          fontFamily:
-            'var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-          backgroundColor: '#09090b',
-          color: '#fafafa',
+          fontFamily: 'var(--font-body), sans-serif',
+          backgroundColor: '#0d0907',
+          color: '#f3eadb',
           minHeight: '100vh',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',

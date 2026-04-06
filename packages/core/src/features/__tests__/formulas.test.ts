@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest'
 import {
   tokenize,
   parseFormula,
-  FormulaParser,
   FormulaError,
 } from '../formulas/parser'
 import { evaluate } from '../formulas/evaluator'

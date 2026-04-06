@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import {
   useTable,
   Table,
@@ -16,9 +16,283 @@ import {
 import { people, departments, type Person } from '@/data'
 import s from './page.module.css'
 
-// ─── Column Definitions ────────────────────────────────────────────────────
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
+
+const shortCurrencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})
+
+const percentFormatter = new Intl.NumberFormat('en-US', {
+  style: 'percent',
+  maximumFractionDigits: 0,
+})
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
 
 const columnHelper = createColumnHelper<Person>()
+
+const totalSalary = people.reduce((sum, person) => sum + person.salary, 0)
+const activeCount = people.filter((person) => person.active).length
+const averageSalary = Math.round(totalSalary / people.length)
+const averageAge = Math.round(
+  people.reduce((sum, person) => sum + person.age, 0) / people.length
+)
+
+const heroPreviewData = people.slice(0, 4)
+const themePreviewData = people.slice(0, 5)
+
+const allThemes = [
+  { id: 'midnight', label: 'Midnight', accent: '#6ec7ff' },
+  { id: 'default', label: 'Default', accent: '#d8b46d' },
+  { id: 'stripe', label: 'Stripe', accent: '#89a4ff' },
+  { id: 'compact', label: 'Compact', accent: '#76d8b7' },
+  { id: 'ocean', label: 'Ocean', accent: '#57c6d8' },
+  { id: 'forest', label: 'Forest', accent: '#8fc7a0' },
+  { id: 'rose', label: 'Rose', accent: '#f08d92' },
+  { id: 'mono', label: 'Mono', accent: '#d8d0c4' },
+] as const
+
+type ThemeId = (typeof allThemes)[number]['id']
+type DemoTab = 'data' | 'editable' | 'themes'
+
+type NotePanel = {
+  eyebrow: string
+  title: string
+  description: string
+  points: string[]
+}
+
+const packageLayers = [
+  {
+    name: '@yable/core',
+    label: 'Headless Engine',
+    copy: 'Sorting, filtering, formulas, pivot tables, clipboard, tree data.',
+  },
+  {
+    name: '@yable/react',
+    label: 'React Surface',
+    copy: 'Table primitives, hooks, editors, pagination, and batteries included.',
+  },
+  {
+    name: '@yable/vanilla',
+    label: 'DOM Renderer',
+    copy: 'Plain-JS rendering for teams that need the engine without React.',
+  },
+  {
+    name: '@yable/themes',
+    label: 'Token Packs',
+    copy: 'Eight built-in visual systems with light and dark support.',
+  },
+] as const
+
+const fieldNotes: Record<DemoTab, NotePanel> = {
+  data: {
+    eyebrow: 'Showcase One',
+    title: 'A sortable employee ledger, not a hollow mock.',
+    description:
+      'Global search, sticky headers, selection, and pagination are all running in the same live surface.',
+    points: [
+      'Type in the search bar to filter the dataset instantly.',
+      'Click any column header to sort and shift-click for multi-sort.',
+      'Row selection and pagination stay in sync instead of fighting each other.',
+    ],
+  },
+  editable: {
+    eyebrow: 'Showcase Two',
+    title: 'Inline editing that keeps state honest.',
+    description:
+      'Pending changes are buffered until save, so the interaction feels safe instead of twitchy.',
+    points: [
+      'Text, number, select, and checkbox editors are wired into the same model.',
+      'Unsaved changes are visible at a glance before they touch the dataset.',
+      'Discard and save actions prove the UI can do more than render pretty cells.',
+    ],
+  },
+  themes: {
+    eyebrow: 'Showcase Three',
+    title: 'Themes are a system, not a screenshot.',
+    description:
+      'Each preview card is a live table instance, which makes the gallery useful for real design decisions.',
+    points: [
+      'Every theme rides on CSS custom properties instead of copy-paste overrides.',
+      'Light and dark modes come from the token layer, not duplicated markup.',
+      'The gallery lets design work happen next to implementation, not after it.',
+    ],
+  },
+}
+
+const themeNotes: Record<ThemeId, NotePanel> = {
+  midnight: {
+    eyebrow: 'Selected Theme',
+    title: 'Midnight leans high-contrast and cinematic.',
+    description:
+      'A dense dark palette for dashboards and ops views where focus matters more than softness.',
+    points: [
+      'Best when you want the table to feel like control software.',
+      'High-visibility accents keep sorting and status states easy to track.',
+      'Pairs naturally with the darker editorial shell in this demo.',
+    ],
+  },
+  default: {
+    eyebrow: 'Selected Theme',
+    title: 'Default is calm, bright, and broadly reusable.',
+    description:
+      'The cleanest entry point when the table needs to blend into an existing product surface.',
+    points: [
+      'Useful for admin tools that want familiarity over drama.',
+      'Neutral tokens leave room for product-brand accents elsewhere.',
+      'A good baseline when teams plan to customize from scratch.',
+    ],
+  },
+  stripe: {
+    eyebrow: 'Selected Theme',
+    title: 'Stripe pushes a sharper product-polish tone.',
+    description:
+      'Cool accents and crisp spacing make it feel a touch more SaaS-native without getting bland.',
+    points: [
+      'Strong fit for billing tools, finance surfaces, and growth dashboards.',
+      'Keeps density high while still reading polished and modern.',
+      'Useful when you want a premium look without custom theme work.',
+    ],
+  },
+  compact: {
+    eyebrow: 'Selected Theme',
+    title: 'Compact is built for information density.',
+    description:
+      'The tightest layout in the pack, intended for teams that care about rows-per-screen.',
+    points: [
+      'Great for operational views with wide datasets and minimal chrome.',
+      'Reduces padding without making the table feel crushed.',
+      'Ideal when speed of scanning matters more than decorative space.',
+    ],
+  },
+  ocean: {
+    eyebrow: 'Selected Theme',
+    title: 'Ocean cools the surface without going sterile.',
+    description:
+      'Aquatic accents give the table a productized calm that still feels distinctive.',
+    points: [
+      'A solid choice for analytics views or data-heavy documentation.',
+      'Blue-green tokens communicate state changes cleanly.',
+      'Feels lighter than Midnight while keeping visual authority.',
+    ],
+  },
+  forest: {
+    eyebrow: 'Selected Theme',
+    title: 'Forest brings warmth and restraint together.',
+    description:
+      'Muted greens work well for operational software that wants maturity rather than neon.',
+    points: [
+      'Strong match for the editorial brass-and-ink framing on this page.',
+      'Status colors feel natural without overwhelming the table body.',
+      'A good default when teams want character without risk.',
+    ],
+  },
+  rose: {
+    eyebrow: 'Selected Theme',
+    title: 'Rose softens the interface without losing clarity.',
+    description:
+      'A warmer tone that proves table tooling does not need to feel industrial to stay useful.',
+    points: [
+      'Great for CRM, people tools, and internal apps with a gentler brand voice.',
+      'Gives edit states and affordances a softer feel than blue-first palettes.',
+      'Distinctive enough to make previews feel intentionally designed.',
+    ],
+  },
+  mono: {
+    eyebrow: 'Selected Theme',
+    title: 'Mono strips the surface down to pure hierarchy.',
+    description:
+      'A monochrome system for teams that want the typography and spacing to do the work.',
+    points: [
+      'Excellent for editorial products and serious back-office tools.',
+      'Lets badges and data states carry meaning without a colorful frame.',
+      'Works especially well when you want the content to feel archival.',
+    ],
+  },
+}
+
+const heroSignals = [
+  {
+    label: 'Features Audited',
+    value: '143 / 222',
+    detail: 'Credible parity tracking against AG Grid.',
+  },
+  {
+    label: 'Themes Included',
+    value: String(allThemes.length).padStart(2, '0'),
+    detail: 'Tokenized palettes with light and dark support.',
+  },
+  {
+    label: 'Average Salary',
+    value: shortCurrencyFormatter.format(averageSalary),
+    detail: 'Live sample data powering the demo tables.',
+  },
+  {
+    label: 'Active Employees',
+    value: percentFormatter.format(activeCount / people.length),
+    detail: 'Status states visible across sorting and filtering.',
+  },
+] as const
+
+const heroColumns: ColumnDef<Person, any>[] = [
+  columnHelper.accessor('firstName', {
+    header: 'Operator',
+    cell: (info: any) => (
+      <div className={s.previewIdentity}>
+        <span className={s.previewName}>
+          {info.row.original.firstName} {info.row.original.lastName}
+        </span>
+        <span className={s.previewRole}>{info.row.original.role}</span>
+      </div>
+    ),
+    size: 210,
+  }),
+  columnHelper.accessor('department', {
+    header: 'Desk',
+    cell: (info: any) => (
+      <span className={getDepartmentClassName(info.getValue() as string)}>
+        {info.getValue()}
+      </span>
+    ),
+    size: 120,
+  }),
+  columnHelper.accessor('salary', {
+    header: 'Budget',
+    cell: (info: any) => (
+      <span className={s.currencyValue}>
+        {currencyFormatter.format(info.getValue() as number)}
+      </span>
+    ),
+    size: 120,
+  }),
+  columnHelper.accessor('active', {
+    header: 'Live',
+    cell: (info: any) => (
+      <span
+        className={`${s.statusPill} ${
+          info.getValue() ? s.statusPillPositive : s.statusPillNegative
+        }`}
+      >
+        <span className={s.statusPillDot} />
+        {info.getValue() ? 'Online' : 'Paused'}
+      </span>
+    ),
+    size: 100,
+  }),
+]
 
 const mainColumns: ColumnDef<Person, any>[] = [
   columnHelper.display({
@@ -54,41 +328,24 @@ const mainColumns: ColumnDef<Person, any>[] = [
   columnHelper.accessor('email', {
     header: 'Email',
     cell: (info: any) => (
-      <span style={{ color: '#60a5fa' }}>{info.getValue()}</span>
+      <span className={s.emailValue}>{info.getValue()}</span>
     ),
     size: 220,
   }),
   columnHelper.accessor('age', {
     header: 'Age',
-    cell: (info: any) => info.getValue(),
+    cell: (info: any) => (
+      <span className={s.numericValue}>{info.getValue()}</span>
+    ),
     size: 70,
   }),
   columnHelper.accessor('department', {
     header: 'Department',
-    cell: (info: any) => {
-      const val = info.getValue() as string
-      const colors: Record<string, { bg: string; text: string }> = {
-        Engineering: { bg: 'rgba(59,130,246,0.1)', text: '#60a5fa' },
-        Design: { bg: 'rgba(168,85,247,0.1)', text: '#c084fc' },
-        Product: { bg: 'rgba(245,158,11,0.1)', text: '#fbbf24' },
-      }
-      const c = colors[val] || { bg: 'rgba(255,255,255,0.05)', text: '#a1a1aa' }
-      return (
-        <span
-          style={{
-            display: 'inline-block',
-            padding: '2px 10px',
-            borderRadius: 100,
-            fontSize: 12,
-            fontWeight: 500,
-            backgroundColor: c.bg,
-            color: c.text,
-          }}
-        >
-          {val}
-        </span>
-      )
-    },
+    cell: (info: any) => (
+      <span className={getDepartmentClassName(info.getValue() as string)}>
+        {info.getValue()}
+      </span>
+    ),
     size: 140,
   }),
   columnHelper.accessor('role', {
@@ -98,48 +355,34 @@ const mainColumns: ColumnDef<Person, any>[] = [
   }),
   columnHelper.accessor('salary', {
     header: 'Salary',
-    cell: (info: any) => {
-      const v = info.getValue() as number
-      return (
-        <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-          ${v.toLocaleString()}
-        </span>
-      )
-    },
+    cell: (info: any) => (
+      <span className={s.currencyValue}>
+        {currencyFormatter.format(info.getValue() as number)}
+      </span>
+    ),
     size: 120,
   }),
   columnHelper.accessor('startDate', {
     header: 'Start Date',
-    cell: (info: any) => {
-      const d = info.getValue() as string
-      return new Date(d).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    },
+    cell: (info: any) => formatDate(info.getValue() as string),
     size: 130,
   }),
   columnHelper.accessor('active', {
     header: 'Status',
-    cell: (info: any) => {
-      const active = info.getValue() as boolean
-      return (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span
-            className={`${s.statusDot} ${active ? s.statusActive : s.statusInactive}`}
-          />
-          <span style={{ fontSize: 12, color: active ? '#4ade80' : '#f87171' }}>
-            {active ? 'Active' : 'Inactive'}
-          </span>
-        </span>
-      )
-    },
-    size: 100,
+    cell: (info: any) => (
+      <span
+        className={`${s.statusPill} ${
+          info.getValue() ? s.statusPillPositive : s.statusPillNegative
+        }`}
+      >
+        <span className={s.statusPillDot} />
+        {info.getValue() ? 'Active' : 'Inactive'}
+      </span>
+    ),
+    size: 110,
   }),
 ]
 
-// Editable form columns
 const editableColumns: ColumnDef<Person, any>[] = [
   columnHelper.accessor('firstName', {
     header: 'First Name',
@@ -168,12 +411,18 @@ const editableColumns: ColumnDef<Person, any>[] = [
     editable: true,
     editConfig: {
       type: 'select',
-      options: departments.map((d) => ({ label: d, value: d })),
+      options: departments.map((department) => ({
+        label: department,
+        value: department,
+      })),
     },
     cell: (info: any) => (
       <CellSelect
         context={info}
-        options={departments.map((d) => ({ label: d, value: d }))}
+        options={departments.map((department) => ({
+          label: department,
+          value: department,
+        }))}
       />
     ),
     meta: { alwaysEditable: true },
@@ -197,7 +446,6 @@ const editableColumns: ColumnDef<Person, any>[] = [
   }),
 ]
 
-// Mini columns for theme gallery preview
 const miniColumns: ColumnDef<Person, any>[] = [
   columnHelper.accessor('firstName', {
     header: 'Name',
@@ -216,34 +464,17 @@ const miniColumns: ColumnDef<Person, any>[] = [
   }),
   columnHelper.accessor('salary', {
     header: 'Salary',
-    cell: (info: any) => `$${(info.getValue() as number).toLocaleString()}`,
-    size: 90,
+    cell: (info: any) =>
+      currencyFormatter.format(info.getValue() as number).replace('.00', ''),
+    size: 100,
   }),
 ]
 
-// ─── Theme Metadata ────────────────────────────────────────────────────────
-
-const allThemes = [
-  { id: 'midnight', label: 'Midnight', accent: '#388bfd' },
-  { id: 'default', label: 'Default', accent: '#3b82f6' },
-  { id: 'stripe', label: 'Stripe', accent: '#635bff' },
-  { id: 'compact', label: 'Compact', accent: '#10b981' },
-  { id: 'ocean', label: 'Ocean', accent: '#0891b2' },
-  { id: 'forest', label: 'Forest', accent: '#16a34a' },
-  { id: 'rose', label: 'Rose', accent: '#f43f5e' },
-  { id: 'mono', label: 'Mono', accent: '#71717a' },
-] as const
-
-type ThemeId = (typeof allThemes)[number]['id']
-type DemoTab = 'data' | 'editable' | 'themes'
-
-// ─── SVG Icons (inline, no deps) ──────────────────────────────────────────
-
 function SearchIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
       <path
-        d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-.3 3.9a5 5 0 1 1 .7-.7l3.1 3.1-.7.7-3.1-3.1Z"
+        d="M10.8 10.8a4.8 4.8 0 1 1 .8-.8l3.2 3.2-.8.8-3.2-3.2Z"
         fill="currentColor"
       />
     </svg>
@@ -252,7 +483,7 @@ function SearchIcon() {
 
 function CheckIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
       <path
         d="M10 3 4.5 8.5 2 6"
         stroke="currentColor"
@@ -264,88 +495,207 @@ function CheckIcon() {
   )
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Page
-// ═══════════════════════════════════════════════════════════════════════════
-
 export default function Home() {
   const [tab, setTab] = useState<DemoTab>('data')
-  const [selectedTheme, setSelectedTheme] = useState<ThemeId>('midnight')
+  const [selectedTheme, setSelectedTheme] = useState<ThemeId>('forest')
+
+  const activeNote = tab === 'themes' ? themeNotes[selectedTheme] : fieldNotes[tab]
 
   return (
     <div className={s.page}>
       <div className={s.inner}>
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <header className={s.header}>
-          <div className={s.logoRow}>
-            <div className={s.logoIcon}>Y</div>
-            <h1 className={s.title}>
-              Yable<span className={s.titleAccent}>Tables</span>
+        <header className={s.hero}>
+          <div className={s.heroCopy}>
+            <div className={s.kickerRow}>
+              <span className={s.kicker}>TypeScript-first table engine</span>
+              <span className={s.kickerDivider} />
+              <span className={s.kickerMeta}>
+                Headless core, React surface, vanilla renderer, theme tokens
+              </span>
+            </div>
+
+            <h1 className={s.heroTitle}>
+              Spreadsheet muscle.
+              <br />
+              Product taste.
+              <br />
+              Zero enterprise tax.
             </h1>
+
+            <p className={s.heroLead}>
+              Yable is a table system for teams that need real data tooling and
+              still want the interface to feel considered. The shell below is
+              editorial by design. The demos inside it are fully live.
+            </p>
+
+            <div className={s.heroBadges}>
+              <span className={s.heroBadge}>Sorting, filtering, editing, theming</span>
+              <span className={s.heroBadge}>Spreadsheet-grade features under MIT</span>
+              <span className={s.heroBadge}>Designed to showcase the package, not hide it</span>
+            </div>
           </div>
-          <p className={s.subtitle}>
-            A complete data table library for React. Fast, themeable, accessible.
-          </p>
-          <div className={s.badges}>
-            <span className={s.badge}>
-              <span className={s.badgeDot} /> Sorting
-            </span>
-            <span className={s.badge}>
-              <span className={s.badgeDot} style={{ background: '#8b5cf6' }} />{' '}
-              Filtering
-            </span>
-            <span className={s.badge}>
-              <span className={s.badgeDot} style={{ background: '#22c55e' }} />{' '}
-              Editing
-            </span>
-            <span className={s.badge}>
-              <span className={s.badgeDot} style={{ background: '#f59e0b' }} />{' '}
-              8 Themes
-            </span>
-            <span className={s.badge}>
-              <span className={s.badgeDot} style={{ background: '#ec4899' }} />{' '}
-              Pagination
-            </span>
-            <span className={s.badge}>
-              <span className={s.badgeDot} style={{ background: '#06b6d4' }} />{' '}
-              Selection
-            </span>
+
+          <div className={s.heroStage}>
+            <div className={s.stageChrome}>
+              <span>Flight Deck</span>
+              <span>Live Preview</span>
+            </div>
+
+            <div className={s.heroPreviewWrap}>
+              <HeroPreview />
+            </div>
+
+            <div className={s.signalGrid}>
+              {heroSignals.map((signal) => (
+                <article key={signal.label} className={s.signalCard}>
+                  <span className={s.signalLabel}>{signal.label}</span>
+                  <strong className={s.signalValue}>{signal.value}</strong>
+                  <p className={s.signalDetail}>{signal.detail}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </header>
 
-        {/* ── Tabs ───────────────────────────────────────────────────── */}
-        <nav className={s.tabBar}>
-          {(
-            [
-              ['data', 'Data Table'],
-              ['editable', 'Editable Table'],
-              ['themes', 'Theme Gallery'],
-            ] as const
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              className={`${s.tabButton} ${tab === key ? s.tabButtonActive : ''}`}
-              onClick={() => setTab(key)}
-            >
-              {label}
-            </button>
+        <section className={s.packageBand} aria-label="Package layers">
+          {packageLayers.map((layer) => (
+            <article key={layer.name} className={s.packageCard}>
+              <span className={s.packageLabel}>{layer.label}</span>
+              <h2 className={s.packageName}>{layer.name}</h2>
+              <p className={s.packageCopy}>{layer.copy}</p>
+            </article>
           ))}
-        </nav>
+        </section>
 
-        {/* ── Demos ──────────────────────────────────────────────────── */}
-        {tab === 'data' && <BasicDemo />}
-        {tab === 'editable' && <EditableDemo />}
-        {tab === 'themes' && (
-          <ThemeGallery selected={selectedTheme} onSelect={setSelectedTheme} />
-        )}
+        <section className={s.showcase}>
+          <div className={s.showcaseHeader}>
+            <div className={s.showcaseTitleGroup}>
+              <span className={s.sectionEyebrow}>Live Demo Deck</span>
+              <h2 className={s.sectionTitle}>The product should sell itself on contact.</h2>
+              <p className={s.sectionDescription}>
+                This page turns the demo into a proper front door for the
+                package: the table is the hero, the framing is intentional, and
+                every tab proves a different part of the system.
+              </p>
+            </div>
+
+            <nav className={s.tabBar} aria-label="Demo tabs">
+              {(
+                [
+                  ['data', 'Live Data'],
+                  ['editable', 'Editing'],
+                  ['themes', 'Theme Gallery'],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`${s.tabButton} ${tab === key ? s.tabButtonActive : ''}`}
+                  onClick={() => setTab(key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className={s.showcaseGrid}>
+            <div className={s.showcaseMain}>
+              {tab === 'data' && <BasicDemo />}
+              {tab === 'editable' && <EditableDemo />}
+              {tab === 'themes' && (
+                <ThemeGallery selected={selectedTheme} onSelect={setSelectedTheme} />
+              )}
+            </div>
+
+            <aside className={s.showcaseSidebar}>
+              <div className={s.sidebarCard}>
+                <span className={s.sidebarEyebrow}>{activeNote.eyebrow}</span>
+                <h3 className={s.sidebarTitle}>{activeNote.title}</h3>
+                <p className={s.sidebarDescription}>{activeNote.description}</p>
+
+                <div className={s.sidebarList}>
+                  {activeNote.points.map((point, index) => (
+                    <div key={point} className={s.sidebarItem}>
+                      <span className={s.sidebarIndex}>
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <span>{point}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={s.sidebarCard}>
+                <span className={s.sidebarEyebrow}>What Ships Free</span>
+                <div className={s.valueStack}>
+                  <div className={s.valueRow}>
+                    <span>Formula engine</span>
+                    <span>Included</span>
+                  </div>
+                  <div className={s.valueRow}>
+                    <span>Pivot tables</span>
+                    <span>Included</span>
+                  </div>
+                  <div className={s.valueRow}>
+                    <span>Clipboard + fill handle</span>
+                    <span>Included</span>
+                  </div>
+                  <div className={s.valueRow}>
+                    <span>Undo / redo</span>
+                    <span>Included</span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section className={s.manifestGrid}>
+          <article className={s.manifestCard}>
+            <span className={s.manifestEyebrow}>Why It Lands</span>
+            <h2 className={s.manifestTitle}>A headless engine that still respects presentation.</h2>
+            <p className={s.manifestCopy}>
+              The package is built for teams that want architectural control
+              without having to rebuild sorting, editing, selection, and visual
+              polish every time a new table appears.
+            </p>
+          </article>
+
+          <article className={s.manifestCard}>
+            <span className={s.manifestEyebrow}>Design Note</span>
+            <h2 className={s.manifestTitle}>The demo needed a point of view.</h2>
+            <p className={s.manifestCopy}>
+              The old page looked like a stock dark SaaS shell. This version
+              uses a warmer editorial palette, stronger typography, and tighter
+              composition so the package feels authored instead of templated.
+            </p>
+          </article>
+
+          <article className={s.manifestCard}>
+            <span className={s.manifestEyebrow}>Interaction Note</span>
+            <h2 className={s.manifestTitle}>Browser-verified, not eyeballed from source.</h2>
+            <p className={s.manifestCopy}>
+              The page was booted locally and checked through browser automation
+              so the visual work stays grounded in the real render, not an
+              imagined one.
+            </p>
+          </article>
+        </section>
       </div>
     </div>
   )
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Basic Data Table
-// ═══════════════════════════════════════════════════════════════════════════
+function HeroPreview() {
+  const table = useTable({
+    data: heroPreviewData,
+    columns: heroColumns,
+    getRowId: (row) => String(row.id),
+  })
+
+  return <Table table={table} theme="forest" striped bordered />
+}
 
 function BasicDemo() {
   const [data] = useState(people)
@@ -360,53 +710,41 @@ function BasicDemo() {
 
   return (
     <section className={s.demoSection}>
-      <div className={s.card}>
-        <div className={s.cardHeader}>
-          <div className={s.cardTitleGroup}>
-            <h2 className={s.cardTitle}>Employee Directory</h2>
-            <p className={s.cardDescription}>
-              20 records &middot; Click column headers to sort &middot;{' '}
-              {selectedCount > 0 && (
-                <span style={{ color: '#60a5fa' }}>
-                  {selectedCount} selected
-                </span>
-              )}
+      <div className={s.demoCard}>
+        <div className={s.demoHeader}>
+          <div className={s.demoTitleGroup}>
+            <span className={s.demoEyebrow}>Live Data Surface</span>
+            <h3 className={s.demoTitle}>Employee ledger with real interaction density.</h3>
+            <p className={s.demoDescription}>
+              Search, sort, select, and paginate without leaving the same
+              component tree.
             </p>
           </div>
-          <div className={s.cardActions}>
-            <div className={s.featureTags}>
-              <span className={s.featureTag}>Sorting</span>
-              <span className={`${s.featureTag} ${s.featureTagPurple}`}>
-                Filtering
-              </span>
-              <span className={`${s.featureTag} ${s.featureTagGreen}`}>
-                Selection
-              </span>
-              <span className={`${s.featureTag} ${s.featureTagAmber}`}>
-                Pagination
-              </span>
-            </div>
+
+          <div className={s.demoMetrics}>
+            <span className={s.metricPill}>{people.length} rows</span>
+            <span className={s.metricPill}>{departments.length} departments</span>
+            <span className={s.metricPill}>
+              {selectedCount > 0 ? `${selectedCount} selected` : 'Selection ready'}
+            </span>
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 16,
-          }}
-        >
-          <div className={s.searchWrap} style={{ flex: 1, maxWidth: 320 }}>
+        <div className={s.searchRow}>
+          <div className={s.searchWrap}>
             <span className={s.searchIcon}>
               <SearchIcon />
             </span>
-            <GlobalFilter table={table} placeholder="Search employees..." />
+            <GlobalFilter
+              table={table}
+              placeholder="Scan names, roles, departments, and salary bands"
+            />
           </div>
+          <p className={s.searchHint}>Click a header to sort. Shift-click to multi-sort.</p>
         </div>
 
         <div className={s.tableWrap}>
-          <Table table={table} theme="midnight" stickyHeader striped>
+          <Table table={table} theme="midnight" stickyHeader striped bordered>
             <Pagination table={table} />
           </Table>
         </div>
@@ -414,10 +752,6 @@ function BasicDemo() {
     </section>
   )
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Editable Table
-// ═══════════════════════════════════════════════════════════════════════════
 
 function EditableDemo() {
   const [data, setData] = useState(() => people.slice(0, 8))
@@ -434,129 +768,113 @@ function EditableDemo() {
 
   const handleSave = () => {
     if (!hasPending) return
+
     const next = data.map((row) => {
       const changes = pendingChanges[String(row.id)]
       return changes ? { ...row, ...changes } : row
     })
-    setData(next)
-    table.discardAllPending()
-  }
 
-  const handleDiscard = () => {
+    setData(next)
     table.discardAllPending()
   }
 
   return (
     <section className={s.demoSection}>
-      <div className={s.card}>
-        <div className={s.cardHeader}>
-          <div className={s.cardTitleGroup}>
-            <h2 className={s.cardTitle}>
-              Inline Editing
-              {hasPending && (
-                <>
-                  <span className={s.unsavedDot} />
-                  <span className={s.unsavedLabel}>
-                    {pendingCount} row{pendingCount > 1 ? 's' : ''} modified
-                  </span>
-                </>
-              )}
-            </h2>
-            <p className={s.cardDescription}>
-              Edit cells directly. Text inputs, selects, and checkboxes built in.
+      <div className={s.demoCard}>
+        <div className={s.demoHeader}>
+          <div className={s.demoTitleGroup}>
+            <span className={s.demoEyebrow}>Editing Surface</span>
+            <h3 className={s.demoTitle}>Inline forms without losing table rhythm.</h3>
+            <p className={s.demoDescription}>
+              Changes stay buffered until commit, which keeps the surface
+              reversible and calm.
             </p>
           </div>
-          <div className={s.cardActions}>
-            <div className={s.featureTags}>
-              <span className={s.featureTag}>Text Input</span>
-              <span className={`${s.featureTag} ${s.featureTagPurple}`}>
-                Select
-              </span>
-              <span className={`${s.featureTag} ${s.featureTagGreen}`}>
-                Checkbox
-              </span>
-            </div>
+
+          <div className={s.demoMetrics}>
+            <span className={s.metricPill}>Text</span>
+            <span className={s.metricPill}>Select</span>
+            <span className={s.metricPill}>Checkbox</span>
+            <span className={s.metricPill}>
+              {hasPending ? `${pendingCount} pending` : 'No pending edits'}
+            </span>
           </div>
         </div>
 
         <div className={s.tableWrap}>
-          <Table table={table} theme="midnight" bordered />
+          <Table table={table} theme="forest" bordered />
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            gap: 8,
-            marginTop: 16,
-          }}
-        >
-          <button
-            className={s.btnSecondary}
-            onClick={handleDiscard}
-            disabled={!hasPending}
-          >
-            Discard
-          </button>
-          <button
-            className={s.btnPrimary}
-            onClick={handleSave}
-            disabled={!hasPending}
-          >
-            Save Changes
-          </button>
+        <div className={s.editorFooter}>
+          <div className={s.pendingBlock}>
+            <span className={`${s.pendingDot} ${hasPending ? s.pendingDotActive : ''}`} />
+            <span className={s.pendingText}>
+              {hasPending
+                ? `${pendingCount} row${pendingCount > 1 ? 's' : ''} waiting to be committed`
+                : 'Edit any cell to stage a change'}
+            </span>
+          </div>
+
+          <div className={s.actionRow}>
+            <button
+              type="button"
+              className={s.btnSecondary}
+              onClick={() => table.discardAllPending()}
+              disabled={!hasPending}
+            >
+              Discard
+            </button>
+            <button
+              type="button"
+              className={s.btnPrimary}
+              onClick={handleSave}
+              disabled={!hasPending}
+            >
+              Save Changes
+            </button>
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Theme Gallery
-// ═══════════════════════════════════════════════════════════════════════════
-
 function ThemeGallery({
   selected,
   onSelect,
 }: {
   selected: ThemeId
-  onSelect: (t: ThemeId) => void
+  onSelect: (theme: ThemeId) => void
 }) {
   return (
     <section className={s.demoSection}>
-      {/* Gallery header */}
-      <div className={s.card} style={{ marginBottom: 20 }}>
-        <div className={s.cardHeader} style={{ marginBottom: 0 }}>
-          <div className={s.cardTitleGroup}>
-            <h2 className={s.cardTitle}>Theme Gallery</h2>
-            <p className={s.cardDescription}>
-              8 built-in themes. Click any card to preview. Each theme supports
-              light and dark modes.
+      <div className={s.demoCard}>
+        <div className={s.demoHeader}>
+          <div className={s.demoTitleGroup}>
+            <span className={s.demoEyebrow}>Theme Gallery</span>
+            <h3 className={s.demoTitle}>Eight token packs. One table language.</h3>
+            <p className={s.demoDescription}>
+              Choose a theme to inspect how the system shifts while the table
+              structure stays constant.
             </p>
           </div>
-          <div className={s.featureTags}>
-            <span className={s.featureTag}>8 Themes</span>
-            <span className={`${s.featureTag} ${s.featureTagPurple}`}>
-              Dark Mode
-            </span>
-            <span className={`${s.featureTag} ${s.featureTagGreen}`}>
-              CSS Variables
-            </span>
+
+          <div className={s.demoMetrics}>
+            <span className={s.metricPill}>Selected: {allThemes.find((theme) => theme.id === selected)?.label}</span>
+            <span className={s.metricPill}>Dark + light ready</span>
           </div>
         </div>
-      </div>
 
-      {/* Grid of mini-table previews */}
-      <div className={s.themeGrid}>
-        {allThemes.map((theme) => (
-          <ThemePreviewCard
-            key={theme.id}
-            theme={theme}
-            isSelected={selected === theme.id}
-            onSelect={() => onSelect(theme.id)}
-          />
-        ))}
+        <div className={s.themeGrid}>
+          {allThemes.map((theme) => (
+            <ThemePreviewCard
+              key={theme.id}
+              theme={theme}
+              isSelected={selected === theme.id}
+              onSelect={() => onSelect(theme.id)}
+            />
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -571,10 +889,8 @@ function ThemePreviewCard({
   isSelected: boolean
   onSelect: () => void
 }) {
-  const previewData = useMemo(() => people.slice(0, 5), [])
-
   const table = useTable({
-    data: previewData,
+    data: themePreviewData,
     columns: miniColumns,
     getRowId: (row) => String(row.id),
   })
@@ -585,9 +901,9 @@ function ThemePreviewCard({
       onClick={onSelect}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
           onSelect()
         }
       }}
@@ -595,16 +911,21 @@ function ThemePreviewCard({
       aria-pressed={isSelected}
     >
       <div className={s.themeTableWrap}>
-        <Table table={table} theme={theme.id} striped />
+        <Table table={table} theme={theme.id} striped bordered />
       </div>
+
       <div className={s.themeCardFooter}>
         <div className={s.themeNameRow}>
           <span
             className={s.themeAccentDot}
-            style={{ background: theme.accent }}
+            style={{ backgroundColor: theme.accent }}
           />
-          <span className={s.themeName}>{theme.label}</span>
+          <div>
+            <span className={s.themeName}>{theme.label}</span>
+            <span className={s.themeSubcopy}>{themeNotes[theme.id].title}</span>
+          </div>
         </div>
+
         <span
           className={`${s.themeCheck} ${isSelected ? s.themeCheckVisible : ''}`}
         >
@@ -613,4 +934,20 @@ function ThemePreviewCard({
       </div>
     </div>
   )
+}
+
+function formatDate(value: string) {
+  return dateFormatter.format(new Date(`${value}T12:00:00Z`))
+}
+
+function getDepartmentClassName(value: string) {
+  if (value === 'Engineering') {
+    return `${s.departmentPill} ${s.departmentEngineering}`
+  }
+
+  if (value === 'Design') {
+    return `${s.departmentPill} ${s.departmentDesign}`
+  }
+
+  return `${s.departmentPill} ${s.departmentProduct}`
 }

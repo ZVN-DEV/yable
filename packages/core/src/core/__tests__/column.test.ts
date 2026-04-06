@@ -1,7 +1,6 @@
 // @yable/core — Column Model Tests
 
 import { describe, it, expect } from 'vitest'
-import { createColumn } from '../column'
 import { createTable } from '../table'
 import { functionalUpdate } from '../../utils'
 import type { TableState, ColumnDef } from '../../types'
@@ -44,6 +43,16 @@ function makeTable(
     grouping: [],
     editing: { activeCell: undefined, pendingValues: {} },
     keyboardNavigation: { focusedCell: null },
+    undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
+    fillHandle: { isDragging: false },
+    formulas: { enabled: false, formulas: {}, computedValues: {}, errors: {} },
+    rowDrag: { draggingRowId: null, overRowId: null, dropPosition: null },
+    pivot: {
+      enabled: false,
+      config: { rowFields: [], columnFields: [], valueFields: [] },
+      expandedRowGroups: {},
+      expandedColumnGroups: {},
+    },
     ...stateOverrides,
   }
 

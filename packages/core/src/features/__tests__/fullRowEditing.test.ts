@@ -3,7 +3,7 @@
 // Since it requires a full table instance, we test the logic patterns
 // via a simplified mock approach.
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // We test the pure state management patterns that fullRowEditing provides.
 // The integration function requires a full Table<TData> instance, so we

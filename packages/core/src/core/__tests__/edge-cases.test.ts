@@ -9,11 +9,6 @@ import type { TableOptions, TableState, ColumnDef } from '../../types'
 // Helpers
 // ---------------------------------------------------------------------------
 
-interface Person {
-  name: string | undefined | null
-  age: number | null
-}
-
 function makeTableWithState(
   data: any[],
   columns: ColumnDef<any, any>[],
@@ -43,6 +38,16 @@ function makeTableWithState(
     grouping: [],
     editing: { activeCell: undefined, pendingValues: {} },
     keyboardNavigation: { focusedCell: null },
+    undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
+    fillHandle: { isDragging: false },
+    formulas: { enabled: false, formulas: {}, computedValues: {}, errors: {} },
+    rowDrag: { draggingRowId: null, overRowId: null, dropPosition: null },
+    pivot: {
+      enabled: false,
+      config: { rowFields: [], columnFields: [], valueFields: [] },
+      expandedRowGroups: {},
+      expandedColumnGroups: {},
+    },
     ...stateOverrides,
   }
 

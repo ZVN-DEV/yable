@@ -8,7 +8,7 @@ import { filterFns } from './filterFns'
 import { aggregationFns } from './aggregationFns'
 import { EventEmitterImpl } from './events/EventEmitter'
 import { functionalUpdate, memo, shallowEqual, range, clamp } from './utils'
-import type { TableOptions, TableState, RowData } from './types'
+import type { TableOptions, TableState } from './types'
 
 // ---------------------------------------------------------------------------
 // Test data
@@ -501,7 +501,7 @@ describe('Row Expanding', () => {
   })
 
   it('toggleExpanded collapses an expanded row', () => {
-    const { table, getState } = createTestTable({
+    const { table } = createTestTable({
       initialState: { expanded: { '1': true } },
     })
     const row = table.getRowModel().rows[0]!
