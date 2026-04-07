@@ -11,6 +11,15 @@ export const measureRecipe: CellMeasureRecipe = {
   padding: 20,
 }
 
+function isSafeUrl(url: string): boolean {
+  const normalized = String(url).toLowerCase().trim()
+  return (
+    !normalized.startsWith('javascript:') &&
+    !normalized.startsWith('data:text/html') &&
+    !normalized.startsWith('vbscript:')
+  )
+}
+
 export function CellLink<TData extends RowData, TValue>({
   context,
   href,
@@ -25,9 +34,15 @@ export function CellLink<TData extends RowData, TValue>({
     ? href(raw)
     : href ?? label
 
+  const safeUrl = isSafeUrl(url) ? url : undefined
+
+  if (!safeUrl) {
+    return <span className={`yable-cell-link ${className ?? ''}`}>{label}</span>
+  }
+
   return (
     <a
-      href={url}
+      href={safeUrl}
       className={`yable-cell-link ${className ?? ''}`}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
