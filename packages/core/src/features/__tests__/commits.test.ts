@@ -220,3 +220,149 @@ describe('CommitCoordinator — opId race', () => {
     await Promise.resolve()
   })
 })
+
+describe('CommitCoordinator — auto-clear sweep', () => {
+  it('clears errored cells whose pending value matches the saved value', async () => {
+    const { store, setSaved, snapshot } = makeStore()
+    setSaved('r1', 'name', 'Acme')
+    const coord = createCommitCoordinator(store, {
+      onCommit: async () => {
+        throw new Error('boom')
+      },
+    })
+    await coord.dispatch([makePatch('r1', 'name', 'Acme Corp', 'Acme')])
+    expect(snapshot().cells.r1?.name?.status).toBe('error')
+
+    // Consumer fixes the data via refetch
+    setSaved('r1', 'name', 'Acme Corp')
+    coord.runAutoClearSweep()
+    expect(snapshot().cells.r1).toBeUndefined()
+  })
+
+  it('does NOT clear cells in pending status during sweep', async () => {
+    const { store, setSaved, snapshot } = makeStore()
+    setSaved('r1', 'name', 'Acme')
+    let release!: () => void
+    const block = new Promise<void>((res) => (release = res))
+
+    const coord = createCommitCoordinator(store, {
+      onCommit: async () => {
+        await block
+      },
+    })
+
+    const p = coord.dispatch([makePatch('r1', 'name', 'Acme Corp', 'Acme')])
+    setSaved('r1', 'name', 'Acme Corp')
+    coord.runAutoClearSweep()
+    // Pending records are sacred — sweep skips them
+    expect(snapshot().cells.r1?.name?.status).toBe('pending')
+
+    release()
+    await p
+  })
+})
+
+describe('CommitCoordinator — orphaned row GC', () => {
+  it('drops entries whose row no longer exists', async () => {
+    const { store, setSaved, deleteRow, snapshot } = makeStore()
+    setSaved('r1', 'name', 'Acme')
+    const coord = createCommitCoordinator(store, {
+      onCommit: async () => {
+        throw new Error('x')
+      },
+    })
+    await coord.dispatch([makePatch('r1', 'name', 'Acme Corp', 'Acme')])
+    expect(snapshot().cells.r1).toBeDefined()
+
+    deleteRow('r1')
+    coord.runOrphanedGc()
+    expect(snapshot().cells.r1).toBeUndefined()
+  })
+})
+
+describe('CommitCoordinator — conflict detection', () => {
+  it('marks an errored cell as conflict when the saved value drifts', async () => {
+    const { store, setSaved, snapshot } = makeStore()
+    setSaved('r1', 'name', 'Acme')
+    const coord = createCommitCoordinator(store, {
+      onCommit: async () => {
+        throw new Error('x')
+      },
+    })
+    await coord.dispatch([makePatch('r1', 'name', 'Acme Corp', 'Acme')])
+    expect(snapshot().cells.r1?.name?.status).toBe('error')
+
+    // External update drifts the saved value
+    setSaved('r1', 'name', 'Acme Inc')
+    coord.runConflictDetection()
+    expect(snapshot().cells.r1?.name?.status).toBe('conflict')
+    expect(snapshot().cells.r1?.name?.conflictWith).toBe('Acme Inc')
+  })
+
+  it('does NOT mark conflict if pending value happens to match saved', async () => {
+    const { store, setSaved, snapshot } = makeStore()
+    setSaved('r1', 'name', 'Acme')
+    const coord = createCommitCoordinator(store, {
+      onCommit: async () => {
+        throw new Error('x')
+      },
+    })
+    await coord.dispatch([makePatch('r1', 'name', 'Acme Corp', 'Acme')])
+    setSaved('r1', 'name', 'Acme Corp') // Pending matches new saved → auto-clear should fire, not conflict
+    coord.runConflictDetection()
+    // Status remains error (we'd need an explicit auto-clear sweep to clear it)
+    expect(snapshot().cells.r1?.name?.status).toBe('error')
+  })
+})
+
+describe('CommitCoordinator — render value & status accessors', () => {
+  it('getRenderValue returns pending while in flight, saved otherwise', async () => {
+    const { store, setSaved } = makeStore()
+    setSaved('r1', 'name', 'Acme')
+    const coord = createCommitCoordinator(store, {
+      onCommit: async () => {
+        throw new Error('x')
+      },
+    })
+    expect(coord.getRenderValue('r1', 'name')).toBe('Acme')
+    await coord.dispatch([makePatch('r1', 'name', 'Acme Corp', 'Acme')])
+    expect(coord.getRenderValue('r1', 'name')).toBe('Acme Corp')
+  })
+
+  it('getCellStatus returns "idle" when no record exists', () => {
+    const { store } = makeStore()
+    const coord = createCommitCoordinator(store, { onCommit: async () => {} })
+    expect(coord.getCellStatus('r1', 'name')).toBe('idle')
+  })
+})
+
+describe('CommitCoordinator — per-column override', () => {
+  it('uses the column-level handler instead of the table-level one', async () => {
+    const { store, setSaved, snapshot } = makeStore()
+    setSaved('r1', 'name', 'Acme')
+    setSaved('r1', 'avatar', null)
+
+    const calls: string[] = []
+    const coord = createCommitCoordinator(store, {
+      onCommit: async () => {
+        calls.push('table')
+      },
+      resolveColumnCommit: (colId) => {
+        if (colId === 'avatar') {
+          return async () => {
+            calls.push('avatar')
+          }
+        }
+        return undefined
+      },
+    })
+
+    await coord.dispatch([
+      makePatch('r1', 'name', 'Acme Corp', 'Acme'),
+      makePatch('r1', 'avatar', 'blob://x', null),
+    ])
+
+    expect(calls.sort()).toEqual(['avatar', 'table'])
+    expect(snapshot().cells.r1).toBeUndefined() // both cleared on success
+  })
+})
