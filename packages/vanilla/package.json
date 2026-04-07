@@ -1,6 +1,10 @@
 {
   "name": "@yable/vanilla",
   "version": "0.1.0",
+  "description": "Vanilla JS/DOM renderer for @yable/core -- framework-free table rendering",
+  "keywords": ["table", "data-grid", "datagrid", "vanilla", "javascript", "dom", "renderer"],
+  "license": "MIT",
+  "author": "ZVN DEV",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

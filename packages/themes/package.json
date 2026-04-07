@@ -1,6 +1,10 @@
 {
   "name": "@yable/themes",
   "version": "0.1.0",
+  "description": "CSS design token system and themes for Yable data tables",
+  "keywords": ["table", "themes", "css", "design-tokens", "dark-mode", "yable"],
+  "license": "MIT",
+  "author": "ZVN DEV",
   "type": "module",
   "main": "./dist/index.css",
   "exports": {
