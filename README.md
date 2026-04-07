@@ -19,7 +19,8 @@ Yable is a TypeScript-first, framework-agnostic data table engine. It ships a he
 
 ## Why Yable?
 
-- **Formula engine** -- 80+ spreadsheet functions with a parser, evaluator, and dependency tracker. AG Grid doesn't even offer this.
+- **Formula engine** -- 17 built-in spreadsheet functions (extensible) with a parser, evaluator, and dependency tracker. Free and MIT-licensed -- AG Grid's formula support requires an Enterprise license.
+- **Async cell commits** -- built-in optimistic saves with pending, error, and conflict cell states. Retry, dismiss, and conflict resolution out of the box. No other React grid ships this.
 - **Pivot tables, fill handle, clipboard, undo/redo** -- features that AG Grid locks behind a $1,000+/dev/year Enterprise license. Yable ships them for free under MIT.
 - **Headless core + batteries-included UI** -- TanStack Table is headless but ships zero components. Yable gives you a headless `@yable/core` *and* ready-to-use React components with styled themes.
 - **TypeScript from the ground up** -- deep key inference on accessors, fully typed state slices, and generic-safe column helpers.
@@ -33,16 +34,17 @@ Yable is a TypeScript-first, framework-agnostic data table engine. It ships a he
 | Filtering (column + global) | Yes | Yes | Yes | Yes |
 | Pagination | Yes | Yes | Yes | Yes |
 | Cell editing | Yes | DIY | Yes | Yes |
-| Column pinning | Yes | Yes | No | Yes |
+| Column pinning | Yes | Yes | Yes | Yes |
 | Column resizing | Yes | Yes | Yes | Yes |
 | Row selection | Yes | Yes | Yes | Yes |
 | Row grouping | Yes | Plugin | No | Yes |
 | Aggregation | Yes | Plugin | No | Yes |
 | Pivot tables | Yes | No | No | Yes |
-| Formula engine | Yes | No | No | No |
+| Formula engine | Yes | No | No | Yes |
 | Fill handle | Yes | No | No | Yes |
 | Clipboard | Yes | No | No | Yes |
-| Undo / Redo | Yes | No | No | Yes |
+| Undo / Redo | Yes | No | Yes | Yes |
+| Async cell commits | Yes | No | No | No |
 | Tree data | Yes | Yes | No | Yes |
 | Export (CSV / JSON) | Yes | No | Yes | Yes |
 | Themes / design tokens | Yes | No | Yes | Yes |
@@ -124,7 +126,7 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 | [`@yable/core`](./packages/core) | Headless table engine -- sorting, filtering, editing, formulas, pivot, tree data, clipboard, and more. Zero dependencies. |
 | [`@yable/react`](./packages/react) | React adapter -- `useTable` hook, `<Table>` component tree, form controls, pagination, global filter. |
 | [`@yable/vanilla`](./packages/vanilla) | Vanilla JS/DOM renderer -- `renderTable()` and `renderPagination()` for non-framework use. |
-| [`@yable/themes`](./packages/themes) | CSS design token system -- 3 built-in themes (default, stripe, compact) with 100+ customizable CSS custom properties. Dark mode included. |
+| [`@yable/themes`](./packages/themes) | CSS design token system -- 8 built-in themes (default, stripe, compact, forest, midnight, rose, ocean, mono) with 100+ customizable CSS custom properties. Dark mode included. |
 
 ## Features
 
@@ -137,10 +139,11 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 
 ### Spreadsheet Features
 - Cell editing -- text, number, select, checkbox, toggle, date, and custom editors with validation
-- Formula engine -- 80+ functions, expression parser, dependency graph, circular reference detection
+- Formula engine -- 17 built-in functions (extensible), expression parser, dependency graph, circular reference detection
 - Fill handle -- drag to auto-fill cells (like Excel)
 - Clipboard -- copy/paste support
 - Undo / Redo -- full edit history
+- Async cell commits -- optimistic saves with pending, error, and conflict cell states, retry, and conflict resolution
 
 ### Layout & Interaction
 - Column pinning -- freeze columns to left or right edges
@@ -169,11 +172,10 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 
 Yable is in **early alpha** (v0.1.0). The core API is taking shape but may still change. We are actively working on:
 
-- Virtualization for large datasets (10k+ rows)
-- Keyboard navigation
-- Additional themes
+- Virtualization polish and benchmarking
 - Server-side data source adapters
 - Storybook examples
+- Additional themes and customization
 
 ## License
 
