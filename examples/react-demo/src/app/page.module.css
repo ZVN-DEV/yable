@@ -217,6 +217,52 @@
   flex-shrink: 0;
 }
 
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.heroCtaPrimary,
+.heroCtaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease,
+    transform 150ms ease;
+}
+
+.heroCtaPrimary {
+  background: linear-gradient(135deg, #d8b46d, #a77d3c);
+  color: #1a120a;
+  border: 1px solid rgba(216, 180, 109, 0.6);
+}
+
+.heroCtaPrimary:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #e9c782, #b98a44);
+}
+
+.heroCtaSecondary {
+  background: rgba(255, 245, 231, 0.04);
+  color: var(--text-soft);
+  border: 1px solid rgba(227, 196, 150, 0.22);
+}
+
+.heroCtaSecondary:hover {
+  background: rgba(255, 245, 231, 0.08);
+  color: var(--text-strong, #f3eadb);
+  border-color: rgba(227, 196, 150, 0.4);
+}
+
 .heroStage {
   padding: 18px;
 }

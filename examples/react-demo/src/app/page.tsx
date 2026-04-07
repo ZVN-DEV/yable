@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import {
   useTable,
   Table,
@@ -532,6 +533,20 @@ export default function Home() {
               <span className={s.heroBadge}>Sorting, filtering, editing, theming</span>
               <span className={s.heroBadge}>Spreadsheet-grade features under MIT</span>
               <span className={s.heroBadge}>Designed to showcase the package, not hide it</span>
+            </div>
+
+            <div className={s.heroCtas}>
+              <Link href="/docs" className={s.heroCtaPrimary}>
+                Read the docs
+              </Link>
+              <a
+                href="https://github.com/ZVN-DEV/yable"
+                target="_blank"
+                rel="noreferrer"
+                className={s.heroCtaSecondary}
+              >
+                View on GitHub
+              </a>
             </div>
           </div>
 
