@@ -213,6 +213,44 @@ describe('CellLink', () => {
     const link = screen.getByRole('link')
     expect(link.className).toContain('yable-cell-link')
   })
+
+  it('blocks javascript: protocol and renders as span', () => {
+    render(<CellLink context={makeCellContext('Click me')} href="javascript:alert(1)" />)
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.getByText('Click me')).toBeInTheDocument()
+    expect(screen.getByText('Click me').tagName).toBe('SPAN')
+  })
+
+  it('blocks JAVASCRIPT: protocol (case-insensitive)', () => {
+    render(<CellLink context={makeCellContext('Click')} href="JAVASCRIPT:void(0)" />)
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.getByText('Click').tagName).toBe('SPAN')
+  })
+
+  it('blocks data:text/html protocol', () => {
+    render(
+      <CellLink context={makeCellContext('Click')} href="data:text/html,<script>alert(1)</script>" />
+    )
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.getByText('Click').tagName).toBe('SPAN')
+  })
+
+  it('blocks vbscript: protocol', () => {
+    render(<CellLink context={makeCellContext('Click')} href="vbscript:MsgBox" />)
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.getByText('Click').tagName).toBe('SPAN')
+  })
+
+  it('allows valid http/https URLs', () => {
+    render(<CellLink context={makeCellContext('Safe')} href="https://example.com" />)
+
+    const link = screen.getByRole('link', { name: 'Safe' })
+    expect(link).toHaveAttribute('href', 'https://example.com')
+  })
 })
 
 // ---------------------------------------------------------------------------

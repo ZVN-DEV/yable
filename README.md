@@ -172,10 +172,9 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 
 Yable is in **early alpha** (v0.1.0). The core API is taking shape but may still change. We are actively working on:
 
-- Virtualization polish and benchmarking
+- Virtualization polish and benchmarking for large datasets (10k+ rows)
 - Server-side data source adapters
-- Storybook examples
-- Additional themes and customization
+- Storybook examples and interactive docs
 
 ## License
 
