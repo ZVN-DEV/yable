@@ -63,14 +63,14 @@ importers:
         specifier: ^0.0.4
         version: 0.0.4
       '@zvndev/yable-core':
-        specifier: workspace:*
-        version: link:../../packages/core
+        specifier: ^0.1.0
+        version: 0.1.0
       '@zvndev/yable-react':
-        specifier: workspace:*
-        version: link:../../packages/react
+        specifier: ^0.1.0
+        version: 0.1.0(@chenglou/pretext@0.0.4)(@zvndev/yable-themes@0.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@zvndev/yable-themes':
-        specifier: workspace:*
-        version: link:../../packages/themes
+        specifier: ^0.1.0
+        version: 0.1.0
       next:
         specifier: ^15.1.0
         version: 15.5.14(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1656,6 +1656,25 @@ packages:
 
   '@vitest/utils@2.1.9':
     resolution: {integrity: sha512-v0psaMSkNJ3A2NMrUEHFRzJtDPFn+/VWZ5WxImB21T9fjucJRmS7xCS3ppEnARb9y11OAzaD+P2Ps+b+BGX5iQ==}
+
+  '@zvndev/yable-core@0.1.0':
+    resolution: {integrity: sha512-LWGEIREArduke8CHj1Ll4+AQJZVKclqfE/XVhNsJrPbqmjWKPd2Xid5Xg9t+jfGjhzzXeRdmTH3SbvEeGGhwww==}
+
+  '@zvndev/yable-react@0.1.0':
+    resolution: {integrity: sha512-bhihz3cbgLYUu5SXpRuQ4Z9axOKJw8Bzc7euFoc3ppur4s4rS/kURoD8wh94Z26R71ad1Y54+glmYCC2qr+Kxw==}
+    peerDependencies:
+      '@chenglou/pretext': '>=0.0.4'
+      '@zvndev/yable-themes': workspace:*
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    peerDependenciesMeta:
+      '@chenglou/pretext':
+        optional: true
+      '@zvndev/yable-themes':
+        optional: true
+
+  '@zvndev/yable-themes@0.1.0':
+    resolution: {integrity: sha512-C+DGrNCvltqKkqvDZvCXFN791y/dq95lO/mQU5nDTVJdS27vyRpEGN+jkEyfvNsMaUo02AlfiEaVtKEzv3olPQ==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -4622,6 +4641,19 @@ snapshots:
       '@vitest/pretty-format': 2.1.9
       loupe: 3.2.1
       tinyrainbow: 1.2.0
+
+  '@zvndev/yable-core@0.1.0': {}
+
+  '@zvndev/yable-react@0.1.0(@chenglou/pretext@0.0.4)(@zvndev/yable-themes@0.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@zvndev/yable-core': link:packages/core
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+    optionalDependencies:
+      '@chenglou/pretext': 0.0.4
+      '@zvndev/yable-themes': 0.1.0
+
+  '@zvndev/yable-themes@0.1.0': {}
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:

@@ -1,0 +1,5 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install --no-package-lock",
+  "buildCommand": "npm run build"
+}

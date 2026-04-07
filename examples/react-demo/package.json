@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.4",
-    "@zvndev/yable-core": "workspace:*",
-    "@zvndev/yable-react": "workspace:*",
-    "@zvndev/yable-themes": "workspace:*",
+    "@zvndev/yable-core": "^0.1.0",
+    "@zvndev/yable-react": "^0.1.0",
+    "@zvndev/yable-themes": "^0.1.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
