@@ -25,6 +25,7 @@ Detailed guide for every Yable feature. Each section explains what the feature d
 - [Clipboard](#clipboard)
 - [Fill Handle](#fill-handle)
 - [Formulas](#formulas)
+- [Async Cell Commits](#async-cell-commits)
 - [Export](#export)
 - [Event System](#event-system)
 - [i18n](#i18n)
@@ -912,11 +913,11 @@ Drag the fill handle at the bottom-right corner of a selected cell to auto-fill 
 
 ## Formulas
 
-A spreadsheet-grade formula engine with 80+ functions, an expression parser, evaluator, and dependency tracker.
+A spreadsheet-grade formula engine with 17 built-in functions (extensible), an expression parser, evaluator, and dependency tracker.
 
 ### Capabilities
 
-- **80+ functions** across math, statistics, text, date, logical, lookup, and financial categories
+- **17 built-in functions** across math, statistics, text, and logical categories (extensible with custom functions)
 - **Expression parser** that handles cell references, ranges, and nested function calls
 - **Dependency tracking** with automatic recalculation when referenced cells change
 - **Circular reference detection** to prevent infinite loops
@@ -924,8 +925,110 @@ A spreadsheet-grade formula engine with 80+ functions, an expression parser, eva
 ### Notes
 
 - The formula engine is included in `@yable/core` and works with any adapter
-- Full documentation for the formula API is coming in a dedicated guide
-- This feature is FREE under MIT -- AG Grid does not offer a formula engine at any price
+- Built-in functions: `SUM`, `AVG`, `COUNT`, `COUNTA`, `MIN`, `MAX`, `IF`, `CONCAT`, `ROUND`, `ABS`, `FLOOR`, `CEILING`, `POWER`, `SQRT`, `LEN`, `UPPER`, `LOWER` (plus aliases `AVERAGE`, `CONCATENATE`, `TRUNC`, `INT`)
+- Register custom functions via the formula engine API
+- This feature is FREE under MIT -- AG Grid requires an Enterprise license for formula support
+
+---
+
+## Async Cell Commits
+
+Save cell edits to a backend with built-in optimistic updates, error handling, retry, and conflict detection. No other React grid ships this feature.
+
+### How to Use
+
+```typescript
+import { createColumnHelper } from '@yable/core'
+import { CommitError } from '@yable/core'
+
+const table = useTable({
+  data,
+  columns,
+  enableCellEditing: true,
+  autoCommit: true, // fire onCommit after each edit (default)
+  onCommit: async (patches) => {
+    // patches is CellPatch[] — one per edited cell
+    const res = await fetch('/api/save', {
+      method: 'POST',
+      body: JSON.stringify(patches.map(p => ({
+        rowId: p.rowId,
+        column: p.columnId,
+        value: p.value,
+      }))),
+      signal: patches[0].signal, // wire abort signal
+    })
+
+    if (!res.ok) {
+      // Throw CommitError for per-cell error messages
+      throw new CommitError({
+        [patches[0].rowId]: {
+          [patches[0].columnId]: 'Server rejected the update',
+        },
+      })
+    }
+  },
+})
+```
+
+### Cell Status Lifecycle
+
+Each cell has a status: `idle` | `pending` | `error` | `conflict`.
+
+| Status | Meaning | Cell renders |
+|---|---|---|
+| `idle` | No in-flight commit | Saved value |
+| `pending` | Commit in flight | Pending value + spinner |
+| `error` | Commit failed | Pending value + error badge with retry |
+| `conflict` | Saved value changed underneath | Pending value + conflict indicator |
+
+### Table Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `onCommit` | `OnCommitFn<TData>` | -- | Async handler for saving cell edits. Resolve = success, throw = failure. |
+| `autoCommit` | `boolean` | `true` | Fire `onCommit` after each edit; if `false`, batch edits until `table.commit()` |
+| `rowCommitRetryMode` | `'failed' \| 'batch'` | `'failed'` | On retry: resend only failed cells or entire batch |
+
+### Table API
+
+| Method | Return | Description |
+|---|---|---|
+| `getCellStatus(rowId, colId)` | `CellStatus` | Get commit status of a cell |
+| `getCellRenderValue(rowId, colId)` | `unknown` | Get display value (pending or saved) |
+| `getCellErrorMessage(rowId, colId)` | `string \| undefined` | Get error message for failed cell |
+| `getCellConflictWith(rowId, colId)` | `unknown` | Get conflicting server value |
+| `commit()` | `Promise<void>` | Commit all pending edits (when `autoCommit: false`) |
+| `retryCommit(rowId, colId)` | `Promise<void>` | Retry a failed commit |
+| `dismissCommit(rowId, colId)` | `void` | Dismiss an error/conflict and revert |
+| `dismissAllCommits()` | `void` | Dismiss all errors/conflicts |
+
+### Per-Column Commit Handler
+
+Override the table-level `onCommit` for specific columns:
+
+```typescript
+columnHelper.accessor('price', {
+  header: 'Price',
+  editable: true,
+  commit: async (patch) => {
+    await updatePrice(patch.rowId, patch.value)
+  },
+})
+```
+
+### What Yable Handles Automatically
+
+- **Stale settlement** -- older in-flight commits are silently dropped if a newer commit lands first
+- **Auto-clear** -- when refetched data matches the pending value, the pending state clears automatically
+- **Orphaned GC** -- if a row disappears while a commit is in flight, the record is cleaned up
+- **Conflict detection** -- if the saved value changes between dispatch and settlement, the cell enters `conflict` status
+- **Abort signals** -- each patch carries an `AbortSignal` that fires when a newer edit supersedes it
+
+### Notes
+
+- See the [Async Commits Consumer Guide](./async-commits.md) for a full walkthrough
+- The `@yable/react` adapter renders cell status badges automatically via `<TableCell>`
+- Conflict resolution is left to the consumer -- dismiss to revert, or apply the pending value again
 
 ---
 

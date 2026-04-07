@@ -5,6 +5,12 @@
   "keywords": ["table", "themes", "css", "design-tokens", "dark-mode", "yable"],
   "license": "MIT",
   "author": "ZVN DEV",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZVN-DEV/table.git",
+    "directory": "packages/themes"
+  },
+  "homepage": "https://github.com/ZVN-DEV/table#readme",
   "type": "module",
   "main": "./dist/index.css",
   "exports": {

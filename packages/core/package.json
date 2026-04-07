@@ -5,6 +5,12 @@
   "keywords": ["table", "data-grid", "datagrid", "spreadsheet", "headless", "typescript", "sorting", "filtering", "formulas", "pivot"],
   "license": "MIT",
   "author": "ZVN DEV",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZVN-DEV/table.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/ZVN-DEV/table#readme",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

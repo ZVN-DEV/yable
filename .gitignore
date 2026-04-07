@@ -13,3 +13,10 @@ dist/
 # Playwright MCP artifacts
 .playwright-mcp/
 
+# Claude Code
+.claude/
+
+# Sprint artifacts
+SPRINT-PLAN.md
+AUDIT-REPORT.md
+

@@ -5,6 +5,12 @@
   "keywords": ["table", "data-grid", "datagrid", "vanilla", "javascript", "dom", "renderer"],
   "license": "MIT",
   "author": "ZVN DEV",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZVN-DEV/table.git",
+    "directory": "packages/vanilla"
+  },
+  "homepage": "https://github.com/ZVN-DEV/table#readme",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

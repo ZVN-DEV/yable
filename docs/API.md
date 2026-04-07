@@ -19,6 +19,7 @@ Complete reference for all public exports from `@yable/core`.
 - [Built-in Filter Functions](#built-in-filter-functions)
 - [Built-in Aggregation Functions](#built-in-aggregation-functions)
 - [Column Definition Types](#column-definition-types)
+- [Async Commit Types](#async-commit-types)
 - [Event Types](#event-types)
 - [Utility Functions](#utility-functions)
 
@@ -469,6 +470,19 @@ The object returned by `createTable()` or `useTable()`. All methods are grouped 
 | `isValid()` | `boolean` | All pending values valid? |
 | `setEditing(updater)` | `void` | Set editing state directly |
 | `resetEditing(defaultState?)` | `void` | Reset editing state |
+
+### Async Commit API
+
+| Method | Return | Description |
+|---|---|---|
+| `getCellRenderValue(rowId, columnId)` | `unknown` | Returns pending value if commit is in-flight, otherwise saved value |
+| `getCellStatus(rowId, columnId)` | `CellStatus` | Returns `'idle' \| 'pending' \| 'error' \| 'conflict'` |
+| `getCellErrorMessage(rowId, columnId)` | `string \| undefined` | Error message from failed commit |
+| `getCellConflictWith(rowId, columnId)` | `unknown` | The server value that conflicts with the pending value |
+| `commit()` | `Promise<void>` | Dispatch all pending edits (used when `autoCommit: false`) |
+| `retryCommit(rowId, columnId)` | `Promise<void>` | Retry a failed commit |
+| `dismissCommit(rowId, columnId)` | `void` | Dismiss an error/conflict and revert to saved value |
+| `dismissAllCommits()` | `void` | Dismiss all errors and conflicts |
 
 ### Export API
 
@@ -960,6 +974,99 @@ interface CellEditConfig<TData, TValue> {
   placeholder?: string
   render?: (props: CellEditRenderProps) => unknown
 }
+```
+
+---
+
+## Async Commit Types
+
+Import from `@yable/core`:
+
+### CellPatch
+
+```typescript
+interface CellPatch<TData, TValue = unknown> {
+  rowId: string
+  columnId: string
+  /** The value the user typed. */
+  value: TValue
+  /** The most recent saved value at the moment we dispatched. */
+  previousValue: TValue
+  /** The full row snapshot at dispatch time. */
+  row: TData
+  /** Aborts when the user starts a new commit on the same cell. */
+  signal: AbortSignal
+}
+```
+
+### CellStatus
+
+```typescript
+type CellStatus = 'idle' | 'pending' | 'error' | 'conflict'
+```
+
+### OnCommitFn
+
+```typescript
+type OnCommitFn<TData> = (
+  patches: CellPatch<TData>[]
+) => Promise<CommitResult> | CommitResult
+```
+
+### CommitResult
+
+```typescript
+type CommitResult = void | {
+  resolved?: Record<string, Record<string, unknown>>
+}
+```
+
+### CommitError
+
+```typescript
+class CommitError extends Error {
+  cells: CommitErrorCells
+  constructor(cells: CommitErrorCells, message?: string)
+}
+
+// rowId -> columnId -> human-readable error message
+type CommitErrorCells = Record<string, Record<string, string>>
+```
+
+Throw from `onCommit` to mark specific cells as failed. Throw a generic `Error` to fail all cells in the batch.
+
+### CommitRecord
+
+```typescript
+interface CommitRecord {
+  status: 'pending' | 'error' | 'conflict'
+  pendingValue: unknown
+  previousValue: unknown
+  opId: number
+  errorMessage?: string     // only when status === 'error'
+  conflictWith?: unknown    // only when status === 'conflict'
+  abortController: AbortController
+}
+```
+
+### Table Options (Async Commits)
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `onCommit` | `OnCommitFn<TData>` | -- | Async handler for saving cell edits. Resolve = success, throw = failure. |
+| `autoCommit` | `boolean` | `true` | Fire `onCommit` after each cell edit. If `false`, batch edits until `table.commit()`. |
+| `rowCommitRetryMode` | `'failed' \| 'batch'` | `'failed'` | `'failed'`: retry only failed cells. `'batch'`: retry entire original batch. |
+
+### Per-Column Commit
+
+Columns can define their own commit handler that takes precedence over `onCommit`:
+
+```typescript
+columnHelper.accessor('price', {
+  commit: async (patch: CellPatch) => {
+    await updatePrice(patch.rowId, patch.value)
+  },
+})
 ```
 
 ---

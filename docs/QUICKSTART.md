@@ -1,6 +1,6 @@
 # Quickstart Guide
 
-Get from zero to a fully interactive data table in 10 steps. Each step builds on the previous one and includes complete, copy-paste-ready code.
+Get from zero to a fully interactive data table in 11 steps. Each step builds on the previous one and includes complete, copy-paste-ready code.
 
 ## Prerequisites
 
@@ -394,6 +394,67 @@ Apply a custom accent color to the table's container:
   <Table table={table} striped />
 </div>
 ```
+
+---
+
+## Step 11: Add Async Cell Commits
+
+Save edits to a backend with automatic optimistic updates, error states, and retry:
+
+```tsx
+import { CommitError } from '@yable/core'
+
+export function EmployeeTable() {
+  const [data, setData] = useState(initialData)
+
+  const table = useTable({
+    data,
+    columns,
+    enableCellEditing: true,
+    // autoCommit: true (default) fires onCommit after each edit
+    onCommit: async (patches) => {
+      const res = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          patches.map((p) => ({
+            id: p.rowId,
+            field: p.columnId,
+            value: p.value,
+          }))
+        ),
+        signal: patches[0].signal, // cancel if user edits again
+      })
+
+      if (!res.ok) {
+        // Per-cell error messages
+        throw new CommitError({
+          [patches[0].rowId]: {
+            [patches[0].columnId]: `Save failed: ${res.statusText}`,
+          },
+        })
+      }
+
+      // On success, update local data so the table re-renders
+      const saved = await res.json()
+      setData((prev) =>
+        prev.map((row) => {
+          const update = saved.find((s: any) => s.id === row.id)
+          return update ? { ...row, ...update } : row
+        })
+      )
+    },
+  })
+
+  return (
+    <Table table={table} striped>
+      <Pagination table={table} />
+    </Table>
+  )
+}
+```
+
+Cells automatically show pending spinners during saves, error badges on failure (with retry on click), and conflict indicators if the server value changed underneath. See the [Async Commits Guide](./async-commits.md) and [Feature Documentation](./FEATURES.md#async-cell-commits) for the full API.
 
 ---
 

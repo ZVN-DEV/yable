@@ -111,4 +111,4 @@ Per-column commits run in parallel with the table-level batch.
 - Conflict detection (`previousValue !== currentSavedValue && pendingValue !== currentSavedValue`)
 - Render-time merge: cell renders `pendingValue ?? savedValue`
 
-See `docs/superpowers/specs/2026-04-07-data-update-patterns-design.md` for the full design rationale.
+See [`docs/superpowers/specs/2026-04-07-data-update-patterns-design.md`](./superpowers/specs/2026-04-07-data-update-patterns-design.md) for the full design rationale.
