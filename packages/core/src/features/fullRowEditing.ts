@@ -152,9 +152,31 @@ export function createFullRowEditingIntegration<TData extends RowData>(
       table.commitEdit()
     }
 
-    // Notify via onEditCommit
-    if (table.options.onEditCommit) {
-      table.options.onEditCommit({ [rowId]: values as Partial<TData> })
+    // Dispatch through CommitCoordinator if onCommit is defined; otherwise
+    // fall back to the legacy onEditCommit hook.
+    const opts = table.options
+    if (opts.onCommit) {
+      const coordinator = (table as any).__commitCoordinator
+      if (coordinator) {
+        const patches = editableColumnIds.map((colId) => {
+          let previousValue: unknown
+          try {
+            previousValue = row.getValue(colId)
+          } catch {
+            previousValue = undefined
+          }
+          return {
+            rowId,
+            columnId: colId,
+            value: values[colId],
+            previousValue,
+          }
+        })
+        // Fire and forget — the coordinator owns the lifecycle
+        void coordinator.dispatch(patches)
+      }
+    } else if (opts.onEditCommit) {
+      opts.onEditCommit({ [rowId]: values as Partial<TData> })
     }
 
     // Clear pending values for this row
