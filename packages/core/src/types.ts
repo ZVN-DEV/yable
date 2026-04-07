@@ -2,6 +2,13 @@
 // @yable/core — Type Definitions
 // ============================================================================
 
+import type {
+  CommitsSlice,
+  OnCommitFn,
+  CellPatch,
+  CommitResult,
+} from './features/commits/types'
+
 // ---------------------------------------------------------------------------
 // Base Types
 // ---------------------------------------------------------------------------
@@ -151,6 +158,14 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   // Cell editing
   editable?: boolean | ((row: Row<TData>) => boolean)
   editConfig?: CellEditConfig<TData, TValue>
+  /**
+   * Per-column commit handler (Task #10). Takes precedence over
+   * `table.options.onCommit` for cells in this column. Use for bespoke
+   * endpoints, file uploads, etc.
+   */
+  commit?: (
+    patch: CellPatch<TData, TValue>
+  ) => Promise<CommitResult> | CommitResult
 
   // Row spanning
   rowSpan?: (
@@ -352,6 +367,25 @@ export interface TableOptions<TData extends RowData> {
   onEditingChange?: OnChangeFn<EditingState>
   onEditCommit?: (changes: Record<string, Partial<TData>>) => void
 
+  // Async commit options (Task #10)
+  /**
+   * Async commit handler. Receives a batch of patches; resolve to mark
+   * success, throw to mark failure. Throw a `CommitError` for per-cell
+   * precision. See features/commits/types.ts for `CellPatch` shape.
+   */
+  onCommit?: OnCommitFn<TData>
+  /**
+   * Default true. Set to false to make the grid accumulate pending edits
+   * and only fire `onCommit` when `table.commit()` is called.
+   */
+  autoCommit?: boolean
+  /**
+   * What happens when a row commit partially fails.
+   * - 'failed' (default) — failed cells stay errored, succeeded cells clear
+   * - 'batch'            — entire row stays errored until the whole row is retried
+   */
+  rowCommitRetryMode?: 'failed' | 'batch'
+
   // Keyboard navigation options
   enableKeyboardNavigation?: boolean
   onKeyboardNavigationChange?: OnChangeFn<KeyboardNavigationState>
@@ -434,6 +468,8 @@ export interface TableState {
   rowPinning: RowPinningState
   grouping: GroupingState
   editing: EditingState
+  /** Optimistic-commit slice — see features/commits/types.ts (Task #10). */
+  commits: CommitsSlice
   keyboardNavigation: KeyboardNavigationState
   undoRedo: UndoRedoState
   fillHandle: FillHandleState

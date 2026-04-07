@@ -53,6 +53,7 @@ export function useTable<TData extends RowData>(
     rowPinning: { top: [], bottom: [] },
     grouping: [],
     editing: { activeCell: undefined, pendingValues: {} },
+    commits: { cells: {}, nextOpId: 1 },
     keyboardNavigation: { focusedCell: null },
     undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
     fillHandle: { isDragging: false },
