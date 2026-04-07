@@ -1,6 +1,10 @@
 {
   "name": "@yable/react",
   "version": "0.1.0",
+  "description": "React adapter for @yable/core -- components, hooks, and form controls for building data tables",
+  "keywords": ["react", "table", "data-grid", "datagrid", "components", "hooks", "typescript", "editing"],
+  "license": "MIT",
+  "author": "ZVN DEV",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

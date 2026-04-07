@@ -1,6 +1,10 @@
 {
   "name": "@yable/core",
   "version": "0.1.0",
+  "description": "Headless, zero-dependency data table engine with sorting, filtering, editing, formulas, pivot tables, and more",
+  "keywords": ["table", "data-grid", "datagrid", "spreadsheet", "headless", "typescript", "sorting", "filtering", "formulas", "pivot"],
+  "license": "MIT",
+  "author": "ZVN DEV",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
