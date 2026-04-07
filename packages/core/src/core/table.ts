@@ -522,21 +522,62 @@ export function createTable<TData extends RowData>(
     },
     commitEdit: () => {
       const editing = table.getState().editing
-      if (editing?.activeCell) {
-        const focusedCell = getCellPositionByIds(
-          table,
-          editing.activeCell.rowId,
-          editing.activeCell.columnId
-        )
+      if (!editing?.activeCell) return
 
-        table.setEditing((old: EditingState) => ({
+      const { rowId, columnId } = editing.activeCell
+
+      // Capture cursor position so we can keep focus on the cell after commit
+      const focusedCell = getCellPositionByIds(table, rowId, columnId)
+
+      // Read the pending value (may be undefined if user pressed Enter without changes)
+      const pendingValue = editing.pendingValues?.[rowId]?.[columnId]
+      const hasPending = pendingValue !== undefined
+
+      // Clear active cell first so the input unmounts. Also drop the pending
+      // value for this cell since the coordinator now owns it.
+      table.setEditing((old: EditingState) => {
+        const nextPending: Record<string, Record<string, unknown>> = {
+          ...(old.pendingValues ?? {}),
+        }
+        if (hasPending && nextPending[rowId]) {
+          const row: Record<string, unknown> = { ...nextPending[rowId] }
+          delete row[columnId]
+          if (Object.keys(row).length === 0) {
+            delete nextPending[rowId]
+          } else {
+            nextPending[rowId] = row
+          }
+        }
+        return {
           ...old,
           activeCell: undefined,
-        }))
-
-        if (focusedCell) {
-          table.setFocusedCell(focusedCell)
+          pendingValues: nextPending,
         }
+      })
+
+      if (focusedCell) {
+        table.setFocusedCell(focusedCell)
+      }
+
+      // If onCommit is defined and autoCommit !== false, dispatch through the
+      // coordinator. Otherwise (legacy mode), fire the existing onEditCommit hook.
+      const opts = table.options
+      const autoCommit = opts.autoCommit !== false
+      if (hasPending && opts.onCommit && autoCommit) {
+        let previousValue: unknown
+        try {
+          previousValue = table.getRow(rowId, true).getValue(columnId)
+        } catch {
+          previousValue = undefined
+        }
+        // Fire-and-forget — coordinator updates the slice asynchronously,
+        // and the table re-renders via state changes
+        void (table as any).__commitCoordinator?.dispatch([
+          { rowId, columnId, value: pendingValue, previousValue },
+        ])
+      } else if (hasPending && opts.onEditCommit) {
+        // Legacy fallback
+        opts.onEditCommit({ [rowId]: { [columnId]: pendingValue } as any })
       }
     },
     cancelEdit: () => {
