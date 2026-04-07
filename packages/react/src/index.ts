@@ -213,6 +213,20 @@ export type { TooltipProps } from './components/Tooltip'
 export { useTooltip } from './hooks/useTooltip'
 export type { UseTooltipOptions, TooltipPosition } from './hooks/useTooltip'
 
+// Async Commit (Task #10)
+export { CellStatusBadge } from './components/CellStatusBadge'
+export type { CellStatusBadgeProps } from './components/CellStatusBadge'
+export { CommitError } from '@yable/core'
+export type {
+  CellStatus as CellCommitStatus,
+  CellPatch,
+  CommitResult,
+  CommitRecord,
+  OnCommitFn,
+  CommitsSlice,
+  CommitErrorCells,
+} from '@yable/core'
+
 // Status Bar
 export { StatusBar } from './components/StatusBar'
 export { StatusBarPanelComponent } from './components/StatusBarPanel'

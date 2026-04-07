@@ -8,6 +8,7 @@ import {
   type Cell,
 } from '@yable/core'
 import { resolveCellType } from '../cells/resolver'
+import { CellStatusBadge } from './CellStatusBadge'
 
 interface TableCellProps<TData extends RowData> {
   cell: Cell<TData, unknown>
@@ -47,17 +48,40 @@ export function TableCell<TData extends RowData>({
     }
   }
 
+  // Read coordinator state — cell status + merged render value
+  const cellStatus = table.getCellStatus(cell.row.id, column.id)
+  const cellErrorMessage = table.getCellErrorMessage(cell.row.id, column.id)
+  const cellConflictWith = table.getCellConflictWith(cell.row.id, column.id)
+
+  // When pending/error/conflict, the rendered value is the user's typed value,
+  // not the saved value
+  const overrideValue =
+    cellStatus !== 'idle'
+      ? table.getCellRenderValue(cell.row.id, column.id)
+      : undefined
+
   // Determine cell content
   let content: React.ReactNode
   const cellDef = column.columnDef.cell
   const cellType = column.columnDef.cellType
 
   if (typeof cellDef === 'function') {
-    content = (cellDef as Function)(cell.getContext())
+    const ctx = cell.getContext()
+    if (overrideValue !== undefined) {
+      // Override getValue() / renderValue() for this render
+      const overriddenCtx = {
+        ...ctx,
+        getValue: () => overrideValue,
+        renderValue: () => overrideValue,
+      }
+      content = (cellDef as Function)(overriddenCtx)
+    } else {
+      content = (cellDef as Function)(ctx)
+    }
   } else if (cellType && !(isEditing || isAlwaysEditable)) {
     content = resolveCellType(cellType, cell.getContext(), column.columnDef.cellTypeProps)
   } else {
-    content = cell.renderValue() as React.ReactNode
+    content = (overrideValue !== undefined ? overrideValue : cell.renderValue()) as React.ReactNode
   }
 
   const handleClick = useCallback(
@@ -132,6 +156,7 @@ export function TableCell<TData extends RowData>({
       data-editing={isEditing || undefined}
       data-focused={isFocused || undefined}
       data-pinned={pinned || undefined}
+      data-cell-status={cellStatus !== 'idle' ? cellStatus : undefined}
       data-column-id={column.id}
       data-row-index={rowIndex}
       data-column-index={columnIndex}
@@ -145,6 +170,22 @@ export function TableCell<TData extends RowData>({
       onFocus={handleFocus}
     >
       {content}
+      {cellStatus === 'error' && (
+        <CellStatusBadge
+          status="error"
+          message={cellErrorMessage}
+          onRetry={() => void table.retryCommit(cell.row.id, column.id)}
+          onDismiss={() => table.dismissCommit(cell.row.id, column.id)}
+        />
+      )}
+      {cellStatus === 'conflict' && (
+        <CellStatusBadge
+          status="conflict"
+          conflictWith={cellConflictWith}
+          onRetry={() => void table.retryCommit(cell.row.id, column.id)}
+          onDismiss={() => table.dismissCommit(cell.row.id, column.id)}
+        />
+      )}
     </td>
   )
 }
