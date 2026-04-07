@@ -1,4 +1,4 @@
-// @yable/react — Loading Overlay Component
+// @zvndev/yable-react — Loading Overlay Component
 // Backdrop-blurred overlay with animated spinner and pulse animation.
 
 import React from 'react'

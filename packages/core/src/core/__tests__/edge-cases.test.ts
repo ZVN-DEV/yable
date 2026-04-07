@@ -1,4 +1,4 @@
-// @yable/core — Edge Case Tests
+// @zvndev/yable-core — Edge Case Tests
 
 import { describe, it, expect } from 'vitest'
 import { createTable } from '../table'

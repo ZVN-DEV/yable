@@ -62,13 +62,13 @@ importers:
       '@chenglou/pretext':
         specifier: ^0.0.4
         version: 0.0.4
-      '@yable/core':
+      '@zvndev/yable-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@yable/react':
+      '@zvndev/yable-react':
         specifier: workspace:*
         version: link:../../packages/react
-      '@yable/themes':
+      '@zvndev/yable-themes':
         specifier: workspace:*
         version: link:../../packages/themes
       next:
@@ -102,13 +102,13 @@ importers:
 
   examples/vanilla-demo:
     dependencies:
-      '@yable/core':
+      '@zvndev/yable-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@yable/themes':
+      '@zvndev/yable-themes':
         specifier: workspace:*
         version: link:../../packages/themes
-      '@yable/vanilla':
+      '@zvndev/yable-vanilla':
         specifier: workspace:*
         version: link:../../packages/vanilla
     devDependencies:
@@ -133,10 +133,10 @@ importers:
 
   packages/react:
     dependencies:
-      '@yable/core':
+      '@zvndev/yable-core':
         specifier: workspace:*
         version: link:../core
-      '@yable/themes':
+      '@zvndev/yable-themes':
         specifier: workspace:*
         version: link:../themes
     devDependencies:
@@ -181,10 +181,10 @@ importers:
 
   packages/vanilla:
     dependencies:
-      '@yable/core':
+      '@zvndev/yable-core':
         specifier: workspace:*
         version: link:../core
-      '@yable/themes':
+      '@zvndev/yable-themes':
         specifier: workspace:*
         version: link:../themes
     devDependencies:

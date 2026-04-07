@@ -1,4 +1,4 @@
-// @yable/core — Built-in filter functions
+// @zvndev/yable-core — Built-in filter functions
 
 import type { RowData, Row, FilterFn } from './types'
 

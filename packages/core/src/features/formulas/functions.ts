@@ -1,4 +1,4 @@
-// @yable/core — Built-in Formula Functions
+// @zvndev/yable-core — Built-in Formula Functions
 // SUM, AVG, COUNT, MIN, MAX, IF, CONCAT, ROUND, ABS
 
 import { FormulaError } from './parser'

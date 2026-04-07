@@ -1,5 +1,5 @@
 {
-  "name": "@yable/core",
+  "name": "@zvndev/yable-core",
   "version": "0.1.0",
   "description": "Headless, zero-dependency data table engine with sorting, filtering, editing, formulas, pivot tables, and more",
   "keywords": ["table", "data-grid", "datagrid", "spreadsheet", "headless", "typescript", "sorting", "filtering", "formulas", "pivot"],

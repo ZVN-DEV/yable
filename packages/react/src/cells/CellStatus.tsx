@@ -1,7 +1,7 @@
-// @yable/react — CellStatus display component
+// @zvndev/yable-react — CellStatus display component
 // Renders a status dot + label for state indicators.
 
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellStatusProps, CellMeasureRecipe } from './types'
 
 /** Status pill: short, single-line label paired with a color dot. */

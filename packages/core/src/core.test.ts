@@ -1,4 +1,4 @@
-// @yable/core — Core test suite
+// @zvndev/yable-core — Core test suite
 
 import { describe, it, expect, vi } from 'vitest'
 import { createTable } from './core/table'

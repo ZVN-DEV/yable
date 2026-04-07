@@ -1,4 +1,4 @@
-// @yable/react — Cell type system
+// @zvndev/yable-react — Cell type system
 //
 // Declarative cell types that style data without custom components.
 // Each cell type knows: how to render, how to measure (for Pretext), and

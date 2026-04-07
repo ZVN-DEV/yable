@@ -1,13 +1,13 @@
-// @yable/themes — Tailwind v3 preset
+// @zvndev/yable-themes — Tailwind v3 preset
 //
 // Usage:
 //
 //   // tailwind.config.ts
-//   import yablePreset from '@yable/themes/tailwind-preset'
+//   import yablePreset from '@zvndev/yable-themes/tailwind-preset'
 //
 //   export default {
 //     presets: [yablePreset],
-//     content: ['./src/**/*.{ts,tsx}', './node_modules/@yable/react/dist/**/*.js'],
+//     content: ['./src/**/*.{ts,tsx}', './node_modules/@zvndev/yable-react/dist/**/*.js'],
 //   }
 //
 // All token utilities resolve to the live CSS variable, so they automatically

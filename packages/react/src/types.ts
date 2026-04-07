@@ -1,6 +1,6 @@
-// @yable/react — React-specific types
+// @zvndev/yable-react — React-specific types
 
-import type { RowData, Table, Row, Cell, Header } from '@yable/core'
+import type { RowData, Table, Row, Cell, Header } from '@zvndev/yable-core'
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from 'react'
 
 export interface TableProps<TData extends RowData>

@@ -10,7 +10,7 @@
  *   3. Token-aware utilities (`bg-yable-bg`, `border-yable-border`,
  *      `text-yable-text-secondary`) automatically follow the active theme
  *      because they resolve to the live CSS variables from
- *      `@yable/themes/tailwind.css`.
+ *      `@zvndev/yable-themes/tailwind.css`.
  */
 
 import { useMemo, useState } from 'react'
@@ -20,7 +20,7 @@ import {
   GlobalFilter,
   Pagination,
   createColumnHelper,
-} from '@yable/react'
+} from '@zvndev/yable-react'
 
 interface Asset {
   id: number

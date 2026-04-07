@@ -1,7 +1,7 @@
-// @yable/react — CellBoolean display component
+// @zvndev/yable-react — CellBoolean display component
 // Visual true/false indicator with dot, badge, or icon modes.
 
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellBooleanProps, CellMeasureRecipe } from './types'
 
 /** Boolean indicator: short single-line label, sometimes with a dot. */

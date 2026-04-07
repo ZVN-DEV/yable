@@ -1,4 +1,4 @@
-// @yable/core — Formula Engine
+// @zvndev/yable-core — Formula Engine
 // Manages formulas, dependency tracking, topological sort, and circular reference detection.
 
 import type { RowData, Table } from '../../types'

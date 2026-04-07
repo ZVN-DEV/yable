@@ -4,10 +4,10 @@
 
 Yable is a TypeScript-first, framework-agnostic data table engine. Monorepo with 4 packages:
 
-- `@yable/core` — Headless table logic (sorting, filtering, editing, formulas, pivot, tree data, clipboard, fill handle, undo/redo). Zero runtime deps.
-- `@yable/react` — 26 React components + 12 hooks. Uses `@yable/core` under the hood.
-- `@yable/vanilla` — Vanilla JS DOM renderer.
-- `@yable/themes` — 8 CSS themes with 80+ design tokens. Pure CSS, no JS.
+- `@zvndev/yable-core` — Headless table logic (sorting, filtering, editing, formulas, pivot, tree data, clipboard, fill handle, undo/redo). Zero runtime deps.
+- `@zvndev/yable-react` — 26 React components + 12 hooks. Uses `@zvndev/yable-core` under the hood.
+- `@zvndev/yable-vanilla` — Vanilla JS DOM renderer.
+- `@zvndev/yable-themes` — 8 CSS themes with 80+ design tokens. Pure CSS, no JS.
 
 ## Build & Test
 
@@ -17,7 +17,7 @@ pnpm build        # builds all 4 packages (ESM + CJS + DTS)
 pnpm test         # runs vitest — 1,351 tests across 35 files
 ```
 
-Demo: `pnpm dev --filter @yable/react-demo` (Next.js on localhost, port varies)
+Demo: `pnpm dev --filter @zvndev/yable-react-demo` (Next.js on localhost, port varies)
 
 ## Architecture
 

@@ -22,9 +22,9 @@ Yable is a TypeScript-first, framework-agnostic data table engine. It ships a he
 - **Formula engine** -- 17 built-in spreadsheet functions (extensible) with a parser, evaluator, and dependency tracker. Free and MIT-licensed -- AG Grid's formula support requires an Enterprise license.
 - **Async cell commits** -- built-in optimistic saves with pending, error, and conflict cell states. Retry, dismiss, and conflict resolution out of the box. No other React grid ships this.
 - **Pivot tables, fill handle, clipboard, undo/redo** -- features that AG Grid locks behind a $1,000+/dev/year Enterprise license. Yable ships them for free under MIT.
-- **Headless core + batteries-included UI** -- TanStack Table is headless but ships zero components. Yable gives you a headless `@yable/core` *and* ready-to-use React components with styled themes.
+- **Headless core + batteries-included UI** -- TanStack Table is headless but ships zero components. Yable gives you a headless `@zvndev/yable-core` *and* ready-to-use React components with styled themes.
 - **TypeScript from the ground up** -- deep key inference on accessors, fully typed state slices, and generic-safe column helpers.
-- **Framework-agnostic** -- `@yable/core` has zero dependencies. `@yable/react` and `@yable/vanilla` are thin adapters.
+- **Framework-agnostic** -- `@zvndev/yable-core` has zero dependencies. `@zvndev/yable-react` and `@zvndev/yable-vanilla` are thin adapters.
 
 ## Comparison
 
@@ -56,22 +56,22 @@ Yable is a TypeScript-first, framework-agnostic data table engine. It ships a he
 ## Installation
 
 ```bash
-npm install @yable/core @yable/react @yable/themes
+npm install @zvndev/yable-core @zvndev/yable-react @zvndev/yable-themes
 ```
 
 Or with pnpm / yarn:
 
 ```bash
-pnpm add @yable/core @yable/react @yable/themes
-yarn add @yable/core @yable/react @yable/themes
+pnpm add @zvndev/yable-core @zvndev/yable-react @zvndev/yable-themes
+yarn add @zvndev/yable-core @zvndev/yable-react @zvndev/yable-themes
 ```
 
 ## Quick Start
 
 ```tsx
-import { createColumnHelper } from '@yable/react'
-import { useTable, Table, Pagination, GlobalFilter } from '@yable/react'
-import '@yable/themes'
+import { createColumnHelper } from '@zvndev/yable-react'
+import { useTable, Table, Pagination, GlobalFilter } from '@zvndev/yable-react'
+import '@zvndev/yable-themes'
 
 // 1. Define your data type
 interface Person {
@@ -123,10 +123,10 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 
 | Package | Description |
 |---|---|
-| [`@yable/core`](./packages/core) | Headless table engine -- sorting, filtering, editing, formulas, pivot, tree data, clipboard, and more. Zero dependencies. |
-| [`@yable/react`](./packages/react) | React adapter -- `useTable` hook, `<Table>` component tree, form controls, pagination, global filter. |
-| [`@yable/vanilla`](./packages/vanilla) | Vanilla JS/DOM renderer -- `renderTable()` and `renderPagination()` for non-framework use. |
-| [`@yable/themes`](./packages/themes) | CSS design token system -- 8 built-in themes (default, stripe, compact, forest, midnight, rose, ocean, mono) with 100+ customizable CSS custom properties. Dark mode included. |
+| [`@zvndev/yable-core`](./packages/core) | Headless table engine -- sorting, filtering, editing, formulas, pivot, tree data, clipboard, and more. Zero dependencies. |
+| [`@zvndev/yable-react`](./packages/react) | React adapter -- `useTable` hook, `<Table>` component tree, form controls, pagination, global filter. |
+| [`@zvndev/yable-vanilla`](./packages/vanilla) | Vanilla JS/DOM renderer -- `renderTable()` and `renderPagination()` for non-framework use. |
+| [`@zvndev/yable-themes`](./packages/themes) | CSS design token system -- 8 built-in themes (default, stripe, compact, forest, midnight, rose, ocean, mono) with 100+ customizable CSS custom properties. Dark mode included. |
 
 ## Features
 

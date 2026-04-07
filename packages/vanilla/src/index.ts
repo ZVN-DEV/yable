@@ -1,4 +1,4 @@
-// @yable/vanilla — Vanilla JS adapter for YableTables
+// @zvndev/yable-vanilla — Vanilla JS adapter for YableTables
 
 // Re-export core types consumers will need
 export type {
@@ -21,7 +21,7 @@ export type {
   Updater,
   SortDirection,
   ColumnMeta,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 // Re-export core utilities
 export {
@@ -30,7 +30,7 @@ export {
   filterFns,
   aggregationFns,
   functionalUpdate,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 // Main factory
 export { createTableDOM } from './createTableDOM'

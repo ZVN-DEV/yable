@@ -1,9 +1,9 @@
-// @yable/react — usePrintLayout hook
+// @zvndev/yable-react — usePrintLayout hook
 // Prepares the table for print by removing virtualization, expanding rows,
 // showing all pages, and triggering the browser print dialog.
 
 import { useCallback, useRef } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 // ---------------------------------------------------------------------------
 // SECURITY: CSS sanitization for user-provided print styles

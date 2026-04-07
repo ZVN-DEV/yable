@@ -1,8 +1,8 @@
-// @yable/react — CellDate display component
+// @zvndev/yable-react — CellDate display component
 // Formatted date display with preset and custom format support.
 
 import { useMemo } from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellDateProps, CellMeasureRecipe } from './types'
 
 /** Date cells render a single line of formatted text. */

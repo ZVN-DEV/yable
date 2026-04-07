@@ -1,4 +1,4 @@
-// @yable/core — Framework-agnostic table engine
+// @zvndev/yable-core — Framework-agnostic table engine
 
 // ---------------------------------------------------------------------------
 // Types

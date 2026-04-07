@@ -1,6 +1,6 @@
 # API Reference
 
-Complete reference for all public exports from `@yable/core`.
+Complete reference for all public exports from `@zvndev/yable-core`.
 
 ---
 
@@ -33,12 +33,12 @@ function createTable<TData extends RowData>(
 ): Table<TData>
 ```
 
-Creates and returns a table instance. This is the main entry point for `@yable/core`. The table instance provides all APIs for reading and manipulating table state.
+Creates and returns a table instance. This is the main entry point for `@zvndev/yable-core`. The table instance provides all APIs for reading and manipulating table state.
 
 **Example:**
 
 ```typescript
-import { createTable, createColumnHelper } from '@yable/core'
+import { createTable, createColumnHelper } from '@zvndev/yable-core'
 
 const table = createTable({
   data: myData,
@@ -843,7 +843,7 @@ table.setSorting((prev) => [...prev, { id: 'age', desc: true }])
 
 ## Built-in Sorting Functions
 
-Import: `import { sortingFns } from '@yable/core'`
+Import: `import { sortingFns } from '@zvndev/yable-core'`
 
 | Name | Signature | Description |
 |---|---|---|
@@ -858,7 +858,7 @@ Import: `import { sortingFns } from '@yable/core'`
 
 ## Built-in Filter Functions
 
-Import: `import { filterFns } from '@yable/core'`
+Import: `import { filterFns } from '@zvndev/yable-core'`
 
 | Name | Filter Value Type | Description |
 |---|---|---|
@@ -878,7 +878,7 @@ Import: `import { filterFns } from '@yable/core'`
 
 ## Built-in Aggregation Functions
 
-Import: `import { aggregationFns } from '@yable/core'`
+Import: `import { aggregationFns } from '@zvndev/yable-core'`
 
 | Name | Return Type | Description |
 |---|---|---|
@@ -980,7 +980,7 @@ interface CellEditConfig<TData, TValue> {
 
 ## Async Commit Types
 
-Import from `@yable/core`:
+Import from `@zvndev/yable-core`:
 
 ### CellPatch
 
@@ -1129,7 +1129,7 @@ interface StateChangeEvent {
 
 ## Utility Functions
 
-Import from `@yable/core`:
+Import from `@zvndev/yable-core`:
 
 | Function | Signature | Description |
 |---|---|---|

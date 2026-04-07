@@ -1,4 +1,4 @@
-// @yable/core — Pivot Table Tests
+// @zvndev/yable-core — Pivot Table Tests
 
 import { describe, it, expect } from 'vitest'
 import { PivotEngine } from '../pivot'

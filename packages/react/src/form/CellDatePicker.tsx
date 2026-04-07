@@ -1,7 +1,7 @@
-// @yable/react — CellDatePicker form component
+// @zvndev/yable-react — CellDatePicker form component
 
 import React, { useEffect, useRef } from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 
 interface CellDatePickerProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>

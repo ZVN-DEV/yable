@@ -1,4 +1,4 @@
-// @yable/core — Fill Handle Tests
+// @zvndev/yable-core — Fill Handle Tests
 
 import { describe, it, expect } from 'vitest'
 import { detectPattern, generateFillValues } from '../fillHandle'

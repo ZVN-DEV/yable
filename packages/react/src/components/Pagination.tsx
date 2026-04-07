@@ -1,7 +1,7 @@
-// @yable/react — Pagination Component
+// @zvndev/yable-react — Pagination Component
 // Polished page navigation with SVG icons, page size selector, and row info.
 
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 interface PaginationProps<TData extends RowData> {
   table: Table<TData>

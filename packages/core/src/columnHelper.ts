@@ -1,4 +1,4 @@
-// @yable/core — createColumnHelper
+// @zvndev/yable-core — createColumnHelper
 
 import type {
   RowData,

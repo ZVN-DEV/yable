@@ -7,7 +7,7 @@ import {
   createColumnHelper,
   useTableRowHeights,
   type CellMeasureRecipe,
-} from '@yable/react'
+} from '@zvndev/yable-react'
 import s from './pretext-demo.module.css'
 
 /* ── Data with variable-length text ────────────────────────────────────── */

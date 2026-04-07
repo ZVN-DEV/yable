@@ -1,10 +1,10 @@
-// @yable/react — Display cell type tests
+// @zvndev/yable-react — Display cell type tests
 
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { createColumnHelper } from '@yable/core'
-import type { CellContext } from '@yable/core'
+import { createColumnHelper } from '@zvndev/yable-core'
+import type { CellContext } from '@zvndev/yable-core'
 import { CellCurrency } from '../cells/CellCurrency'
 import { CellBadge } from '../cells/CellBadge'
 import { CellLink } from '../cells/CellLink'

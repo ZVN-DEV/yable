@@ -1,4 +1,4 @@
-// @yable/react — React adapter for YableTables
+// @zvndev/yable-react — React adapter for YableTables
 
 // Re-export core types consumers will need
 export type {
@@ -57,7 +57,7 @@ export type {
   RowEditEvent,
   RowEditCommitEvent,
   CellFlashEvent,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 // Re-export core utilities
 export {
@@ -66,7 +66,7 @@ export {
   filterFns,
   aggregationFns,
   functionalUpdate,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 // Re-export i18n
 export {
@@ -75,12 +75,12 @@ export {
   setDefaultLocale,
   getDefaultLocale,
   resetLocale,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 export type {
   YableLocale,
   PartialLocale,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 // React-specific types
 export type {
@@ -216,7 +216,7 @@ export type { UseTooltipOptions, TooltipPosition } from './hooks/useTooltip'
 // Async Commit (Task #10)
 export { CellStatusBadge } from './components/CellStatusBadge'
 export type { CellStatusBadgeProps } from './components/CellStatusBadge'
-export { CommitError } from '@yable/core'
+export { CommitError } from '@zvndev/yable-core'
 export type {
   CellStatus as CellCommitStatus,
   CellPatch,
@@ -225,7 +225,7 @@ export type {
   OnCommitFn,
   CommitsSlice,
   CommitErrorCells,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 // Status Bar
 export { StatusBar } from './components/StatusBar'

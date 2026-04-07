@@ -1,7 +1,7 @@
-// @yable/react — useContextMenu hook
+// @zvndev/yable-react — useContextMenu hook
 
 import { useState, useCallback, useEffect } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 export function useContextMenu() {
   const [isOpen, setIsOpen] = useState(false)

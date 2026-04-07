@@ -1,11 +1,11 @@
 /* ============================================================================
-   @yable/themes — Stripe Theme
+   @zvndev/yable-themes — Stripe Theme
    Inspired by Stripe's dashboard — warm grays, crisp typography,
    refined borders, and a professional polish.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/stripe.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/stripe.css'
      <Table className="yable-theme-stripe" />
    ============================================================================ */
 

@@ -1,8 +1,8 @@
-// @yable/react — Cell type resolver
+// @zvndev/yable-react — Cell type resolver
 // Maps declarative cellType strings to display cell components AND
 // to text-measurement recipes used by Pretext auto-measurement.
 
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import { CellBadge, measureRecipe as badgeRecipe } from './CellBadge'
 import { CellCurrency, measureRecipe as currencyRecipe } from './CellCurrency'
 import { CellStatus, measureRecipe as statusRecipe } from './CellStatus'

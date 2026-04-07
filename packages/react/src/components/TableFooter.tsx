@@ -1,6 +1,6 @@
-// @yable/react — Table Footer Component
+// @zvndev/yable-react — Table Footer Component
 
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 interface TableFooterProps<TData extends RowData> {
   table: Table<TData>

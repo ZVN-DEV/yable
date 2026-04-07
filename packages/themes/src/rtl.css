@@ -1,10 +1,10 @@
 /* ============================================================================
-   @yable/themes — RTL (Right-to-Left) Support
+   @zvndev/yable-themes — RTL (Right-to-Left) Support
    Mirrors layout, pinning, resize handles, sort indicators, and
    all directional properties for RTL languages (Arabic, Hebrew, etc.).
 
    Usage:
-     import '@yable/themes/rtl.css'
+     import '@zvndev/yable-themes/rtl.css'
      <Table direction="rtl" />
    ============================================================================ */
 

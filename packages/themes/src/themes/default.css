@@ -1,11 +1,11 @@
 /* ============================================================================
-   @yable/themes — Default Theme
+   @zvndev/yable-themes — Default Theme
    Clean, minimal, modern. The Linear/Vercel aesthetic.
    Import this after index.css for a polished look out of the box.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/default.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/default.css'
    ============================================================================ */
 
 .yable-theme-default,

@@ -1,6 +1,6 @@
-// @yable/react — Sort Indicator Component
+// @zvndev/yable-react — Sort Indicator Component
 
-import type { SortDirection } from '@yable/core'
+import type { SortDirection } from '@zvndev/yable-core'
 
 interface SortIndicatorProps {
   direction: SortDirection | false

@@ -1,4 +1,4 @@
-// @yable/core — Keyboard Navigation Tests
+// @zvndev/yable-core — Keyboard Navigation Tests
 
 import { describe, expect, it } from 'vitest'
 import { createColumnHelper } from '../../columnHelper'

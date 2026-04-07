@@ -1,4 +1,4 @@
-// @yable/core — Row Dragging Feature
+// @zvndev/yable-core — Row Dragging Feature
 // Provides row reorder logic and drag state management.
 
 import type { RowData, Table, Updater } from '../types'

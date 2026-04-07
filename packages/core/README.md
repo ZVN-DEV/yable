@@ -1,13 +1,13 @@
-# @yable/core
+# @zvndev/yable-core
 
 Headless, framework-agnostic data table engine. Zero dependencies.
 
-`@yable/core` is the foundation of the Yable table library. It handles all table logic -- sorting, filtering, pagination, editing, grouping, aggregation, pivot tables, tree data, formulas, clipboard, fill handle, undo/redo, and more -- without touching the DOM. Framework adapters like `@yable/react` and `@yable/vanilla` consume the core to produce UI.
+`@zvndev/yable-core` is the foundation of the Yable table library. It handles all table logic -- sorting, filtering, pagination, editing, grouping, aggregation, pivot tables, tree data, formulas, clipboard, fill handle, undo/redo, and more -- without touching the DOM. Framework adapters like `@zvndev/yable-react` and `@zvndev/yable-vanilla` consume the core to produce UI.
 
 ## Installation
 
 ```bash
-npm install @yable/core
+npm install @zvndev/yable-core
 ```
 
 ## Core Concepts
@@ -65,7 +65,7 @@ The intersection of a row and a column. Cells provide typed value access, editin
 ## Basic Usage
 
 ```typescript
-import { createTable, createColumnHelper } from '@yable/core'
+import { createTable, createColumnHelper } from '@zvndev/yable-core'
 
 interface Person {
   name: string
@@ -160,7 +160,7 @@ import type {
   RowSelectionState,
   EditingState,
   // ... and many more
-} from '@yable/core'
+} from '@zvndev/yable-core'
 ```
 
 ## License

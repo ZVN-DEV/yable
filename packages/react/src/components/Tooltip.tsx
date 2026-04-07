@@ -1,4 +1,4 @@
-// @yable/react — Tooltip Component
+// @zvndev/yable-react — Tooltip Component
 // Renders a positioned tooltip with arrow/caret, entrance animation, and auto-flip support.
 
 import React, { useEffect, useRef } from 'react'

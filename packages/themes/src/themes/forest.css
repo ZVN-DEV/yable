@@ -1,12 +1,12 @@
 /* ============================================================================
-   @yable/themes — Forest Theme
+   @zvndev/yable-themes — Forest Theme
    Grounded and organic. Deep sage, warm earth, olive undertones.
    Not neon green — think aged moss, warm clay, worn leather.
    Borders are warm gray-green, headers are olive-sage.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/forest.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/forest.css'
      <Table theme="forest" />
    ============================================================================ */
 

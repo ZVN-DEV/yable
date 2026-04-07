@@ -1,11 +1,11 @@
 /* ============================================================================
-   @yable/themes — Compact Theme
+   @zvndev/yable-themes — Compact Theme
    Dense, data-heavy variant. Optimized for displaying maximum information
    in minimum space. Think Bloomberg terminal meets modern design.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/compact.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/compact.css'
      <Table className="yable-theme-compact" />
    ============================================================================ */
 

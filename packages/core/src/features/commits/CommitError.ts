@@ -1,4 +1,4 @@
-// @yable/core — CommitError
+// @zvndev/yable-core — CommitError
 //
 // Throw from `onCommit` to put specific cells into the `error` state.
 // `throw new Error('msg')` puts ALL cells in the batch into error;

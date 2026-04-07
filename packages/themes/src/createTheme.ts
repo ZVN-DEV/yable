@@ -1,4 +1,4 @@
-// @yable/themes — Theme Builder
+// @zvndev/yable-themes — Theme Builder
 // createTheme() generates CSS from token overrides.
 // injectTheme() injects a <style> element at runtime for theme switching.
 

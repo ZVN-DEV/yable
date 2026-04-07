@@ -1,8 +1,8 @@
-// @yable/react — Global Filter Component
+// @zvndev/yable-react — Global Filter Component
 // Search input with inline magnifying glass icon and clear button.
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 interface GlobalFilterProps<TData extends RowData> {
   table: Table<TData>

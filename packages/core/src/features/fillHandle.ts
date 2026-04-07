@@ -1,4 +1,4 @@
-// @yable/core — Fill Handle Feature
+// @zvndev/yable-core — Fill Handle Feature
 // Drag corner to auto-fill cells with pattern detection.
 
 import type { RowData, Table, Row, Column } from '../types'

@@ -1,4 +1,4 @@
-// @yable/react — CellStatusBadge component tests
+// @zvndev/yable-react — CellStatusBadge component tests
 
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'

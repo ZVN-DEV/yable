@@ -1,5 +1,5 @@
 {
-  "name": "@yable/themes",
+  "name": "@zvndev/yable-themes",
   "version": "0.1.0",
   "description": "CSS design token system and themes for Yable data tables",
   "keywords": ["table", "themes", "css", "design-tokens", "dark-mode", "yable"],

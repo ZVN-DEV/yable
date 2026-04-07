@@ -1,4 +1,4 @@
-// @yable/react — useTooltip hook
+// @zvndev/yable-react — useTooltip hook
 // Manages tooltip positioning, visibility, delay, and auto-flip.
 
 import { useState, useCallback, useRef, useEffect } from 'react'

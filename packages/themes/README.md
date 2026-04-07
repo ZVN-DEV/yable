@@ -1,26 +1,26 @@
-# @yable/themes
+# @zvndev/yable-themes
 
 CSS design token system for the Yable data table engine.
 
-`@yable/themes` provides structural CSS, 100+ design tokens as CSS custom properties, built-in themes, and automatic dark mode support. Import a single CSS file to style any Yable table.
+`@zvndev/yable-themes` provides structural CSS, 100+ design tokens as CSS custom properties, built-in themes, and automatic dark mode support. Import a single CSS file to style any Yable table.
 
 ## Installation
 
 ```bash
-npm install @yable/themes
+npm install @zvndev/yable-themes
 ```
 
 ## Quick Start
 
 ```tsx
 // Import the complete stylesheet (tokens + base + all themes)
-import '@yable/themes'
+import '@zvndev/yable-themes'
 
 // Or import individual pieces
-import '@yable/themes/tokens.css'   // Design tokens only
-import '@yable/themes/default.css'  // Default theme
-import '@yable/themes/stripe.css'   // Stripe theme
-import '@yable/themes/compact.css'  // Compact theme
+import '@zvndev/yable-themes/tokens.css'   // Design tokens only
+import '@zvndev/yable-themes/default.css'  // Default theme
+import '@zvndev/yable-themes/stripe.css'   // Stripe theme
+import '@zvndev/yable-themes/compact.css'  // Compact theme
 ```
 
 Then apply a theme via the `theme` prop (React) or `theme` option (vanilla):

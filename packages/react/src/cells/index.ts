@@ -1,4 +1,4 @@
-// @yable/react — Display cell types
+// @zvndev/yable-react — Display cell types
 // Declarative cell components for styled data display.
 // No custom components needed — just use these on your column defs.
 

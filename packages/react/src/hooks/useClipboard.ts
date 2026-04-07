@@ -1,8 +1,8 @@
-// @yable/react — useClipboard hook
+// @zvndev/yable-react — useClipboard hook
 // Attaches copy/cut/paste keyboard listeners to the table container.
 
 import { useEffect, useCallback } from 'react'
-import type { RowData, Table, ClipboardOptions } from '@yable/core'
+import type { RowData, Table, ClipboardOptions } from '@zvndev/yable-core'
 
 export interface UseClipboardOptions extends ClipboardOptions {
   /** Whether clipboard is enabled. Default: true */

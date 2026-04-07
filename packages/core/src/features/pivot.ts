@@ -1,4 +1,4 @@
-// @yable/core — Pivot Mode Feature
+// @zvndev/yable-core — Pivot Mode Feature
 // Full pivot tables with auto-generated columns.
 // User selects row fields, column fields, value fields (with aggregation).
 // Generates cross-tabulation: row groups -> rows, column groups -> dynamic columns.

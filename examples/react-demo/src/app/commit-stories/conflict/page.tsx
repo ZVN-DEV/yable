@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useTable, Table, createColumnHelper } from '@yable/react'
-import type { CellPatch } from '@yable/core'
+import { useTable, Table, createColumnHelper } from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 interface Item {
   id: string

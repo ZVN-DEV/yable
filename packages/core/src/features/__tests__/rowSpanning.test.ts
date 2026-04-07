@@ -1,4 +1,4 @@
-// @yable/core — Row Spanning Tests
+// @zvndev/yable-core — Row Spanning Tests
 
 import { describe, it, expect } from 'vitest'
 import {

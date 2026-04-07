@@ -1,4 +1,4 @@
-// @yable/react — Pretext-powered row height pre-computation
+// @zvndev/yable-react — Pretext-powered row height pre-computation
 //
 // Uses @chenglou/pretext to measure text layout WITHOUT DOM access.
 // Returns exact pixel heights for every row before any rendering happens.

@@ -1,12 +1,12 @@
 /* ============================================================================
-   @yable/themes — Midnight Theme
+   @zvndev/yable-themes — Midnight Theme
    Deep navy with electric blue glow. Inspired by VS Code, GitHub dark,
    and modern developer tools. Headers feel alive with subtle blue tint.
    Active states carry a soft luminous glow.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/midnight.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/midnight.css'
      <Table theme="midnight" />
    ============================================================================ */
 

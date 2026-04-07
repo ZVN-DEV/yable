@@ -1,4 +1,4 @@
-// @yable/core — Typed Event Emitter
+// @zvndev/yable-core — Typed Event Emitter
 
 export class EventEmitterImpl<TEventMap extends Record<string, any>> {
   private listeners = new Map<keyof TEventMap, Set<(payload: any) => void>>()

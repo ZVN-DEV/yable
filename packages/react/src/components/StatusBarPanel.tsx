@@ -1,4 +1,4 @@
-// @yable/react — Status Bar Panel Component
+// @zvndev/yable-react — Status Bar Panel Component
 // Individual panel segment with icon, label, and value.
 
 import React from 'react'

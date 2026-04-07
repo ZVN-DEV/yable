@@ -1,4 +1,4 @@
-// @yable/react — Context Menu Item Component
+// @zvndev/yable-react — Context Menu Item Component
 // Renders a single menu item with optional icon, shortcut badge, submenu arrow, and hover states.
 
 import React, { useState, useRef, useEffect } from 'react'

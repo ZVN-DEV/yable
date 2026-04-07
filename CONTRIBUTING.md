@@ -41,7 +41,7 @@ pnpm storybook
 ```
 yable/
   packages/
-    core/           # @yable/core — headless table engine
+    core/           # @zvndev/yable-core — headless table engine
       src/
         core/       # Table, Column, Row, Cell, Header implementations
         types.ts    # All TypeScript type definitions
@@ -52,7 +52,7 @@ yable/
         aggregationFns.ts
         events/     # Event emitter implementation
         utils.ts    # Shared utility functions
-    react/          # @yable/react — React adapter
+    react/          # @zvndev/yable-react — React adapter
       src/
         components/ # Table, TableHeader, TableBody, TableCell, etc.
         form/       # CellInput, CellSelect, CellCheckbox, etc.
@@ -60,10 +60,10 @@ yable/
         useTable.ts # Main hook
         types.ts    # React-specific types
         index.ts    # Public API exports
-    vanilla/        # @yable/vanilla — DOM renderer
+    vanilla/        # @zvndev/yable-vanilla — DOM renderer
       src/
         renderer.ts # renderTable(), renderPagination()
-    themes/         # @yable/themes — CSS design tokens and themes
+    themes/         # @zvndev/yable-themes — CSS design tokens and themes
       src/
         tokens.css  # CSS custom properties
         base.css    # Structural styles
@@ -76,20 +76,20 @@ yable/
 ### Dependency Graph
 
 ```
-@yable/core (zero dependencies)
+@zvndev/yable-core (zero dependencies)
   ^
-  |--- @yable/react (depends on core + react)
-  |--- @yable/vanilla (depends on core)
+  |--- @zvndev/yable-react (depends on core + react)
+  |--- @zvndev/yable-vanilla (depends on core)
 
-@yable/themes (standalone CSS, no JS dependencies)
+@zvndev/yable-themes (standalone CSS, no JS dependencies)
 ```
 
 ### Design Principles
 
-1. **@yable/core is framework-agnostic.** It must never import React, DOM APIs, or any framework-specific code.
+1. **@zvndev/yable-core is framework-agnostic.** It must never import React, DOM APIs, or any framework-specific code.
 2. **Types live in core.** All shared TypeScript interfaces and type definitions belong in `packages/core/src/types.ts`.
-3. **Adapters are thin.** `@yable/react` and `@yable/vanilla` should contain minimal logic -- they wire `@yable/core` to their framework's rendering model.
-4. **CSS is token-driven.** All visual properties in `@yable/themes` use CSS custom properties. No hard-coded colors or sizes in component CSS.
+3. **Adapters are thin.** `@zvndev/yable-react` and `@zvndev/yable-vanilla` should contain minimal logic -- they wire `@zvndev/yable-core` to their framework's rendering model.
+4. **CSS is token-driven.** All visual properties in `@zvndev/yable-themes` use CSS custom properties. No hard-coded colors or sizes in component CSS.
 
 ## Running Tests
 
@@ -98,7 +98,7 @@ yable/
 pnpm test
 
 # Run tests for a specific package
-pnpm --filter @yable/core test
+pnpm --filter @zvndev/yable-core test
 
 # Run tests in CI mode (no watch)
 pnpm test:ci

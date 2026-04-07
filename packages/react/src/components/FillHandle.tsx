@@ -1,4 +1,4 @@
-// @yable/react — FillHandle Component
+// @zvndev/yable-react — FillHandle Component
 // Small blue square at the bottom-right corner of the focused cell.
 // Cursor changes to crosshair and the handle scales up on hover.
 

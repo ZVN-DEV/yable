@@ -1,4 +1,4 @@
-// @yable/react — Drag Handle Component
+// @zvndev/yable-react — Drag Handle Component
 // Renders a 2x3 grip dot icon that initiates HTML5 drag operations.
 // Appears subtle by default and becomes more prominent on hover.
 

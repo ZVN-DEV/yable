@@ -1,4 +1,4 @@
-// @yable/react — No Rows Overlay Component
+// @zvndev/yable-react — No Rows Overlay Component
 // Centered message with illustration SVGs, distinguishing "no data" vs "no results" (filtered).
 
 import React from 'react'

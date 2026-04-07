@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react'
-import '@yable/themes/default.css'
+import '@zvndev/yable-themes/default.css'
 
 const preview: Preview = {
   parameters: {

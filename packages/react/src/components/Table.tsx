@@ -1,7 +1,7 @@
-// @yable/react — Main Table Component
+// @zvndev/yable-react — Main Table Component
 
 import React, { useState, useCallback, useRef } from 'react'
-import type { RowData } from '@yable/core'
+import type { RowData } from '@zvndev/yable-core'
 import { TableProvider } from '../context'
 import type { TableProps } from '../types'
 import { TableHeader } from './TableHeader'

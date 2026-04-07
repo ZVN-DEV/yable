@@ -1,5 +1,5 @@
-import { createTableDOM, createColumnHelper, type ColumnDef } from '@yable/vanilla'
-import '@yable/themes/default.css'
+import { createTableDOM, createColumnHelper, type ColumnDef } from '@zvndev/yable-vanilla'
+import '@zvndev/yable-themes/default.css'
 
 interface Person {
   id: number

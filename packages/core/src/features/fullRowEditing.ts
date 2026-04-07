@@ -1,4 +1,4 @@
-// @yable/core — Full Row Editing Feature
+// @zvndev/yable-core — Full Row Editing Feature
 // All editable cells in a row edit simultaneously.
 // Tab moves between cells within the row, Enter commits, Escape cancels.
 

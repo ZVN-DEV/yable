@@ -1,7 +1,7 @@
-// @yable/react — CellLink display component
+// @zvndev/yable-react — CellLink display component
 // Clickable link cell with external link support.
 
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellLinkProps, CellMeasureRecipe } from './types'
 
 /** Link cells render the target text/URL on a single line. */

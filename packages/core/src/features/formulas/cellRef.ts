@@ -1,4 +1,4 @@
-// @yable/core — Formula Cell Reference Parser
+// @zvndev/yable-core — Formula Cell Reference Parser
 // Converts between A1-style references and {row, col} coordinates.
 
 // ---------------------------------------------------------------------------

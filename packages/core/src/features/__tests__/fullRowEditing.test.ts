@@ -1,4 +1,4 @@
-// @yable/core — Full Row Editing Tests
+// @zvndev/yable-core — Full Row Editing Tests
 // Tests the createFullRowEditingIntegration function.
 // Since it requires a full table instance, we test the logic patterns
 // via a simplified mock approach.

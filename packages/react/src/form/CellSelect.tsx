@@ -1,7 +1,7 @@
-// @yable/react — CellSelect form component
+// @zvndev/yable-react — CellSelect form component
 
 import React from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 
 interface SelectOption {
   label: string

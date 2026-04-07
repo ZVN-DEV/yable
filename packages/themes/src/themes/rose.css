@@ -1,12 +1,12 @@
 /* ============================================================================
-   @yable/themes — Rose Theme
+   @zvndev/yable-themes — Rose Theme
    Elegant editorial warmth. Sophisticated, not sweet. Rose-500 accent
    over warm stone grays. Think Notion's rose variant — subtle, warm,
    with an editorial quality that feels intentional.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/rose.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/rose.css'
      <Table theme="rose" />
    ============================================================================ */
 

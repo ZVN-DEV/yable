@@ -1,5 +1,5 @@
 {
-  "name": "@yable/vanilla-demo",
+  "name": "@zvndev/yable-vanilla-demo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,9 +8,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@yable/core": "workspace:*",
-    "@yable/vanilla": "workspace:*",
-    "@yable/themes": "workspace:*"
+    "@zvndev/yable-core": "workspace:*",
+    "@zvndev/yable-vanilla": "workspace:*",
+    "@zvndev/yable-themes": "workspace:*"
   },
   "devDependencies": {
     "vite": "^6.0.0",

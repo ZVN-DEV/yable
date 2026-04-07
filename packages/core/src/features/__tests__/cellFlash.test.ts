@@ -1,4 +1,4 @@
-// @yable/core — Cell Flash Tests
+// @zvndev/yable-core — Cell Flash Tests
 
 import { describe, it, expect, vi } from 'vitest'
 import { detectCellChanges } from '../cellFlash'

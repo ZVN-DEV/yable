@@ -1,7 +1,7 @@
-// @yable/react — Table Body Component
+// @zvndev/yable-react — Table Body Component
 
 import React, { useCallback, useRef } from 'react'
-import type { Column, RowData, Table, Row } from '@yable/core'
+import type { Column, RowData, Table, Row } from '@zvndev/yable-core'
 import { TableCell } from './TableCell'
 import { CellErrorBoundary } from './ErrorBoundary'
 import { useVirtualization } from '../hooks/useVirtualization'

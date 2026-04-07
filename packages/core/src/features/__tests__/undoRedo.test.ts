@@ -1,4 +1,4 @@
-// @yable/core — Undo/Redo Tests
+// @zvndev/yable-core — Undo/Redo Tests
 
 import { describe, it, expect } from 'vitest'
 import { UndoStack } from '../undoRedo'

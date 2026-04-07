@@ -1,9 +1,9 @@
-// @yable/react — Status Bar Component
+// @zvndev/yable-react — Status Bar Component
 // Footer bar with flex layout, dividers between panels, and support for
 // total row count, selected count, filtered count, and custom aggregations.
 
 import React from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 import type { StatusBarPanelConfig } from '../types'
 import { StatusBarPanelComponent } from './StatusBarPanel'
 

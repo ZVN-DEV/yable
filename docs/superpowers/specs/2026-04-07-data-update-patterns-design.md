@@ -98,7 +98,7 @@ batching. One option covers both.
                        │ throws / returns
                        │
 ┌──────────────────────────────────────────────────┐
-│  CommitCoordinator (new, in @yable/core)         │
+│  CommitCoordinator (new, in @zvndev/yable-core)         │
 │  • opId allocation                               │
 │  • settlement routing                            │
 │  • status transitions                            │
@@ -125,20 +125,20 @@ NEVER mutates `rowData`.
 
 ### 3.2 Module boundaries
 
-- `@yable/core/src/features/commits.ts` — CommitCoordinator, slice, types,
+- `@zvndev/yable-core/src/features/commits.ts` — CommitCoordinator, slice, types,
   reducer, selectors. New file.
-- `@yable/core/src/features/cellEditing.ts` — extended to dispatch to coordinator
+- `@zvndev/yable-core/src/features/cellEditing.ts` — extended to dispatch to coordinator
   on Enter/blur instead of calling `onEditCommit` directly.
-- `@yable/core/src/features/fullRowEditing.ts` — extended to send batch patches
+- `@zvndev/yable-core/src/features/fullRowEditing.ts` — extended to send batch patches
   through coordinator. Existing `validate` hooks run BEFORE coordinator dispatch.
-- `@yable/core/src/types.ts` — new types: `CellStatus`, `CellPatch`,
+- `@zvndev/yable-core/src/types.ts` — new types: `CellStatus`, `CellPatch`,
   `CommitRecord`, `CommitResult`, `CommitError`, `OnCommitFn`, plus `commits`
   slice on `TableState`.
-- `@yable/react/src/components/Cell.tsx` — reads `getCellStatus(row, col)` and
+- `@zvndev/yable-react/src/components/Cell.tsx` — reads `getCellStatus(row, col)` and
   applies status data attributes for theming.
-- `@yable/react/src/components/CellStatusBadge.tsx` — new. Default error tooltip +
+- `@zvndev/yable-react/src/components/CellStatusBadge.tsx` — new. Default error tooltip +
   retry button. Slot-overrideable.
-- `@yable/themes/src/tokens.ts` — new tokens for `--yable-cell-error-border`,
+- `@zvndev/yable-themes/src/tokens.ts` — new tokens for `--yable-cell-error-border`,
   `--yable-cell-error-bg`, `--yable-cell-pending-opacity`, etc.
 
 ---
@@ -457,7 +457,7 @@ interface Table<TData> {
 
 ### 6.3 Theming surface
 
-New CSS variables on `@yable/themes`:
+New CSS variables on `@zvndev/yable-themes`:
 
 ```css
 :root {
@@ -602,7 +602,7 @@ read-only mirror of `commits.cells` for legacy consumers.
    through coordinator if `onCommit` is defined; falls back to `onEditCommit` otherwise.
 3. **Phase 3 — Wire fullRowEditing to coordinator.** Validation hooks preserved.
 4. **Phase 4 — Cell UI (status badges, retry, conflict).** New components in
-   `@yable/react`. Theme tokens shipped in `@yable/themes`.
+   `@zvndev/yable-react`. Theme tokens shipped in `@zvndev/yable-themes`.
 5. **Phase 5 — Playground stories.** Manual QA + screenshot regression.
 6. **Phase 6 — Docs + migration guide.** Updated README, new section on async commits.
 

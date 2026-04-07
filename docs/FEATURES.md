@@ -195,7 +195,7 @@ columnHelper.accessor('tags', {
 ### React: GlobalFilter Component
 
 ```tsx
-import { GlobalFilter } from '@yable/react'
+import { GlobalFilter } from '@zvndev/yable-react'
 
 <GlobalFilter
   table={table}
@@ -242,7 +242,7 @@ table.getRowCount()         // total rows
 ### React: Pagination Component
 
 ```tsx
-import { Pagination } from '@yable/react'
+import { Pagination } from '@zvndev/yable-react'
 
 <Table table={table}>
   <Pagination
@@ -924,7 +924,7 @@ A spreadsheet-grade formula engine with 17 built-in functions (extensible), an e
 
 ### Notes
 
-- The formula engine is included in `@yable/core` and works with any adapter
+- The formula engine is included in `@zvndev/yable-core` and works with any adapter
 - Built-in functions: `SUM`, `AVG`, `COUNT`, `COUNTA`, `MIN`, `MAX`, `IF`, `CONCAT`, `ROUND`, `ABS`, `FLOOR`, `CEILING`, `POWER`, `SQRT`, `LEN`, `UPPER`, `LOWER` (plus aliases `AVERAGE`, `CONCATENATE`, `TRUNC`, `INT`)
 - Register custom functions via the formula engine API
 - This feature is FREE under MIT -- AG Grid requires an Enterprise license for formula support
@@ -938,8 +938,8 @@ Save cell edits to a backend with built-in optimistic updates, error handling, r
 ### How to Use
 
 ```typescript
-import { createColumnHelper } from '@yable/core'
-import { CommitError } from '@yable/core'
+import { createColumnHelper } from '@zvndev/yable-core'
+import { CommitError } from '@zvndev/yable-core'
 
 const table = useTable({
   data,
@@ -1027,7 +1027,7 @@ columnHelper.accessor('price', {
 ### Notes
 
 - See the [Async Commits Consumer Guide](./async-commits.md) for a full walkthrough
-- The `@yable/react` adapter renders cell status badges automatically via `<TableCell>`
+- The `@zvndev/yable-react` adapter renders cell status badges automatically via `<TableCell>`
 - Conflict resolution is left to the consumer -- dismiss to revert, or apply the pending value again
 
 ---

@@ -1,8 +1,8 @@
-// @yable/react — Flash Cell Component
+// @zvndev/yable-react — Flash Cell Component
 // Wraps cell content with flash animation on data change.
 
 import React from 'react'
-import type { CellFlashInfo } from '@yable/core'
+import type { CellFlashInfo } from '@zvndev/yable-core'
 
 // ---------------------------------------------------------------------------
 // SECURITY: CSS color validation

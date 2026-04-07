@@ -1,4 +1,4 @@
-// @yable/core — Clipboard Tests
+// @zvndev/yable-core — Clipboard Tests
 
 import { describe, it, expect } from 'vitest'
 import {

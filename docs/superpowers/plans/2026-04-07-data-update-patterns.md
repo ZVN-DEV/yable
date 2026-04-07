@@ -6,7 +6,7 @@
 
 **Architecture:** New `commits` slice on `TableState` is the single source of truth for in-flight/errored/conflicted edits. A `CommitCoordinator` factory exposes pure dispatch/settle/sweep operations. Existing `cellEditing` and `fullRowEditing` features delegate to the coordinator instead of calling `onEditCommit` directly. The grid never mutates `rowData`; pending values shadow saved values at render time. React cells read merged values + status via new table methods.
 
-**Tech Stack:** TypeScript, React 19, vitest, pnpm workspace, turborepo. Tests in `@yable/core` use pure state-machine simulators (the existing pattern in `packages/core/src/features/__tests__/`). React component tests use vitest + happy-dom (matches existing `@yable/react` test setup).
+**Tech Stack:** TypeScript, React 19, vitest, pnpm workspace, turborepo. Tests in `@zvndev/yable-core` use pure state-machine simulators (the existing pattern in `packages/core/src/features/__tests__/`). React component tests use vitest + happy-dom (matches existing `@zvndev/yable-react` test setup).
 
 **Spec:** `docs/superpowers/specs/2026-04-07-data-update-patterns-design.md`
 
@@ -50,8 +50,8 @@
 
 ```bash
 git status
-pnpm --filter @yable/core test:ci
-pnpm --filter @yable/react test:ci 2>&1 | tail -20
+pnpm --filter @zvndev/yable-core test:ci
+pnpm --filter @zvndev/yable-react test:ci 2>&1 | tail -20
 ```
 
 Expected: clean status, all existing tests pass. If anything fails, STOP and report — do not start implementation on a broken baseline.
@@ -71,7 +71,7 @@ Expected: clean status, all existing tests pass. If anything fails, STOP and rep
 Create `packages/core/src/features/commits/types.ts`:
 
 ```ts
-// @yable/core — Commit types (Task #10 / data update patterns)
+// @zvndev/yable-core — Commit types (Task #10 / data update patterns)
 //
 // These types power the optimistic-commit / cell-status surface. See
 // docs/superpowers/specs/2026-04-07-data-update-patterns-design.md for the
@@ -277,8 +277,8 @@ grep -n "editing: { activeCell" packages/core/src/core/table.ts
 - [ ] **Step 1.6: Run typecheck**
 
 ```bash
-pnpm --filter @yable/core typecheck
-pnpm --filter @yable/react typecheck
+pnpm --filter @zvndev/yable-core typecheck
+pnpm --filter @zvndev/yable-react typecheck
 ```
 
 Expected: PASS. If there are errors about `CommitsSlice` not being a property of `TableState` from a third site, repeat step 1.5 for that file.
@@ -286,7 +286,7 @@ Expected: PASS. If there are errors about `CommitsSlice` not being a property of
 - [ ] **Step 1.7: Run tests**
 
 ```bash
-pnpm --filter @yable/core test:ci
+pnpm --filter @zvndev/yable-core test:ci
 ```
 
 Expected: all existing tests still pass (we haven't added behaviour yet, just types and an empty slice).
@@ -315,7 +315,7 @@ git commit -m "feat(core): add commits slice + types for async commit"
 Create `packages/core/src/features/__tests__/commits.test.ts`:
 
 ```ts
-// @yable/core — Commit feature tests (Task #10)
+// @zvndev/yable-core — Commit feature tests (Task #10)
 
 import { describe, it, expect } from 'vitest'
 import { CommitError } from '../commits/CommitError'
@@ -350,7 +350,7 @@ describe('CommitError', () => {
 - [ ] **Step 2.2: Run the failing test**
 
 ```bash
-pnpm --filter @yable/core test:ci -- commits.test.ts
+pnpm --filter @zvndev/yable-core test:ci -- commits.test.ts
 ```
 
 Expected: FAIL — `Cannot find module '../commits/CommitError'`
@@ -360,7 +360,7 @@ Expected: FAIL — `Cannot find module '../commits/CommitError'`
 Create `packages/core/src/features/commits/CommitError.ts`:
 
 ```ts
-// @yable/core — CommitError
+// @zvndev/yable-core — CommitError
 //
 // Throw from `onCommit` to put specific cells into the `error` state.
 // `throw new Error('msg')` puts ALL cells in the batch into error;
@@ -386,7 +386,7 @@ export class CommitError extends Error {
 - [ ] **Step 2.4: Run the test again**
 
 ```bash
-pnpm --filter @yable/core test:ci -- commits.test.ts
+pnpm --filter @zvndev/yable-core test:ci -- commits.test.ts
 ```
 
 Expected: PASS (4 tests).
@@ -599,7 +599,7 @@ describe('CommitCoordinator — opId race', () => {
 - [ ] **Step 3.2: Run the failing tests**
 
 ```bash
-pnpm --filter @yable/core test:ci -- commits.test.ts
+pnpm --filter @zvndev/yable-core test:ci -- commits.test.ts
 ```
 
 Expected: FAIL — `Cannot find module '../commits/coordinator'`
@@ -609,7 +609,7 @@ Expected: FAIL — `Cannot find module '../commits/coordinator'`
 Create `packages/core/src/features/commits/coordinator.ts`:
 
 ```ts
-// @yable/core — CommitCoordinator
+// @zvndev/yable-core — CommitCoordinator
 //
 // Pure factory: takes a tiny store interface and returns the dispatch/settle
 // surface used by the table. Free of any Table<TData> dependency so it can
@@ -992,7 +992,7 @@ export type CommitCoordinator = ReturnType<typeof createCommitCoordinator>
 - [ ] **Step 3.4: Run the tests**
 
 ```bash
-pnpm --filter @yable/core test:ci -- commits.test.ts
+pnpm --filter @zvndev/yable-core test:ci -- commits.test.ts
 ```
 
 Expected: PASS for the dispatch + opId race tests. If the abort-controller test fails because of microtask ordering, add an extra `await Promise.resolve()` cycle in the test.
@@ -1169,7 +1169,7 @@ describe('CommitCoordinator — per-column override', () => {
 - [ ] **Step 4.2: Run the tests**
 
 ```bash
-pnpm --filter @yable/core test:ci -- commits.test.ts
+pnpm --filter @zvndev/yable-core test:ci -- commits.test.ts
 ```
 
 Expected: PASS for all sweep / accessor / per-column tests. The implementation already covers this — these are pure verification tests.
@@ -1425,8 +1425,8 @@ export type {
 - [ ] **Step 5.5: Run typecheck and tests**
 
 ```bash
-pnpm --filter @yable/core typecheck
-pnpm --filter @yable/core test:ci
+pnpm --filter @zvndev/yable-core typecheck
+pnpm --filter @zvndev/yable-core test:ci
 ```
 
 Expected: PASS. If typecheck complains that `Table` requires the new methods, double-check step 5.3.
@@ -1543,8 +1543,8 @@ Find the `commitEdit` method in `packages/core/src/core/table.ts` (around line 5
 - [ ] **Step 6.3: Run typecheck and existing tests**
 
 ```bash
-pnpm --filter @yable/core typecheck
-pnpm --filter @yable/core test:ci
+pnpm --filter @zvndev/yable-core typecheck
+pnpm --filter @zvndev/yable-core test:ci
 ```
 
 Expected: PASS. Existing `fullRowEditing` tests still use `onEditCommit` and should not be affected — they don't pass `onCommit`.
@@ -1611,8 +1611,8 @@ with:
 - [ ] **Step 7.2: Run typecheck and existing tests**
 
 ```bash
-pnpm --filter @yable/core typecheck
-pnpm --filter @yable/core test:ci
+pnpm --filter @zvndev/yable-core typecheck
+pnpm --filter @zvndev/yable-core test:ci
 ```
 
 Expected: PASS. Existing `fullRowEditing.test.ts` doesn't set `onCommit`, so the legacy path stays exercised.
@@ -1738,7 +1738,7 @@ import { CellStatusBadge } from './CellStatusBadge'
 - [ ] **Step 8.2: Typecheck**
 
 ```bash
-pnpm --filter @yable/react typecheck
+pnpm --filter @zvndev/yable-react typecheck
 ```
 
 Expected: FAIL — `Cannot find module './CellStatusBadge'`. We create it next.
@@ -1760,7 +1760,7 @@ Skip commit until Task 9 lands so the worktree is buildable.
 Create `packages/react/src/components/CellStatusBadge.tsx`:
 
 ```tsx
-// @yable/react — CellStatusBadge
+// @zvndev/yable-react — CellStatusBadge
 //
 // Renders the error / conflict decoration over a cell when the commit
 // coordinator marks it as `error` or `conflict`. Consumers can override
@@ -1870,8 +1870,8 @@ export type { CellStatusBadgeProps } from './components/CellStatusBadge'
 - [ ] **Step 9.3: Typecheck and test**
 
 ```bash
-pnpm --filter @yable/react typecheck
-pnpm --filter @yable/core test:ci
+pnpm --filter @zvndev/yable-react typecheck
+pnpm --filter @zvndev/yable-core test:ci
 ```
 
 Expected: PASS for typecheck. Core tests already passed.
@@ -1984,7 +1984,7 @@ In `packages/themes/src/base.css`, append a new section at the end of the file:
 - [ ] **Step 10.3: Build themes and verify**
 
 ```bash
-pnpm --filter @yable/themes build 2>&1 | tail -20
+pnpm --filter @zvndev/yable-themes build 2>&1 | tail -20
 ```
 
 Expected: build succeeds. If there's no `build` script, just check the file syntax is valid CSS.
@@ -2048,8 +2048,8 @@ import {
   useTable,
   Table,
   createColumnHelper,
-} from '@yable/react'
-import type { CellPatch } from '@yable/core'
+} from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 interface Item {
   id: string
@@ -2130,8 +2130,8 @@ import {
   useTable,
   Table,
   createColumnHelper,
-} from '@yable/react'
-import type { CellPatch } from '@yable/core'
+} from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 interface Item {
   id: string
@@ -2195,7 +2195,7 @@ export default function SlowNetworkStory() {
 - [ ] **Step 11.4: Build the demo and visit each route manually**
 
 ```bash
-pnpm --filter @yable/react-demo dev 2>&1 | tail -10 &
+pnpm --filter @zvndev/yable-react-demo dev 2>&1 | tail -10 &
 sleep 8
 ```
 
@@ -2229,8 +2229,8 @@ Create `examples/react-demo/src/app/commit-stories/conflict/page.tsx`:
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useTable, Table, createColumnHelper } from '@yable/react'
-import type { CellPatch } from '@yable/core'
+import { useTable, Table, createColumnHelper } from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 interface Item {
   id: string
@@ -2303,8 +2303,8 @@ Create `examples/react-demo/src/app/commit-stories/bulk-save/page.tsx`:
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useTable, Table, createColumnHelper } from '@yable/react'
-import type { CellPatch } from '@yable/core'
+import { useTable, Table, createColumnHelper } from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 interface Item {
   id: string
@@ -2382,8 +2382,8 @@ Create `examples/react-demo/src/app/commit-stories/per-column/page.tsx`:
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useTable, Table, createColumnHelper } from '@yable/react'
-import type { CellPatch } from '@yable/core'
+import { useTable, Table, createColumnHelper } from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 interface Item {
   id: string
@@ -2472,7 +2472,7 @@ export default function PerColumnStory() {
 - [ ] **Step 12.4: Manual QA**
 
 ```bash
-pnpm --filter @yable/react-demo dev 2>&1 | tail -10 &
+pnpm --filter @zvndev/yable-react-demo dev 2>&1 | tail -10 &
 sleep 8
 ```
 
@@ -2511,8 +2511,8 @@ Yable ships first-class support for optimistic UI with async commit, error handl
 ## The minimum viable example
 
 ```tsx
-import { useTable, Table } from '@yable/react'
-import type { CellPatch } from '@yable/core'
+import { useTable, Table } from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 function MyTable() {
   const onCommit = async (patches: CellPatch<Row>[]) => {
@@ -2551,7 +2551,7 @@ That's it. Pending state, error state, retry, and conflict UI are all rendered a
 If your API returns per-field validation errors, throw a `CommitError`:
 
 ```tsx
-import { CommitError } from '@yable/core'
+import { CommitError } from '@zvndev/yable-core'
 
 const onCommit = async (patches) => {
   const res = await fetch('/api/save', { ... })
@@ -2645,7 +2645,7 @@ Expected: ALL pass. If anything fails:
 - [ ] **Step 14.2: Manual end-to-end smoke**
 
 ```bash
-pnpm --filter @yable/react-demo dev 2>&1 | tail -10 &
+pnpm --filter @zvndev/yable-react-demo dev 2>&1 | tail -10 &
 sleep 8
 ```
 
@@ -2712,5 +2712,5 @@ All spec requirements have at least one task. No gaps.
 - **The existing `pendingValues` slice and `fullRowEditing` validation hook are NOT removed.** They're the legacy path. If `onCommit` is undefined, the table behaves exactly as it does today. Don't break this.
 - **The `lastDataRef` sweep trigger in Task 5 is a coarse heuristic.** It fires on every `setOptions` call where the data ref changed. For React Query / SWR consumers this is correct. If a downstream consumer reports unnecessary sweeps, we can refine — but per the spec the cost is O(n) over `commits.cells`, which is bounded by what the user has in flight.
 - **The `(table as any).__commitCoordinator` cast in Tasks 5/6/7 is intentional.** The coordinator is an internal detail not part of the public Table API surface — only the wrapping methods are exposed. Don't promote it to a public field.
-- **Tests in `@yable/core` use the pure state-machine pattern.** Don't introduce a full table fixture for the coordinator tests — the existing `makeStore` helper from Task 3 covers everything.
+- **Tests in `@zvndev/yable-core` use the pure state-machine pattern.** Don't introduce a full table fixture for the coordinator tests — the existing `makeStore` helper from Task 3 covers everything.
 - **If a typecheck failure points at a TableState construction site we missed**, add `commits: { cells: {}, nextOpId: 1 }` and move on. There may be more sites than the ones listed in Task 1 — grep `editing: {` to find them.

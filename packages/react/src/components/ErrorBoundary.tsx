@@ -1,4 +1,4 @@
-// @yable/react — Error Boundary Component
+// @zvndev/yable-react — Error Boundary Component
 
 import React from 'react'
 

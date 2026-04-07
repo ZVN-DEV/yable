@@ -1,4 +1,4 @@
-// @yable/core — Header Group Model
+// @zvndev/yable-core — Header Group Model
 
 import type {
   RowData,

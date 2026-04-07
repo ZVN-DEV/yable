@@ -1,4 +1,4 @@
-// @yable/core — CommitCoordinator
+// @zvndev/yable-core — CommitCoordinator
 //
 // Pure factory: takes a tiny store interface and returns the dispatch/settle
 // surface used by the table. Free of any Table<TData> dependency so it can

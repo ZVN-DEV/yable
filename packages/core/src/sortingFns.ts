@@ -1,4 +1,4 @@
-// @yable/core — Built-in sorting functions
+// @zvndev/yable-core — Built-in sorting functions
 
 import type { RowData, Row, SortingFn } from './types'
 

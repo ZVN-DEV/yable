@@ -1,5 +1,5 @@
 /* ============================================================================
-   @yable/themes — Tailwind v4 Theme Bridge
+   @zvndev/yable-themes — Tailwind v4 Theme Bridge
    ============================================================================
 
    Imports Yable's CSS custom properties into Tailwind's `@theme` namespace
@@ -9,8 +9,8 @@
    Usage (Tailwind v4):
 
        @import "tailwindcss";
-       @import "@yable/themes";
-       @import "@yable/themes/tailwind.css";
+       @import "@zvndev/yable-themes";
+       @import "@zvndev/yable-themes/tailwind.css";
 
    The middle import provides the base table CSS + token defaults; this file
    re-exposes those tokens to Tailwind so utility classes resolve to live

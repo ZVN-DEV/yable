@@ -1,7 +1,7 @@
-// @yable/react — CellInput form component
+// @zvndev/yable-react — CellInput form component
 
 import React, { useEffect, useRef } from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 
 interface CellInputProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>

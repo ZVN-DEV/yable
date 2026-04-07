@@ -1,4 +1,4 @@
-// @yable/vanilla — createTableDOM factory
+// @zvndev/yable-vanilla — createTableDOM factory
 
 import {
   createTable,
@@ -8,7 +8,7 @@ import {
   type TableState,
   type Table,
   type Updater,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 import { renderTable, renderPagination } from './renderer'
 import { attachEventDelegation, type VanillaEventHandlers, type VanillaEventHandler } from './events'
 

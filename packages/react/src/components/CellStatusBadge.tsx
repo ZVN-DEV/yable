@@ -1,4 +1,4 @@
-// @yable/react — CellStatusBadge
+// @zvndev/yable-react — CellStatusBadge
 //
 // Renders the error / conflict decoration over a cell when the commit
 // coordinator marks it as `error` or `conflict`. Consumers can override

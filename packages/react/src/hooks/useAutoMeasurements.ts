@@ -1,4 +1,4 @@
-// @yable/react — Pretext auto-measurement helpers
+// @zvndev/yable-react — Pretext auto-measurement helpers
 //
 // Bridges the declarative cell-type system to Pretext: given a list of
 // columns, derive the per-column `CellMeasurement[]` that
@@ -11,7 +11,7 @@
 //   3. The default text recipe passed to this hook (theme-derived)
 
 import { useMemo } from 'react'
-import type { ColumnDef, RowData } from '@yable/core'
+import type { ColumnDef, RowData } from '@zvndev/yable-core'
 import { getMeasureRecipeForCellType } from '../cells/resolver'
 import type { CellMeasureRecipe } from '../cells/types'
 import type { CellMeasurement } from './usePretextMeasurement'

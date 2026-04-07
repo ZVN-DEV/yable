@@ -1,4 +1,4 @@
-// @yable/core — Formula Parser & Evaluator Tests
+// @zvndev/yable-core — Formula Parser & Evaluator Tests
 
 import { describe, it, expect } from 'vitest'
 import {

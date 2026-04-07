@@ -1,4 +1,4 @@
-// @yable/core — Tree Data Tests
+// @zvndev/yable-core — Tree Data Tests
 
 import { describe, it, expect } from 'vitest'
 import {

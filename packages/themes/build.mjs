@@ -34,13 +34,13 @@ function build() {
     }
   }
 
-  console.log('[@yable/themes] Built successfully')
+  console.log('[@zvndev/yable-themes] Built successfully')
 }
 
 build()
 
 if (process.argv.includes('--watch')) {
-  console.log('[@yable/themes] Watching for changes...')
+  console.log('[@zvndev/yable-themes] Watching for changes...')
   watch(srcDir, { recursive: true }, () => {
     build()
   })

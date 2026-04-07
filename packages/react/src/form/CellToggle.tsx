@@ -1,7 +1,7 @@
-// @yable/react — CellToggle form component
+// @zvndev/yable-react — CellToggle form component
 
 import React from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 
 interface CellToggleProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>

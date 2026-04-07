@@ -1,9 +1,9 @@
-// @yable/react — Tree Toggle Component
+// @zvndev/yable-react — Tree Toggle Component
 // Renders indent + animated expand/collapse chevron for tree data rows.
 // The chevron smoothly rotates 90 degrees on expand/collapse via CSS transition.
 
 import React, { useCallback } from 'react'
-import type { RowData, Row } from '@yable/core'
+import type { RowData, Row } from '@zvndev/yable-core'
 
 interface TreeToggleProps<TData extends RowData> {
   row: Row<TData>

@@ -22,9 +22,9 @@
 
 ### Nice-to-Have (v0.4+)
 
-- [ ] **Vue adapter** (`@yable/vue`)
-- [ ] **Svelte adapter** (`@yable/svelte`)
-- [ ] **Angular adapter** (`@yable/angular`)
+- [ ] **Vue adapter** (`@zvndev/yable-vue`)
+- [ ] **Svelte adapter** (`@zvndev/yable-svelte`)
+- [ ] **Angular adapter** (`@zvndev/yable-angular`)
 - [ ] **Large text editor** — Textarea/modal for long text cells
 - [ ] **Rich select editor** — Searchable dropdown with grouping
 - [ ] **Self-referential tree data** — parentId-based tree (currently path-based only)
@@ -57,7 +57,7 @@ Weakest: Charts (0%), Server-Side (30%), Accessibility (30%), Framework Support 
 
 - [ ] **Landing page** — yable.dev or similar. Hero with animated table demo, feature comparison vs AG Grid/TanStack, pricing (free), quickstart
 - [ ] **Interactive playground** — StackBlitz/CodeSandbox embed where users can try Yable live
-- [ ] **npm publish** — `@yable/core@0.1.0-alpha`, `@yable/react@0.1.0-alpha`, `@yable/themes@0.1.0-alpha`, `@yable/vanilla@0.1.0-alpha`
+- [ ] **npm publish** — `@zvndev/yable-core@0.1.0-alpha`, `@zvndev/yable-react@0.1.0-alpha`, `@zvndev/yable-themes@0.1.0-alpha`, `@zvndev/yable-vanilla@0.1.0-alpha`
 - [ ] **GitHub repo polish** — Topics, description, social preview image, issue templates, discussion board
 - [ ] **Launch blog post** — "13 AG Grid Enterprise features, $0" — the pitch
 - [ ] **Hacker News / Reddit post** — r/reactjs, r/javascript, r/webdev

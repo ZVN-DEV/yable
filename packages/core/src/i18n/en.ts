@@ -1,4 +1,4 @@
-// @yable/core — Default English Locale
+// @zvndev/yable-core — Default English Locale
 
 export interface YableLocale {
   // Pagination

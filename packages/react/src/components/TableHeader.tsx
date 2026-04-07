@@ -1,4 +1,4 @@
-// @yable/react — Table Header Component
+// @zvndev/yable-react — Table Header Component
 
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import type {
@@ -6,7 +6,7 @@ import type {
   Table,
   Header as HeaderType,
   ColumnOrderState,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 import { SortIndicator } from './SortIndicator'
 
 interface TableHeaderProps<TData extends RowData> {

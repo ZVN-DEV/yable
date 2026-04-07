@@ -1,13 +1,13 @@
-// @yable/react — useRowDrag hook
+// @zvndev/yable-react — useRowDrag hook
 // React hook wrapping the HTML5 Drag & Drop API for row reordering.
 
 import { useState, useCallback, useRef } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 import {
   type RowDragState,
   getInitialRowDragState,
   moveRow,
-} from '@yable/core/features/rowDragging'
+} from '@zvndev/yable-core/features/rowDragging'
 
 // Re-export the type for convenience
 export type { RowDragState }

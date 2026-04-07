@@ -1,7 +1,7 @@
 {
-  "name": "@yable/react",
+  "name": "@zvndev/yable-react",
   "version": "0.1.0",
-  "description": "React adapter for @yable/core -- components, hooks, and form controls for building data tables",
+  "description": "React adapter for @zvndev/yable-core -- components, hooks, and form controls for building data tables",
   "keywords": ["react", "table", "data-grid", "datagrid", "components", "hooks", "typescript", "editing"],
   "license": "MIT",
   "author": "ZVN DEV",
@@ -39,11 +39,11 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@yable/core": "workspace:*"
+    "@zvndev/yable-core": "workspace:*"
   },
   "peerDependencies": {
     "@chenglou/pretext": ">=0.0.4",
-    "@yable/themes": "workspace:*",
+    "@zvndev/yable-themes": "workspace:*",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
@@ -51,7 +51,7 @@
     "@chenglou/pretext": {
       "optional": true
     },
-    "@yable/themes": {
+    "@zvndev/yable-themes": {
       "optional": true
     }
   },

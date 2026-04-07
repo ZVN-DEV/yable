@@ -1,4 +1,4 @@
-// @yable/core — createTable() — Main Engine
+// @zvndev/yable-core — createTable() — Main Engine
 
 import type {
   RowData,

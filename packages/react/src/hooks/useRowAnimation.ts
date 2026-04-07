@@ -1,9 +1,9 @@
-// @yable/react — useRowAnimation hook
+// @zvndev/yable-react — useRowAnimation hook
 // Animated transitions on sort/filter/group changes.
 // Tracks row positions and applies CSS transform transitions.
 
 import { useRef, useCallback } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 export interface UseRowAnimationOptions {
   /** Enable row animations. Default: false */

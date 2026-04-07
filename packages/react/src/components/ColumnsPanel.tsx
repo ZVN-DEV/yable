@@ -1,9 +1,9 @@
-// @yable/react — Columns Panel Component
+// @zvndev/yable-react — Columns Panel Component
 // Show/hide/reorder columns via drag-and-drop with search, toggle-all actions,
 // and a polished drag handle.
 
 import React, { useState, useCallback } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 interface ColumnsPanelProps<TData extends RowData> {
   table: Table<TData>

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { useTable, Table, Pagination, GlobalFilter, createColumnHelper, type ColumnDef } from '@yable/react'
+import { useTable, Table, Pagination, GlobalFilter, createColumnHelper, type ColumnDef } from '@zvndev/yable-react'
 
 interface Person {
   id: number

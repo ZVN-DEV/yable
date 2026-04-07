@@ -1,12 +1,12 @@
 /* ============================================================================
-   @yable/themes — Mono Theme
+   @zvndev/yable-themes — Mono Theme
    Swiss design. Zero color. Pure typography. Maximum contrast.
    The accent IS black (light) or white (dark). Borders are surgical.
    This theme makes the data and typography the absolute hero.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/mono.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/mono.css'
      <Table theme="mono" />
    ============================================================================ */
 

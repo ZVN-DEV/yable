@@ -1,12 +1,12 @@
 /* ============================================================================
-   @yable/themes — Ocean Theme
+   @zvndev/yable-themes — Ocean Theme
    Calm and fluid. Desaturated sage-teal palette with gentle transitions.
    Think soft tide pools, not bright Caribbean. Muted teal headers,
    borders that blend into backgrounds.
 
    Usage:
-     import '@yable/themes'
-     import '@yable/themes/ocean.css'
+     import '@zvndev/yable-themes'
+     import '@zvndev/yable-themes/ocean.css'
      <Table theme="ocean" />
    ============================================================================ */
 

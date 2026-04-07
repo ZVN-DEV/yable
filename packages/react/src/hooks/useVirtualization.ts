@@ -1,4 +1,4 @@
-// @yable/react — Row virtualization hook
+// @zvndev/yable-react — Row virtualization hook
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 

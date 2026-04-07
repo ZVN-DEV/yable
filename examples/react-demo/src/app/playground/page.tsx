@@ -13,7 +13,7 @@ import {
   createColumnHelper,
   type ColumnDef,
   type TableInstance,
-} from '@yable/react'
+} from '@zvndev/yable-react'
 import s from './playground.module.css'
 
 /* ── Data ────────────────────────────────────────────────────────────────── */
@@ -359,7 +359,7 @@ export default function PlaygroundPage() {
         </Section>
 
         <div className={s.panelFooter}>
-          <span className={s.footerBrand}>@yable/react</span>
+          <span className={s.footerBrand}>@zvndev/yable-react</span>
           <span className={s.footerVersion}>v0.1.0</span>
         </div>
       </aside>

@@ -1,4 +1,4 @@
-// @yable/core — Formula AST Evaluator
+// @zvndev/yable-core — Formula AST Evaluator
 // Evaluates an AST node, resolving cell references against the table.
 
 import type { ASTNode } from './parser'

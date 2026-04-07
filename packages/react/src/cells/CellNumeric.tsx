@@ -1,8 +1,8 @@
-// @yable/react — CellNumeric display component
+// @zvndev/yable-react — CellNumeric display component
 // Right-aligned number with tabular figures and optional unit suffix.
 
 import { useMemo } from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellNumericProps, CellMeasureRecipe } from './types'
 
 /** Right-aligned tabular number. Always single-line. */

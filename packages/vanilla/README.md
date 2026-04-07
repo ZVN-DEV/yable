@@ -1,21 +1,21 @@
-# @yable/vanilla
+# @zvndev/yable-vanilla
 
 Vanilla JavaScript / DOM renderer for the Yable data table engine.
 
-`@yable/vanilla` takes a `@yable/core` table instance and returns an HTML string you can inject into any container. No framework required.
+`@zvndev/yable-vanilla` takes a `@zvndev/yable-core` table instance and returns an HTML string you can inject into any container. No framework required.
 
 ## Installation
 
 ```bash
-npm install @yable/core @yable/vanilla
+npm install @zvndev/yable-core @zvndev/yable-vanilla
 ```
 
 ## Basic Usage
 
 ```typescript
-import { createTable, createColumnHelper } from '@yable/core'
-import { renderTable, renderPagination } from '@yable/vanilla'
-import '@yable/themes'
+import { createTable, createColumnHelper } from '@zvndev/yable-core'
+import { renderTable, renderPagination } from '@zvndev/yable-vanilla'
+import '@zvndev/yable-themes'
 
 interface Product {
   name: string

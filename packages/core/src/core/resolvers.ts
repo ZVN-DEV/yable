@@ -1,4 +1,4 @@
-// @yable/core — Sort/Filter function resolvers
+// @zvndev/yable-core — Sort/Filter function resolvers
 // Factored out of table.ts to avoid circular imports (table -> column -> table).
 
 import type { RowData, SortingFn, FilterFn } from '../types'

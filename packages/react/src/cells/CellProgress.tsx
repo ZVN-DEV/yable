@@ -1,7 +1,7 @@
-// @yable/react — CellProgress display component
+// @zvndev/yable-react — CellProgress display component
 // Inline progress bar for percentage or bounded numeric values.
 
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellProgressProps, CellMeasureRecipe } from './types'
 
 /**

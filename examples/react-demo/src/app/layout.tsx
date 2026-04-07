@@ -5,15 +5,15 @@ import {
   IBM_Plex_Sans,
 } from 'next/font/google'
 import './globals.css'
-import '@yable/themes'
-import '@yable/themes/default.css'
-import '@yable/themes/midnight.css'
-import '@yable/themes/stripe.css'
-import '@yable/themes/compact.css'
-import '@yable/themes/ocean.css'
-import '@yable/themes/forest.css'
-import '@yable/themes/rose.css'
-import '@yable/themes/mono.css'
+import '@zvndev/yable-themes'
+import '@zvndev/yable-themes/default.css'
+import '@zvndev/yable-themes/midnight.css'
+import '@zvndev/yable-themes/stripe.css'
+import '@zvndev/yable-themes/compact.css'
+import '@zvndev/yable-themes/ocean.css'
+import '@zvndev/yable-themes/forest.css'
+import '@zvndev/yable-themes/rose.css'
+import '@zvndev/yable-themes/mono.css'
 
 const display = Cormorant_Garamond({
   subsets: ['latin'],

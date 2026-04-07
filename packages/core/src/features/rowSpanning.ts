@@ -1,4 +1,4 @@
-// @yable/core — Row Spanning Feature
+// @zvndev/yable-core — Row Spanning Feature
 // Allows a single cell to span multiple contiguous rows when adjacent rows
 // have the same value. Controlled via `rowSpan` callback on column def.
 

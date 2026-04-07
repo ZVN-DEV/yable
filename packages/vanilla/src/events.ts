@@ -1,6 +1,6 @@
-// @yable/vanilla — Event Delegation
+// @zvndev/yable-vanilla — Event Delegation
 
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 export type VanillaEventHandler = (event: {
   type: string

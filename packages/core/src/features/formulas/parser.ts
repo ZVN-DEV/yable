@@ -1,4 +1,4 @@
-// @yable/core — Formula Tokenizer & AST Builder
+// @zvndev/yable-core — Formula Tokenizer & AST Builder
 // Parses formula strings like "=SUM(A1:A10) + B2 * 3" into an AST.
 
 // ---------------------------------------------------------------------------

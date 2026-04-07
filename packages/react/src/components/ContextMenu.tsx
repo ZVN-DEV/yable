@@ -1,8 +1,8 @@
-// @yable/react — Context Menu Component
+// @zvndev/yable-react — Context Menu Component
 // Built-in right-click menu with copy, paste, cut, export, sort, pin, hide, auto-size.
 
 import React, { useRef, useEffect, useCallback } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 import { ContextMenuItem, type ContextMenuItemDef } from './ContextMenuItem'
 
 export type { ContextMenuItemDef }

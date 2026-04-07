@@ -1,6 +1,6 @@
-// @yable/vanilla — DOM Renderer
+// @zvndev/yable-vanilla — DOM Renderer
 
-import type { RowData, Table, Row, Cell, Header, Column } from '@yable/core'
+import type { RowData, Table, Row, Cell, Header, Column } from '@zvndev/yable-core'
 
 // ---------------------------------------------------------------------------
 // SECURITY: Escape HTML for safe injection into innerHTML

@@ -1,4 +1,4 @@
-// @yable/react — useTheme hook
+// @zvndev/yable-react — useTheme hook
 // Runtime theme switching without page reload.
 
 import { useState, useEffect, useCallback, useRef } from 'react'

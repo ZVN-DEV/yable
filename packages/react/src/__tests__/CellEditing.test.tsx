@@ -1,9 +1,9 @@
-// @yable/react — Cell editing tests
+// @zvndev/yable-react — Cell editing tests
 
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { createColumnHelper } from '@yable/core'
+import { createColumnHelper } from '@zvndev/yable-core'
 import { useTable } from '../useTable'
 import { Table } from '../components/Table'
 

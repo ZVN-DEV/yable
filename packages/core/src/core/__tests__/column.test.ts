@@ -1,4 +1,4 @@
-// @yable/core — Column Model Tests
+// @zvndev/yable-core — Column Model Tests
 
 import { describe, it, expect } from 'vitest'
 import { createTable } from '../table'

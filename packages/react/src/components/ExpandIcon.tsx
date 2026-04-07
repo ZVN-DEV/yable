@@ -1,4 +1,4 @@
-// @yable/react — Expand Icon Component
+// @zvndev/yable-react — Expand Icon Component
 // Animated expand/collapse chevron for master/detail rows.
 // Uses CSS transform: rotate() with a smooth transition for the expand animation.
 

@@ -1,7 +1,7 @@
-// @yable/react — React context for table instance
+// @zvndev/yable-react — React context for table instance
 
 import { createContext, useContext } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 const TableContext = createContext<Table<any> | null>(null)
 

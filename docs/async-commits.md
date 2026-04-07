@@ -5,8 +5,8 @@ Yable ships first-class support for optimistic UI with async commit, error handl
 ## The minimum viable example
 
 ```tsx
-import { useTable, Table } from '@yable/react'
-import type { CellPatch } from '@yable/core'
+import { useTable, Table } from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
 
 function MyTable() {
   const onCommit = async (patches: CellPatch<Row>[]) => {
@@ -45,7 +45,7 @@ That's it. Pending state, error state, retry, and conflict UI are all rendered a
 If your API returns per-field validation errors, throw a `CommitError`:
 
 ```tsx
-import { CommitError } from '@yable/core'
+import { CommitError } from '@zvndev/yable-core'
 
 const onCommit = async (patches) => {
   const res = await fetch('/api/save', { ... })

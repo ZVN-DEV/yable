@@ -12,7 +12,7 @@ import {
   createColumnHelper,
   type ColumnDef,
   type TableInstance,
-} from '@yable/react'
+} from '@zvndev/yable-react'
 import { people, departments, type Person } from '@/data'
 import s from './page.module.css'
 
@@ -76,22 +76,22 @@ type NotePanel = {
 
 const packageLayers = [
   {
-    name: '@yable/core',
+    name: '@zvndev/yable-core',
     label: 'Headless Engine',
     copy: 'Sorting, filtering, formulas, pivot tables, clipboard, tree data.',
   },
   {
-    name: '@yable/react',
+    name: '@zvndev/yable-react',
     label: 'React Surface',
     copy: 'Table primitives, hooks, editors, pagination, and batteries included.',
   },
   {
-    name: '@yable/vanilla',
+    name: '@zvndev/yable-vanilla',
     label: 'DOM Renderer',
     copy: 'Plain-JS rendering for teams that need the engine without React.',
   },
   {
-    name: '@yable/themes',
+    name: '@zvndev/yable-themes',
     label: 'Token Packs',
     copy: 'Eight built-in visual systems with light and dark support.',
   },

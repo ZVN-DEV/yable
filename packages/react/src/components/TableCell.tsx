@@ -1,4 +1,4 @@
-// @yable/react — Table Cell Component
+// @zvndev/yable-react — Table Cell Component
 
 import React, { useCallback } from 'react'
 import {
@@ -6,7 +6,7 @@ import {
   type RowData,
   type Table,
   type Cell,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 import { resolveCellType } from '../cells/resolver'
 import { CellStatusBadge } from './CellStatusBadge'
 

@@ -1,4 +1,4 @@
-// @yable/react — Pivot Config Component
+// @zvndev/yable-react — Pivot Config Component
 // UI for configuring pivot table fields: dragging fields between
 // rows, columns, and values zones.
 

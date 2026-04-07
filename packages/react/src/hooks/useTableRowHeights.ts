@@ -1,4 +1,4 @@
-// @yable/react — One-call row-height computation for declarative tables
+// @zvndev/yable-react — One-call row-height computation for declarative tables
 //
 // Combines `useAutoMeasurements` (column-defs → measurement specs) with
 // `usePretextMeasurement` (specs → exact pixel heights). Most users
@@ -6,7 +6,7 @@
 // just declare `cellType: 'currency'` on their columns and call this hook.
 
 import { useMemo } from 'react'
-import type { ColumnDef, RowData } from '@yable/core'
+import type { ColumnDef, RowData } from '@zvndev/yable-core'
 import {
   usePretextMeasurement,
   type CellMeasurement,
@@ -37,7 +37,7 @@ export interface UseTableRowHeightsOptions<TData extends RowData> {
   enabled?: boolean
 }
 
-/** Sensible default that matches `@yable/themes` `tokens.css`. */
+/** Sensible default that matches `@zvndev/yable-themes` `tokens.css`. */
 export const DEFAULT_TEXT_RECIPE: CellMeasureRecipe = {
   font: '400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
   lineHeight: 20,

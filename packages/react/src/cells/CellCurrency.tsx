@@ -1,8 +1,8 @@
-// @yable/react — CellCurrency display component
+// @zvndev/yable-react — CellCurrency display component
 // Renders numbers as formatted currency with tabular figures.
 
 import { useMemo } from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellCurrencyProps, CellMeasureRecipe } from './types'
 
 /**

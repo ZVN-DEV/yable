@@ -1,4 +1,4 @@
-// @yable/core — Row Dragging Tests
+// @zvndev/yable-core — Row Dragging Tests
 
 import { describe, it, expect } from 'vitest'
 import { moveRow, getInitialRowDragState } from '../rowDragging'

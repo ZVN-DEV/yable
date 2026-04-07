@@ -1,7 +1,7 @@
-// @yable/react — CellCheckbox form component
+// @zvndev/yable-react — CellCheckbox form component
 
 import React from 'react'
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 
 interface CellCheckboxProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>

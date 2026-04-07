@@ -1,10 +1,10 @@
-// @yable/react — Print Layout Component
+// @zvndev/yable-react — Print Layout Component
 // Renders a print-optimized version of the table that removes
 // sticky positioning, virtualization, and shows all rows.
 // Includes page header, timestamp, row count summary, and page-break hints.
 
 import React from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 interface PrintLayoutProps<TData extends RowData> {
   table: Table<TData>

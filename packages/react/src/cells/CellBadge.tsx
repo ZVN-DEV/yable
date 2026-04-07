@@ -1,8 +1,8 @@
-// @yable/react — CellBadge display component
+// @zvndev/yable-react — CellBadge display component
 // Renders categorical data as a styled pill/badge.
 // Theme-aware via CSS custom properties.
 
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellBadgeProps, CellMeasureRecipe } from './types'
 
 /**

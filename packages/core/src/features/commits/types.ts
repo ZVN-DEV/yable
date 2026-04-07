@@ -1,4 +1,4 @@
-// @yable/core — Commit types (Task #10 / data update patterns)
+// @zvndev/yable-core — Commit types (Task #10 / data update patterns)
 //
 // These types power the optimistic-commit / cell-status surface. See
 // docs/superpowers/specs/2026-04-07-data-update-patterns-design.md for the

@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@yable/core', '@yable/react', '@yable/themes'],
+  transpilePackages: ['@zvndev/yable-core', '@zvndev/yable-react', '@zvndev/yable-themes'],
   eslint: {
     ignoreDuringBuilds: true,
   },

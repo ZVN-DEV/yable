@@ -1,9 +1,9 @@
-// @yable/react — Filters Panel Component
+// @zvndev/yable-react — Filters Panel Component
 // Summary of active filters with edit/remove capabilities, count badge,
 // and a polished empty state illustration.
 
 import { useCallback } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 interface FiltersPanelProps<TData extends RowData> {
   table: Table<TData>

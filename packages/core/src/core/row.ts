@@ -1,4 +1,4 @@
-// @yable/core — Row Model
+// @zvndev/yable-core — Row Model
 
 import type {
   RowData,

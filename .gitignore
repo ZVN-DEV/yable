@@ -20,3 +20,5 @@ dist/
 SPRINT-PLAN.md
 AUDIT-REPORT.md
 
+.vercel
+.env*.local

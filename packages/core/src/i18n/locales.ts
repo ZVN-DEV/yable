@@ -1,4 +1,4 @@
-// @yable/core — Locale System
+// @zvndev/yable-core — Locale System
 // Provides default English locale with the ability to override any string.
 
 import { en, type YableLocale } from './en'

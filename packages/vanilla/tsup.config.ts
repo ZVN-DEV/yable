@@ -9,5 +9,5 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   minify: false,
-  external: ['@yable/core', '@yable/themes'],
+  external: ['@zvndev/yable-core', '@zvndev/yable-themes'],
 })

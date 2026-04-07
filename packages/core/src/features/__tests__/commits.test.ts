@@ -1,4 +1,4 @@
-// @yable/core — Commit feature tests (Task #10)
+// @zvndev/yable-core — Commit feature tests (Task #10)
 
 import { describe, it, expect } from 'vitest'
 import { CommitError } from '../commits/CommitError'

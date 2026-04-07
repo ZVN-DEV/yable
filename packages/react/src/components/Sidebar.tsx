@@ -1,9 +1,9 @@
-// @yable/react — Sidebar / Tool Panels Component
+// @zvndev/yable-react — Sidebar / Tool Panels Component
 // Slides in from right with tab interface for Columns and Filters panels.
 // Includes keyboard support: Escape to close, tab-switching keyboard nav.
 
 import { useCallback, useEffect, useRef } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 import { ColumnsPanel } from './ColumnsPanel'
 import { FiltersPanel } from './FiltersPanel'
 

@@ -1,7 +1,7 @@
-// @yable/react — CellRating display component
+// @zvndev/yable-react — CellRating display component
 // Renders a rating value as filled/empty characters (stars by default).
 
-import type { RowData, CellContext } from '@yable/core'
+import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellRatingProps, CellMeasureRecipe } from './types'
 
 /**

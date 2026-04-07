@@ -1,4 +1,4 @@
-// @yable/core — Cell Flash Feature
+// @zvndev/yable-core — Cell Flash Feature
 // Detects data changes and produces flash metadata for cells whose values changed.
 
 import type { RowData } from '../types'

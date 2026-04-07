@@ -1,4 +1,4 @@
-// @yable/core — Clipboard Feature
+// @zvndev/yable-core — Clipboard Feature
 // Copy (Ctrl+C), Cut (Ctrl+X), Paste (Ctrl+V) with configurable delimiters.
 
 import type { RowData, Table, Row, Column } from '../types'

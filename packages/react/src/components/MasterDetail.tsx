@@ -1,9 +1,9 @@
-// @yable/react — Master Detail Component
+// @zvndev/yable-react — Master Detail Component
 // Detail panel container for expanded rows with slide-down animation
 // and proper accessibility semantics.
 
 import React from 'react'
-import type { RowData, Row, Table } from '@yable/core'
+import type { RowData, Row, Table } from '@zvndev/yable-core'
 
 interface MasterDetailProps<TData extends RowData> {
   row: Row<TData>

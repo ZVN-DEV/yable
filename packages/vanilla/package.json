@@ -1,7 +1,7 @@
 {
-  "name": "@yable/vanilla",
+  "name": "@zvndev/yable-vanilla",
   "version": "0.1.0",
-  "description": "Vanilla JS/DOM renderer for @yable/core -- framework-free table rendering",
+  "description": "Vanilla JS/DOM renderer for @zvndev/yable-core -- framework-free table rendering",
   "keywords": ["table", "data-grid", "datagrid", "vanilla", "javascript", "dom", "renderer"],
   "license": "MIT",
   "author": "ZVN DEV",
@@ -37,13 +37,13 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@yable/core": "workspace:*"
+    "@zvndev/yable-core": "workspace:*"
   },
   "peerDependencies": {
-    "@yable/themes": "workspace:*"
+    "@zvndev/yable-themes": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@yable/themes": {
+    "@zvndev/yable-themes": {
       "optional": true
     }
   },

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import {
   useTable, Table, CellInput, CellSelect, CellCheckbox,
   createColumnHelper, type ColumnDef,
-} from '@yable/react'
+} from '@zvndev/yable-react'
 
 interface Task {
   id: number

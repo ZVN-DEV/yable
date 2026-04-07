@@ -1,4 +1,4 @@
-// @yable/core — Undo/Redo Feature
+// @zvndev/yable-core — Undo/Redo Feature
 // Configurable undo/redo stack for cell value changes.
 
 import type { RowData, Table } from '../types'

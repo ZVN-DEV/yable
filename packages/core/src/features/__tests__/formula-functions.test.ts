@@ -1,4 +1,4 @@
-// @yable/core — Formula Built-in Functions Tests
+// @zvndev/yable-core — Formula Built-in Functions Tests
 
 import { describe, it, expect } from 'vitest'
 import { builtInFunctions } from '../formulas/functions'

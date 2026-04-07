@@ -1,4 +1,4 @@
-// @yable/core — Tree Data Feature
+// @zvndev/yable-core — Tree Data Feature
 // Hierarchical parent-child data support.
 // `getDataPath` callback returns array path (e.g., ['USA', 'California', 'San Francisco'])
 // Auto-builds tree from flat data. Supports expand/collapse, indent by depth,

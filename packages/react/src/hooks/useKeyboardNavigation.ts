@@ -1,4 +1,4 @@
-// @yable/react — useKeyboardNavigation hook
+// @zvndev/yable-react — useKeyboardNavigation hook
 // Attaches spreadsheet-style keyboard navigation to the table container.
 
 import { useCallback, useEffect } from 'react'
@@ -9,7 +9,7 @@ import {
   type KeyboardNavigationCell,
   type RowData,
   type Table,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 export interface UseKeyboardNavigationOptions {
   /** Whether keyboard navigation is enabled. Default: true */

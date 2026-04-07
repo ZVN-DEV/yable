@@ -1,8 +1,8 @@
-// @yable/react — useFillHandle hook
+// @zvndev/yable-react — useFillHandle hook
 // Tracks drag state for the fill handle corner square.
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import type { RowData, Table } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
 
 export interface FillHandleDragState {
   isDragging: boolean

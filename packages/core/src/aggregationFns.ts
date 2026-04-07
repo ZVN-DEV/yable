@@ -1,4 +1,4 @@
-// @yable/core — Built-in aggregation functions
+// @zvndev/yable-core — Built-in aggregation functions
 
 import type { RowData, Row, AggregationFn } from './types'
 

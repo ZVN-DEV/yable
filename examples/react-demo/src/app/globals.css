@@ -3,4 +3,4 @@
    `tw-scope` class so they don't affect existing demos. */
 
 @import "tailwindcss";
-@import "@yable/themes/tailwind.css";
+@import "@zvndev/yable-themes/tailwind.css";

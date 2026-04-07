@@ -13,10 +13,10 @@ Get from zero to a fully interactive data table in 11 steps. Each step builds on
 ## Step 1: Install Packages
 
 ```bash
-npm install @yable/core @yable/react @yable/themes
+npm install @zvndev/yable-core @zvndev/yable-react @zvndev/yable-themes
 ```
 
-`@yable/core` is the headless engine. `@yable/react` provides the React hook and components. `@yable/themes` provides CSS styling.
+`@zvndev/yable-core` is the headless engine. `@zvndev/yable-react` provides the React hook and components. `@zvndev/yable-themes` provides CSS styling.
 
 ---
 
@@ -64,7 +64,7 @@ The `createColumnHelper` function gives you a type-safe way to define columns. T
 
 ```typescript
 // columns.ts
-import { createColumnHelper } from '@yable/react'
+import { createColumnHelper } from '@zvndev/yable-react'
 import type { Employee } from './types'
 
 const columnHelper = createColumnHelper<Employee>()
@@ -100,8 +100,8 @@ The `useTable` hook creates a table instance and manages React state internally.
 
 ```tsx
 // EmployeeTable.tsx
-import { useTable, Table } from '@yable/react'
-import '@yable/themes'
+import { useTable, Table } from '@zvndev/yable-react'
+import '@zvndev/yable-themes'
 import { employees } from './data'
 import { columns } from './columns'
 
@@ -159,7 +159,7 @@ If you need to know the current sort state or set it programmatically:
 
 ```tsx
 import { useState } from 'react'
-import type { SortingState } from '@yable/react'
+import type { SortingState } from '@zvndev/yable-react'
 
 export function EmployeeTable() {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -184,7 +184,7 @@ export function EmployeeTable() {
 Use the `GlobalFilter` component for a search-across-all-columns input:
 
 ```tsx
-import { useTable, Table, GlobalFilter } from '@yable/react'
+import { useTable, Table, GlobalFilter } from '@zvndev/yable-react'
 
 export function EmployeeTable() {
   const table = useTable({ data: employees, columns })
@@ -228,7 +228,7 @@ Available built-in filter functions: `includesString`, `includesStringSensitive`
 Add the `Pagination` component as a child of `Table`:
 
 ```tsx
-import { useTable, Table, Pagination, GlobalFilter } from '@yable/react'
+import { useTable, Table, Pagination, GlobalFilter } from '@zvndev/yable-react'
 
 export function EmployeeTable() {
   const table = useTable({
@@ -357,7 +357,7 @@ Double-click a cell to enter edit mode. Press **Enter** to commit, **Escape** to
 Import the theme CSS and set the `theme` prop:
 
 ```tsx
-import '@yable/themes'
+import '@zvndev/yable-themes'
 
 // Use the stripe theme
 <Table table={table} theme="stripe" striped stickyHeader />
@@ -402,7 +402,7 @@ Apply a custom accent color to the table's container:
 Save edits to a backend with automatic optimistic updates, error states, and retry:
 
 ```tsx
-import { CommitError } from '@yable/core'
+import { CommitError } from '@zvndev/yable-core'
 
 export function EmployeeTable() {
   const [data, setData] = useState(initialData)
@@ -464,9 +464,9 @@ Here is the full working example with all features combined:
 
 ```tsx
 import { useState } from 'react'
-import { createColumnHelper, useTable, Table, Pagination, GlobalFilter } from '@yable/react'
-import type { SortingState } from '@yable/react'
-import '@yable/themes'
+import { createColumnHelper, useTable, Table, Pagination, GlobalFilter } from '@zvndev/yable-react'
+import type { SortingState } from '@zvndev/yable-react'
+import '@zvndev/yable-themes'
 
 // Data type
 interface Employee {

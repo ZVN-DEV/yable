@@ -1,4 +1,4 @@
-// @yable/core — Keyboard Navigation Feature
+// @zvndev/yable-core — Keyboard Navigation Feature
 // Focused-cell state helpers plus spreadsheet-style navigation rules.
 
 import { clamp } from '../utils'

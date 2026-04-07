@@ -1,4 +1,4 @@
-// @yable/react — useTable hook
+// @zvndev/yable-react — useTable hook
 
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import {
@@ -10,7 +10,7 @@ import {
   type TableState,
   type Table,
   type Updater,
-} from '@yable/core'
+} from '@zvndev/yable-core'
 
 /**
  * Shallow-compare two objects. Returns true if all own keys are strictly equal.

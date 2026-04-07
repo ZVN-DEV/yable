@@ -1,13 +1,13 @@
-# @yable/react
+# @zvndev/yable-react
 
 React bindings for the Yable data table engine.
 
-`@yable/react` provides the `useTable` hook, a component tree for rendering tables, form controls for in-cell editing, and convenience components for pagination and filtering. It re-exports `@yable/core` utilities so you only need one import for most use cases.
+`@zvndev/yable-react` provides the `useTable` hook, a component tree for rendering tables, form controls for in-cell editing, and convenience components for pagination and filtering. It re-exports `@zvndev/yable-core` utilities so you only need one import for most use cases.
 
 ## Installation
 
 ```bash
-npm install @yable/core @yable/react
+npm install @zvndev/yable-core @zvndev/yable-react
 ```
 
 **Peer dependencies:** React 18+ (also works with React 19).
@@ -15,8 +15,8 @@ npm install @yable/core @yable/react
 ## Quick Start
 
 ```tsx
-import { createColumnHelper, useTable, Table, Pagination } from '@yable/react'
-import '@yable/themes'
+import { createColumnHelper, useTable, Table, Pagination } from '@zvndev/yable-react'
+import '@zvndev/yable-themes'
 
 interface Task {
   title: string
@@ -53,7 +53,7 @@ function TaskTable() {
 
 ### `useTable<TData>(options: TableOptions<TData>): Table<TData>`
 
-The primary hook. Accepts the same options as `@yable/core`'s `createTable()` but manages React state internally. Supports both uncontrolled (default) and controlled state patterns.
+The primary hook. Accepts the same options as `@zvndev/yable-core`'s `createTable()` but manages React state internally. Supports both uncontrolled (default) and controlled state patterns.
 
 ```tsx
 // Uncontrolled -- useTable manages all state
@@ -106,9 +106,9 @@ const table = useTable({
 | `TableProvider` | React context provider for the table instance. |
 | `useTableContext()` | Hook to access the table instance from any child component. |
 
-## Re-exports from @yable/core
+## Re-exports from @zvndev/yable-core
 
-For convenience, `@yable/react` re-exports commonly used utilities so you don't need to import from `@yable/core` directly:
+For convenience, `@zvndev/yable-react` re-exports commonly used utilities so you don't need to import from `@zvndev/yable-core` directly:
 
 - `createColumnHelper`
 - `sortingFns`

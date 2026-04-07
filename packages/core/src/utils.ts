@@ -1,4 +1,4 @@
-// @yable/core — Core utility functions
+// @zvndev/yable-core — Core utility functions
 
 import type { RowData, Updater, DeepKeys, DeepValue, ColumnDef } from './types'
 

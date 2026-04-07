@@ -1,9 +1,9 @@
-// @yable/react — useCellFlash hook
+// @zvndev/yable-react — useCellFlash hook
 // Tracks data changes and provides flash state for cells.
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import type { RowData, Table } from '@yable/core'
-import { detectCellChanges, type CellFlashInfo } from '@yable/core'
+import type { RowData, Table } from '@zvndev/yable-core'
+import { detectCellChanges, type CellFlashInfo } from '@zvndev/yable-core'
 
 export interface UseCellFlashOptions {
   /** Flash duration in ms */
