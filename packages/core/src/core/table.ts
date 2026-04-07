@@ -44,6 +44,8 @@ import {
   getNextFocusedCell,
   normalizeFocusedCell,
 } from '../features/keyboardNavigation'
+import { createCommitCoordinator } from '../features/commits/coordinator'
+import type { CellPatch, CommitsSlice } from '../features/commits/types'
 
 // Re-export resolvers for convenience (they live in resolvers.ts to avoid circular deps)
 export { resolveSortingFn, resolveFilterFn } from './resolvers'
@@ -609,6 +611,16 @@ export function createTable<TData extends RowData>(
       return {}
     },
 
+    // Async commit API (Task #10) — wired below after the literal
+    getCellRenderValue: () => undefined,
+    getCellStatus: () => 'idle',
+    getCellErrorMessage: () => undefined,
+    getCellConflictWith: () => undefined,
+    commit: async () => {},
+    retryCommit: async () => {},
+    dismissCommit: () => {},
+    dismissAllCommits: () => {},
+
     // Keyboard Navigation API
     setKeyboardNavigation: (_updater: Updater<KeyboardNavigationState>) => {},
     getFocusedCell: () => {
@@ -1082,6 +1094,133 @@ export function createTable<TData extends RowData>(
   // Pre-expanded and pre-grouped models
   table.getPreExpandedRowModel = table.getSortedRowModel
   table.getPreGroupedRowModel = table.getFilteredRowModel
+
+  // ---------------------------------------------------------------------------
+  // Commit Coordinator (Task #10)
+  // ---------------------------------------------------------------------------
+
+  const setCommitsSlice = (next: CommitsSlice) => {
+    table.setState((old: TableState) => ({ ...old, commits: next }))
+  }
+
+  let lastDataRef: unknown = resolvedOptions.data
+
+  const commitCoordinator = createCommitCoordinator(
+    {
+      getSlice: () => table.getState().commits,
+      setSlice: setCommitsSlice,
+      getSavedValue: (rowId: string, columnId: string) => {
+        try {
+          const row = table.getRow(rowId, true)
+          return row.getValue(columnId)
+        } catch {
+          return undefined
+        }
+      },
+      getRow: (rowId: string) => {
+        try {
+          return table.getRow(rowId, true).original
+        } catch {
+          return undefined
+        }
+      },
+      rowExists: (rowId: string) => {
+        try {
+          table.getRow(rowId, true)
+          return true
+        } catch {
+          return false
+        }
+      },
+    },
+    {
+      onCommit: resolvedOptions.onCommit as any,
+      resolveColumnCommit: (columnId: string) => {
+        const col = table.getColumn(columnId)
+        const def = col?.columnDef as any
+        return def?.commit
+      },
+      rowCommitRetryMode: resolvedOptions.rowCommitRetryMode ?? 'failed',
+    }
+  )
+
+  ;(table as any).__commitCoordinator = commitCoordinator
+
+  // Wire new table methods (override the literal stubs)
+  table.getCellRenderValue = (rowId: string, columnId: string) => {
+    const status = commitCoordinator.getCellStatus(rowId, columnId)
+    if (status !== 'idle') {
+      return commitCoordinator.getRenderValue(rowId, columnId)
+    }
+    try {
+      return table.getRow(rowId, true).getValue(columnId)
+    } catch {
+      return undefined
+    }
+  }
+
+  table.getCellStatus = (rowId: string, columnId: string) =>
+    commitCoordinator.getCellStatus(rowId, columnId)
+
+  table.getCellErrorMessage = (rowId: string, columnId: string) =>
+    commitCoordinator.getRecord(rowId, columnId)?.errorMessage
+
+  table.getCellConflictWith = (rowId: string, columnId: string) =>
+    commitCoordinator.getRecord(rowId, columnId)?.conflictWith
+
+  table.commit = async () => {
+    // When autoCommit is true, the coordinator has already fired everything;
+    // there's nothing buffered. When autoCommit is false, the existing
+    // pendingValues from the editing slice are flushed through the coordinator.
+    const editing = table.getState().editing
+    const pendingValues: Record<string, Record<string, unknown>> =
+      editing.pendingValues ?? {}
+    const patches: Omit<CellPatch, 'signal' | 'row'>[] = []
+    for (const rowId of Object.keys(pendingValues)) {
+      for (const colId of Object.keys(pendingValues[rowId]!)) {
+        let previousValue: unknown
+        try {
+          previousValue = table.getRow(rowId, true).getValue(colId)
+        } catch {
+          previousValue = undefined
+        }
+        patches.push({
+          rowId,
+          columnId: colId,
+          value: pendingValues[rowId]![colId],
+          previousValue,
+        })
+      }
+    }
+    if (patches.length === 0) return
+    await commitCoordinator.dispatch(patches)
+    table.setEditing((old: EditingState) => ({ ...old, pendingValues: {} }))
+  }
+
+  table.retryCommit = async (rowId: string, columnId: string) => {
+    await commitCoordinator.retry(rowId, columnId)
+  }
+
+  table.dismissCommit = (rowId: string, columnId: string) => {
+    commitCoordinator.dismiss(rowId, columnId)
+  }
+
+  table.dismissAllCommits = () => {
+    commitCoordinator.dismissAll()
+  }
+
+  // Sweep triggers — fire on data ref change
+  const originalSetOptions = table.setOptions
+  table.setOptions = (updater: Updater<TableOptions<TData>>) => {
+    originalSetOptions(updater)
+    const data = table.options.data
+    if (data !== lastDataRef) {
+      lastDataRef = data
+      commitCoordinator.runOrphanedGc()
+      commitCoordinator.runAutoClearSweep()
+      commitCoordinator.runConflictDetection()
+    }
+  }
 
   return table as Table<TData>
 }

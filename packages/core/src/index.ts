@@ -205,3 +205,23 @@ export {
   resetLocale,
 } from './i18n/locales'
 export type { PartialLocale } from './i18n/locales'
+
+// ---------------------------------------------------------------------------
+// Async Commit (Task #10)
+// ---------------------------------------------------------------------------
+export { CommitError } from './features/commits/CommitError'
+export type { CommitErrorCells } from './features/commits/CommitError'
+export type {
+  CellStatus,
+  CellPatch,
+  CommitResult,
+  CommitRecord,
+  CommitsSlice,
+  OnCommitFn,
+} from './features/commits/types'
+export { createCommitCoordinator } from './features/commits/coordinator'
+export type {
+  CommitStore,
+  CoordinatorOptions,
+  CommitCoordinator,
+} from './features/commits/coordinator'

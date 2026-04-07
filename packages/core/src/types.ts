@@ -902,6 +902,27 @@ export interface Table<TData extends RowData> {
   setEditing: (updater: Updater<EditingState>) => void
   resetEditing: (defaultState?: boolean) => void
 
+  // Async commit API (Task #10)
+  /** Read the merged render value (pending shadows saved). */
+  getCellRenderValue: (rowId: string, columnId: string) => unknown
+  /** Read the cell's commit status. */
+  getCellStatus: (
+    rowId: string,
+    columnId: string
+  ) => 'idle' | 'pending' | 'error' | 'conflict'
+  /** Error message if status === 'error'. */
+  getCellErrorMessage: (rowId: string, columnId: string) => string | undefined
+  /** Conflicting saved value if status === 'conflict'. */
+  getCellConflictWith: (rowId: string, columnId: string) => unknown
+  /** Manually fire all pending commits (used when autoCommit=false). */
+  commit: () => Promise<void>
+  /** Retry a single failed/conflicted cell. */
+  retryCommit: (rowId: string, columnId: string) => Promise<void>
+  /** Drop a single pending/error/conflict entry without retrying. */
+  dismissCommit: (rowId: string, columnId: string) => void
+  /** Drop all pending/error/conflict entries. */
+  dismissAllCommits: () => void
+
   // Keyboard Navigation API
   getFocusedCell: () => KeyboardNavigationCell | null
   setFocusedCell: (cell: KeyboardNavigationCell | null) => void
