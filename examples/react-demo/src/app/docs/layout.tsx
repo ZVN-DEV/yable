@@ -1,25 +1,21 @@
 import Link from 'next/link'
 import 'highlight.js/styles/github-dark.css'
+import { DOCS } from '@/lib/docs'
+import { SidebarNav } from './SidebarNav'
 import s from './docs.module.css'
 
-const navGroups = [
-  {
-    label: 'Start here',
-    items: [
-      { slug: '', title: 'Quickstart' },
-      { slug: 'features', title: 'Features' },
-    ],
-  },
-  {
-    label: 'Reference',
-    items: [
-      { slug: 'api', title: 'API reference' },
-      { slug: 'async-commits', title: 'Async commits' },
-    ],
-  },
-] as const
-
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
+  const navDocs = DOCS.map((d) => ({
+    slug: d.slug,
+    label: d.label,
+    sections: d.sections.map((sec) => ({
+      slug: sec.slug,
+      title: sec.title,
+      content: '',
+      headings: [],
+    })),
+  }))
+
   return (
     <div className={s.shell}>
       <header className={s.topbar}>
@@ -59,44 +55,10 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
       <div className={s.body}>
         <aside className={s.sidebar}>
-          <div className={s.sidebarInner}>
-            {navGroups.map((group) => (
-              <div key={group.label} className={s.navGroup}>
-                <span className={s.navGroupLabel}>{group.label}</span>
-                <ul className={s.navList}>
-                  {group.items.map((item) => (
-                    <li key={item.slug}>
-                      <Link
-                        href={item.slug ? `/docs/${item.slug}` : '/docs'}
-                        className={s.navLink}
-                      >
-                        {item.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-            <div className={s.navFooter}>
-              <p className={s.navFooterText}>
-                Docs are mirrored from{' '}
-                <a
-                  href="https://github.com/ZVN-DEV/yable/tree/main/docs"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={s.navFooterLink}
-                >
-                  github.com/ZVN-DEV/yable/docs
-                </a>
-              </p>
-            </div>
-          </div>
+          <SidebarNav docs={navDocs} />
         </aside>
 
-        <main className={s.main}>
-          <article className={s.article}>{children}</article>
-        </main>
+        <main className={s.main}>{children}</main>
       </div>
     </div>
   )
