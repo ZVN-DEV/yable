@@ -2,6 +2,7 @@
 // Centered message with illustration SVGs, distinguishing "no data" vs "no results" (filtered).
 
 import React from 'react'
+import { getDefaultLocale } from '@zvndev/yable-core'
 
 export interface NoRowsOverlayProps {
   /** Custom empty component */
@@ -116,13 +117,14 @@ export function NoRowsOverlay({
     return <div className="yable-overlay-empty">{emptyComponent}</div>
   }
 
+  const locale = getDefaultLocale()
   const defaultMessage = isFiltered
-    ? 'No results found'
-    : 'No data'
+    ? locale.emptyNoResults
+    : locale.emptyNoData
 
   const defaultDetail = isFiltered
-    ? 'Try adjusting your search or filter criteria.'
-    : 'There are no rows to display.'
+    ? locale.emptyNoResultsDetail
+    : locale.emptyNoDataDetail
 
   const icon = emptyIcon ?? (isFiltered ? <DefaultFilteredIcon /> : <DefaultEmptyIcon />)
 

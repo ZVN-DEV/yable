@@ -39,7 +39,12 @@ const EMPTY_RESULT: Omit<UseVirtualizationResult, 'scrollTo'> = {
  * Computes which rows are visible in a scrollable container and returns
  * positioning data so only those rows (plus an overscan buffer) are rendered.
  *
- * Supports both fixed and variable row heights.
+ * Returns `{ virtualRows, totalHeight, startIndex, endIndex, scrollTo }`.
+ * Re-renders are triggered by scroll (rAF-throttled) and ResizeObserver
+ * container resize. Supports fixed, variable, and Pretext-pre-measured heights.
+ *
+ * Gotcha: variable-height mode caches measured heights per index — pass new
+ * `pretextHeights` arrays (or change `totalRows`) to invalidate the cache.
  */
 export function useVirtualization({
   containerRef,

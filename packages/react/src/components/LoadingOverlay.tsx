@@ -2,6 +2,7 @@
 // Backdrop-blurred overlay with animated spinner and pulse animation.
 
 import React from 'react'
+import { getDefaultLocale } from '@zvndev/yable-core'
 
 export interface LoadingOverlayProps {
   /** Whether loading is active */
@@ -50,23 +51,25 @@ function Spinner() {
 export function LoadingOverlay({
   loading,
   loadingComponent,
-  loadingText = 'Loading...',
+  loadingText,
 }: LoadingOverlayProps) {
   if (!loading) return null
+
+  const resolvedText = loadingText ?? getDefaultLocale().loadingText
 
   return (
     <div
       className="yable-overlay-loading"
       role="alert"
       aria-busy="true"
-      aria-label={loadingText}
+      aria-label={resolvedText}
     >
       <div className="yable-overlay-loading-content">
         {loadingComponent ?? (
           <>
             <Spinner />
-            {loadingText && (
-              <span className="yable-overlay-loading-text">{loadingText}</span>
+            {resolvedText && (
+              <span className="yable-overlay-loading-text">{resolvedText}</span>
             )}
           </>
         )}

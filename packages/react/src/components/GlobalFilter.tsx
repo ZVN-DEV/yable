@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import type { RowData, Table } from '@zvndev/yable-core'
+import { getDefaultLocale } from '@zvndev/yable-core'
 
 interface GlobalFilterProps<TData extends RowData> {
   table: Table<TData>
@@ -42,10 +43,12 @@ function ClearIcon() {
 
 export function GlobalFilter<TData extends RowData>({
   table,
-  placeholder = 'Search...',
+  placeholder,
   debounce = 300,
   className,
 }: GlobalFilterProps<TData>) {
+  const locale = getDefaultLocale()
+  const resolvedPlaceholder = placeholder ?? locale.searchPlaceholder
   const [value, setValue] = useState<string>(
     (table.getState().globalFilter as string) ?? ''
   )
@@ -111,8 +114,8 @@ export function GlobalFilter<TData extends RowData>({
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        aria-label="Search table"
+        placeholder={resolvedPlaceholder}
+        aria-label={locale.searchAriaLabel}
         role="searchbox"
       />
       {hasValue && (

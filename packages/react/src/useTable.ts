@@ -27,6 +27,20 @@ function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boolean {
   return true
 }
 
+/**
+ * React hook that wraps the framework-agnostic core table engine.
+ *
+ * Returns a stable {@link Table} instance whose `state` reflects either
+ * the consumer's controlled `options.state` or the hook's internal state.
+ *
+ * Re-renders are triggered by `setState` from the default `onStateChange`
+ * implementation. Consumers may pass their own `onStateChange` to control
+ * state externally.
+ *
+ * Gotcha: `options.onStateChange` is captured via a latest-ref, so a fresh
+ * function identity from the parent is always invoked — even if every other
+ * option key is shallow-equal to the previous render.
+ */
 export function useTable<TData extends RowData>(
   options: TableOptions<TData>
 ): Table<TData> {
@@ -83,6 +97,13 @@ export function useTable<TData extends RowData>(
     return options
   }, [options])
 
+  // Latest-ref for onStateChange so the wrapper always invokes the freshest
+  // callback identity, even when every other key in `options` is shallow-equal
+  // (which would otherwise leave `stableOptions` referentially identical and
+  // mask a new function identity from the parent).
+  const onStateChangeRef = useRef(options.onStateChange)
+  onStateChangeRef.current = options.onStateChange
+
   const resolvedState = useMemo(
     () => ({
       ...state,
@@ -93,13 +114,14 @@ export function useTable<TData extends RowData>(
 
   const onStateChange = useCallback(
     (updater: Updater<TableState>) => {
-      if (stableOptions.onStateChange) {
-        stableOptions.onStateChange(updater)
+      const latest = onStateChangeRef.current
+      if (latest) {
+        latest(updater)
       } else {
         setState((prev) => functionalUpdate(updater, prev))
       }
     },
-    [stableOptions.onStateChange]
+    []
   )
 
   const resolvedOptions: TableOptions<TData> = useMemo(

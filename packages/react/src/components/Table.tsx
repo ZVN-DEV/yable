@@ -27,7 +27,7 @@ export function Table<TData extends RowData>({
   loading,
   loadingComponent,
   loadingText,
-  emptyMessage = 'No data',
+  emptyMessage,
   emptyComponent,
   emptyIcon,
   emptyDetail,
@@ -81,10 +81,6 @@ export function Table<TData extends RowData>({
     },
     [contextMenu, table]
   )
-
-  // toggleSidebar — currently wired in but not yet connected to UI
-  // Will be used when sidebar toggle button is added
-  void sidebarPanel
 
   return (
     <TableProvider value={table}>

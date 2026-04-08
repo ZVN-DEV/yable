@@ -2,6 +2,7 @@
 // Polished page navigation with SVG icons, page size selector, and row info.
 
 import type { RowData, Table } from '@zvndev/yable-core'
+import { getDefaultLocale } from '@zvndev/yable-core'
 
 interface PaginationProps<TData extends RowData> {
   table: Table<TData>
@@ -76,6 +77,7 @@ export function Pagination<TData extends RowData>({
   const to = Math.min((pageIndex + 1) * pageSize, totalRows)
   const canPrev = table.getCanPreviousPage()
   const canNext = table.getCanNextPage()
+  const locale = getDefaultLocale()
 
   return (
     <nav className="yable-pagination" role="navigation" aria-label="Table pagination">
@@ -84,8 +86,8 @@ export function Pagination<TData extends RowData>({
         <div className="yable-pagination-info">
           <span className="yable-pagination-info-text">
             {totalRows > 0
-              ? `${from}\u2013${to} of ${totalRows}`
-              : 'No results'}
+              ? `${from}\u2013${to} ${locale.paginationOf} ${totalRows}`
+              : locale.paginationNoResults}
           </span>
           {showPageSize && (
             <div className="yable-pagination-select-wrapper">
@@ -99,7 +101,7 @@ export function Pagination<TData extends RowData>({
               >
                 {pageSizes.map((size) => (
                   <option key={size} value={size}>
-                    {size} rows
+                    {size} {locale.paginationRows}
                   </option>
                 ))}
               </select>
@@ -117,8 +119,8 @@ export function Pagination<TData extends RowData>({
             className="yable-pagination-btn yable-pagination-btn--nav"
             onClick={() => table.setPageIndex(0)}
             disabled={!canPrev}
-            aria-label="First page"
-            title="First page"
+            aria-label={locale.paginationFirstPage}
+            title={locale.paginationFirstPage}
           >
             <ChevronFirstIcon />
           </button>
@@ -129,8 +131,8 @@ export function Pagination<TData extends RowData>({
           className="yable-pagination-btn yable-pagination-btn--nav"
           onClick={() => table.previousPage()}
           disabled={!canPrev}
-          aria-label="Previous page"
-          title="Previous page"
+          aria-label={locale.paginationPreviousPage}
+          title={locale.paginationPreviousPage}
         >
           <ChevronLeftIcon />
         </button>
@@ -156,7 +158,7 @@ export function Pagination<TData extends RowData>({
               className={`yable-pagination-btn yable-pagination-btn--page${page === pageIndex ? ' yable-pagination-btn--active' : ''}`}
               data-active={page === pageIndex ? 'true' : undefined}
               onClick={() => table.setPageIndex(page)}
-              aria-label={`Page ${page + 1}`}
+              aria-label={`${locale.paginationPage} ${page + 1}`}
               aria-current={page === pageIndex ? 'page' : undefined}
             >
               {page + 1}
@@ -169,8 +171,8 @@ export function Pagination<TData extends RowData>({
           className="yable-pagination-btn yable-pagination-btn--nav"
           onClick={() => table.nextPage()}
           disabled={!canNext}
-          aria-label="Next page"
-          title="Next page"
+          aria-label={locale.paginationNextPage}
+          title={locale.paginationNextPage}
         >
           <ChevronRightIcon />
         </button>
@@ -181,8 +183,8 @@ export function Pagination<TData extends RowData>({
             className="yable-pagination-btn yable-pagination-btn--nav"
             onClick={() => table.setPageIndex(pageCount - 1)}
             disabled={!canNext}
-            aria-label="Last page"
-            title="Last page"
+            aria-label={locale.paginationLastPage}
+            title={locale.paginationLastPage}
           >
             <ChevronLastIcon />
           </button>

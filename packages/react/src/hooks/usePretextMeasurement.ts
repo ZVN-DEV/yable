@@ -78,11 +78,15 @@ function loadPretext(): Promise<PretextModule | null> {
 
 /**
  * Pre-computes exact pixel heights for every row using Pretext's
- * DOM-free text measurement. Returns typed arrays for cache-friendly
- * access by the virtualizer.
+ * DOM-free text measurement.
  *
- * layout() is pure arithmetic (~0.0003ms per cell) so column resizing
- * re-computes all heights near-instantly.
+ * Returns `{ rowHeights, prefixSums, totalHeight, ready, ... }` as typed
+ * arrays for cache-friendly access by the virtualizer. `prepare()` re-runs
+ * when `data` or fonts change; `layout()` re-runs only when column widths
+ * change (pure math, ~0.0003ms per cell).
+ *
+ * Gotcha: pretext is loaded lazily — `ready` flips to true on the first
+ * render after the dynamic import resolves and heights are computed.
  */
 export function usePretextMeasurement({
   data,
