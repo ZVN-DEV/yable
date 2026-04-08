@@ -36,21 +36,33 @@ describe('useTable — latest onStateChange', () => {
       const [tag, setTagState] = useState('first')
       setTag = setTagState
 
-      const [state, setState] = useState<Partial<TableState>>({})
+      const [state, setState] = useState<TableState>({
+        sorting: [],
+        columnFilters: [],
+        globalFilter: '',
+        columnVisibility: {},
+        columnOrder: [],
+        columnPinning: { left: [], right: [] },
+        rowSelection: {},
+        expanded: {},
+        grouping: [],
+        pagination: { pageIndex: 0, pageSize: 10 },
+        editing: { activeCell: undefined, pendingValues: {} },
+      })
 
       // Each render produces a fresh `onStateChange` identity that closes
       // over the latest `tag`. Every other option key is referentially
       // stable across renders.
       const handleChange = (updater: Updater<TableState>) => {
         calls.push(tag)
-        setState((prev) => functionalUpdate(updater, prev as TableState))
+        setState((prev) => functionalUpdate(updater, prev))
       }
 
       const table = useTable<TestRow>({
         data: testData,
         columns,
         getRowId: (row) => row.id,
-        state: state as TableState,
+        state,
         onStateChange: handleChange,
       })
 
