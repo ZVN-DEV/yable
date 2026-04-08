@@ -1,8 +1,8 @@
 // @zvndev/yable-core — Column Model Tests
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createTable } from '../table'
-import { functionalUpdate } from '../../utils'
+import { functionalUpdate, MAX_ACCESSOR_DEPTH } from '../../utils'
 import type { TableState, ColumnDef } from '../../types'
 
 // ---------------------------------------------------------------------------
@@ -322,5 +322,105 @@ describe('Column sizing', () => {
     )
 
     expect(table.getColumn('name')!.getSize()).toBe(300)
+  })
+})
+
+// ===========================================================================
+// Column sizing — min/max bounds & validation
+// ===========================================================================
+
+describe('Column sizing min/max bounds', () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    warnSpy.mockRestore()
+  })
+
+  it('clamps a small size up to minSize', () => {
+    const { table } = makeTable([
+      { accessorKey: 'name', header: 'Name', size: 50, minSize: 100 },
+    ])
+    expect(table.getColumn('name')!.getSize()).toBe(100)
+  })
+
+  it('clamps a large size down to maxSize', () => {
+    const { table } = makeTable([
+      { accessorKey: 'name', header: 'Name', size: 500, maxSize: 300 },
+    ])
+    expect(table.getColumn('name')!.getSize()).toBe(300)
+  })
+
+  it('warns once when minSize > maxSize and resolves to a sane size (min wins)', () => {
+    const { table } = makeTable([
+      // minSize 400, maxSize 200 — invalid; min wins per documented policy.
+      { accessorKey: 'name', header: 'Name', size: 150, minSize: 400, maxSize: 200 },
+    ])
+
+    const col = table.getColumn('name')!
+    const size = col.getSize()
+
+    // Resolved size lands inside a sane range — at or above the minSize floor.
+    expect(size).toBeGreaterThanOrEqual(400)
+
+    // Warning fired with the [yable] prefix and the column id.
+    expect(warnSpy).toHaveBeenCalled()
+    const firstCall = warnSpy.mock.calls[0]!
+    expect(String(firstCall[0])).toContain('[yable]')
+    expect(String(firstCall[0])).toContain('name')
+    expect(String(firstCall[0])).toContain('minSize')
+    expect(String(firstCall[0])).toContain('maxSize')
+
+    // Subsequent reads must not re-warn (one-shot guard).
+    col.getSize()
+    col.getSize()
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ===========================================================================
+// Accessor depth guard
+// ===========================================================================
+
+describe('createColumn accessorKey depth guard', () => {
+  let errorSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    errorSpy.mockRestore()
+  })
+
+  it('rejects accessorKey paths deeper than MAX_ACCESSOR_DEPTH', () => {
+    // Build a path with MAX_ACCESSOR_DEPTH + 1 segments
+    const tooDeepKey = Array.from(
+      { length: MAX_ACCESSOR_DEPTH + 1 },
+      (_, i) => `s${i}`
+    ).join('.')
+
+    const { table } = makeTable([
+      { accessorKey: tooDeepKey as any, header: 'Deep', id: 'deep' },
+    ])
+
+    const col = table.getColumn('deep')!
+    // Build a deeply-nested object so a real walk would actually find a value.
+    const row: any = {}
+    let cursor = row
+    for (let i = 0; i < MAX_ACCESSOR_DEPTH + 1; i++) {
+      cursor[`s${i}`] = i === MAX_ACCESSOR_DEPTH ? 'leaf' : {}
+      cursor = cursor[`s${i}`]
+    }
+
+    // accessor must short-circuit to undefined and log via [yable] prefix
+    expect(col.accessorFn!(row, 0)).toBeUndefined()
+    expect(errorSpy).toHaveBeenCalled()
+    const firstCall = errorSpy.mock.calls[0]!
+    expect(String(firstCall[0])).toContain('[yable]')
+    expect(String(firstCall[0])).toContain('too deep')
   })
 })

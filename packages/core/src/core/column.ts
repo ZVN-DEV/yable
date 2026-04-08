@@ -10,7 +10,7 @@ import type {
   SortingFn,
   FilterFn,
 } from '../types'
-import { resolveColumnId, memo } from '../utils'
+import { resolveColumnId, memo, MAX_ACCESSOR_DEPTH } from '../utils'
 import { resolveSortingFn, resolveFilterFn } from './resolvers'
 import { sortingFns } from '../sortingFns'
 import { filterFns } from '../filterFns'
@@ -39,6 +39,10 @@ export function createColumn<TData extends RowData, TValue = unknown>(
   const id = resolveColumnId(columnDef)
   const ext = getExtensions(columnDef)
 
+  // One-shot guard so we don't spam the console on every getSize() call
+  // when a column def has invalid min/max bounds.
+  let warnedInvalidSizeBounds = false
+
   const column: Column<TData, TValue> = {
     id,
     columnDef,
@@ -51,7 +55,34 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     getSize: () => {
       const state = table.getState()
       const sizing = state.columnSizing?.[id]
-      return sizing ?? ext.size ?? 150
+      const raw = sizing ?? ext.size ?? 150
+
+      const min = ext.minSize
+      const max = ext.maxSize
+
+      // Validate bounds: if a user accidentally sets minSize > maxSize the
+      // resulting clamp would silently flip the size. Warn once and resolve
+      // by treating minSize as the floor (i.e. min wins). This is documented
+      // so callers know which bound takes precedence on misconfiguration.
+      if (
+        typeof min === 'number' &&
+        typeof max === 'number' &&
+        min > max
+      ) {
+        if (!warnedInvalidSizeBounds) {
+          warnedInvalidSizeBounds = true
+          console.warn(
+            `[yable] column "${id}" has minSize (${min}) > maxSize (${max})`
+          )
+        }
+        // Min wins: clamp the raw size up to min, ignoring the broken max.
+        return Math.max(raw, min)
+      }
+
+      let resolved = raw
+      if (typeof min === 'number') resolved = Math.max(resolved, min)
+      if (typeof max === 'number') resolved = Math.min(resolved, max)
+      return resolved
     },
     getStart: () => 0,
     getAfter: () => 0,
@@ -302,8 +333,15 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     column.accessorFn = columnDef.accessorFn
   } else if ('accessorKey' in columnDef && columnDef.accessorKey) {
     const key = columnDef.accessorKey as string
+    const parts = key.split('.')
+    const tooDeep = parts.length > MAX_ACCESSOR_DEPTH
+    if (tooDeep) {
+      console.error(
+        `[yable] accessor path too deep (>${MAX_ACCESSOR_DEPTH} segments): ${key}`
+      )
+    }
     column.accessorFn = ((row: TData) => {
-      const parts = key.split('.')
+      if (tooDeep) return undefined as unknown as TValue
       let value: unknown = row
       for (const part of parts) {
         if (value == null) return undefined as unknown as TValue

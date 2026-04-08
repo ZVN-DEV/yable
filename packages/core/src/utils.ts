@@ -63,14 +63,31 @@ export function memo<TResult>(
 // ---------------------------------------------------------------------------
 
 /**
+ * Maximum depth allowed when walking a dot-notation accessor path.
+ * Protects against accidentally pathological keys like "a.b.c.d.e.f.g..."
+ * that would walk the row object indefinitely.
+ */
+export const MAX_ACCESSOR_DEPTH = 32
+
+/**
  * Access a deeply-nested value from an object using dot-notation key.
  * e.g. `getDeepValue(row, 'address.city')` → `row.address.city`
+ *
+ * Paths deeper than `MAX_ACCESSOR_DEPTH` segments are rejected with a
+ * console.error and `undefined` is returned, to prevent runaway walks.
  */
 export function getDeepValue<T, K extends DeepKeys<T>>(
   obj: T,
   key: K
 ): DeepValue<T, K> {
-  const parts = (key as string).split('.')
+  const path = key as string
+  const parts = path.split('.')
+  if (parts.length > MAX_ACCESSOR_DEPTH) {
+    console.error(
+      `[yable] accessor path too deep (>${MAX_ACCESSOR_DEPTH} segments): ${path}`
+    )
+    return undefined as DeepValue<T, K>
+  }
   let current: unknown = obj
   for (const part of parts) {
     if (current == null) return undefined as DeepValue<T, K>

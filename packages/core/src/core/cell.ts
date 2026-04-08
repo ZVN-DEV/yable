@@ -70,7 +70,14 @@ export function createCell<TData extends RowData, TValue = unknown>(
         const rows = table.getRowModel().rows
         const rowIndex = rows.findIndex((r) => r.id === row.id)
         if (rowIndex >= 0) {
-          return rowSpanFn(row, rows, rowIndex)
+          // Wrap user-supplied rowSpanFn callback in try/catch so a
+          // throwing implementation cannot crash the renderer.
+          try {
+            return rowSpanFn(row, rows, rowIndex)
+          } catch (e) {
+            console.error('[yable] rowSpan threw', e)
+            return undefined
+          }
         }
       }
       return undefined
