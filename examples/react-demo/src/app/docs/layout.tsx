@@ -1,18 +1,18 @@
 import Link from 'next/link'
 import 'highlight.js/styles/github-dark.css'
 import { DOCS } from '@/lib/docs'
-import { SidebarNav } from './SidebarNav'
+import { SidebarNav, type SidebarNavDoc } from './SidebarNav'
 import s from './docs.module.css'
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
-  const navDocs = DOCS.map((d) => ({
+  // Strip down each Doc to just what the sidebar renders, so we don't ship
+  // every section's full markdown content to the client bundle.
+  const navDocs: SidebarNavDoc[] = DOCS.map((d) => ({
     slug: d.slug,
     label: d.label,
     sections: d.sections.map((sec) => ({
       slug: sec.slug,
       title: sec.title,
-      content: '',
-      headings: [],
     })),
   }))
 

@@ -24,6 +24,13 @@
   gap: 24px;
 }
 
+@media (max-width: 720px) {
+  .topbarInner {
+    padding: 14px 18px;
+    gap: 12px;
+  }
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -73,6 +80,29 @@
   gap: 28px;
 }
 
+@media (max-width: 720px) {
+  .topNav {
+    gap: 16px;
+  }
+  .brandKicker {
+    display: none;
+  }
+  .brandDivider {
+    display: none;
+  }
+}
+
+/* Below ~480px the GitHub link becomes the first thing to drop — keep
+   Demo + Playground + npm visible since they're the most useful. */
+@media (max-width: 480px) {
+  .topNav {
+    gap: 14px;
+  }
+  .topLink {
+    font-size: 13px;
+  }
+}
+
 .topLink {
   font-size: 14px;
   color: rgba(243, 234, 219, 0.7);
@@ -97,8 +127,8 @@
 @media (max-width: 900px) {
   .body {
     grid-template-columns: 1fr;
-    gap: 32px;
-    padding: 28px 20px 72px;
+    gap: 20px;
+    padding: 20px 18px 64px;
   }
 }
 
@@ -109,12 +139,105 @@
   align-self: start;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
+  /* Subtle scroll fade so the bottom of the list looks intentional. */
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+  padding-bottom: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(243, 234, 219, 0.18) transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(243, 234, 219, 0.16);
+  border-radius: 3px;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 0;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}
+
+/* Mobile sidebar toggle button — hidden on desktop, visible on mobile */
+.sidebarToggle {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(243, 234, 219, 0.04);
+  border: 1px solid rgba(243, 234, 219, 0.1);
+  color: #f3eadb;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  width: 100%;
+  justify-content: flex-start;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.sidebarToggle:hover {
+  background: rgba(243, 234, 219, 0.06);
+  border-color: rgba(216, 180, 109, 0.3);
+}
+
+.sidebarToggleIcon {
+  font-size: 14px;
+  line-height: 1;
+  color: #d8b46d;
+}
+
+.sidebarToggleLabel {
+  flex: 1;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .sidebarToggle {
+    display: flex;
+  }
 }
 
 .sidebarInner {
   display: flex;
   flex-direction: column;
   gap: 28px;
+}
+
+@media (max-width: 900px) {
+  .sidebarInner {
+    display: none;
+    margin-top: 14px;
+    padding: 18px;
+    border-radius: 14px;
+    background: rgba(243, 234, 219, 0.03);
+    border: 1px solid rgba(243, 234, 219, 0.08);
+    gap: 22px;
+  }
+
+  .sidebarInnerOpen {
+    display: flex;
+  }
 }
 
 .navGroup {
@@ -214,34 +337,44 @@
 
 .article {
   max-width: 760px;
+  min-width: 0;
 }
 
 /* Prose styling — applied to markdown output */
 .prose {
   font-size: 15.5px;
-  line-height: 1.7;
-  color: rgba(243, 234, 219, 0.9);
+  line-height: 1.72;
+  color: rgba(243, 234, 219, 0.88);
+}
+
+/* Anchor jumps clear the sticky topbar (~72px) without hiding the heading. */
+.prose :global(h1),
+.prose :global(h2),
+.prose :global(h3),
+.prose :global(h4) {
+  scroll-margin-top: 96px;
 }
 
 .prose :global(h1) {
   font-family: var(--font-display), serif;
-  font-size: 42px;
-  line-height: 1.1;
+  font-size: 44px;
+  line-height: 1.08;
   font-weight: 600;
-  margin: 0 0 20px;
+  margin: 0 0 24px;
   color: #f3eadb;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .prose :global(h2) {
   font-family: var(--font-display), serif;
-  font-size: 28px;
-  line-height: 1.2;
+  font-size: 30px;
+  line-height: 1.18;
   font-weight: 600;
-  margin: 48px 0 16px;
+  margin: 56px 0 18px;
   color: #f3eadb;
-  padding-top: 20px;
-  border-top: 1px solid rgba(243, 234, 219, 0.08);
+  padding-top: 24px;
+  border-top: 1px solid rgba(243, 234, 219, 0.09);
+  letter-spacing: -0.005em;
 }
 
 .prose :global(h2:first-child) {
@@ -252,36 +385,72 @@
 
 .prose :global(h3) {
   font-family: var(--font-display), serif;
-  font-size: 22px;
+  font-size: 23px;
+  line-height: 1.25;
   font-weight: 600;
-  margin: 32px 0 12px;
+  margin: 44px 0 14px;
   color: #f3eadb;
+  letter-spacing: -0.003em;
 }
 
 .prose :global(h4) {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
-  margin: 24px 0 10px;
-  color: rgba(243, 234, 219, 0.95);
+  margin: 30px 0 10px;
+  color: rgba(243, 234, 219, 0.9);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   font-family: var(--font-mono), monospace;
+}
+
+@media (max-width: 720px) {
+  .prose {
+    font-size: 15px;
+    line-height: 1.68;
+  }
+  .prose :global(h1) {
+    font-size: 32px;
+    margin-bottom: 18px;
+  }
+  .prose :global(h2) {
+    font-size: 24px;
+    margin-top: 44px;
+    padding-top: 18px;
+  }
+  .prose :global(h3) {
+    font-size: 19px;
+    margin-top: 32px;
+  }
 }
 
 .prose :global(p) {
   margin: 0 0 18px;
 }
 
+.prose :global(p + p) {
+  /* Tighter spacing between consecutive paragraphs that aren't separated
+     by a heading or list. */
+  margin-top: -2px;
+}
+
 .prose :global(a) {
   color: #d8b46d;
   text-decoration: none;
-  border-bottom: 1px solid rgba(216, 180, 109, 0.35);
-  transition: border-color 150ms ease, color 150ms ease;
+  border-bottom: 1px solid rgba(216, 180, 109, 0.4);
+  transition: border-color 150ms ease, color 150ms ease,
+    background 150ms ease;
+  padding-bottom: 1px;
 }
 
 .prose :global(a:hover) {
   color: #eec887;
   border-bottom-color: #eec887;
+}
+
+.prose :global(a:focus-visible) {
+  outline: 2px solid rgba(216, 180, 109, 0.6);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .prose :global(strong) {
@@ -291,17 +460,22 @@
 
 .prose :global(ul),
 .prose :global(ol) {
-  margin: 0 0 18px;
-  padding-left: 22px;
+  margin: 0 0 20px;
+  padding-left: 24px;
 }
 
 .prose :global(li) {
-  margin: 6px 0;
+  margin: 8px 0;
+  padding-left: 4px;
+}
+
+.prose :global(li::marker) {
+  color: rgba(216, 180, 109, 0.7);
 }
 
 .prose :global(li > ul),
 .prose :global(li > ol) {
-  margin: 6px 0 0;
+  margin: 8px 0 4px;
 }
 
 .prose :global(blockquote) {
@@ -326,24 +500,31 @@
 /* Inline code */
 .prose :global(code) {
   font-family: var(--font-mono), monospace;
-  font-size: 0.88em;
+  font-size: 0.86em;
   background: rgba(243, 234, 219, 0.08);
   color: #eec887;
   padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(243, 234, 219, 0.06);
+  border-radius: 5px;
+  border: 1px solid rgba(243, 234, 219, 0.07);
+  /* Allow long inline code (e.g. package names) to break instead of forcing
+     a horizontal scroll on the whole article. */
+  word-break: break-word;
 }
 
 /* Code blocks (overrides highlight.js theme background) */
 .prose :global(pre) {
-  margin: 20px 0;
+  margin: 22px 0;
   padding: 18px 20px;
   border-radius: 12px;
   background: #0a0604 !important;
   border: 1px solid rgba(243, 234, 219, 0.1);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   font-size: 13.5px;
-  line-height: 1.6;
+  line-height: 1.62;
+  /* Cap the code block width to its container so a long single line scrolls
+     instead of pushing the page. */
+  max-width: 100%;
 }
 
 .prose :global(pre code) {
@@ -353,17 +534,48 @@
   border: none;
   border-radius: 0;
   font-size: inherit;
+  /* Force horizontal scroll instead of wrap inside code blocks. */
+  white-space: pre;
+  word-break: normal;
+  display: block;
+  min-width: 0;
 }
 
-/* Tables */
+/* Tables — wrapped in a horizontally scrollable block so wide reference
+   tables (like the API tables) never break the article width. */
 .prose :global(table) {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-collapse: collapse;
-  margin: 22px 0;
+  margin: 24px 0;
   font-size: 14px;
   border: 1px solid rgba(243, 234, 219, 0.12);
   border-radius: 10px;
-  overflow: hidden;
+}
+
+.prose :global(table) :global(thead),
+.prose :global(table) :global(tbody),
+.prose :global(table) :global(tr) {
+  /* Keep regular table behaviour inside the scroll container. */
+  display: table;
+  width: 100%;
+  table-layout: auto;
+}
+
+/* Give cells a comfortable minimum so the description column reads
+   naturally — narrower viewports get horizontal scroll instead of
+   character-per-line squish. */
+.prose :global(table) :global(th),
+.prose :global(table) :global(td) {
+  min-width: 96px;
+}
+
+.prose :global(table) :global(td:last-child),
+.prose :global(table) :global(th:last-child) {
+  min-width: 200px;
 }
 
 .prose :global(thead) {
@@ -400,14 +612,18 @@
   grid-template-columns: minmax(0, 1fr) 220px;
   gap: 56px;
   align-items: start;
+  /* Ensure the grid itself never exceeds its parent — long code blocks
+     scroll inside their own container instead of pushing the page width. */
+  min-width: 0;
 }
 
 @media (max-width: 1100px) {
   .sectionPage {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 40px;
   }
 }
+
 
 .onThisPage {
   position: sticky;
@@ -426,6 +642,14 @@
     padding-left: 0;
     padding-top: 24px;
     border-top: 1px solid rgba(243, 234, 219, 0.08);
+  }
+}
+
+/* Phones: hide the "On this page" rail entirely — at this width it's
+   redundant with the sidebar drawer and just adds noise below the article. */
+@media (max-width: 720px) {
+  .onThisPage {
+    display: none;
   }
 }
 
@@ -590,6 +814,18 @@
   letter-spacing: -0.01em;
 }
 
+@media (max-width: 720px) {
+  .landingTitle {
+    font-size: 36px;
+  }
+  .landingHeader {
+    margin-bottom: 32px;
+  }
+  .landingLead {
+    font-size: 16px;
+  }
+}
+
 .landingLead {
   margin: 0;
   font-size: 17px;
@@ -680,6 +916,18 @@
   margin: 0 0 16px;
   color: #f3eadb;
   letter-spacing: -0.01em;
+}
+
+@media (max-width: 720px) {
+  .docOverviewTitle {
+    font-size: 32px;
+  }
+  .docOverviewHeader {
+    margin-bottom: 28px;
+  }
+  .docOverviewIntro {
+    margin-bottom: 36px;
+  }
 }
 
 .docOverviewLead {
