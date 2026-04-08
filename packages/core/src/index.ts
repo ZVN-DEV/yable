@@ -207,6 +207,34 @@ export {
 export type { PartialLocale } from './i18n/locales'
 
 // ---------------------------------------------------------------------------
+// Spreadsheet Features (engines exposed for advanced use)
+// ---------------------------------------------------------------------------
+
+// Formula engine
+export { FormulaEngine } from './features/formulas/engine'
+export { builtInFunctions as formulaFunctions } from './features/formulas/functions'
+export type { FormulaFunction } from './features/formulas/functions'
+export { FormulaError } from './features/formulas/parser'
+
+// Pivot engine
+export {
+  PivotEngine,
+  getPivotRowModel,
+  generatePivotColumnDefs,
+  getInitialPivotState,
+} from './features/pivot'
+export type {
+  PivotFieldConfig,
+  PivotValueConfig,
+  PivotColumn,
+  PivotRow,
+} from './features/pivot'
+
+// Undo / redo
+export { UndoStack, createUndoRedoIntegration } from './features/undoRedo'
+export type { UndoRedoOptions } from './features/undoRedo'
+
+// ---------------------------------------------------------------------------
 // Async Commit (Task #10)
 // ---------------------------------------------------------------------------
 export { CommitError } from './features/commits/CommitError'

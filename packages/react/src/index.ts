@@ -213,6 +213,27 @@ export type { TooltipProps } from './components/Tooltip'
 export { useTooltip } from './hooks/useTooltip'
 export type { UseTooltipOptions, TooltipPosition } from './hooks/useTooltip'
 
+// Spreadsheet engines (re-exported from core for convenience)
+export {
+  FormulaEngine,
+  formulaFunctions,
+  FormulaError,
+  PivotEngine,
+  getPivotRowModel,
+  generatePivotColumnDefs,
+  getInitialPivotState,
+  UndoStack,
+  createUndoRedoIntegration,
+} from '@zvndev/yable-core'
+export type {
+  FormulaFunction,
+  PivotFieldConfig,
+  PivotValueConfig,
+  PivotColumn,
+  PivotRow,
+  UndoRedoOptions,
+} from '@zvndev/yable-core'
+
 // Async Commit (Task #10)
 export { CellStatusBadge } from './components/CellStatusBadge'
 export type { CellStatusBadgeProps } from './components/CellStatusBadge'

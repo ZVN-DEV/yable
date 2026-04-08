@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   useTable,
@@ -84,7 +84,7 @@ const packageLayers = [
   {
     name: '@zvndev/yable-react',
     label: 'React Surface',
-    copy: 'Table primitives, hooks, editors, pagination, and batteries included.',
+    copy: 'Table primitives, hooks, cell editors, pagination, status bars.',
   },
   {
     name: '@zvndev/yable-vanilla',
@@ -95,6 +95,58 @@ const packageLayers = [
     name: '@zvndev/yable-themes',
     label: 'Token Packs',
     copy: 'Eight built-in visual systems with light and dark support.',
+  },
+] as const
+
+// Honest comparison: every "Yes" here is verifiable in the source.
+// Competitor data comes from publicly documented feature lists.
+type CompareCell = 'yes' | 'no' | 'partial' | 'paid'
+type CompareRow = {
+  label: string
+  yable: CompareCell
+  tanstack: CompareCell
+  agCommunity: CompareCell
+  agEnterprise: CompareCell
+  note?: string
+}
+
+const compareRows: CompareRow[] = [
+  { label: 'Headless core', yable: 'yes', tanstack: 'yes', agCommunity: 'no', agEnterprise: 'no' },
+  { label: 'React components shipped', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
+  { label: 'Cell editing (text, select, checkbox…)', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
+  { label: 'Sorting / filtering / pagination', yable: 'yes', tanstack: 'yes', agCommunity: 'yes', agEnterprise: 'yes' },
+  { label: 'Pivot tables', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
+  { label: 'Formula engine', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
+  { label: 'Clipboard copy / paste / TSV', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
+  { label: 'Fill handle (linear + geometric)', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
+  { label: 'Undo / redo with event hooks', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
+  { label: 'Tree data / hierarchical rows', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
+  { label: 'Async cell commits + retry', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
+  { label: '8 themed token packs', yable: 'yes', tanstack: 'no', agCommunity: 'partial', agEnterprise: 'partial' },
+  { label: 'Row virtualization', yable: 'no', tanstack: 'partial', agCommunity: 'yes', agEnterprise: 'yes', note: 'Yable: planned, hook scaffold present' },
+  { label: 'Keyboard navigation grid', yable: 'no', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes', note: 'Yable: planned' },
+  { label: 'License', yable: 'yes', tanstack: 'yes', agCommunity: 'yes', agEnterprise: 'paid' },
+]
+
+// Real spreadsheet feature highlights — each one is implemented and shipping.
+const showcaseFeatures = [
+  {
+    eyebrow: '01 · Spreadsheet engine',
+    title: 'Formula engine, not a pretty wrapper.',
+    copy: 'Real tokenizer, AST parser, recursive evaluator with dependency tracking and circular-reference detection. 17 built-in functions including SUM, AVG, IF, CONCAT, POWER, ROUND.',
+    code: '=SUM(B2:B12) * IF(D2 > 100, 1.1, 1)',
+  },
+  {
+    eyebrow: '02 · Pivot tables',
+    title: 'Cross-tabulation in MIT.',
+    copy: 'Row groups, column groups, value aggregation, row + column subtotals, grand totals, dynamic columns. Gated behind paywalls in MUI Premium and AG Grid Enterprise; free here.',
+    code: 'rowFields: ["region"]\ncolumnFields: ["quarter"]\nvalueFields: [{ field: "revenue", aggregation: "sum" }]',
+  },
+  {
+    eyebrow: '03 · Async commits',
+    title: 'Optimistic edits that survive failure.',
+    copy: 'Edit cells, commit batches to a backend, see pending / saved / error states inline, retry failed rows, surface conflicts as typed errors. Built for real product teams.',
+    code: 'onCommit: async (patches) => {\n  await api.save(patches)\n}',
   },
 ] as const
 
@@ -225,26 +277,28 @@ const themeNotes: Record<ThemeId, NotePanel> = {
   },
 }
 
+// Verifiable signals — every number here is grounded in the codebase, not
+// pulled from a marketing deck. See README + AUDIT-REPORT for sources.
 const heroSignals = [
   {
-    label: 'Features Audited',
-    value: '143 / 222',
-    detail: 'Credible parity tracking against AG Grid.',
+    label: 'Packages',
+    value: '04',
+    detail: 'Headless core, React surface, vanilla renderer, theme tokens.',
   },
   {
-    label: 'Themes Included',
+    label: 'Themes shipped',
     value: String(allThemes.length).padStart(2, '0'),
-    detail: 'Tokenized palettes with light and dark support.',
+    detail: 'Token-driven palettes with light and dark support.',
   },
   {
-    label: 'Average Salary',
-    value: shortCurrencyFormatter.format(averageSalary),
-    detail: 'Live sample data powering the demo tables.',
+    label: 'Formula functions',
+    value: '17',
+    detail: 'SUM, AVG, IF, CONCAT, ROUND, POWER… all under MIT.',
   },
   {
-    label: 'Active Employees',
-    value: percentFormatter.format(activeCount / people.length),
-    detail: 'Status states visible across sorting and filtering.',
+    label: 'Runtime deps',
+    value: '00',
+    detail: 'Core, vanilla, and theme packages ship zero dependencies.',
   },
 ] as const
 
@@ -391,6 +445,7 @@ const editableColumns: ColumnDef<Person, any>[] = [
     editConfig: { type: 'text' },
     cell: (info: any) => <CellInput context={info} />,
     meta: { alwaysEditable: true },
+    size: 110,
   }),
   columnHelper.accessor('lastName', {
     header: 'Last Name',
@@ -398,6 +453,7 @@ const editableColumns: ColumnDef<Person, any>[] = [
     editConfig: { type: 'text' },
     cell: (info: any) => <CellInput context={info} />,
     meta: { alwaysEditable: true },
+    size: 110,
   }),
   columnHelper.accessor('email', {
     header: 'Email',
@@ -405,7 +461,7 @@ const editableColumns: ColumnDef<Person, any>[] = [
     editConfig: { type: 'text' },
     cell: (info: any) => <CellInput context={info} type="email" />,
     meta: { alwaysEditable: true },
-    size: 240,
+    size: 200,
   }),
   columnHelper.accessor('department', {
     header: 'Department',
@@ -427,7 +483,7 @@ const editableColumns: ColumnDef<Person, any>[] = [
       />
     ),
     meta: { alwaysEditable: true },
-    size: 160,
+    size: 140,
   }),
   columnHelper.accessor('salary', {
     header: 'Salary',
@@ -435,7 +491,7 @@ const editableColumns: ColumnDef<Person, any>[] = [
     editConfig: { type: 'number' },
     cell: (info: any) => <CellInput context={info} type="number" />,
     meta: { alwaysEditable: true },
-    size: 130,
+    size: 110,
   }),
   columnHelper.accessor('active', {
     header: 'Active',
@@ -443,7 +499,7 @@ const editableColumns: ColumnDef<Person, any>[] = [
     editConfig: { type: 'checkbox' },
     cell: (info: any) => <CellCheckbox context={info} />,
     meta: { alwaysEditable: true },
-    size: 80,
+    size: 70,
   }),
 ]
 
@@ -508,36 +564,32 @@ export default function Home() {
         <header className={s.hero}>
           <div className={s.heroCopy}>
             <div className={s.kickerRow}>
-              <span className={s.kicker}>TypeScript-first table engine</span>
+              <span className={s.kicker}>v0.1 · MIT licensed</span>
               <span className={s.kickerDivider} />
               <span className={s.kickerMeta}>
-                Headless core, React surface, vanilla renderer, theme tokens
+                Headless core · React · Vanilla · Theme tokens
               </span>
             </div>
 
             <h1 className={s.heroTitle}>
-              Spreadsheet muscle.
-              <br />
-              Product taste.
-              <br />
-              Zero enterprise tax.
+              <span className={s.heroLine}>Spreadsheet muscle.</span>
+              <span className={s.heroLine}>Product taste.</span>
+              <span className={`${s.heroLine} ${s.heroLineAccent}`}>
+                Zero enterprise tax.
+              </span>
             </h1>
 
             <p className={s.heroLead}>
-              Yable is a table system for teams that need real data tooling and
-              still want the interface to feel considered. The shell below is
-              editorial by design. The demos inside it are fully live.
+              Yable is a TypeScript-first data table that ships pivot tables,
+              formulas, clipboard, fill handle, undo/redo and async commits in
+              the same MIT package. The features other libraries paywall — this
+              one ships them on contact.
             </p>
 
-            <div className={s.heroBadges}>
-              <span className={s.heroBadge}>Sorting, filtering, editing, theming</span>
-              <span className={s.heroBadge}>Spreadsheet-grade features under MIT</span>
-              <span className={s.heroBadge}>Designed to showcase the package, not hide it</span>
-            </div>
-
             <div className={s.heroCtas}>
-              <Link href="/docs" className={s.heroCtaPrimary}>
+              <Link href="/docs/quickstart" className={s.heroCtaPrimary}>
                 Read the docs
+                <span aria-hidden>→</span>
               </Link>
               <a
                 href="https://github.com/ZVN-DEV/yable"
@@ -548,38 +600,74 @@ export default function Home() {
                 View on GitHub
               </a>
             </div>
+
+            <div className={s.heroSignalRow}>
+              {heroSignals.map((signal) => (
+                <div key={signal.label} className={s.heroSignal}>
+                  <span className={s.heroSignalValue}>{signal.value}</span>
+                  <span className={s.heroSignalLabel}>{signal.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className={s.heroStage}>
             <div className={s.stageChrome}>
-              <span>Flight Deck</span>
-              <span>Live Preview</span>
+              <span className={s.stageDots}>
+                <span />
+                <span />
+                <span />
+              </span>
+              <span>flight-deck.tsx</span>
+              <span className={s.stageStatus}>
+                <span className={s.stageStatusDot} />
+                Live
+              </span>
             </div>
 
             <div className={s.heroPreviewWrap}>
               <HeroPreview />
+              <HeroCursor />
             </div>
 
-            <div className={s.signalGrid}>
-              {heroSignals.map((signal) => (
-                <article key={signal.label} className={s.signalCard}>
-                  <span className={s.signalLabel}>{signal.label}</span>
-                  <strong className={s.signalValue}>{signal.value}</strong>
-                  <p className={s.signalDetail}>{signal.detail}</p>
-                </article>
-              ))}
+            <div className={s.heroStageMeta}>
+              <span>Sort · Filter · Multi-select · Cell edit</span>
+              <span className={s.heroStageMetaAccent}>useTable() →</span>
             </div>
           </div>
         </header>
 
         <section className={s.packageBand} aria-label="Package layers">
-          {packageLayers.map((layer) => (
+          {packageLayers.map((layer, idx) => (
             <article key={layer.name} className={s.packageCard}>
+              <span className={s.packageNum}>0{idx + 1}</span>
               <span className={s.packageLabel}>{layer.label}</span>
               <h2 className={s.packageName}>{layer.name}</h2>
               <p className={s.packageCopy}>{layer.copy}</p>
             </article>
           ))}
+        </section>
+
+        <section className={s.featureShowcase} aria-label="Spreadsheet features">
+          <div className={s.featureShowcaseHeader}>
+            <span className={s.sectionEyebrow}>Crown Jewels</span>
+            <h2 className={s.featureShowcaseTitle}>
+              Three things every other free table makes you build yourself.
+            </h2>
+          </div>
+
+          <div className={s.featureGrid}>
+            {showcaseFeatures.map((feature) => (
+              <article key={feature.title} className={s.featureCard}>
+                <span className={s.featureEyebrow}>{feature.eyebrow}</span>
+                <h3 className={s.featureTitle}>{feature.title}</h3>
+                <p className={s.featureCopy}>{feature.copy}</p>
+                <pre className={s.featureCode}>
+                  <code>{feature.code}</code>
+                </pre>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className={s.showcase}>
@@ -642,60 +730,68 @@ export default function Home() {
               </div>
 
               <div className={s.sidebarCard}>
-                <span className={s.sidebarEyebrow}>What Ships Free</span>
+                <span className={s.sidebarEyebrow}>What ships free</span>
+                <p className={s.sidebarDescription}>
+                  Every feature below is implemented, exported from
+                  <code className={s.inlineCode}>@zvndev/yable-react</code>, and
+                  documented in the repo. No paid tier, no &ldquo;coming
+                  soon&rdquo;.
+                </p>
                 <div className={s.valueStack}>
-                  <div className={s.valueRow}>
-                    <span>Formula engine</span>
-                    <span>Included</span>
-                  </div>
-                  <div className={s.valueRow}>
-                    <span>Pivot tables</span>
-                    <span>Included</span>
-                  </div>
-                  <div className={s.valueRow}>
-                    <span>Clipboard + fill handle</span>
-                    <span>Included</span>
-                  </div>
-                  <div className={s.valueRow}>
-                    <span>Undo / redo</span>
-                    <span>Included</span>
-                  </div>
+                  <ValueRow label="FormulaEngine + 17 functions" />
+                  <ValueRow label="PivotEngine with subtotals" />
+                  <ValueRow label="useClipboard (TSV copy/paste)" />
+                  <ValueRow label="useFillHandle (linear + geo)" />
+                  <ValueRow label="UndoStack with event hooks" />
+                  <ValueRow label="onCommit async coordinator" />
                 </div>
               </div>
             </aside>
           </div>
         </section>
 
-        <section className={s.manifestGrid}>
-          <article className={s.manifestCard}>
-            <span className={s.manifestEyebrow}>Why It Lands</span>
-            <h2 className={s.manifestTitle}>A headless engine that still respects presentation.</h2>
-            <p className={s.manifestCopy}>
-              The package is built for teams that want architectural control
-              without having to rebuild sorting, editing, selection, and visual
-              polish every time a new table appears.
+        <section className={s.compareSection} aria-label="Feature comparison">
+          <div className={s.compareHeader}>
+            <span className={s.sectionEyebrow}>Honest Comparison</span>
+            <h2 className={s.compareTitle}>
+              Yable versus the libraries you already know.
+            </h2>
+            <p className={s.compareSub}>
+              Every &ldquo;yes&rdquo; in the Yable column is verifiable in this
+              repo. The &ldquo;no&rdquo;s on virtualization and keyboard nav are
+              real and tracked in the public TODO — we ship honesty, not theater.
             </p>
-          </article>
+          </div>
 
-          <article className={s.manifestCard}>
-            <span className={s.manifestEyebrow}>Design Note</span>
-            <h2 className={s.manifestTitle}>The demo needed a point of view.</h2>
-            <p className={s.manifestCopy}>
-              The old page looked like a stock dark SaaS shell. This version
-              uses a warmer editorial palette, stronger typography, and tighter
-              composition so the package feels authored instead of templated.
-            </p>
-          </article>
+          <CompareTable />
+        </section>
 
-          <article className={s.manifestCard}>
-            <span className={s.manifestEyebrow}>Interaction Note</span>
-            <h2 className={s.manifestTitle}>Browser-verified, not eyeballed from source.</h2>
-            <p className={s.manifestCopy}>
-              The page was booted locally and checked through browser automation
-              so the visual work stays grounded in the real render, not an
-              imagined one.
-            </p>
-          </article>
+        <section className={s.ctaSection}>
+          <div className={s.ctaCard}>
+            <div className={s.ctaCopy}>
+              <span className={s.sectionEyebrow}>Next Step</span>
+              <h2 className={s.ctaTitle}>
+                Ship a table by lunch.
+              </h2>
+              <p className={s.ctaLead}>
+                The quickstart walks from zero to a fully interactive Yable
+                table in 11 steps. Each step has copy-paste code that has been
+                booted in a real Next.js app.
+              </p>
+            </div>
+            <div className={s.ctaActions}>
+              <Link href="/docs/quickstart" className={s.heroCtaPrimary}>
+                Start the quickstart
+                <span aria-hidden>→</span>
+              </Link>
+              <Link href="/docs/features" className={s.heroCtaSecondary}>
+                Browse features
+              </Link>
+              <Link href="/docs/async-commits" className={s.heroCtaSecondary}>
+                Async commits guide
+              </Link>
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -703,13 +799,124 @@ export default function Home() {
 }
 
 function HeroPreview() {
+  // Cycle the data + sort to make the hero feel alive without faking it.
+  const allRows = useMemo(() => people.slice(0, 8), [])
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => (t + 1) % 4), 2400)
+    return () => clearInterval(id)
+  }, [])
+
+  const data = useMemo(() => {
+    const slice = allRows.slice(tick, tick + 4)
+    if (slice.length === 4) return slice
+    // Wrap around when we run off the end
+    return [...slice, ...allRows.slice(0, 4 - slice.length)]
+  }, [allRows, tick])
+
   const table = useTable({
-    data: heroPreviewData,
+    data,
     columns: heroColumns,
     getRowId: (row) => String(row.id),
   })
 
   return <Table table={table} theme="forest" striped bordered />
+}
+
+function HeroCursor() {
+  // Pure-CSS animated cursor that moves across the table — no real mouse,
+  // just visual texture so the hero stage doesn't feel inert.
+  return (
+    <div className={s.heroCursor} aria-hidden>
+      <span className={s.heroCursorDot} />
+    </div>
+  )
+}
+
+function ValueRow({ label }: { label: string }) {
+  return (
+    <div className={s.valueRow}>
+      <span>{label}</span>
+      <span className={s.valueRowMark}>
+        <CheckIcon />
+      </span>
+    </div>
+  )
+}
+
+function CompareTable() {
+  const symbol = (cell: CompareCell) => {
+    switch (cell) {
+      case 'yes':
+        return <span className={`${s.compareCell} ${s.compareYes}`}>●</span>
+      case 'no':
+        return <span className={`${s.compareCell} ${s.compareNo}`}>—</span>
+      case 'partial':
+        return <span className={`${s.compareCell} ${s.comparePartial}`}>◐</span>
+      case 'paid':
+        return <span className={`${s.compareCell} ${s.comparePaid}`}>$</span>
+    }
+  }
+
+  return (
+    <div className={s.compareTableWrap}>
+      <table className={s.compareTable}>
+        <thead>
+          <tr>
+            <th scope="col" className={s.compareHeadFeature}>
+              Feature
+            </th>
+            <th scope="col" className={s.compareHeadYable}>
+              Yable
+              <span>MIT · free</span>
+            </th>
+            <th scope="col">
+              TanStack Table
+              <span>MIT · free</span>
+            </th>
+            <th scope="col">
+              AG Grid Community
+              <span>MIT · free</span>
+            </th>
+            <th scope="col">
+              AG Grid Enterprise
+              <span>~$1k+ / dev / yr</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {compareRows.map((row) => (
+            <tr key={row.label}>
+              <th scope="row" className={s.compareRowLabel}>
+                {row.label}
+                {row.note && <span className={s.compareNote}>{row.note}</span>}
+              </th>
+              <td className={s.compareCellYable}>{symbol(row.yable)}</td>
+              <td>{symbol(row.tanstack)}</td>
+              <td>{symbol(row.agCommunity)}</td>
+              <td>{symbol(row.agEnterprise)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className={s.compareLegend}>
+        <span>
+          <span className={`${s.compareCell} ${s.compareYes}`}>●</span> shipping
+        </span>
+        <span>
+          <span className={`${s.compareCell} ${s.comparePartial}`}>◐</span> partial / DIY
+        </span>
+        <span>
+          <span className={`${s.compareCell} ${s.comparePaid}`}>$</span> paid tier only
+        </span>
+        <span>
+          <span className={`${s.compareCell} ${s.compareNo}`}>—</span> not available
+        </span>
+      </div>
+    </div>
+  )
 }
 
 function BasicDemo() {
