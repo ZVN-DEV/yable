@@ -552,14 +552,42 @@ function CheckIcon() {
   )
 }
 
+// Tracks the OS-level `prefers-reduced-motion` setting. SSR-safe: starts at
+// `false` and updates after mount, so the hydrated markup matches the server
+// output. The CSS in `page.module.css` carries the matching @media fallback
+// so JS-blocked clients also see the static state.
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReduced(mql.matches)
+    update()
+    if (mql.addEventListener) {
+      mql.addEventListener('change', update)
+      return () => mql.removeEventListener('change', update)
+    }
+    // Safari < 14 fallback
+    mql.addListener(update)
+    return () => mql.removeListener(update)
+  }, [])
+
+  return reduced
+}
+
 export default function Home() {
   const [tab, setTab] = useState<DemoTab>('data')
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>('forest')
+  const reducedMotion = useReducedMotion()
 
   const activeNote = tab === 'themes' ? themeNotes[selectedTheme] : fieldNotes[tab]
 
   return (
-    <div className={s.page}>
+    <div
+      className={s.page}
+      data-reduced-motion={reducedMotion ? 'true' : 'false'}
+    >
       <div className={s.inner}>
         <header className={s.hero}>
           <div className={s.heroCopy}>

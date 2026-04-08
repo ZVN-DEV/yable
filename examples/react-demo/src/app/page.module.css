@@ -77,6 +77,40 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Reduced-motion: honor the OS setting AND a JS-managed data attribute on
+ * `.page`. Disables one-shot entrance animations as well as the infinite
+ * hero pulse and cursor-path animations. */
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  .packageBand,
+  .featureShowcase,
+  .showcase,
+  .compareSection,
+  .ctaSection,
+  .stageStatusDot,
+  .heroCursor {
+    animation: none !important;
+    transition: none !important;
+  }
+  .heroCursor { opacity: 0 !important; }
+}
+
+.page[data-reduced-motion='true'] .hero,
+.page[data-reduced-motion='true'] .packageBand,
+.page[data-reduced-motion='true'] .featureShowcase,
+.page[data-reduced-motion='true'] .showcase,
+.page[data-reduced-motion='true'] .compareSection,
+.page[data-reduced-motion='true'] .ctaSection,
+.page[data-reduced-motion='true'] .stageStatusDot,
+.page[data-reduced-motion='true'] .heroCursor {
+  animation: none !important;
+  transition: none !important;
+}
+
+.page[data-reduced-motion='true'] .heroCursor {
+  opacity: 0 !important;
+}
+
 /* ---------------------------------------------------------------------------
  * HERO
  * ------------------------------------------------------------------------- */
