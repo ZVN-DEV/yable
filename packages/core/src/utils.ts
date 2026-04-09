@@ -7,9 +7,7 @@ import type { RowData, Updater, DeepKeys, DeepValue, ColumnDef } from './types'
 // ---------------------------------------------------------------------------
 
 export function functionalUpdate<T>(updater: Updater<T>, input: T): T {
-  return typeof updater === 'function'
-    ? (updater as (prev: T) => T)(input)
-    : updater
+  return typeof updater === 'function' ? (updater as (prev: T) => T)(input) : updater
 }
 
 // ---------------------------------------------------------------------------
@@ -27,7 +25,7 @@ export function memo<TResult>(
     key?: string
     debug?: () => boolean
     onChange?: (result: TResult) => void
-  }
+  },
 ): () => TResult {
   let deps: any[] | undefined
   let result: TResult | undefined
@@ -35,9 +33,7 @@ export function memo<TResult>(
   return () => {
     const newDeps = getDeps()
     const depsChanged =
-      !deps ||
-      newDeps.length !== deps.length ||
-      newDeps.some((dep, i) => dep !== deps![i])
+      !deps || newDeps.length !== deps.length || newDeps.some((dep, i) => dep !== deps![i])
 
     if (depsChanged) {
       if (opts?.debug?.()) {
@@ -76,16 +72,11 @@ export const MAX_ACCESSOR_DEPTH = 32
  * Paths deeper than `MAX_ACCESSOR_DEPTH` segments are rejected with a
  * console.error and `undefined` is returned, to prevent runaway walks.
  */
-export function getDeepValue<T, K extends DeepKeys<T>>(
-  obj: T,
-  key: K
-): DeepValue<T, K> {
+export function getDeepValue<T, K extends DeepKeys<T>>(obj: T, key: K): DeepValue<T, K> {
   const path = key as string
   const parts = path.split('.')
   if (parts.length > MAX_ACCESSOR_DEPTH) {
-    console.error(
-      `[yable] accessor path too deep (>${MAX_ACCESSOR_DEPTH} segments): ${path}`
-    )
+    console.error(`[yable] accessor path too deep (>${MAX_ACCESSOR_DEPTH} segments): ${path}`)
     return undefined as DeepValue<T, K>
   }
   let current: unknown = obj
@@ -100,18 +91,14 @@ export function getDeepValue<T, K extends DeepKeys<T>>(
 // Column ID Resolution
 // ---------------------------------------------------------------------------
 
-export function resolveColumnId<TData extends RowData>(
-  columnDef: ColumnDef<TData, any>
-): string {
+export function resolveColumnId<TData extends RowData>(columnDef: ColumnDef<TData, any>): string {
   if (columnDef.id) return columnDef.id
   if ('accessorKey' in columnDef && columnDef.accessorKey) {
     return typeof columnDef.accessorKey === 'string'
       ? columnDef.accessorKey
       : String(columnDef.accessorKey)
   }
-  throw new Error(
-    '[yable] Column definitions must have an `id` or `accessorKey` property.'
-  )
+  throw new Error('[yable E004] Column definitions must have an `id` or `accessorKey` property.')
 }
 
 // ---------------------------------------------------------------------------
@@ -122,7 +109,7 @@ export function resolveRowId<TData extends RowData>(
   row: TData,
   index: number,
   getRowId?: (originalRow: TData, index: number, parent?: unknown) => string,
-  parent?: unknown
+  parent?: unknown,
 ): string {
   if (getRowId) return getRowId(row, index, parent)
   return String(index)
@@ -134,7 +121,7 @@ export function resolveRowId<TData extends RowData>(
 
 export function getCellValue<TData extends RowData>(
   row: TData,
-  columnDef: ColumnDef<TData, any>
+  columnDef: ColumnDef<TData, any>,
 ): unknown {
   if ('accessorFn' in columnDef && columnDef.accessorFn) {
     return columnDef.accessorFn(row, 0)
@@ -162,10 +149,7 @@ export function shallowEqual<T>(a: T, b: T): boolean {
   if (keysA.length !== keysB.length) return false
 
   for (const key of keysA) {
-    if (
-      !Object.prototype.hasOwnProperty.call(b, key) ||
-      !Object.is(objA[key], objB[key])
-    ) {
+    if (!Object.prototype.hasOwnProperty.call(b, key) || !Object.is(objA[key], objB[key])) {
       return false
     }
   }
@@ -183,11 +167,12 @@ export function makeStateUpdater<K extends keyof any, V>(
     setState: (updater: Updater<any>) => void
     getState: () => any
     options: { [P in `on${Capitalize<string & K>}Change`]?: (updater: Updater<V>) => void }
-  }
+  },
 ): (updater: Updater<V>) => void {
   return (updater: Updater<V>) => {
     // Check if there's a direct onChange handler
-    const onChangeKey = `on${String(key).charAt(0).toUpperCase()}${String(key).slice(1)}Change` as keyof typeof instance.options
+    const onChangeKey =
+      `on${String(key).charAt(0).toUpperCase()}${String(key).slice(1)}Change` as keyof typeof instance.options
     const onChange = instance.options[onChangeKey] as ((updater: Updater<V>) => void) | undefined
 
     if (onChange) {
@@ -228,10 +213,7 @@ export function range(start: number, end: number): number[] {
 }
 
 /** Flatten a tree of items that have children */
-export function flattenBy<T>(
-  items: T[],
-  getChildren: (item: T) => T[]
-): T[] {
+export function flattenBy<T>(items: T[], getChildren: (item: T) => T[]): T[] {
   const result: T[] = []
   const recurse = (list: T[]) => {
     for (const item of list) {

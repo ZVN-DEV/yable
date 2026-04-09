@@ -1,8 +1,16 @@
 {
   "name": "@zvndev/yable-vanilla",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Vanilla JS/DOM renderer for @zvndev/yable-core -- framework-free table rendering",
-  "keywords": ["table", "data-grid", "datagrid", "vanilla", "javascript", "dom", "renderer"],
+  "keywords": [
+    "table",
+    "data-grid",
+    "datagrid",
+    "vanilla",
+    "javascript",
+    "dom",
+    "renderer"
+  ],
   "license": "MIT",
   "author": "ZVN DEV",
   "repository": {
@@ -27,7 +35,9 @@
       }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

@@ -47,9 +47,7 @@ const columnHelper = createColumnHelper<Person>()
 const totalSalary = people.reduce((sum, person) => sum + person.salary, 0)
 const activeCount = people.filter((person) => person.active).length
 const averageSalary = Math.round(totalSalary / people.length)
-const averageAge = Math.round(
-  people.reduce((sum, person) => sum + person.age, 0) / people.length
-)
+const averageAge = Math.round(people.reduce((sum, person) => sum + person.age, 0) / people.length)
 
 const heroPreviewData = people.slice(0, 4)
 const themePreviewData = people.slice(0, 5)
@@ -112,19 +110,91 @@ type CompareRow = {
 
 const compareRows: CompareRow[] = [
   { label: 'Headless core', yable: 'yes', tanstack: 'yes', agCommunity: 'no', agEnterprise: 'no' },
-  { label: 'React components shipped', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
-  { label: 'Cell editing (text, select, checkbox…)', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
-  { label: 'Sorting / filtering / pagination', yable: 'yes', tanstack: 'yes', agCommunity: 'yes', agEnterprise: 'yes' },
+  {
+    label: 'React components shipped',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'yes',
+    agEnterprise: 'yes',
+  },
+  {
+    label: 'Cell editing (text, select, checkbox…)',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'yes',
+    agEnterprise: 'yes',
+  },
+  {
+    label: 'Sorting / filtering / pagination',
+    yable: 'yes',
+    tanstack: 'yes',
+    agCommunity: 'yes',
+    agEnterprise: 'yes',
+  },
   { label: 'Pivot tables', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
-  { label: 'Formula engine', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
-  { label: 'Clipboard copy / paste / TSV', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
-  { label: 'Fill handle (linear + geometric)', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
-  { label: 'Undo / redo with event hooks', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
-  { label: 'Tree data / hierarchical rows', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
-  { label: 'Async cell commits + retry', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
-  { label: '8 themed token packs', yable: 'yes', tanstack: 'no', agCommunity: 'partial', agEnterprise: 'partial' },
-  { label: 'Row virtualization', yable: 'yes', tanstack: 'partial', agCommunity: 'yes', agEnterprise: 'yes' },
-  { label: 'Keyboard navigation grid', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
+  {
+    label: 'Formula engine',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'no',
+    agEnterprise: 'paid',
+  },
+  {
+    label: 'Clipboard copy / paste / TSV',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'no',
+    agEnterprise: 'paid',
+  },
+  {
+    label: 'Fill handle (linear + geometric)',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'no',
+    agEnterprise: 'paid',
+  },
+  {
+    label: 'Undo / redo with event hooks',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'yes',
+    agEnterprise: 'yes',
+  },
+  {
+    label: 'Tree data / hierarchical rows',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'no',
+    agEnterprise: 'paid',
+  },
+  {
+    label: 'Async cell commits + retry',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'no',
+    agEnterprise: 'no',
+  },
+  {
+    label: '8 themed token packs',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'partial',
+    agEnterprise: 'partial',
+  },
+  {
+    label: 'Row virtualization',
+    yable: 'yes',
+    tanstack: 'partial',
+    agCommunity: 'yes',
+    agEnterprise: 'yes',
+  },
+  {
+    label: 'Keyboard navigation grid',
+    yable: 'yes',
+    tanstack: 'no',
+    agCommunity: 'yes',
+    agEnterprise: 'yes',
+  },
   { label: 'License', yable: 'yes', tanstack: 'yes', agCommunity: 'yes', agEnterprise: 'paid' },
 ]
 
@@ -234,8 +304,7 @@ const themeNotes: Record<ThemeId, NotePanel> = {
   ocean: {
     eyebrow: 'Selected Theme',
     title: 'Ocean cools the surface without going sterile.',
-    description:
-      'Aquatic accents give the table a productized calm that still feels distinctive.',
+    description: 'Aquatic accents give the table a productized calm that still feels distinctive.',
     points: [
       'A solid choice for analytics views or data-heavy documentation.',
       'Blue-green tokens communicate state changes cleanly.',
@@ -318,18 +387,14 @@ const heroColumns: ColumnDef<Person, any>[] = [
   columnHelper.accessor('department', {
     header: 'Desk',
     cell: (info: any) => (
-      <span className={getDepartmentClassName(info.getValue() as string)}>
-        {info.getValue()}
-      </span>
+      <span className={getDepartmentClassName(info.getValue() as string)}>{info.getValue()}</span>
     ),
     size: 120,
   }),
   columnHelper.accessor('salary', {
     header: 'Budget',
     cell: (info: any) => (
-      <span className={s.currencyValue}>
-        {currencyFormatter.format(info.getValue() as number)}
-      </span>
+      <span className={s.currencyValue}>{currencyFormatter.format(info.getValue() as number)}</span>
     ),
     size: 120,
   }),
@@ -382,24 +447,18 @@ const mainColumns: ColumnDef<Person, any>[] = [
   }),
   columnHelper.accessor('email', {
     header: 'Email',
-    cell: (info: any) => (
-      <span className={s.emailValue}>{info.getValue()}</span>
-    ),
+    cell: (info: any) => <span className={s.emailValue}>{info.getValue()}</span>,
     size: 220,
   }),
   columnHelper.accessor('age', {
     header: 'Age',
-    cell: (info: any) => (
-      <span className={s.numericValue}>{info.getValue()}</span>
-    ),
+    cell: (info: any) => <span className={s.numericValue}>{info.getValue()}</span>,
     size: 70,
   }),
   columnHelper.accessor('department', {
     header: 'Department',
     cell: (info: any) => (
-      <span className={getDepartmentClassName(info.getValue() as string)}>
-        {info.getValue()}
-      </span>
+      <span className={getDepartmentClassName(info.getValue() as string)}>{info.getValue()}</span>
     ),
     size: 140,
   }),
@@ -411,9 +470,7 @@ const mainColumns: ColumnDef<Person, any>[] = [
   columnHelper.accessor('salary', {
     header: 'Salary',
     cell: (info: any) => (
-      <span className={s.currencyValue}>
-        {currencyFormatter.format(info.getValue() as number)}
-      </span>
+      <span className={s.currencyValue}>{currencyFormatter.format(info.getValue() as number)}</span>
     ),
     size: 120,
   }),
@@ -521,8 +578,7 @@ const miniColumns: ColumnDef<Person, any>[] = [
   }),
   columnHelper.accessor('salary', {
     header: 'Salary',
-    cell: (info: any) =>
-      currencyFormatter.format(info.getValue() as number).replace('.00', ''),
+    cell: (info: any) => currencyFormatter.format(info.getValue() as number).replace('.00', ''),
     size: 100,
   }),
 ]
@@ -530,10 +586,7 @@ const miniColumns: ColumnDef<Person, any>[] = [
 function SearchIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-      <path
-        d="M10.8 10.8a4.8 4.8 0 1 1 .8-.8l3.2 3.2-.8.8-3.2-3.2Z"
-        fill="currentColor"
-      />
+      <path d="M10.8 10.8a4.8 4.8 0 1 1 .8-.8l3.2 3.2-.8.8-3.2-3.2Z" fill="currentColor" />
     </svg>
   )
 }
@@ -584,34 +637,26 @@ export default function Home() {
   const activeNote = tab === 'themes' ? themeNotes[selectedTheme] : fieldNotes[tab]
 
   return (
-    <div
-      className={s.page}
-      data-reduced-motion={reducedMotion ? 'true' : 'false'}
-    >
+    <div className={s.page} data-reduced-motion={reducedMotion ? 'true' : 'false'}>
       <div className={s.inner}>
         <header className={s.hero}>
           <div className={s.heroCopy}>
             <div className={s.kickerRow}>
               <span className={s.kicker}>v0.2 · MIT licensed</span>
               <span className={s.kickerDivider} />
-              <span className={s.kickerMeta}>
-                Headless core · React · Vanilla · Theme tokens
-              </span>
+              <span className={s.kickerMeta}>Headless core · React · Vanilla · Theme tokens</span>
             </div>
 
             <h1 className={s.heroTitle}>
               <span className={s.heroLine}>Spreadsheet muscle.</span>
               <span className={s.heroLine}>Product taste.</span>
-              <span className={`${s.heroLine} ${s.heroLineAccent}`}>
-                Zero enterprise tax.
-              </span>
+              <span className={`${s.heroLine} ${s.heroLineAccent}`}>Zero enterprise tax.</span>
             </h1>
 
             <p className={s.heroLead}>
-              Yable is a TypeScript-first data table that ships pivot tables,
-              formulas, clipboard, fill handle, undo/redo and async commits in
-              the same MIT package. The features others charge $1,000+/dev/year
-              for — free here, on contact.
+              Yable is a TypeScript-first data table that ships pivot tables, formulas, clipboard,
+              fill handle, undo/redo and async commits in the same MIT package. The features others
+              charge $1,000+/dev/year for — free here, on contact.
             </p>
 
             <div className={s.heroCtas}>
@@ -704,9 +749,9 @@ export default function Home() {
               <span className={s.sectionEyebrow}>Live Demo Deck</span>
               <h2 className={s.sectionTitle}>The product should sell itself on contact.</h2>
               <p className={s.sectionDescription}>
-                This page turns the demo into a proper front door for the
-                package: the table is the hero, the framing is intentional, and
-                every tab proves a different part of the system.
+                This page turns the demo into a proper front door for the package: the table is the
+                hero, the framing is intentional, and every tab proves a different part of the
+                system.
               </p>
             </div>
 
@@ -748,9 +793,7 @@ export default function Home() {
                 <div className={s.sidebarList}>
                   {activeNote.points.map((point, index) => (
                     <div key={point} className={s.sidebarItem}>
-                      <span className={s.sidebarIndex}>
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
+                      <span className={s.sidebarIndex}>{String(index + 1).padStart(2, '0')}</span>
                       <span>{point}</span>
                     </div>
                   ))}
@@ -761,15 +804,14 @@ export default function Home() {
                 <span className={s.sidebarEyebrow}>What ships free</span>
                 <p className={s.sidebarDescription}>
                   Every feature below is implemented, exported from
-                  <code className={s.inlineCode}>@zvndev/yable-react</code>, and
-                  documented in the repo. No paid tier, no &ldquo;coming
-                  soon&rdquo;.
+                  <code className={s.inlineCode}>@zvndev/yable-react</code>, and documented in the
+                  repo. No paid tier, no &ldquo;coming soon&rdquo;.
                 </p>
                 <div className={s.valueStack}>
                   <ValueRow label="FormulaEngine + 17 functions" />
                   <ValueRow label="PivotEngine with subtotals" />
                   <ValueRow label="useClipboard (TSV copy/paste)" />
-                  <ValueRow label="useFillHandle (linear + geo)" />
+                  <ValueRow label="useFillHandle (constant, sequence, dates)" />
                   <ValueRow label="UndoStack with event hooks" />
                   <ValueRow label="onCommit async coordinator" />
                 </div>
@@ -781,12 +823,10 @@ export default function Home() {
         <section className={s.compareSection} aria-label="Feature comparison">
           <div className={s.compareHeader}>
             <span className={s.sectionEyebrow}>Honest Comparison</span>
-            <h2 className={s.compareTitle}>
-              Yable versus the libraries you already know.
-            </h2>
+            <h2 className={s.compareTitle}>Yable versus the libraries you already know.</h2>
             <p className={s.compareSub}>
-              Every cell in the Yable column is verifiable in this repo.
-              No paid tiers, no gated features — the entire library is MIT.
+              Every cell in the Yable column is verifiable in this repo. No paid tiers, no gated
+              features — the entire library is MIT.
             </p>
           </div>
 
@@ -797,13 +837,10 @@ export default function Home() {
           <div className={s.ctaCard}>
             <div className={s.ctaCopy}>
               <span className={s.sectionEyebrow}>Next Step</span>
-              <h2 className={s.ctaTitle}>
-                Ship a table by lunch.
-              </h2>
+              <h2 className={s.ctaTitle}>Ship a table by lunch.</h2>
               <p className={s.ctaLead}>
-                The quickstart walks from zero to a fully interactive Yable
-                table in 11 steps. Each step has copy-paste code that has been
-                booted in a real Next.js app.
+                The quickstart walks from zero to a fully interactive Yable table in 11 steps. Each
+                step has copy-paste code that has been booted in a real Next.js app.
               </p>
             </div>
             <div className={s.ctaActions}>
@@ -965,8 +1002,7 @@ function BasicDemo() {
             <span className={s.demoEyebrow}>Live Data Surface</span>
             <h3 className={s.demoTitle}>Employee ledger with real interaction density.</h3>
             <p className={s.demoDescription}>
-              Search, sort, select, and paginate without leaving the same
-              component tree.
+              Search, sort, select, and paginate without leaving the same component tree.
             </p>
           </div>
 
@@ -1035,8 +1071,7 @@ function EditableDemo() {
             <span className={s.demoEyebrow}>Editing Surface</span>
             <h3 className={s.demoTitle}>Inline forms without losing table rhythm.</h3>
             <p className={s.demoDescription}>
-              Changes stay buffered until commit, which keeps the surface
-              reversible and calm.
+              Changes stay buffered until commit, which keeps the surface reversible and calm.
             </p>
           </div>
 
@@ -1103,13 +1138,15 @@ function ThemeGallery({
             <span className={s.demoEyebrow}>Theme Gallery</span>
             <h3 className={s.demoTitle}>Eight token packs. One table language.</h3>
             <p className={s.demoDescription}>
-              Choose a theme to inspect how the system shifts while the table
-              structure stays constant.
+              Choose a theme to inspect how the system shifts while the table structure stays
+              constant.
             </p>
           </div>
 
           <div className={s.demoMetrics}>
-            <span className={s.metricPill}>Selected: {allThemes.find((theme) => theme.id === selected)?.label}</span>
+            <span className={s.metricPill}>
+              Selected: {allThemes.find((theme) => theme.id === selected)?.label}
+            </span>
             <span className={s.metricPill}>Dark + light ready</span>
           </div>
         </div>
@@ -1165,19 +1202,14 @@ function ThemePreviewCard({
 
       <div className={s.themeCardFooter}>
         <div className={s.themeNameRow}>
-          <span
-            className={s.themeAccentDot}
-            style={{ backgroundColor: theme.accent }}
-          />
+          <span className={s.themeAccentDot} style={{ backgroundColor: theme.accent }} />
           <div>
             <span className={s.themeName}>{theme.label}</span>
             <span className={s.themeSubcopy}>{themeNotes[theme.id].title}</span>
           </div>
         </div>
 
-        <span
-          className={`${s.themeCheck} ${isSelected ? s.themeCheckVisible : ''}`}
-        >
+        <span className={`${s.themeCheck} ${isSelected ? s.themeCheckVisible : ''}`}>
           <CheckIcon />
         </span>
       </div>

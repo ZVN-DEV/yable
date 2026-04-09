@@ -11,8 +11,8 @@ export function useTableContext<TData extends RowData>(): Table<TData> {
   const ctx = useContext(TableContext)
   if (!ctx) {
     throw new Error(
-      '[yable] useTableContext must be used within a <Table> component. ' +
-      'Did you forget to pass the `table` prop?'
+      '[yable E001] useTableContext must be used within a <Table> component. ' +
+        'Did you forget to pass the `table` prop?',
     )
   }
   return ctx as Table<TData>

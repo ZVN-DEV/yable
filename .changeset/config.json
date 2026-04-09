@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    ["@zvndev/yable-core", "@zvndev/yable-react", "@zvndev/yable-vanilla", "@zvndev/yable-themes"]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": ["@zvndev/yable-react-demo", "@zvndev/yable-vanilla-demo"]
+}

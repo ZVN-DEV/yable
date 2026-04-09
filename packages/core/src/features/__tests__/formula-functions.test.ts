@@ -37,7 +37,12 @@ describe('Math Functions', () => {
     })
 
     it('should flatten nested arrays (from ranges)', () => {
-      expect(builtInFunctions.SUM([[1, 2], [3, 4]])).toBe(10)
+      expect(
+        builtInFunctions.SUM!([
+          [1, 2],
+          [3, 4],
+        ]),
+      ).toBe(10)
     })
 
     it('should treat boolean TRUE as 1', () => {
@@ -211,7 +216,7 @@ describe('Text Functions', () => {
     })
 
     it('should flatten nested arrays from ranges', () => {
-      expect(builtInFunctions.CONCAT([['a', 'b'], ['c']])).toBe('abc')
+      expect(builtInFunctions.CONCAT!([['a', 'b'], ['c']])).toBe('abc')
     })
   })
 
@@ -341,10 +346,27 @@ describe('Statistical Functions', () => {
 describe('Function Registry', () => {
   it('should have all expected function names', () => {
     const expected = [
-      'SUM', 'AVG', 'AVERAGE', 'COUNT', 'COUNTA',
-      'MIN', 'MAX', 'IF', 'CONCAT', 'CONCATENATE',
-      'ROUND', 'ABS', 'FLOOR', 'CEILING', 'CEIL',
-      'POWER', 'POW', 'SQRT', 'LEN', 'UPPER', 'LOWER',
+      'SUM',
+      'AVG',
+      'AVERAGE',
+      'COUNT',
+      'COUNTA',
+      'MIN',
+      'MAX',
+      'IF',
+      'CONCAT',
+      'CONCATENATE',
+      'ROUND',
+      'ABS',
+      'FLOOR',
+      'CEILING',
+      'CEIL',
+      'POWER',
+      'POW',
+      'SQRT',
+      'LEN',
+      'UPPER',
+      'LOWER',
     ]
     for (const name of expected) {
       expect(builtInFunctions).toHaveProperty(name)

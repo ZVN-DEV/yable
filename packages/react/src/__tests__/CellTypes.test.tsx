@@ -3,7 +3,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { createColumnHelper } from '@zvndev/yable-core'
 import type { CellContext } from '@zvndev/yable-core'
 import { CellCurrency } from '../cells/CellCurrency'
 import { CellBadge } from '../cells/CellBadge'
@@ -37,7 +36,7 @@ describe('CellCurrency', () => {
 
   it('formats with decimal places', () => {
     render(
-      <CellCurrency context={makeCellContext(99.5)} currency="USD" locale="en-US" decimals={2} />
+      <CellCurrency context={makeCellContext(99.5)} currency="USD" locale="en-US" decimals={2} />,
     )
 
     expect(screen.getByText('$99.50')).toBeInTheDocument()
@@ -53,34 +52,28 @@ describe('CellCurrency', () => {
   })
 
   it('applies positive class when colorize=true and value > 0', () => {
-    render(
-      <CellCurrency context={makeCellContext(100)} colorize locale="en-US" />
-    )
+    render(<CellCurrency context={makeCellContext(100)} colorize locale="en-US" />)
 
     const span = screen.getByText('$100')
     expect(span).toHaveClass('yable-cell-currency--positive')
   })
 
   it('applies negative class when colorize=true and value < 0', () => {
-    render(
-      <CellCurrency context={makeCellContext(-50)} colorize locale="en-US" />
-    )
+    render(<CellCurrency context={makeCellContext(-50)} colorize locale="en-US" />)
 
     const span = screen.getByText(/-\$50/)
     expect(span).toHaveClass('yable-cell-currency--negative')
   })
 
   it('returns null for null value', () => {
-    const { container } = render(
-      <CellCurrency context={makeCellContext(null)} locale="en-US" />
-    )
+    const { container } = render(<CellCurrency context={makeCellContext(null)} locale="en-US" />)
 
     expect(container.innerHTML).toBe('')
   })
 
   it('returns null for NaN value', () => {
     const { container } = render(
-      <CellCurrency context={makeCellContext('not-a-number')} locale="en-US" />
+      <CellCurrency context={makeCellContext('not-a-number')} locale="en-US" />,
     )
 
     expect(container.innerHTML).toBe('')
@@ -156,30 +149,21 @@ describe('CellLink', () => {
   })
 
   it('uses href prop for the link URL when provided', () => {
-    render(
-      <CellLink context={makeCellContext('Click me')} href="https://other.com" />
-    )
+    render(<CellLink context={makeCellContext('Click me')} href="https://other.com" />)
 
     const link = screen.getByRole('link', { name: 'Click me' })
     expect(link).toHaveAttribute('href', 'https://other.com')
   })
 
   it('uses href function to compute URL', () => {
-    render(
-      <CellLink
-        context={makeCellContext('doc-123')}
-        href={(val) => `/docs/${val}`}
-      />
-    )
+    render(<CellLink context={makeCellContext('doc-123')} href={(val) => `/docs/${val}`} />)
 
     const link = screen.getByRole('link', { name: 'doc-123' })
     expect(link).toHaveAttribute('href', '/docs/doc-123')
   })
 
   it('sets target="_blank" and rel for external links', () => {
-    render(
-      <CellLink context={makeCellContext('External')} href="https://ext.com" external />
-    )
+    render(<CellLink context={makeCellContext('External')} href="https://ext.com" external />)
 
     const link = screen.getByRole('link', { name: /External/ })
     expect(link).toHaveAttribute('target', '_blank')
@@ -187,9 +171,7 @@ describe('CellLink', () => {
   })
 
   it('does not set target for non-external links', () => {
-    render(
-      <CellLink context={makeCellContext('Internal')} href="/page" />
-    )
+    render(<CellLink context={makeCellContext('Internal')} href="/page" />)
 
     const link = screen.getByRole('link', { name: 'Internal' })
     expect(link).not.toHaveAttribute('target')
@@ -231,7 +213,10 @@ describe('CellLink', () => {
 
   it('blocks data:text/html protocol', () => {
     render(
-      <CellLink context={makeCellContext('Click')} href="data:text/html,<script>alert(1)</script>" />
+      <CellLink
+        context={makeCellContext('Click')}
+        href="data:text/html,<script>alert(1)</script>"
+      />,
     )
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
@@ -288,9 +273,7 @@ describe('CellBoolean', () => {
   })
 
   it('uses custom trueLabel and falseLabel', () => {
-    render(
-      <CellBoolean context={makeCellContext(true)} trueLabel="Yes" falseLabel="No" />
-    )
+    render(<CellBoolean context={makeCellContext(true)} trueLabel="Yes" falseLabel="No" />)
     expect(screen.getByText('Yes')).toBeInTheDocument()
   })
 

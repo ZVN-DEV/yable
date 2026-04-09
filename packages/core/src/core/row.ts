@@ -1,11 +1,6 @@
 // @zvndev/yable-core — Row Model
 
-import type {
-  RowData,
-  Row,
-  Table,
-  RowPinningPosition,
-} from '../types'
+import type { RowData, Row, Table, RowPinningPosition } from '../types'
 import { createCell } from './cell'
 
 export function createRow<TData extends RowData>(
@@ -15,7 +10,7 @@ export function createRow<TData extends RowData>(
   rowIndex: number,
   depth: number,
   subRows?: Row<TData>[],
-  parentId?: string
+  parentId?: string,
 ): Row<TData> {
   const row: Row<TData> = {
     id,
@@ -33,10 +28,7 @@ export function createRow<TData extends RowData>(
       try {
         return column.accessorFn(original, rowIndex) as TValue
       } catch (err) {
-        console.error(
-          `[yable] accessorFn threw for column "${columnId}", row "${id}":`,
-          err
-        )
+        console.error(`[yable E009] accessorFn threw for column "${columnId}", row "${id}":`, err)
         return undefined as TValue
       }
     },
@@ -44,29 +36,27 @@ export function createRow<TData extends RowData>(
       return row.getValue(columnId)
     },
     getAllCells: () => {
-      return table.getAllLeafColumns().map((column) =>
-        createCell(table, row, column, column.id)
-      )
+      return table.getAllLeafColumns().map((column) => createCell(table, row, column, column.id))
     },
     getVisibleCells: () => {
-      return table.getVisibleFlatColumns().map((column) =>
-        createCell(table, row, column, column.id)
-      )
+      return table
+        .getVisibleFlatColumns()
+        .map((column) => createCell(table, row, column, column.id))
     },
     getLeftVisibleCells: () => {
-      return table.getLeftVisibleLeafColumns().map((column) =>
-        createCell(table, row, column, column.id)
-      )
+      return table
+        .getLeftVisibleLeafColumns()
+        .map((column) => createCell(table, row, column, column.id))
     },
     getRightVisibleCells: () => {
-      return table.getRightVisibleLeafColumns().map((column) =>
-        createCell(table, row, column, column.id)
-      )
+      return table
+        .getRightVisibleLeafColumns()
+        .map((column) => createCell(table, row, column, column.id))
     },
     getCenterVisibleCells: () => {
-      return table.getCenterVisibleLeafColumns().map((column) =>
-        createCell(table, row, column, column.id)
-      )
+      return table
+        .getCenterVisibleLeafColumns()
+        .map((column) => createCell(table, row, column, column.id))
     },
 
     // Selection
@@ -168,7 +158,7 @@ export function createRow<TData extends RowData>(
     pin: (
       position: RowPinningPosition,
       _includeLeafRows?: boolean,
-      _includeParentRows?: boolean
+      _includeParentRows?: boolean,
     ) => {
       table.setRowPinning((old) => {
         const top = (old.top ?? []).filter((r) => r !== id)

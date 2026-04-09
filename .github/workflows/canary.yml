@@ -1,0 +1,45 @@
+name: Canary
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: canary-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  canary:
+    name: Publish canary
+    runs-on: ubuntu-latest
+    # Skip canary on release commits (the version-packages PR merge)
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - name: Snapshot version
+        run: pnpm changeset version --snapshot canary
+
+      - name: Publish canary to npm
+        run: pnpm changeset publish --tag canary --no-git-tag
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'

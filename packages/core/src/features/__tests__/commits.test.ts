@@ -2,10 +2,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { CommitError } from '../commits/CommitError'
-import {
-  createCommitCoordinator,
-  type CommitStore,
-} from '../commits/coordinator'
+import { createCommitCoordinator, type CommitStore } from '../commits/coordinator'
 import type { CommitsSlice, CellPatch } from '../commits/types'
 
 describe('CommitError', () => {
@@ -23,7 +20,7 @@ describe('CommitError', () => {
 
   it('uses the provided message or a default', () => {
     const a = new CommitError({})
-    expect(a.message).toBe('Commit failed')
+    expect(a.message).toBe('[yable E012] CommitError: handler threw or rejected')
     const b = new CommitError({}, 'Boom')
     expect(b.message).toBe('Boom')
   })
@@ -72,7 +69,7 @@ function makePatch(
   rowId: string,
   columnId: string,
   value: unknown,
-  previousValue: unknown
+  previousValue: unknown,
 ): Omit<CellPatch, 'signal' | 'row'> {
   return { rowId, columnId, value, previousValue }
 }
@@ -203,9 +200,7 @@ describe('CommitCoordinator — opId race', () => {
       onCommit: async (patches) => {
         const signal = patches[0]!.signal
         aborts.push(signal.aborted)
-        await new Promise((r) =>
-          signal.addEventListener('abort', () => r(undefined))
-        )
+        await new Promise((r) => signal.addEventListener('abort', () => r(undefined)))
       },
     })
 

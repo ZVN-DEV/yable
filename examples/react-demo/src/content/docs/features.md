@@ -49,37 +49,37 @@ columnHelper.accessor('name', {
 
 ### Table Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableSorting` | `boolean` | `true` | Enable/disable sorting globally |
-| `enableMultiSort` | `boolean` | `true` | Allow sorting by multiple columns |
-| `enableSortingRemoval` | `boolean` | `true` | Allow removing sort (third click) |
-| `maxMultiSortColCount` | `number` | `Infinity` | Max simultaneous sort columns |
-| `manualSorting` | `boolean` | `false` | If true, sorting is handled externally (server-side) |
-| `sortDescFirst` | `boolean` | `false` | Start with descending on first click |
-| `isMultiSortEvent` | `(e) => boolean` | Shift key | Which modifier key triggers multi-sort |
-| `onSortingChange` | `OnChangeFn<SortingState>` | -- | Callback when sorting state changes |
+| Option                 | Type                       | Default    | Description                                          |
+| ---------------------- | -------------------------- | ---------- | ---------------------------------------------------- |
+| `enableSorting`        | `boolean`                  | `true`     | Enable/disable sorting globally                      |
+| `enableMultiSort`      | `boolean`                  | `true`     | Allow sorting by multiple columns                    |
+| `enableSortingRemoval` | `boolean`                  | `true`     | Allow removing sort (third click)                    |
+| `maxMultiSortColCount` | `number`                   | `Infinity` | Max simultaneous sort columns                        |
+| `manualSorting`        | `boolean`                  | `false`    | If true, sorting is handled externally (server-side) |
+| `sortDescFirst`        | `boolean`                  | `false`    | Start with descending on first click                 |
+| `isMultiSortEvent`     | `(e) => boolean`           | Shift key  | Which modifier key triggers multi-sort               |
+| `onSortingChange`      | `OnChangeFn<SortingState>` | --         | Callback when sorting state changes                  |
 
 ### Column Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableSorting` | `boolean` | `true` | Enable sorting for this column |
-| `sortingFn` | `SortingFnOption` | `'auto'` | Sort function name or custom function |
-| `sortDescFirst` | `boolean` | `false` | Start descending for this column |
-| `invertSorting` | `boolean` | `false` | Invert sort direction |
-| `sortUndefined` | `false \| -1 \| 1 \| 'first' \| 'last'` | -- | Where to place `undefined` values |
+| Option          | Type                                    | Default  | Description                           |
+| --------------- | --------------------------------------- | -------- | ------------------------------------- |
+| `enableSorting` | `boolean`                               | `true`   | Enable sorting for this column        |
+| `sortingFn`     | `SortingFnOption`                       | `'auto'` | Sort function name or custom function |
+| `sortDescFirst` | `boolean`                               | `false`  | Start descending for this column      |
+| `invertSorting` | `boolean`                               | `false`  | Invert sort direction                 |
+| `sortUndefined` | `false \| -1 \| 1 \| 'first' \| 'last'` | --       | Where to place `undefined` values     |
 
 ### Built-in Sorting Functions
 
-| Name | Description |
-|---|---|
-| `alphanumeric` | Natural sort -- `"item2"` before `"item10"` (case-insensitive) |
-| `alphanumericCaseSensitive` | Natural sort (case-sensitive) |
-| `text` | Locale-aware string comparison (case-insensitive) |
-| `textCaseSensitive` | Locale-aware string comparison (case-sensitive) |
-| `datetime` | Sorts Date objects and date strings by timestamp |
-| `basic` | Simple `>` / `<` comparison for numbers and strings |
+| Name                        | Description                                                    |
+| --------------------------- | -------------------------------------------------------------- |
+| `alphanumeric`              | Natural sort -- `"item2"` before `"item10"` (case-insensitive) |
+| `alphanumericCaseSensitive` | Natural sort (case-sensitive)                                  |
+| `text`                      | Locale-aware string comparison (case-insensitive)              |
+| `textCaseSensitive`         | Locale-aware string comparison (case-sensitive)                |
+| `datetime`                  | Sorts Date objects and date strings by timestamp               |
+| `basic`                     | Simple `>` / `<` comparison for numbers and strings            |
 
 ### Custom Sort Function
 
@@ -126,39 +126,39 @@ Filtering is enabled by default. Use `setColumnFilters` or `setGlobalFilter` to 
 
 ### Table Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableFilters` | `boolean` | `true` | Enable/disable all filtering |
-| `enableColumnFilters` | `boolean` | `true` | Enable per-column filters |
-| `enableGlobalFilter` | `boolean` | `true` | Enable global search |
-| `manualFiltering` | `boolean` | `false` | Handle filtering externally (server-side) |
-| `globalFilterFn` | `FilterFnOption` | -- | Custom global filter function |
-| `onColumnFiltersChange` | `OnChangeFn<ColumnFiltersState>` | -- | Callback when column filters change |
-| `onGlobalFilterChange` | `OnChangeFn<string>` | -- | Callback when global filter changes |
+| Option                  | Type                             | Default | Description                               |
+| ----------------------- | -------------------------------- | ------- | ----------------------------------------- |
+| `enableFilters`         | `boolean`                        | `true`  | Enable/disable all filtering              |
+| `enableColumnFilters`   | `boolean`                        | `true`  | Enable per-column filters                 |
+| `enableGlobalFilter`    | `boolean`                        | `true`  | Enable global search                      |
+| `manualFiltering`       | `boolean`                        | `false` | Handle filtering externally (server-side) |
+| `globalFilterFn`        | `FilterFnOption`                 | --      | Custom global filter function             |
+| `onColumnFiltersChange` | `OnChangeFn<ColumnFiltersState>` | --      | Callback when column filters change       |
+| `onGlobalFilterChange`  | `OnChangeFn<string>`             | --      | Callback when global filter changes       |
 
 ### Column Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableColumnFilter` | `boolean` | `true` | Enable filtering for this column |
-| `enableGlobalFilter` | `boolean` | `true` | Include this column in global search |
-| `filterFn` | `FilterFnOption` | -- | Filter function name or custom function |
+| Option               | Type             | Default | Description                             |
+| -------------------- | ---------------- | ------- | --------------------------------------- |
+| `enableColumnFilter` | `boolean`        | `true`  | Enable filtering for this column        |
+| `enableGlobalFilter` | `boolean`        | `true`  | Include this column in global search    |
+| `filterFn`           | `FilterFnOption` | --      | Filter function name or custom function |
 
 ### Built-in Filter Functions
 
-| Name | Description |
-|---|---|
-| `includesString` | Case-insensitive substring match |
-| `includesStringSensitive` | Case-sensitive substring match |
-| `equalsString` | Case-insensitive exact string match |
-| `equalsStringSensitive` | Case-sensitive exact string match |
-| `arrIncludes` | Array contains value |
-| `arrIncludesAll` | Array contains all values |
-| `arrIncludesSome` | Array contains at least one value |
-| `equals` | Strict equality (`===`) |
-| `weakEquals` | Loose equality (`==`) |
-| `inNumberRange` | Number within `[min, max]` range |
-| `inDateRange` | Date within `[start, end]` range |
+| Name                      | Description                         |
+| ------------------------- | ----------------------------------- |
+| `includesString`          | Case-insensitive substring match    |
+| `includesStringSensitive` | Case-sensitive substring match      |
+| `equalsString`            | Case-insensitive exact string match |
+| `equalsStringSensitive`   | Case-sensitive exact string match   |
+| `arrIncludes`             | Array contains value                |
+| `arrIncludesAll`          | Array contains all values           |
+| `arrIncludesSome`         | Array contains at least one value   |
+| `equals`                  | Strict equality (`===`)             |
+| `weakEquals`              | Loose equality (`==`)               |
+| `inNumberRange`           | Number within `[min, max]` range    |
+| `inDateRange`             | Date within `[start, end]` range    |
 
 ### Examples
 
@@ -197,10 +197,10 @@ columnHelper.accessor('tags', {
 ```tsx
 import { GlobalFilter } from '@zvndev/yable-react'
 
-<GlobalFilter
+;<GlobalFilter
   table={table}
   placeholder="Search..."
-  debounce={300}  // ms delay before applying filter
+  debounce={300} // ms delay before applying filter
 />
 ```
 
@@ -216,13 +216,13 @@ Pagination is always active by default (page size 10). Configure via `initialSta
 
 ### Table Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `manualPagination` | `boolean` | `false` | Handle pagination externally (server-side) |
-| `pageCount` | `number` | -- | Total page count (for server-side) |
-| `rowCount` | `number` | -- | Total row count (for server-side) |
-| `autoResetPageIndex` | `boolean` | `true` | Reset to page 0 when data changes |
-| `onPaginationChange` | `OnChangeFn<PaginationState>` | -- | Callback when pagination state changes |
+| Option               | Type                          | Default | Description                                |
+| -------------------- | ----------------------------- | ------- | ------------------------------------------ |
+| `manualPagination`   | `boolean`                     | `false` | Handle pagination externally (server-side) |
+| `pageCount`          | `number`                      | --      | Total page count (for server-side)         |
+| `rowCount`           | `number`                      | --      | Total row count (for server-side)          |
+| `autoResetPageIndex` | `boolean`                     | `true`  | Reset to page 0 when data changes          |
+| `onPaginationChange` | `OnChangeFn<PaginationState>` | --      | Callback when pagination state changes     |
 
 ### Programmatic Control
 
@@ -233,10 +233,10 @@ table.firstPage()
 table.lastPage()
 table.setPageIndex(3)
 table.setPageSize(25)
-table.getCanNextPage()      // boolean
-table.getCanPreviousPage()  // boolean
-table.getPageCount()        // total pages
-table.getRowCount()         // total rows
+table.getCanNextPage() // boolean
+table.getCanPreviousPage() // boolean
+table.getPageCount() // total pages
+table.getRowCount() // total rows
 ```
 
 ### React: Pagination Component
@@ -244,13 +244,13 @@ table.getRowCount()         // total rows
 ```tsx
 import { Pagination } from '@zvndev/yable-react'
 
-<Table table={table}>
+;<Table table={table}>
   <Pagination
     table={table}
-    showPageSize       // Show page size dropdown
+    showPageSize // Show page size dropdown
     pageSizes={[10, 25, 50, 100]}
-    showInfo           // Show "1-10 of 50" text
-    showFirstLast      // Show first/last page buttons
+    showInfo // Show "1-10 of 50" text
+    showFirstLast // Show first/last page buttons
   />
 </Table>
 ```
@@ -273,13 +273,13 @@ Edit cell values inline with validation, formatting, and multiple input types.
 ```typescript
 interface CellEditConfig {
   type: 'text' | 'number' | 'select' | 'toggle' | 'date' | 'checkbox' | 'custom'
-  options?: { label: string; value: unknown }[]   // For 'select' type
-  getOptions?: (row: Row) => { label: string; value: unknown }[]  // Dynamic options
-  validate?: (value, row) => string | null         // Return error message or null
-  parse?: (inputValue: string) => TValue           // Parse input string to typed value
-  format?: (value: TValue) => string               // Format value for display
+  options?: { label: string; value: unknown }[] // For 'select' type
+  getOptions?: (row: Row) => { label: string; value: unknown }[] // Dynamic options
+  validate?: (value, row) => string | null // Return error message or null
+  parse?: (inputValue: string) => TValue // Parse input string to typed value
+  format?: (value: TValue) => string // Format value for display
   placeholder?: string
-  render?: (props: CellEditRenderProps) => unknown  // Custom editor render
+  render?: (props: CellEditRenderProps) => unknown // Custom editor render
 }
 ```
 
@@ -333,17 +333,17 @@ const table = useTable({
 ### Table Methods
 
 ```typescript
-table.startEditing(rowId, columnId)   // Enter edit mode on a cell
-table.commitEdit()                     // Commit the active edit
-table.cancelEdit()                     // Cancel the active edit
-table.setPendingValue(rowId, columnId, value)  // Set a pending value
-table.getPendingValue(rowId, columnId)         // Read a pending value
-table.getAllPendingChanges()            // Get all uncommitted changes
-table.hasPendingChanges()              // Check if any changes are pending
-table.commitAllPending()               // Commit all pending changes at once
-table.discardAllPending()              // Discard all pending changes
-table.getValidationErrors()            // Get validation errors
-table.isValid()                        // Check if all pending values are valid
+table.startEditing(rowId, columnId) // Enter edit mode on a cell
+table.commitEdit() // Commit the active edit
+table.cancelEdit() // Cancel the active edit
+table.setPendingValue(rowId, columnId, value) // Set a pending value
+table.getPendingValue(rowId, columnId) // Read a pending value
+table.getAllPendingChanges() // Get all uncommitted changes
+table.hasPendingChanges() // Check if any changes are pending
+table.commitAllPending() // Commit all pending changes at once
+table.discardAllPending() // Discard all pending changes
+table.getValidationErrors() // Get validation errors
+table.isValid() // Check if all pending values are valid
 ```
 
 ### Always-Editable Cells
@@ -403,13 +403,13 @@ table.getColumn('actions')?.pin('right')
 table.getColumn('name')?.pin(false)
 
 // Check pin status
-table.getColumn('name')?.getIsPinned()  // 'left' | 'right' | false
+table.getColumn('name')?.getIsPinned() // 'left' | 'right' | false
 
 // Set all pinning at once
 table.setColumnPinning({ left: ['name', 'id'], right: ['actions'] })
 
 // Check if any columns are pinned
-table.getIsSomeColumnsPinned('left')  // boolean
+table.getIsSomeColumnsPinned('left') // boolean
 ```
 
 ---
@@ -435,9 +435,9 @@ const table = useTable({
 ```typescript
 columnHelper.accessor('name', {
   header: 'Name',
-  size: 200,       // Default width in px
-  minSize: 100,    // Minimum width
-  maxSize: 400,    // Maximum width
+  size: 200, // Default width in px
+  minSize: 100, // Minimum width
+  maxSize: 400, // Maximum width
   enableResizing: true,
 })
 ```
@@ -463,7 +463,7 @@ const table = useTable({
   enableHiding: true,
   initialState: {
     columnVisibility: {
-      email: false,  // Hide the email column by default
+      email: false, // Hide the email column by default
     },
   },
 })
@@ -486,8 +486,8 @@ table.toggleAllColumnsVisible(true)
 table.toggleAllColumnsVisible(false)
 
 // Check visibility
-table.getColumn('email')?.getIsVisible()  // boolean
-table.getIsAllColumnsVisible()             // boolean
+table.getColumn('email')?.getIsVisible() // boolean
+table.getIsAllColumnsVisible() // boolean
 ```
 
 ---
@@ -579,17 +579,17 @@ Calculate summary values for grouped rows. Aggregation functions run on each gro
 
 ### Built-in Aggregation Functions
 
-| Name | Description |
-|---|---|
-| `sum` | Sum of numeric values |
-| `min` | Minimum numeric value |
-| `max` | Maximum numeric value |
-| `extent` | `[min, max]` tuple |
-| `mean` | Average of numeric values |
-| `median` | Median of numeric values |
-| `unique` | Array of unique values |
-| `uniqueCount` | Count of unique values |
-| `count` | Number of rows |
+| Name          | Description               |
+| ------------- | ------------------------- |
+| `sum`         | Sum of numeric values     |
+| `min`         | Minimum numeric value     |
+| `max`         | Maximum numeric value     |
+| `extent`      | `[min, max]` tuple        |
+| `mean`        | Average of numeric values |
+| `median`      | Median of numeric values  |
+| `unique`      | Array of unique values    |
+| `uniqueCount` | Count of unique values    |
+| `count`       | Number of rows            |
 
 ### How to Use
 
@@ -626,10 +626,12 @@ Select rows with single-click or checkboxes. Supports single selection, multi-se
 const table = useTable({
   data,
   columns,
-  enableRowSelection: true,       // or (row) => boolean for conditional
-  enableMultiRowSelection: true,   // Allow selecting multiple rows
-  enableSubRowSelection: true,     // Select sub-rows when parent is selected
-  onRowSelectionChange: (updater) => { /* handle changes */ },
+  enableRowSelection: true, // or (row) => boolean for conditional
+  enableMultiRowSelection: true, // Allow selecting multiple rows
+  enableSubRowSelection: true, // Select sub-rows when parent is selected
+  onRowSelectionChange: (updater) => {
+    /* handle changes */
+  },
 })
 ```
 
@@ -649,11 +651,11 @@ table.toggleAllPageRowsSelected(true)
 table.toggleAllRowsSelected(true)
 
 // Check selection state
-table.getRow('0').getIsSelected()         // boolean
-table.getIsAllRowsSelected()               // boolean
-table.getIsSomeRowsSelected()              // boolean
-table.getIsAllPageRowsSelected()           // boolean
-table.getSelectedRowModel()                // RowModel of selected rows
+table.getRow('0').getIsSelected() // boolean
+table.getIsAllRowsSelected() // boolean
+table.getIsSomeRowsSelected() // boolean
+table.getIsAllPageRowsSelected() // boolean
+table.getSelectedRowModel() // RowModel of selected rows
 
 // Clear selection
 table.resetRowSelection(true)
@@ -718,8 +720,8 @@ table.toggleAllRowsExpanded(true)
 table.toggleAllRowsExpanded(false)
 
 // Check expansion state
-table.getRow('0').getIsExpanded()  // boolean
-table.getIsAllRowsExpanded()       // boolean
+table.getRow('0').getIsExpanded() // boolean
+table.getIsAllRowsExpanded() // boolean
 ```
 
 ---
@@ -751,9 +753,9 @@ table.getRow('0').pin('bottom')
 table.getRow('0').pin(false)
 
 // Get pinned rows
-table.getTopRows()     // Row[]
-table.getBottomRows()  // Row[]
-table.getCenterRows()  // Row[] (unpinned rows)
+table.getTopRows() // Row[]
+table.getBottomRows() // Row[]
+table.getCenterRows() // Row[] (unpinned rows)
 ```
 
 ---
@@ -804,10 +806,10 @@ const table = useTable({
 ### Row Properties
 
 ```typescript
-row.depth       // 0 for top-level, 1 for children, etc.
-row.subRows     // Child rows
-row.parentId    // Parent row ID (if nested)
-row.getCanExpand()  // true if row has sub-rows
+row.depth // 0 for top-level, 1 for children, etc.
+row.subRows // Child rows
+row.parentId // Parent row ID (if nested)
+row.getCanExpand() // true if row has sub-rows
 ```
 
 ---
@@ -834,8 +836,8 @@ const table = useTable({
 ### Notes
 
 - Pivot tables build on the grouping + aggregation features
-- Full pivot table configuration (row fields, column fields, value fields) is being developed
-- For the current version, use grouping with aggregation functions to achieve pivot-like views
+- A full `PivotEngine` with row fields, column fields, value fields, subtotals, and grand totals is exported from `@zvndev/yable-core` (`PivotEngine`, `getPivotRowModel`, `generatePivotColumnDefs`, `getInitialPivotState`, `PivotConfig`)
+- You can also fall back to plain grouping + aggregation for lighter-weight pivot-style views
 
 ---
 
@@ -845,69 +847,98 @@ Track edit history and allow users to undo/redo changes.
 
 ### How It Works
 
-The editing system tracks pending values. Use `commitAllPending()` to persist changes and `discardAllPending()` to revert:
+Yable ships a real `UndoStack` that records `cell-edit` actions and supports push/undo/redo with a configurable stack size. It is exported from `@zvndev/yable-core` alongside `createUndoRedoIntegration` for wiring it into a table instance.
 
 ```typescript
-// Make edits
-table.setPendingValue('row-1', 'name', 'New Name')
-table.setPendingValue('row-1', 'salary', 120000)
+import { UndoStack } from '@zvndev/yable-core'
 
-// Check for pending changes
-table.hasPendingChanges()  // true
+const stack = new UndoStack(50) // maxSize = 50 actions
 
-// Undo all pending (not yet committed)
-table.discardAllPending()
+stack.push({
+  type: 'cell-edit',
+  rowId: 'row-1',
+  columnId: 'name',
+  oldValue: 'Alice',
+  newValue: 'Alice Johnson',
+  timestamp: Date.now(),
+})
 
-// Or commit all at once
-table.commitAllPending()  // triggers onEditCommit callback
+const undone = stack.undo() // UndoAction | undefined — moves to redo stack
+const redone = stack.redo() // UndoAction | undefined — moves back to undo stack
 ```
 
-### Notes
+### Pending-value "undo"
 
-- Full undo/redo with an action stack is planned for a future release
-- Currently, "undo" means discarding uncommitted pending values
+For transient, uncommitted edits, the editing system also lets you discard or commit pending values without touching the undo stack:
+
+```typescript
+table.setPendingValue('row-1', 'name', 'New Name')
+table.hasPendingChanges() // true
+table.discardAllPending() // drop uncommitted edits
+table.commitAllPending() // persist via onEditCommit
+```
 
 ---
 
 ## Clipboard
 
-Copy table data to the clipboard.
+Copy, cut, and paste table data with configurable delimiters. Defaults to tab-separated values for Excel compatibility.
 
-### How It Works
+### Core primitives
 
-Use the `exportData()` method to produce clipboard-ready content:
+The core package exports `serializeCells`, `parseClipboardText`, and related helpers from `packages/core/src/features/clipboard.ts`. Use them directly, or drive clipboard interactions from the React hook `useClipboard` in `@zvndev/yable-react`.
 
 ```typescript
-// Copy visible data as CSV
+import { serializeCells } from '@zvndev/yable-core'
+
+// Serialize selected rows/columns to clipboard text (TSV by default)
+const text = serializeCells(selectedRows, selectedColumns, {
+  delimiter: '\t',
+  rowDelimiter: '\n',
+  includeHeaders: false,
+})
+await navigator.clipboard.writeText(text)
+```
+
+### Bulk export (CSV/JSON)
+
+For bulk copy operations outside of a selection, `exportData()` is the simpler path:
+
+```typescript
 const csv = table.exportData({ format: 'csv' })
 navigator.clipboard.writeText(csv)
 
-// Copy all data (ignoring pagination)
 const allCsv = table.exportData({ format: 'csv', allRows: true })
 navigator.clipboard.writeText(allCsv)
 
-// Copy specific columns
 const partial = table.exportData({
   format: 'csv',
   columns: ['name', 'email'],
 })
 ```
 
-### Notes
-
-- Full clipboard integration (paste, cell-range copy) is planned
-- Currently, export covers bulk copy operations
-
 ---
 
 ## Fill Handle
 
-Drag the fill handle at the bottom-right corner of a selected cell to auto-fill adjacent cells with the same value, like in Excel.
+Drag the fill handle at the bottom-right corner of a selected cell to auto-fill adjacent cells, like in Excel. Pattern detection supports constants, arithmetic sequences, date sequences, and repeating values.
+
+### Core primitives
+
+The fill handle logic lives in `packages/core/src/features/fillHandle.ts`. The React hook `useFillHandle` in `@zvndev/yable-react` wires it into a live table.
+
+```typescript
+import { detectPattern } from '@zvndev/yable-core'
+
+// Detect a pattern from source values, then project it over the destination range
+const pattern = detectPattern([1, 2, 3])
+// -> { type: 'sequence', start: 1, step: 1 }
+```
 
 ### Notes
 
-- Fill handle is in development and will be available in a future release
-- The infrastructure (cell editing, pending values) is already in place
+- Supported patterns: `constant`, `sequence` (numeric), `date-sequence`, and `repeat`
+- Fully covered by `packages/core/src/features/__tests__/fillHandle.test.ts`
 
 ---
 
@@ -925,7 +956,7 @@ A spreadsheet-grade formula engine with 17 built-in functions (extensible), an e
 ### Notes
 
 - The formula engine is included in `@zvndev/yable-core` and works with any adapter
-- Built-in functions: `SUM`, `AVG`, `COUNT`, `COUNTA`, `MIN`, `MAX`, `IF`, `CONCAT`, `ROUND`, `ABS`, `FLOOR`, `CEILING`, `POWER`, `SQRT`, `LEN`, `UPPER`, `LOWER` (plus aliases `AVERAGE`, `CONCATENATE`, `TRUNC`, `INT`)
+- Built-in functions: `SUM`, `AVG`, `COUNT`, `COUNTA`, `MIN`, `MAX`, `IF`, `CONCAT`, `ROUND`, `ABS`, `FLOOR`, `CEILING`, `POWER`, `SQRT`, `LEN`, `UPPER`, `LOWER` (plus aliases `AVERAGE`, `CONCATENATE`, `CEIL`, `POW`)
 - Register custom functions via the formula engine API
 - This feature is FREE under MIT -- AG Grid requires an Enterprise license for formula support
 
@@ -950,11 +981,13 @@ const table = useTable({
     // patches is CellPatch[] — one per edited cell
     const res = await fetch('/api/save', {
       method: 'POST',
-      body: JSON.stringify(patches.map(p => ({
-        rowId: p.rowId,
-        column: p.columnId,
-        value: p.value,
-      }))),
+      body: JSON.stringify(
+        patches.map((p) => ({
+          rowId: p.rowId,
+          column: p.columnId,
+          value: p.value,
+        })),
+      ),
       signal: patches[0].signal, // wire abort signal
     })
 
@@ -974,33 +1007,33 @@ const table = useTable({
 
 Each cell has a status: `idle` | `pending` | `error` | `conflict`.
 
-| Status | Meaning | Cell renders |
-|---|---|---|
-| `idle` | No in-flight commit | Saved value |
-| `pending` | Commit in flight | Pending value + spinner |
-| `error` | Commit failed | Pending value + error badge with retry |
-| `conflict` | Saved value changed underneath | Pending value + conflict indicator |
+| Status     | Meaning                        | Cell renders                           |
+| ---------- | ------------------------------ | -------------------------------------- |
+| `idle`     | No in-flight commit            | Saved value                            |
+| `pending`  | Commit in flight               | Pending value + spinner                |
+| `error`    | Commit failed                  | Pending value + error badge with retry |
+| `conflict` | Saved value changed underneath | Pending value + conflict indicator     |
 
 ### Table Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `onCommit` | `OnCommitFn<TData>` | -- | Async handler for saving cell edits. Resolve = success, throw = failure. |
-| `autoCommit` | `boolean` | `true` | Fire `onCommit` after each edit; if `false`, batch edits until `table.commit()` |
-| `rowCommitRetryMode` | `'failed' \| 'batch'` | `'failed'` | On retry: resend only failed cells or entire batch |
+| Option               | Type                  | Default    | Description                                                                     |
+| -------------------- | --------------------- | ---------- | ------------------------------------------------------------------------------- |
+| `onCommit`           | `OnCommitFn<TData>`   | --         | Async handler for saving cell edits. Resolve = success, throw = failure.        |
+| `autoCommit`         | `boolean`             | `true`     | Fire `onCommit` after each edit; if `false`, batch edits until `table.commit()` |
+| `rowCommitRetryMode` | `'failed' \| 'batch'` | `'failed'` | On retry: resend only failed cells or entire batch                              |
 
 ### Table API
 
-| Method | Return | Description |
-|---|---|---|
-| `getCellStatus(rowId, colId)` | `CellStatus` | Get commit status of a cell |
-| `getCellRenderValue(rowId, colId)` | `unknown` | Get display value (pending or saved) |
-| `getCellErrorMessage(rowId, colId)` | `string \| undefined` | Get error message for failed cell |
-| `getCellConflictWith(rowId, colId)` | `unknown` | Get conflicting server value |
-| `commit()` | `Promise<void>` | Commit all pending edits (when `autoCommit: false`) |
-| `retryCommit(rowId, colId)` | `Promise<void>` | Retry a failed commit |
-| `dismissCommit(rowId, colId)` | `void` | Dismiss an error/conflict and revert |
-| `dismissAllCommits()` | `void` | Dismiss all errors/conflicts |
+| Method                              | Return                | Description                                         |
+| ----------------------------------- | --------------------- | --------------------------------------------------- |
+| `getCellStatus(rowId, colId)`       | `CellStatus`          | Get commit status of a cell                         |
+| `getCellRenderValue(rowId, colId)`  | `unknown`             | Get display value (pending or saved)                |
+| `getCellErrorMessage(rowId, colId)` | `string \| undefined` | Get error message for failed cell                   |
+| `getCellConflictWith(rowId, colId)` | `unknown`             | Get conflicting server value                        |
+| `commit()`                          | `Promise<void>`       | Commit all pending edits (when `autoCommit: false`) |
+| `retryCommit(rowId, colId)`         | `Promise<void>`       | Retry a failed commit                               |
+| `dismissCommit(rowId, colId)`       | `void`                | Dismiss an error/conflict and revert                |
+| `dismissAllCommits()`               | `void`                | Dismiss all errors/conflicts                        |
 
 ### Per-Column Commit Handler
 
@@ -1057,14 +1090,14 @@ const partial = table.exportData({
 
 ### ExportOptions
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `format` | `'csv' \| 'json'` | `'json'` | Output format |
-| `allRows` | `boolean` | `false` | Include all rows (ignore pagination) |
-| `columns` | `string[]` | -- | Specific column IDs to include (default: all visible) |
-| `includeHeaders` | `boolean` | -- | Include column headers in output |
-| `delimiter` | `string` | `','` | CSV delimiter |
-| `fileName` | `string` | -- | Suggested file name |
+| Option           | Type              | Default  | Description                                           |
+| ---------------- | ----------------- | -------- | ----------------------------------------------------- |
+| `format`         | `'csv' \| 'json'` | `'json'` | Output format                                         |
+| `allRows`        | `boolean`         | `false`  | Include all rows (ignore pagination)                  |
+| `columns`        | `string[]`        | --       | Specific column IDs to include (default: all visible) |
+| `includeHeaders` | `boolean`         | --       | Include column headers in output                      |
+| `delimiter`      | `string`          | `','`    | CSV delimiter                                         |
+| `fileName`       | `string`          | --       | Suggested file name                                   |
 
 ---
 
@@ -1074,24 +1107,24 @@ Yable includes a typed event emitter for responding to table interactions.
 
 ### Available Events
 
-| Event | Payload | Description |
-|---|---|---|
-| `cell:click` | `CellClickEvent` | Cell was clicked |
-| `cell:dblclick` | `CellClickEvent` | Cell was double-clicked |
-| `cell:contextmenu` | `CellClickEvent` | Cell right-click |
-| `row:click` | `RowClickEvent` | Row was clicked |
-| `row:dblclick` | `RowClickEvent` | Row was double-clicked |
-| `row:contextmenu` | `RowClickEvent` | Row right-click |
-| `header:click` | `HeaderClickEvent` | Header cell was clicked |
-| `header:contextmenu` | `HeaderClickEvent` | Header right-click |
-| `cell:edit:start` | `CellEditEvent` | Cell entered edit mode |
-| `cell:edit:commit` | `CellEditEvent` | Cell edit was committed |
-| `cell:edit:cancel` | `CellEditEvent` | Cell edit was cancelled |
-| `selection:change` | `SelectionChangeEvent` | Row selection changed |
-| `sort:change` | `SortChangeEvent` | Sorting changed |
-| `filter:change` | `FilterChangeEvent` | Filters changed |
-| `page:change` | `PageChangeEvent` | Pagination changed |
-| `state:change` | `StateChangeEvent` | Any state changed |
+| Event                | Payload                | Description             |
+| -------------------- | ---------------------- | ----------------------- |
+| `cell:click`         | `CellClickEvent`       | Cell was clicked        |
+| `cell:dblclick`      | `CellClickEvent`       | Cell was double-clicked |
+| `cell:contextmenu`   | `CellClickEvent`       | Cell right-click        |
+| `row:click`          | `RowClickEvent`        | Row was clicked         |
+| `row:dblclick`       | `RowClickEvent`        | Row was double-clicked  |
+| `row:contextmenu`    | `RowClickEvent`        | Row right-click         |
+| `header:click`       | `HeaderClickEvent`     | Header cell was clicked |
+| `header:contextmenu` | `HeaderClickEvent`     | Header right-click      |
+| `cell:edit:start`    | `CellEditEvent`        | Cell entered edit mode  |
+| `cell:edit:commit`   | `CellEditEvent`        | Cell edit was committed |
+| `cell:edit:cancel`   | `CellEditEvent`        | Cell edit was cancelled |
+| `selection:change`   | `SelectionChangeEvent` | Row selection changed   |
+| `sort:change`        | `SortChangeEvent`      | Sorting changed         |
+| `filter:change`      | `FilterChangeEvent`    | Filters changed         |
+| `page:change`        | `PageChangeEvent`      | Pagination changed      |
+| `state:change`       | `StateChangeEvent`     | Any state changed       |
 
 ### How to Use
 
@@ -1136,11 +1169,38 @@ const table = useTable({
 
 ## i18n
 
-Internationalization support for table UI strings.
+Internationalization support for table UI strings. The core package exports a `YableLocale` interface and helpers for creating and swapping locales.
+
+### How to Use
+
+```typescript
+import {
+  en,
+  createLocale,
+  setDefaultLocale,
+  getDefaultLocale,
+  resetLocale,
+} from '@zvndev/yable-core'
+
+// Build a partial override on top of English
+const frCa = createLocale(en, {
+  paginationPage: 'Page',
+  paginationOf: 'de',
+  searchPlaceholder: 'Rechercher…',
+})
+
+// Make it the new default for any new tables
+setDefaultLocale(frCa)
+
+// Read the currently active locale
+const current = getDefaultLocale()
+
+// Reset back to built-in English
+resetLocale()
+```
 
 ### Notes
 
-- i18n infrastructure is being developed
-- Built-in components use English strings by default
-- Custom text can be passed via props (`emptyMessage`, `placeholder`, etc.)
-- Full locale support is planned for a future release
+- Default locale is English (`en`) — see `packages/core/src/i18n/en.ts` for the full key list
+- Built-in React components (pagination, global filter, etc.) read strings from the active locale
+- Custom text can still be passed via component props (`emptyMessage`, `placeholder`, etc.) to override on a per-instance basis

@@ -135,7 +135,7 @@ const VALID_THEME_NAME = /^[a-zA-Z0-9_-]+$/
 function validateThemeName(name: string): void {
   if (!VALID_THEME_NAME.test(name)) {
     throw new Error(
-      `Yable: Invalid theme name '${name}'. Theme names must contain only letters, numbers, hyphens, and underscores.`
+      `[yable E002] Invalid theme name '${name}'. Theme names must contain only letters, numbers, hyphens, and underscores.`,
     )
   }
 }
@@ -153,14 +153,8 @@ function validateThemeName(name: string): void {
 function sanitizeCSSValue(value: string): string {
   let sanitized = value
 
-  // Remove characters that can break out of a CSS declaration or rule
-  sanitized = sanitized.replace(/[{}]/g, '')
-
-  // Remove semicolons that are not inside quotes (prevents injecting new declarations)
-  // We strip all semicolons — CSS custom property values don't need them
-  sanitized = sanitized.replace(/;/g, '')
-
-  // Remove @import and @charset directives (case-insensitive)
+  // Remove @import and @charset directives (case-insensitive) BEFORE we strip
+  // structural characters so patterns like `@import` are matched as a whole.
   sanitized = sanitized.replace(/@import/gi, '')
   sanitized = sanitized.replace(/@charset/gi, '')
 
@@ -172,6 +166,15 @@ function sanitizeCSSValue(value: string): string {
 
   // Remove javascript: protocol
   sanitized = sanitized.replace(/javascript\s*:/gi, '')
+
+  // Remove structural CSS characters that could break out of a declaration
+  // or inject new declarations/rules. CSS custom property values used by
+  // this theme system never legitimately contain any of:
+  //   { } ; :
+  // so stripping them is safe. Stripping `:` is what closes the
+  // `red; background: blue` injection vector — without this, dropping only
+  // `;` leaves behind `red background: blue` which still matches a declaration.
+  sanitized = sanitized.replace(/[{};:]/g, '')
 
   return sanitized.trim()
 }
@@ -204,7 +207,12 @@ export function createTheme(definition: ThemeDefinition): string {
 
   if (dark) {
     // Auto dark mode
-    css += `\n@media (prefers-color-scheme: dark) {\n  ${selector}:not([data-yable-theme="light"]) {\n${tokensToCSS(dark).split('\n').map(l => '  ' + l).join('\n')}\n  }\n}\n`
+    css += `\n@media (prefers-color-scheme: dark) {\n  ${selector}:not([data-yable-theme="light"]) {\n${tokensToCSS(
+      dark,
+    )
+      .split('\n')
+      .map((l) => '  ' + l)
+      .join('\n')}\n  }\n}\n`
 
     // Manual dark mode
     css += `\n[data-yable-theme="dark"] ${selector} {\n${tokensToCSS(dark)}\n}\n`
@@ -251,7 +259,7 @@ export function switchTheme(container: HTMLElement, themeName: string): void {
 
   container.setAttribute('data-theme', themeName)
   // Also update the class
-  const classes = container.className.split(' ').filter(c => !c.startsWith('yable-theme-'))
+  const classes = container.className.split(' ').filter((c) => !c.startsWith('yable-theme-'))
   classes.push(`yable-theme-${themeName}`)
   container.className = classes.join(' ')
 }

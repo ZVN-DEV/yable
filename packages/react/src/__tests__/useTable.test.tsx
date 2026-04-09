@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest'
 import { act, render } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   createColumnHelper,
   type Table,
@@ -48,7 +48,7 @@ describe('useTable — latest onStateChange', () => {
         grouping: [],
         pagination: { pageIndex: 0, pageSize: 10 },
         editing: { activeCell: undefined, pendingValues: {} },
-      })
+      } as unknown as TableState)
 
       // Each render produces a fresh `onStateChange` identity that closes
       // over the latest `tag`. Every other option key is referentially

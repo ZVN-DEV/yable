@@ -2,7 +2,18 @@
   "name": "@zvndev/yable-core",
   "version": "0.2.0",
   "description": "Headless, zero-dependency data table engine with sorting, filtering, editing, formulas, pivot tables, and more",
-  "keywords": ["table", "data-grid", "datagrid", "spreadsheet", "headless", "typescript", "sorting", "filtering", "formulas", "pivot"],
+  "keywords": [
+    "table",
+    "data-grid",
+    "datagrid",
+    "spreadsheet",
+    "headless",
+    "typescript",
+    "sorting",
+    "filtering",
+    "formulas",
+    "pivot"
+  ],
   "license": "MIT",
   "author": "ZVN DEV",
   "repository": {
@@ -77,7 +88,10 @@
       }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

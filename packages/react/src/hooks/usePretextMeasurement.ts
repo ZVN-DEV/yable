@@ -110,7 +110,9 @@ export function usePretextMeasurement({
     loadPretext().then((mod) => {
       if (!cancelled && mod) setPretext(mod)
     })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [enabled])
 
   // Cache prepared text handles — keyed by "text|font"
@@ -145,7 +147,12 @@ export function usePretextMeasurement({
     return result
     // Re-run when data changes or fonts change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pretext, enabled, data, columns.map((c) => `${c.columnId}:${c.font}:${c.fixedHeight ? 'F' : 'T'}`).join('|')])
+  }, [
+    pretext,
+    enabled,
+    data,
+    columns.map((c) => `${c.columnId}:${c.font}:${c.fixedHeight ? 'F' : 'T'}`).join('|'),
+  ])
 
   // Phase 2: layout() — runs when column widths change (pure math, instant)
   const measurement = useMemo(() => {
@@ -171,7 +178,8 @@ export function usePretextMeasurement({
     }
     if (fixedFloor > 0) {
       for (let r = 0; r < data.length; r++) {
-        if (fixedFloor > rowHeights[r]) rowHeights[r] = fixedFloor
+        // Safe: r < data.length === rowHeights.length (Float64Array allocated above)
+        if (fixedFloor > rowHeights[r]!) rowHeights[r] = fixedFloor
       }
     }
 
@@ -181,7 +189,8 @@ export function usePretextMeasurement({
       if (!col) continue
       const result = pretext.layout(prepared, col.width, col.lineHeight)
       const cellHeight = result.height + (col.padding ?? 16)
-      if (cellHeight > rowHeights[rowIndex]) {
+      // Safe: rowIndex came from iterating `0..data.length` when building preparedCells
+      if (cellHeight > rowHeights[rowIndex]!) {
         rowHeights[rowIndex] = cellHeight
       }
     }
@@ -189,7 +198,8 @@ export function usePretextMeasurement({
     // Build prefix sums for O(log n) binary search in virtualizer
     const prefixSums = new Float64Array(data.length + 1)
     for (let i = 0; i < data.length; i++) {
-      prefixSums[i + 1] = prefixSums[i] + rowHeights[i]
+      // Safe: i < data.length, and prefixSums has length data.length + 1
+      prefixSums[i + 1] = prefixSums[i]! + rowHeights[i]!
     }
 
     layoutTimeRef.current = performance.now() - start
@@ -197,7 +207,8 @@ export function usePretextMeasurement({
     return {
       rowHeights,
       prefixSums,
-      totalHeight: prefixSums[data.length],
+      // Safe: prefixSums has length data.length + 1, so [data.length] always exists
+      totalHeight: prefixSums[data.length]!,
     }
     // Re-run on column width changes (layout is pure math, ~15ms for 50k cells)
     // eslint-disable-next-line react-hooks/exhaustive-deps

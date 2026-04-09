@@ -8,15 +8,25 @@
     "test": "turbo run test:ci",
     "test:watch": "turbo run test",
     "test:ci": "turbo run test:ci",
+    "test:coverage": "turbo run test:ci -- --coverage",
     "lint": "turbo run lint",
     "lint:root": "eslint .",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean",
     "storybook": "storybook dev -p 6006",
-    "storybook:build": "storybook build"
+    "storybook:build": "storybook build",
+    "prepare": "husky",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish",
+    "size": "size-limit",
+    "size:why": "size-limit --why",
+    "format": "prettier --write ."
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.10",
     "@eslint/js": "^9.0.0",
+    "@size-limit/preset-small-lib": "^11.1.6",
     "@storybook/addon-essentials": "^8.4.0",
     "@storybook/react": "^8.4.0",
     "@storybook/react-vite": "^8.4.0",
@@ -25,15 +35,49 @@
     "eslint": "^9.0.0",
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "fast-check": "^3.23.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "size-limit": "^11.1.6",
     "storybook": "^8.4.0",
     "turbo": "^2.3.0",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.0.0"
   },
+  "size-limit": [
+    {
+      "name": "@zvndev/yable-core (ESM)",
+      "path": "packages/core/dist/index.js",
+      "limit": "40 KB",
+      "gzip": true
+    },
+    {
+      "name": "@zvndev/yable-react (ESM)",
+      "path": "packages/react/dist/index.js",
+      "limit": "35 KB",
+      "gzip": true,
+      "ignore": [
+        "react",
+        "react-dom",
+        "@zvndev/yable-core"
+      ]
+    },
+    {
+      "name": "@zvndev/yable-vanilla (ESM)",
+      "path": "packages/vanilla/dist/index.js",
+      "limit": "10 KB",
+      "gzip": true,
+      "ignore": [
+        "@zvndev/yable-core"
+      ]
+    }
+  ],
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

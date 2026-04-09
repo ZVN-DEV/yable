@@ -12,7 +12,7 @@ export class CommitError extends Error {
   cells: CommitErrorCells
 
   constructor(cells: CommitErrorCells, message?: string) {
-    super(message ?? 'Commit failed')
+    super(message ?? '[yable E012] CommitError: handler threw or rejected')
     this.name = 'CommitError'
     this.cells = cells
     // Maintain prototype chain across down-compilation

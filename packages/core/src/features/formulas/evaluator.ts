@@ -41,11 +41,11 @@ export function evaluate(
   node: ASTNode,
   getCellValue: CellValueResolver,
   getRangeValues: RangeValueResolver,
-  _depth: number = 0
+  _depth: number = 0,
 ): unknown {
   if (_depth > MAX_EVAL_DEPTH) {
     throw new FormulaError(
-      `Formula evaluation exceeds maximum recursion depth of ${MAX_EVAL_DEPTH}. Check for circular references or overly complex expressions.`
+      `[yable E008] Formula evaluation exceeds maximum recursion depth of ${MAX_EVAL_DEPTH}. Check for circular references or overly complex expressions.`,
     )
   }
 
@@ -77,21 +77,17 @@ export function evaluate(
         node.right,
         getCellValue,
         getRangeValues,
-        nextDepth
+        nextDepth,
       )
 
     case 'functionCall':
-      return evaluateFunctionCall(
-        node.name,
-        node.args,
-        getCellValue,
-        getRangeValues,
-        nextDepth
-      )
+      return evaluateFunctionCall(node.name, node.args, getCellValue, getRangeValues, nextDepth)
 
     default: {
       const exhaustive: never = node
-      throw new FormulaError(`Unknown AST node type: ${(exhaustive as { type: string }).type}`)
+      throw new FormulaError(
+        `[yable E013] Unknown AST node type: ${(exhaustive as { type: string }).type}`,
+      )
     }
   }
 }
@@ -105,7 +101,7 @@ function evaluateUnaryOp(
   operand: ASTNode,
   getCellValue: CellValueResolver,
   getRangeValues: RangeValueResolver,
-  depth: number
+  depth: number,
 ): unknown {
   const value = evaluate(operand, getCellValue, getRangeValues, depth)
 
@@ -125,7 +121,7 @@ function evaluateBinaryOp(
   right: ASTNode,
   getCellValue: CellValueResolver,
   getRangeValues: RangeValueResolver,
-  depth: number
+  depth: number,
 ): unknown {
   const leftVal = evaluate(left, getCellValue, getRangeValues, depth)
   const rightVal = evaluate(right, getCellValue, getRangeValues, depth)
@@ -174,18 +170,16 @@ function evaluateFunctionCall(
   args: ASTNode[],
   getCellValue: CellValueResolver,
   getRangeValues: RangeValueResolver,
-  depth: number
+  depth: number,
 ): unknown {
   const fn = builtInFunctions[name]
 
   if (!fn) {
-    throw new FormulaError(`Unknown function: ${name}`)
+    throw new FormulaError(`[yable E007] Unknown function: ${name}`)
   }
 
   // Evaluate each argument
-  const evaluatedArgs = args.map((arg) =>
-    evaluate(arg, getCellValue, getRangeValues, depth)
-  )
+  const evaluatedArgs = args.map((arg) => evaluate(arg, getCellValue, getRangeValues, depth))
 
   return fn(evaluatedArgs)
 }

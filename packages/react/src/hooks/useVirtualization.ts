@@ -55,7 +55,11 @@ export function useVirtualization({
   pretextHeights,
   pretextPrefixSums,
 }: UseVirtualizationOptions): UseVirtualizationResult {
-  const hasPretextHeights = !!(pretextHeights && pretextPrefixSums && pretextHeights.length >= totalRows)
+  const hasPretextHeights = !!(
+    pretextHeights &&
+    pretextPrefixSums &&
+    pretextHeights.length >= totalRows
+  )
   const isFixedHeight = typeof rowHeight === 'number' && !hasPretextHeights
 
   // Cache for variable row heights (index -> measured or estimated size)
@@ -63,8 +67,9 @@ export function useVirtualization({
 
   const getRowHeight = useCallback(
     (index: number): number => {
-      // Pretext heights take priority — exact pixel values
-      if (hasPretextHeights) return pretextHeights![index]
+      // Pretext heights take priority — exact pixel values.
+      // Safe: hasPretextHeights verified pretextHeights.length >= totalRows and index < totalRows
+      if (hasPretextHeights) return pretextHeights![index]!
       if (isFixedHeight) return rowHeight as number
       // Check cache first
       const cached = heightCacheRef.current.get(index)
@@ -74,7 +79,7 @@ export function useVirtualization({
       heightCacheRef.current.set(index, height)
       return height
     },
-    [rowHeight, isFixedHeight, hasPretextHeights, pretextHeights]
+    [rowHeight, isFixedHeight, hasPretextHeights, pretextHeights],
   )
 
   const [scrollState, setScrollState] = useState<{
@@ -153,8 +158,9 @@ export function useVirtualization({
       const clampedIndex = Math.max(0, Math.min(index, totalRows - 1))
 
       if (hasPretextHeights && pretextPrefixSums!) {
-        // Instant: prefix sums give us the exact offset
-        container.scrollTop = pretextPrefixSums![clampedIndex]
+        // Instant: prefix sums give us the exact offset.
+        // Safe: hasPretextHeights verified length, clampedIndex < totalRows <= pretextPrefixSums.length
+        container.scrollTop = pretextPrefixSums![clampedIndex]!
       } else if (isFixedHeight) {
         container.scrollTop = clampedIndex * (rowHeight as number)
       } else {
@@ -165,13 +171,22 @@ export function useVirtualization({
         container.scrollTop = offset
       }
     },
-    [containerRef, totalRows, rowHeight, isFixedHeight, getRowHeight, hasPretextHeights, pretextPrefixSums]
+    [
+      containerRef,
+      totalRows,
+      rowHeight,
+      isFixedHeight,
+      getRowHeight,
+      hasPretextHeights,
+      pretextPrefixSums,
+    ],
   )
 
   // Compute total height — pretext prefix sums give us this for free
   const totalHeight = useMemo(() => {
     if (totalRows === 0) return 0
-    if (hasPretextHeights && pretextPrefixSums!) return pretextPrefixSums![totalRows]
+    // Safe: prefixSums has length data.length + 1, totalRows === data.length, so [totalRows] exists
+    if (hasPretextHeights && pretextPrefixSums!) return pretextPrefixSums![totalRows]!
     if (isFixedHeight) return totalRows * (rowHeight as number)
     let total = 0
     for (let i = 0; i < totalRows; i++) {
@@ -209,7 +224,8 @@ export function useVirtualization({
     let hi = totalRows - 1
     while (lo < hi) {
       const mid = (lo + hi) >>> 1
-      if (pretextPrefixSums![mid + 1] <= scrollTop) {
+      // Safe: mid + 1 <= hi + 1 <= totalRows < prefixSums.length (length is data.length + 1)
+      if (pretextPrefixSums![mid + 1]! <= scrollTop) {
         lo = mid + 1
       } else {
         hi = mid
@@ -223,7 +239,8 @@ export function useVirtualization({
     hi = totalRows - 1
     while (lo < hi) {
       const mid = (lo + hi + 1) >>> 1
-      if (pretextPrefixSums![mid] < bottomEdge) {
+      // Safe: mid <= hi < totalRows < prefixSums.length
+      if (pretextPrefixSums![mid]! < bottomEdge) {
         lo = mid
       } else {
         hi = mid - 1
@@ -233,10 +250,7 @@ export function useVirtualization({
   } else if (isFixedHeight) {
     const fixedH = rowHeight as number
     startIndex = Math.floor(scrollTop / fixedH)
-    endIndex = Math.min(
-      totalRows - 1,
-      Math.ceil((scrollTop + containerHeight) / fixedH) - 1
-    )
+    endIndex = Math.min(totalRows - 1, Math.ceil((scrollTop + containerHeight) / fixedH) - 1)
   } else {
     // Variable heights: walk rows to find the visible range
     let accum = 0
@@ -272,12 +286,13 @@ export function useVirtualization({
   const virtualRows: VirtualRow[] = []
 
   if (hasPretextHeights && pretextPrefixSums!) {
-    // Fastest path: prefix sums give us start offsets directly
+    // Fastest path: prefix sums give us start offsets directly.
+    // Safe: i in [overscanStart, overscanEnd] ⊆ [0, totalRows - 1] < both arrays' lengths
     for (let i = overscanStart; i <= overscanEnd; i++) {
       virtualRows.push({
         index: i,
-        start: pretextPrefixSums![i],
-        size: pretextHeights![i],
+        start: pretextPrefixSums![i]!,
+        size: pretextHeights![i]!,
       })
     }
   } else if (isFixedHeight) {

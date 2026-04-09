@@ -13,7 +13,7 @@ Thank you for your interest in contributing to Yable! This guide covers everythi
 
 ```bash
 # Clone the repository
-git clone https://github.com/zvndev/yable.git
+git clone https://github.com/ZVN-DEV/yable.git
 cd yable
 
 # Install dependencies
@@ -67,7 +67,7 @@ yable/
       src/
         tokens.css  # CSS custom properties
         base.css    # Structural styles
-        themes/     # Theme-specific CSS (default, stripe, compact)
+        themes/     # Theme-specific CSS (default, stripe, compact, forest, midnight, rose, ocean, mono)
   docs/             # Documentation
 ```
 
@@ -221,7 +221,7 @@ Write clear, descriptive commit messages. Use the imperative mood:
 
 ## Reporting Issues
 
-Found a bug or have a feature request? Please [open an issue](https://github.com/zvndev/yable/issues) with:
+Found a bug or have a feature request? Please [open an issue](https://github.com/ZVN-DEV/yable/issues) with:
 
 - **Bug reports**: Steps to reproduce, expected behavior, actual behavior, and your environment (OS, Node version, framework version).
 - **Feature requests**: Description of the feature, why it's useful, and (optionally) how you'd expect the API to look.
