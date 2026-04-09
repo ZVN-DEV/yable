@@ -1,6 +1,6 @@
 {
   "name": "@zvndev/yable-react",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React adapter for @zvndev/yable-core -- components, hooks, and form controls for building data tables",
   "keywords": [
     "react",
