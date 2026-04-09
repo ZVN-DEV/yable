@@ -116,10 +116,10 @@ const compareRows: CompareRow[] = [
   { label: 'Cell editing (text, select, checkbox…)', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
   { label: 'Sorting / filtering / pagination', yable: 'yes', tanstack: 'yes', agCommunity: 'yes', agEnterprise: 'yes' },
   { label: 'Pivot tables', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
-  { label: 'Formula engine', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
+  { label: 'Formula engine', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
   { label: 'Clipboard copy / paste / TSV', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
-  { label: 'Fill handle (linear + geometric)', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
-  { label: 'Undo / redo with event hooks', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
+  { label: 'Fill handle (linear + geometric)', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
+  { label: 'Undo / redo with event hooks', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
   { label: 'Tree data / hierarchical rows', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
   { label: 'Async cell commits + retry', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
   { label: '8 themed token packs', yable: 'yes', tanstack: 'no', agCommunity: 'partial', agEnterprise: 'partial' },
@@ -610,8 +610,8 @@ export default function Home() {
             <p className={s.heroLead}>
               Yable is a TypeScript-first data table that ships pivot tables,
               formulas, clipboard, fill handle, undo/redo and async commits in
-              the same MIT package. The features other libraries paywall — this
-              one ships them on contact.
+              the same MIT package. The features others charge $1,000+/dev/year
+              for — free here, on contact.
             </p>
 
             <div className={s.heroCtas}>

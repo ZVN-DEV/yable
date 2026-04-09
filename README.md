@@ -21,7 +21,7 @@ Yable is a TypeScript-first, framework-agnostic data table engine. It ships a he
 
 - **Formula engine** -- 17 built-in spreadsheet functions (extensible) with a parser, evaluator, and dependency tracker. Free and MIT-licensed -- AG Grid's formula support requires an Enterprise license.
 - **Async cell commits** -- built-in optimistic saves with pending, error, and conflict cell states. Retry, dismiss, and conflict resolution out of the box. No other React grid ships this.
-- **Pivot tables, fill handle, clipboard, undo/redo** -- features that AG Grid locks behind a $1,000+/dev/year Enterprise license. Yable ships them for free under MIT.
+- **Pivot tables, fill handle, clipboard** -- features that AG Grid locks behind a $1,000+/dev/year Enterprise license. Yable ships them for free under MIT.
 - **Headless core + batteries-included UI** -- TanStack Table is headless but ships zero components. Yable gives you a headless `@zvndev/yable-core` *and* ready-to-use React components with styled themes.
 - **TypeScript from the ground up** -- deep key inference on accessors, fully typed state slices, and generic-safe column helpers.
 - **Framework-agnostic** -- `@zvndev/yable-core` has zero (0) dependencies. `@zvndev/yable-react` and `@zvndev/yable-vanilla` are thin adapters.
