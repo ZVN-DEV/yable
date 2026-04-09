@@ -1,6 +1,6 @@
 {
   "name": "@zvndev/yable-vanilla",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Vanilla JS/DOM renderer for @zvndev/yable-core -- framework-free table rendering",
   "keywords": [
     "table",
