@@ -123,8 +123,8 @@ const compareRows: CompareRow[] = [
   { label: 'Tree data / hierarchical rows', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
   { label: 'Async cell commits + retry', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'no' },
   { label: '8 themed token packs', yable: 'yes', tanstack: 'no', agCommunity: 'partial', agEnterprise: 'partial' },
-  { label: 'Row virtualization', yable: 'no', tanstack: 'partial', agCommunity: 'yes', agEnterprise: 'yes', note: 'Yable: planned, hook scaffold present' },
-  { label: 'Keyboard navigation grid', yable: 'no', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes', note: 'Yable: planned' },
+  { label: 'Row virtualization', yable: 'yes', tanstack: 'partial', agCommunity: 'yes', agEnterprise: 'yes' },
+  { label: 'Keyboard navigation grid', yable: 'yes', tanstack: 'no', agCommunity: 'yes', agEnterprise: 'yes' },
   { label: 'License', yable: 'yes', tanstack: 'yes', agCommunity: 'yes', agEnterprise: 'paid' },
 ]
 
@@ -592,7 +592,7 @@ export default function Home() {
         <header className={s.hero}>
           <div className={s.heroCopy}>
             <div className={s.kickerRow}>
-              <span className={s.kicker}>v0.1 · MIT licensed</span>
+              <span className={s.kicker}>v0.2 · MIT licensed</span>
               <span className={s.kickerDivider} />
               <span className={s.kickerMeta}>
                 Headless core · React · Vanilla · Theme tokens
