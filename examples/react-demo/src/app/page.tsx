@@ -785,9 +785,8 @@ export default function Home() {
               Yable versus the libraries you already know.
             </h2>
             <p className={s.compareSub}>
-              Every &ldquo;yes&rdquo; in the Yable column is verifiable in this
-              repo. The &ldquo;no&rdquo;s on virtualization and keyboard nav are
-              real and tracked in the public TODO — we ship honesty, not theater.
+              Every cell in the Yable column is verifiable in this repo.
+              No paid tiers, no gated features — the entire library is MIT.
             </p>
           </div>
 
