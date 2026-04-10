@@ -1,30 +1,13 @@
 import type { Metadata } from 'next'
-import {
-  Cormorant_Garamond,
-  IBM_Plex_Mono,
-  IBM_Plex_Sans,
-} from 'next/font/google'
+import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
 import './globals.css'
 import '@zvndev/yable-themes'
 import '@zvndev/yable-themes/default.css'
 import '@zvndev/yable-themes/midnight.css'
-import '@zvndev/yable-themes/stripe.css'
-import '@zvndev/yable-themes/compact.css'
-import '@zvndev/yable-themes/ocean.css'
-import '@zvndev/yable-themes/forest.css'
-import '@zvndev/yable-themes/rose.css'
-import '@zvndev/yable-themes/mono.css'
-
-const display = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  display: 'swap',
-  variable: '--font-display',
-})
 
 const body = IBM_Plex_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-body',
 })
@@ -37,27 +20,31 @@ const mono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Yable Demo — Spreadsheet-Grade Tables With Taste',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  title: {
+    default: 'Yable — The open-source React data table',
+    template: '%s · Yable',
+  },
   description:
-    'A live editorial showcase for Yable: sorting, filtering, editing, themes, and a stronger visual front door for the package.',
+    'Open-source TypeScript data table with pivot tables, formulas, fill handle, clipboard, undo/redo, and async commits. MIT-licensed AG Grid alternative.',
+  openGraph: {
+    type: 'website',
+    siteName: 'Yable',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+  authors: [{ name: 'ZVN DEV', url: 'https://github.com/ZVN-DEV' }],
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
-      data-yable-theme="dark"
-    >
+    <html lang="en" className={`${body.variable} ${mono.variable}`} data-yable-theme="dark">
       <body
         style={{
           margin: 0,
           fontFamily: 'var(--font-body), sans-serif',
-          backgroundColor: '#0d0907',
+          backgroundColor: '#0a0706',
           color: '#f3eadb',
           minHeight: '100vh',
           WebkitFontSmoothing: 'antialiased',
