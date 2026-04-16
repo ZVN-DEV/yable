@@ -53,8 +53,8 @@ export interface UsePrintLayoutOptions {
 }
 
 export function usePrintLayout<TData extends RowData>(
-  table: Table<TData>,
-  options: UsePrintLayoutOptions = {}
+  _table: Table<TData>,
+  options: UsePrintLayoutOptions = {},
 ) {
   const { title, additionalCSS } = options
   const isPrintingRef = useRef(false)
@@ -105,7 +105,7 @@ export function usePrintLayout<TData extends RowData>(
     requestAnimationFrame(() => {
       window.print()
     })
-  }, [table, title, additionalCSS])
+  }, [title, additionalCSS])
 
   return {
     preparePrint,

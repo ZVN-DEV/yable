@@ -1,11 +1,7 @@
 // @zvndev/yable-core — Formula Parser & Evaluator Tests
 
 import { describe, it, expect } from 'vitest'
-import {
-  tokenize,
-  parseFormula,
-  FormulaError,
-} from '../formulas/parser'
+import { tokenize, parseFormula, FormulaError } from '../formulas/parser'
 import { evaluate } from '../formulas/evaluator'
 import type { CellValueResolver, RangeValueResolver } from '../formulas/evaluator'
 import {
@@ -33,10 +29,7 @@ function evalFormula(formula: string): unknown {
 }
 
 /** Parse and evaluate a formula with a cell grid */
-function evalWithGrid(
-  formula: string,
-  grid: Record<string, unknown>
-): unknown {
+function evalWithGrid(formula: string, grid: Record<string, unknown>): unknown {
   const getCellValue: CellValueResolver = (ref) => grid[ref]
   const getRangeValues: RangeValueResolver = (rangeRef) => {
     const parsed = parseRangeRef(rangeRef)
@@ -137,6 +130,17 @@ describe('Tokenizer', () => {
     const tokens = tokenize('=sum(a1)')
     expect(tokens[0]?.value).toBe('SUM')
     expect(tokens[2]?.value).toBe('A1')
+  })
+})
+
+describe('Evaluator safety guards', () => {
+  it('should reject formulas that exceed maximum evaluation depth', () => {
+    let formula = '=1'
+    for (let i = 0; i < 110; i++) {
+      formula = `=ABS(${formula.slice(1)})`
+    }
+
+    expect(() => evalFormula(formula)).toThrow(FormulaError)
   })
 })
 
@@ -412,7 +416,11 @@ describe('Evaluator', () => {
     it('should throw FormulaError on unknown unary operator', () => {
       // This one is hard to trigger since the parser limits ops,
       // but we can test the evaluator directly
-      const ast = { type: 'unaryOp' as const, operator: '~', operand: { type: 'number' as const, value: 1 } }
+      const ast = {
+        type: 'unaryOp' as const,
+        operator: '~',
+        operand: { type: 'number' as const, value: 1 },
+      }
       expect(() => evaluate(ast, noop, noopRange)).toThrow(FormulaError)
     })
 
@@ -562,7 +570,7 @@ describe('Cell Reference Utilities', () => {
         expect.arrayContaining([
           { row: 0, col: 0 },
           { row: 1, col: 1 },
-        ])
+        ]),
       )
     })
 

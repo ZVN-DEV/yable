@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a reproducible bug in Yable
+title: '[Bug]: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please include a minimal reproduction and the exact package versions you tested.
+  - type: input
+    id: package_version
+    attributes:
+      label: Affected package(s) and version(s)
+      placeholder: '@zvndev/yable-react@0.2.1, @zvndev/yable-core@0.2.1'
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - Core
+        - React
+        - Vanilla
+        - Themes
+        - Demo / docs
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Link a repo, sandbox, or paste the smallest possible reproduction.
+      placeholder: Step-by-step reproduction or URL to a minimal repo
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, framework, package manager, Node version, OS, etc.
+      placeholder: 'Next.js 15.5.15, React 19, pnpm 10.29.3, Node 22, macOS 15'
+    validations:
+      required: true

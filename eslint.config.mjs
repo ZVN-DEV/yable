@@ -4,6 +4,20 @@ import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
 
 export default tseslint.config(
+  {
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.next/**',
+      '**/.turbo/**',
+      '**/coverage/**',
+      '**/storybook-static/**',
+      '**/playwright-report/**',
+      '**/test-results/**',
+      '**/next-env.d.ts',
+      '**/*.config.*',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -22,8 +36,5 @@ export default tseslint.config(
     settings: {
       react: { version: 'detect' },
     },
-  },
-  {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/*.config.*'],
   },
 )

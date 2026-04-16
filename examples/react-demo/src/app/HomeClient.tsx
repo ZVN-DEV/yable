@@ -69,6 +69,10 @@ const allThemes = [
 type ThemeId = (typeof allThemes)[number]['id']
 type DemoTab = 'data' | 'editable' | 'themes'
 
+const CURRENT_VERSION = '0.2.1'
+const PASSING_TESTS = '596'
+const REACT_GZIPPED_SIZE = '35.5kB'
+
 /* ─────────────────────────────────────────────────────────────────────────
  * Comparison table data
  * ─────────────────────────────────────────────────────────────────────── */
@@ -95,7 +99,7 @@ const compareRows: CompareRow[] = [
   {
     label: 'Cell editing (text, select, checkbox\u2026)',
     yable: 'yes',
-    tanstack: 'no',
+    tanstack: 'partial',
     agCommunity: 'yes',
     agEnterprise: 'yes',
   },
@@ -191,7 +195,7 @@ const showcaseFeatures = [
   },
   {
     eyebrow: 'PivotEngine',
-    title: 'Pivot tables, no paywall.',
+    title: 'Pivot tables, built in.',
     copy: (
       <>
         Row groups, column groups, aggregation, subtotals, grand totals, dynamic columns. One config
@@ -629,7 +633,7 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
         <header className={s.hero}>
           <div className={s.heroCopy}>
             <div className={s.kickerRow}>
-              <span className={s.kicker}>v0.2 · MIT licensed</span>
+              <span className={s.kicker}>{`v${CURRENT_VERSION}`} · MIT licensed</span>
               <span className={s.kickerDivider} />
               <span className={s.kickerMeta}>React · Vanilla · Headless · Themeable</span>
             </div>
@@ -637,15 +641,18 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
             <h1 className={s.heroTitle}>
               <span className={s.heroLine}>Pivot tables. Formulas.</span>
               <span className={s.heroLine}>Clipboard. Fill handle.</span>
-              <span className={`${s.heroLine} ${s.heroLineAccent}`}>All MIT. Zero deps.</span>
+              <span className={`${s.heroLine} ${s.heroLineAccent}`}>
+                All MIT. Core stays zero-dep.
+              </span>
               <span className="sr-only">
-                Open-source React data table with spreadsheet features — MIT alternative to AG Grid.
+                Open-source React data table with spreadsheet-style features and a headless core.
               </span>
             </h1>
 
             <p className={s.heroLead}>
-              A React data table that ships what AG Grid charges $1k/dev/yr for. TypeScript-first.
-              Works headless or with built-in components.
+              TypeScript-first data table with formulas, pivoting, async commits, theming, and
+              shipped row virtualization. Use the headless core, the React components, or the
+              vanilla renderer.
             </p>
 
             <div className={s.installStrip}>
@@ -675,16 +682,16 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
 
             <div className={s.trustStrip}>
               <div className={s.trustItem}>
-                <span className={s.trustValue}>&mdash;</span>
-                <span className={s.trustLabel}>GitHub stars</span>
+                <span className={s.trustValue}>{PASSING_TESTS}</span>
+                <span className={s.trustLabel}>passing tests</span>
               </div>
               <div className={s.trustItem}>
-                <span className={s.trustValue}>~12kB</span>
-                <span className={s.trustLabel}>gzipped</span>
+                <span className={s.trustValue}>{REACT_GZIPPED_SIZE}</span>
+                <span className={s.trustLabel}>React pkg gzipped</span>
               </div>
               <div className={s.trustItem}>
                 <span className={s.trustValue}>0</span>
-                <span className={s.trustLabel}>runtime deps</span>
+                <span className={s.trustLabel}>core runtime deps</span>
               </div>
             </div>
           </div>
@@ -714,8 +721,8 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
             <span className={s.sectionEyebrow}>Comparison</span>
             <h2 className={s.compareTitle}>Feature matrix.</h2>
             <p className={s.compareSub}>
-              Every checkmark in the Yable column is verifiable in this repo. No paid tiers — the
-              entire library is MIT.
+              Every Yable checkmark is verifiable in this repo. Competitor columns focus on built-in
+              behavior rather than custom code or extra packages.
             </p>
           </div>
           <CompareTable />
@@ -725,7 +732,7 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
         <section className={s.featureSection} aria-label="Key features and live demo">
           <div className={s.featureHeader}>
             <span className={s.sectionEyebrow}>Built In</span>
-            <h2 className={s.sectionTitle}>Stuff you&apos;d normally build yourself or pay for.</h2>
+            <h2 className={s.sectionTitle}>Stuff you&apos;d normally bolt together yourself.</h2>
           </div>
 
           <div className={s.featureGrid}>
@@ -952,7 +959,7 @@ function CompareTable() {
             </th>
             <th scope="col">
               AG Grid Enterprise
-              <span>~$1k+ / dev / yr</span>
+              <span>paid tier</span>
             </th>
           </tr>
         </thead>

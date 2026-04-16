@@ -196,7 +196,6 @@ columnHelper.accessor('tags', {
 
 ```tsx
 import { GlobalFilter } from '@zvndev/yable-react'
-
 ;<GlobalFilter
   table={table}
   placeholder="Search..."
@@ -243,7 +242,6 @@ table.getRowCount() // total rows
 
 ```tsx
 import { Pagination } from '@zvndev/yable-react'
-
 ;<Table table={table}>
   <Pagination
     table={table}
@@ -816,7 +814,7 @@ row.getCanExpand() // true if row has sub-rows
 
 ## Pivot Tables
 
-Transform flat data into cross-tabulated views. This is a premium feature in most competitors -- Yable includes it for free under MIT.
+Transform flat data into cross-tabulated views. Pivoting ships in Yable's MIT-licensed core.
 
 ### How to Enable
 
@@ -958,13 +956,13 @@ A spreadsheet-grade formula engine with 17 built-in functions (extensible), an e
 - The formula engine is included in `@zvndev/yable-core` and works with any adapter
 - Built-in functions: `SUM`, `AVG`, `COUNT`, `COUNTA`, `MIN`, `MAX`, `IF`, `CONCAT`, `ROUND`, `ABS`, `FLOOR`, `CEILING`, `POWER`, `SQRT`, `LEN`, `UPPER`, `LOWER` (plus aliases `AVERAGE`, `CONCATENATE`, `CEIL`, `POW`)
 - Register custom functions via the formula engine API
-- This feature is FREE under MIT -- AG Grid requires an Enterprise license for formula support
+- This feature ships in Yable's MIT-licensed core
 
 ---
 
 ## Async Cell Commits
 
-Save cell edits to a backend with built-in optimistic updates, error handling, retry, and conflict detection. No other React grid ships this feature.
+Save cell edits to a backend with built-in optimistic updates, error handling, retry, and conflict detection. Yable treats this as a first-class workflow instead of leaving it as app glue code.
 
 ### How to Use
 

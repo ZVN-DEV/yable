@@ -32,6 +32,8 @@ interface Employee {
   completion: number
 }
 
+const CURRENT_VERSION = '0.2.1'
+
 const departments = ['Engineering', 'Design', 'Product', 'Marketing', 'Sales']
 const roles = [
   'Intern',
@@ -412,7 +414,7 @@ export default function PlaygroundPage() {
 
         <div className={s.panelFooter}>
           <span className={s.footerBrand}>@zvndev/yable-react</span>
-          <span className={s.footerVersion}>v0.2.0</span>
+          <span className={s.footerVersion}>{`v${CURRENT_VERSION}`}</span>
         </div>
       </aside>
 

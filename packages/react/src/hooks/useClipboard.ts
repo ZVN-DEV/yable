@@ -23,16 +23,9 @@ export interface UseClipboardOptions extends ClipboardOptions {
  */
 export function useClipboard<TData extends RowData>(
   table: Table<TData>,
-  options: UseClipboardOptions = {}
+  options: UseClipboardOptions = {},
 ): void {
-  const {
-    enabled = true,
-    containerRef,
-    onCopy,
-    onCut,
-    onPaste,
-    ...clipboardOptions
-  } = options
+  const { enabled = true, containerRef, onCopy, onCut, onPaste, ...clipboardOptions } = options
 
   const handleCopy = useCallback(
     (e: ClipboardEvent) => {
@@ -48,7 +41,7 @@ export function useClipboard<TData extends RowData>(
 
       onCopy?.(text)
     },
-    [table, clipboardOptions, onCopy]
+    [table, clipboardOptions, onCopy],
   )
 
   const handleCut = useCallback(
@@ -64,7 +57,7 @@ export function useClipboard<TData extends RowData>(
 
       onCut?.(text)
     },
-    [table, clipboardOptions, onCut]
+    [table, clipboardOptions, onCut],
   )
 
   const handlePaste = useCallback(
@@ -85,24 +78,35 @@ export function useClipboard<TData extends RowData>(
         targetRowId = state.editing.activeCell.rowId
         targetColumnId = state.editing.activeCell.columnId
       } else {
-        // Use first selected row
-        const selectedRowIds = Object.keys(state.rowSelection || {}).filter(
-          (id) => state.rowSelection[id]
-        )
-        if (selectedRowIds.length > 0) {
-          targetRowId = selectedRowIds[0]
+        const selectedRange = table.getCellSelectionRange()
+        const rows = table.getRowModel().rows
+        const columns = table.getVisibleLeafColumns()
+
+        if (selectedRange) {
+          const startRowIndex = Math.min(selectedRange.start.rowIndex, selectedRange.end.rowIndex)
+          const startColumnIndex = Math.min(
+            selectedRange.start.columnIndex,
+            selectedRange.end.columnIndex,
+          )
+
+          targetRowId = rows[startRowIndex]?.id
+          targetColumnId = columns[startColumnIndex]?.id
         } else {
-          // Use first visible row
-          const rows = table.getRowModel().rows
-          if (rows.length > 0) {
+          // Use first selected row
+          const selectedRowIds = Object.keys(state.rowSelection || {}).filter(
+            (id) => state.rowSelection[id],
+          )
+          if (selectedRowIds.length > 0) {
+            targetRowId = selectedRowIds[0]
+          } else if (rows.length > 0) {
+            // Use first visible row
             targetRowId = rows[0]!.id
           }
-        }
 
-        // Use first visible column
-        const columns = table.getVisibleLeafColumns()
-        if (columns.length > 0) {
-          targetColumnId = columns[0]!.id
+          if (columns.length > 0) {
+            // Use first visible column
+            targetColumnId = columns[0]!.id
+          }
         }
       }
 
@@ -111,7 +115,7 @@ export function useClipboard<TData extends RowData>(
         onPaste?.(text)
       }
     },
-    [table, clipboardOptions, onPaste]
+    [table, clipboardOptions, onPaste],
   )
 
   useEffect(() => {

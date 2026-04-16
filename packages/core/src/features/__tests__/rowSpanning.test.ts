@@ -1,11 +1,7 @@
 // @zvndev/yable-core — Row Spanning Tests
 
-import { describe, it, expect } from 'vitest'
-import {
-  resolveRowSpans,
-  getRowSpan,
-  isCellSpanned,
-} from '../rowSpanning'
+import { describe, it, expect, vi } from 'vitest'
+import { resolveRowSpans, getRowSpan, isCellSpanned } from '../rowSpanning'
 import type { RowSpanMap } from '../rowSpanning'
 
 // ---------------------------------------------------------------------------
@@ -31,8 +27,7 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         id: 'name',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) =>
-          rowIndex === 0 ? 2 : 1,
+        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 2 : 1),
       },
     ]
 
@@ -52,8 +47,7 @@ describe('resolveRowSpans', () => {
       {
         id: 'name',
         // Try to span 10 starting from row 1 — only 2 rows remain
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) =>
-          rowIndex === 1 ? 10 : 1,
+        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 1 ? 10 : 1),
       },
     ]
 
@@ -82,8 +76,7 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         id: 'name',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) =>
-          rowIndex === 0 ? 0 : -1,
+        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 0 : -1),
       },
     ]
 
@@ -97,13 +90,11 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         id: 'col_a',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) =>
-          rowIndex === 0 ? 2 : 1,
+        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 2 : 1),
       },
       {
         id: 'col_b',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) =>
-          rowIndex === 0 ? 3 : 1,
+        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 3 : 1),
       },
     ]
 
@@ -146,13 +137,32 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         accessorKey: 'status',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) =>
-          rowIndex === 0 ? 2 : 1,
+        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 2 : 1),
       },
     ]
 
     const map = resolveRowSpans(rows, colDefs as any)
     expect(getRowSpan(map, 0, 'status')).toBe(2)
+  })
+
+  it('should recover safely when rowSpan callback throws', () => {
+    const rows = mockRows(2)
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const colDefs = [
+      {
+        id: 'name',
+        rowSpan: () => {
+          throw new Error('boom')
+        },
+      },
+    ]
+
+    const map = resolveRowSpans(rows, colDefs as any)
+
+    expect(map.size).toBe(0)
+    expect(consoleError).toHaveBeenCalled()
+
+    consoleError.mockRestore()
   })
 })
 
@@ -166,16 +176,15 @@ describe('isCellSpanned', () => {
     const colDefs = [
       {
         id: 'name',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) =>
-          rowIndex === 0 ? 3 : 1,
+        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 3 : 1),
       },
     ]
 
     const map = resolveRowSpans(rows, colDefs as any)
 
     expect(isCellSpanned(map, 0, 'name')).toBe(false) // span origin
-    expect(isCellSpanned(map, 1, 'name')).toBe(true)  // consumed
-    expect(isCellSpanned(map, 2, 'name')).toBe(true)  // consumed
+    expect(isCellSpanned(map, 1, 'name')).toBe(true) // consumed
+    expect(isCellSpanned(map, 2, 'name')).toBe(true) // consumed
   })
 
   it('should return false for cells without span entries', () => {

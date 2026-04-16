@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Workspace docs and demo copy now track the current `0.2.1` package version, verified bundle sizes, and current feature set
 - All public packages now declare `"sideEffects": false` for better tree-shaking
 - TypeScript `noUncheckedIndexedAccess` enabled across the monorepo
 - `examples/vanilla-demo` bumped Vite to `^6.4.2` (resolves upstream advisory)

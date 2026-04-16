@@ -3,8 +3,10 @@
 import type { RowData, Table, Row, Cell, Header } from '@zvndev/yable-core'
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from 'react'
 
-export interface TableProps<TData extends RowData>
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+export interface TableProps<TData extends RowData> extends Omit<
+  HTMLAttributes<HTMLDivElement>,
+  'children'
+> {
   table: Table<TData>
   /** Enable sticky header */
   stickyHeader?: boolean
@@ -52,6 +54,12 @@ export interface TableProps<TData extends RowData>
   sidebarPanels?: ('columns' | 'filters')[]
   /** Default sidebar panel */
   defaultSidebarPanel?: 'columns' | 'filters'
+  /** Render a second header row with per-column floating filters */
+  floatingFilters?: boolean
+  /** Virtualize wide tables horizontally when safe to do so */
+  columnVirtualization?: boolean
+  /** Additional columns rendered beyond the viewport when column virtualization is enabled */
+  columnVirtualizationOverscan?: number
 }
 
 /** Status bar panel configuration */
@@ -67,17 +75,20 @@ export interface StatusBarPanelProps {
   table: Table<any>
 }
 
-export interface TableRowProps<TData extends RowData>
-  extends HTMLAttributes<HTMLTableRowElement> {
+export interface TableRowProps<TData extends RowData> extends HTMLAttributes<HTMLTableRowElement> {
   row: Row<TData>
 }
 
-export interface TableCellProps<TData extends RowData, TValue = unknown>
-  extends TdHTMLAttributes<HTMLTableCellElement> {
+export interface TableCellProps<
+  TData extends RowData,
+  TValue = unknown,
+> extends TdHTMLAttributes<HTMLTableCellElement> {
   cell: Cell<TData, TValue>
 }
 
-export interface TableHeaderCellProps<TData extends RowData, TValue = unknown>
-  extends ThHTMLAttributes<HTMLTableCellElement> {
+export interface TableHeaderCellProps<
+  TData extends RowData,
+  TValue = unknown,
+> extends ThHTMLAttributes<HTMLTableCellElement> {
   header: Header<TData, TValue>
 }

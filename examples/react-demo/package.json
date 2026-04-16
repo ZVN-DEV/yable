@@ -8,14 +8,14 @@
     "start": "next start"
   },
   "dependencies": {
-    "@chenglou/pretext": "^0.0.4",
+    "@chenglou/pretext": "^0.0.5",
     "@zvndev/yable-core": "workspace:*",
     "@zvndev/yable-react": "workspace:*",
     "@zvndev/yable-themes": "workspace:*",
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
-    "next": "^15.1.0",
+    "next": "^15.5.15",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",

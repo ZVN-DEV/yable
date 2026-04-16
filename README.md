@@ -13,20 +13,22 @@
 
 ---
 
-**TanStack's philosophy, AG Grid's features, neither's price tag.**
+**Headless architecture, spreadsheet-style features, no commercial lock-in.**
 
 Yable is a TypeScript-first, framework-agnostic data table engine. It ships a headless core with sorting, filtering, editing, formulas, pivot tables, and more -- all MIT-licensed. Use it with React today, or wire it to any framework through the vanilla renderer.
 
 ## Why Yable?
 
-- **Formula engine** -- 17 built-in spreadsheet functions (extensible) with a parser, evaluator, and dependency tracker. Free and MIT-licensed -- AG Grid's formula support requires an Enterprise license.
-- **Async cell commits** -- built-in optimistic saves with pending, error, and conflict cell states. Retry, dismiss, and conflict resolution out of the box. No other React grid ships this.
-- **Pivot tables, fill handle, clipboard** -- features that AG Grid locks behind a $1,000+/dev/year Enterprise license. Yable ships them for free under MIT.
-- **Headless core + batteries-included UI** -- TanStack Table is headless but ships zero components. Yable gives you a headless `@zvndev/yable-core` _and_ ready-to-use React components with styled themes.
+- **Formula engine** -- 17 built-in spreadsheet functions (extensible) with a parser, evaluator, and dependency tracker. It ships in the MIT-licensed core.
+- **Async cell commits** -- built-in optimistic saves with pending, error, and conflict cell states. Retry, dismiss, and conflict handling are part of the shipped workflow, not left as an app-level exercise.
+- **Pivot tables, fill handle, clipboard** -- spreadsheet-style workflows are built into the MIT-licensed core instead of being split across separate packages or paid tiers inside Yable.
+- **Headless core + batteries-included UI** -- `@zvndev/yable-core` stays headless and zero-dependency, while `@zvndev/yable-react`, `@zvndev/yable-vanilla`, and `@zvndev/yable-themes` cover the common UI paths.
 - **TypeScript from the ground up** -- deep key inference on accessors, fully typed state slices, and generic-safe column helpers.
 - **Framework-agnostic** -- `@zvndev/yable-core` has zero (0) dependencies. `@zvndev/yable-react` and `@zvndev/yable-vanilla` are thin adapters.
 
 ## Comparison
+
+Built-in feature snapshot. `DIY` means the library can support the workflow, but you assemble the UI and behavior yourself.
 
 | Feature                     |  Yable   | TanStack Table | AG Grid Community | AG Grid Enterprise |
 | --------------------------- | :------: | :------------: | :---------------: | :----------------: |
@@ -44,6 +46,8 @@ Yable is a TypeScript-first, framework-agnostic data table engine. It ships a he
 | Fill handle                 |   Yes    |       No       |        No         |        Yes         |
 | Clipboard                   |   Yes    |       No       |        No         |        Yes         |
 | Undo / Redo                 |   Yes    |       No       |        Yes        |        Yes         |
+| Row virtualization          |   Yes    |      DIY       |        Yes        |        Yes         |
+| Keyboard navigation         |   Yes    |       No       |        Yes        |        Yes         |
 | Async cell commits          |   Yes    |       No       |        No         |         No         |
 | Tree data                   |   Yes    |      Yes       |        No         |        Yes         |
 | Export (CSV / JSON)         |   Yes    |       No       |        Yes        |        Yes         |
@@ -51,7 +55,7 @@ Yable is a TypeScript-first, framework-agnostic data table engine. It ships a he
 | React components            |   Yes    |       No       |        Yes        |        Yes         |
 | Vanilla JS renderer         |   Yes    |       No       |        No         |         No         |
 | MIT license                 |   Yes    |      Yes       |        Yes        |         No         |
-| Price                       | **Free** |    **Free**    |     **Free**      | **$1,000+/dev/yr** |
+| Price                       | **Free** |    **Free**    |     **Free**      |      **Paid**      |
 
 ## Installation
 
@@ -174,11 +178,12 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 
 ## Status
 
-Yable is at **v0.2.0**. Row virtualization and keyboard navigation are shipping, and the monorepo runs on multi-config CI with changesets-based releases, pre-commit hooks, bundle size tracking, and 580 tests across 27 files. The API is still pre-1.0 and may change before a stable release. Near-term focus:
+Yable is at **v0.2.1** in this repo. Row virtualization, column virtualization, keyboard navigation, floating filters, set filters, and baseline range selection are shipping, and the current workspace passes build, test, typecheck, lint, coverage, size, and audit checks locally with **596 passing tests**. The API is still pre-1.0 and may change before a stable release. Near-term focus:
 
-- Server-side data source adapters
-- Storybook examples and interactive docs
-- Property-based fuzz testing for the formula parser
+- Cell range selection
+- Column virtualization
+- Floating filters
+- Set filter
 
 ## License
 

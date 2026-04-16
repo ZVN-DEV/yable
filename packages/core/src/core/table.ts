@@ -18,6 +18,7 @@ import type {
   ColumnFiltersState,
   PaginationState,
   RowSelectionState,
+  CellRange,
   VisibilityState,
   ColumnOrderState,
   ColumnPinningState,
@@ -44,6 +45,13 @@ import {
   getNextFocusedCell,
   normalizeFocusedCell,
 } from '../features/keyboardNavigation'
+import { applyCellPaste, parseClipboardText, serializeCells } from '../features/clipboard'
+import {
+  clampCellToTable,
+  createCellRange,
+  isCellInRange,
+  normalizeCellRange,
+} from '../features/selection'
 import { createCommitCoordinator } from '../features/commits/coordinator'
 import type { CellPatch, CommitsSlice } from '../features/commits/types'
 
@@ -60,6 +68,7 @@ const getInitialState = (): TableState => ({
   globalFilter: '',
   pagination: { pageIndex: 0, pageSize: 10 },
   rowSelection: {},
+  cellSelection: { range: null, anchor: null, isDragging: false },
   columnVisibility: {},
   columnOrder: [],
   columnPinning: { left: [], right: [] },
@@ -358,6 +367,125 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     setRowSelection: (_updater: Updater<RowSelectionState>) => {},
     resetRowSelection: (defaultState?: boolean) => {
       table.setRowSelection(defaultState ? {} : table.getState().rowSelection)
+    },
+    getCellSelectionRange: (): CellRange | null => table.getState().cellSelection?.range ?? null,
+    clearCellSelection: () => {
+      table.setState((old: TableState) => ({
+        ...old,
+        cellSelection: {
+          ...(old.cellSelection ?? { range: null, anchor: null, isDragging: false }),
+          range: null,
+          isDragging: false,
+        },
+      }))
+    },
+    selectCell: (
+      cell: KeyboardNavigationCell,
+      options?: { extend?: boolean; keepAnchor?: boolean },
+    ) => {
+      const clamped = clampCellToTable(table, cell)
+      if (!clamped) {
+        table.clearCellSelection()
+        return
+      }
+
+      table.setState((old: TableState) => {
+        const previousSelection = old.cellSelection ?? {
+          range: null,
+          anchor: null,
+          isDragging: false,
+        }
+        const anchor =
+          options?.extend && previousSelection.anchor
+            ? previousSelection.anchor
+            : options?.keepAnchor
+              ? (previousSelection.anchor ?? clamped)
+              : clamped
+
+        return {
+          ...old,
+          cellSelection: {
+            range: createCellRange(anchor, clamped),
+            anchor,
+            isDragging: false,
+          },
+        }
+      })
+    },
+    startCellRangeSelection: (cell: KeyboardNavigationCell, options?: { extend?: boolean }) => {
+      const clamped = clampCellToTable(table, cell)
+      if (!clamped) {
+        table.clearCellSelection()
+        return
+      }
+
+      table.setState((old: TableState) => {
+        const previousSelection = old.cellSelection ?? {
+          range: null,
+          anchor: null,
+          isDragging: false,
+        }
+        const anchor =
+          options?.extend && previousSelection.anchor ? previousSelection.anchor : clamped
+
+        return {
+          ...old,
+          cellSelection: {
+            range: createCellRange(anchor, clamped),
+            anchor,
+            isDragging: true,
+          },
+        }
+      })
+    },
+    updateCellRangeSelection: (cell: KeyboardNavigationCell) => {
+      const clamped = clampCellToTable(table, cell)
+      if (!clamped) return
+
+      table.setState((old: TableState) => {
+        const previousSelection = old.cellSelection ?? {
+          range: null,
+          anchor: null,
+          isDragging: false,
+        }
+        if (!previousSelection.range && !previousSelection.isDragging) return old
+
+        const anchor = previousSelection.anchor ?? clamped
+        return {
+          ...old,
+          cellSelection: {
+            ...previousSelection,
+            range: createCellRange(anchor, clamped),
+          },
+        }
+      })
+    },
+    endCellRangeSelection: () => {
+      table.setState((old: TableState) => ({
+        ...old,
+        cellSelection: {
+          ...(old.cellSelection ?? { range: null, anchor: null, isDragging: false }),
+          isDragging: false,
+        },
+      }))
+    },
+    getIsCellSelected: (rowIndex: number, columnIndex: number) => {
+      const range = table.getCellSelectionRange()
+      return range ? isCellInRange(range, rowIndex, columnIndex) : false
+    },
+    getCellSelectionEdges: (rowIndex: number, columnIndex: number) => {
+      const range = table.getCellSelectionRange()
+      if (!range || !isCellInRange(range, rowIndex, columnIndex)) {
+        return null
+      }
+
+      const normalized = normalizeCellRange(range)
+      return {
+        top: rowIndex === normalized.top,
+        right: columnIndex === normalized.right,
+        bottom: rowIndex === normalized.bottom,
+        left: columnIndex === normalized.left,
+      }
     },
 
     // Visibility API
@@ -701,6 +829,11 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       )
     },
 
+    // Clipboard API — wired below after row/column models are available
+    copyToClipboard: () => '',
+    pasteFromClipboard: () => {},
+    cutCells: () => '',
+
     // Export API
     exportData: (opts?: ExportOptions): string => {
       const rowModel = opts?.allRows ? table.getPrePaginationRowModel() : table.getRowModel()
@@ -1037,8 +1170,12 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
             }
           }
 
-          // Default string include filter
           const value = row.getValue(filter.id)
+          if (Array.isArray(filter.value)) {
+            return filter.value.some((candidate: unknown) => value === candidate)
+          }
+
+          // Default string include filter
           return String(value ?? '')
             .toLowerCase()
             .includes(String(filter.value ?? '').toLowerCase())
@@ -1284,6 +1421,151 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       commitCoordinator.runAutoClearSweep()
       commitCoordinator.runConflictDetection()
     }
+  }
+
+  const resolveClipboardOptions = (options?: {
+    delimiter?: string
+    rowDelimiter?: string
+    includeHeaders?: boolean
+  }) => ({
+    delimiter: options?.delimiter ?? '\t',
+    rowDelimiter: options?.rowDelimiter ?? '\n',
+    includeHeaders: options?.includeHeaders ?? false,
+  })
+
+  const buildCopiedCells = (
+    rows: Row<TData>[],
+    columns: Column<TData, unknown>[],
+  ): { rowId: string; columnId: string; value: unknown }[] =>
+    rows.flatMap((row) =>
+      columns.map((column) => ({
+        rowId: row.id,
+        columnId: column.id,
+        value: row.getValue(column.id),
+      })),
+    )
+
+  table.copyToClipboard = (options?: {
+    delimiter?: string
+    rowDelimiter?: string
+    includeHeaders?: boolean
+  }) => {
+    const resolved = resolveClipboardOptions(options)
+    const rowModel = table.getRowModel()
+    const visibleColumns = table.getVisibleLeafColumns()
+    const range = table.getCellSelectionRange()
+
+    let rows: Row<TData>[] = []
+    let columns: Column<TData, unknown>[] = []
+
+    if (range) {
+      const normalized = normalizeCellRange(range)
+      rows = rowModel.rows.slice(normalized.top, normalized.bottom + 1)
+      columns = visibleColumns.slice(normalized.left, normalized.right + 1)
+    } else {
+      const selection = table.getState().rowSelection
+      rows = rowModel.rows.filter((row: Row<TData>) => selection[row.id])
+      columns = visibleColumns
+
+      if (rows.length === 0) {
+        const focusedCell = table.getFocusedCell()
+        if (focusedCell) {
+          const row = rowModel.rows[focusedCell.rowIndex]
+          const column = visibleColumns[focusedCell.columnIndex]
+          if (row && column) {
+            rows = [row]
+            columns = [column]
+          }
+        }
+      }
+    }
+
+    if (rows.length === 0 || columns.length === 0) {
+      return ''
+    }
+
+    const text = serializeCells(rows, columns, resolved)
+    table.events.emit('clipboard:copy', {
+      text,
+      cells: buildCopiedCells(rows, columns),
+    })
+    return text
+  }
+
+  table.pasteFromClipboard = (
+    text: string,
+    targetRowId: string,
+    targetColumnId: string,
+    options?: {
+      delimiter?: string
+      rowDelimiter?: string
+      includeHeaders?: boolean
+    },
+  ) => {
+    const resolved = resolveClipboardOptions(options)
+    const data = parseClipboardText(text, resolved)
+    if (data.length === 0) return
+
+    const pastedCells = applyCellPaste(
+      table,
+      data,
+      targetRowId,
+      targetColumnId,
+      table.getRowModel().rows,
+      table.getVisibleLeafColumns(),
+    )
+
+    table.events.emit('clipboard:paste', {
+      text,
+      cells: pastedCells,
+    })
+  }
+
+  table.cutCells = (options?: {
+    delimiter?: string
+    rowDelimiter?: string
+    includeHeaders?: boolean
+  }) => {
+    const text = table.copyToClipboard(options)
+    if (!text) return text
+
+    const range = table.getCellSelectionRange()
+    const rowModel = table.getRowModel()
+    const visibleColumns = table.getVisibleLeafColumns()
+    let rows: Row<TData>[] = []
+    let columns: Column<TData, unknown>[] = []
+
+    if (range) {
+      const normalized = normalizeCellRange(range)
+      rows = rowModel.rows.slice(normalized.top, normalized.bottom + 1)
+      columns = visibleColumns.slice(normalized.left, normalized.right + 1)
+    } else {
+      const focusedCell = table.getFocusedCell()
+      if (focusedCell) {
+        const row = rowModel.rows[focusedCell.rowIndex]
+        const column = visibleColumns[focusedCell.columnIndex]
+        if (row && column) {
+          rows = [row]
+          columns = [column]
+        }
+      }
+    }
+
+    const cutCells = buildCopiedCells(rows, columns)
+    for (const cell of cutCells) {
+      const column = table.getColumn(cell.columnId)
+      if ((column?.columnDef as { editable?: boolean } | undefined)?.editable === false) {
+        continue
+      }
+      table.setPendingValue(cell.rowId, cell.columnId, '')
+    }
+
+    table.events.emit('clipboard:cut', {
+      text,
+      cells: cutCells,
+    })
+
+    return text
   }
 
   return table as Table<TData>

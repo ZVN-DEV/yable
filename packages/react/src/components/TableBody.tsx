@@ -1,6 +1,6 @@
 // @zvndev/yable-react — Table Body Component
 
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import type { Column, RowData, Table, Row } from '@zvndev/yable-core'
 import { TableCell } from './TableCell'
 import { CellErrorBoundary } from './ErrorBoundary'
@@ -11,14 +11,16 @@ interface TableBodyProps<TData extends RowData> {
   clickableRows?: boolean
 }
 
-export function TableBody<TData extends RowData>({
-  table,
-  clickableRows,
-}: TableBodyProps<TData>) {
+export function TableBody<TData extends RowData>({ table, clickableRows }: TableBodyProps<TData>) {
   const rows = table.getRowModel().rows
   const visibleColumns = table.getVisibleLeafColumns()
   const activeCell = table.getState().editing.activeCell
   const focusedCell = table.getFocusedCell()
+  const cellSelection = table.getState().cellSelection ?? {
+    range: null,
+    anchor: null,
+    isDragging: false,
+  }
   const options = table.options
   const enableVirtualization = options.enableVirtualization ?? false
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -39,6 +41,23 @@ export function TableBody<TData extends RowData>({
     pretextPrefixSums,
   })
 
+  const cellSelectionKey = cellSelection.range
+    ? `${cellSelection.range.start.rowIndex}:${cellSelection.range.start.columnIndex}:${cellSelection.range.end.rowIndex}:${cellSelection.range.end.columnIndex}:${cellSelection.isDragging ? 'dragging' : 'idle'}`
+    : `none:${cellSelection.isDragging ? 'dragging' : 'idle'}`
+
+  useEffect(() => {
+    const handleWindowMouseUp = () => {
+      if (table.getState().cellSelection?.isDragging) {
+        table.endCellRangeSelection()
+      }
+    }
+
+    window.addEventListener('mouseup', handleWindowMouseUp)
+    return () => {
+      window.removeEventListener('mouseup', handleWindowMouseUp)
+    }
+  }, [table])
+
   if (!enableVirtualization) {
     // Non-virtualized: render all rows directly
     return (
@@ -53,10 +72,9 @@ export function TableBody<TData extends RowData>({
             isSelected={row.getIsSelected()}
             isExpanded={row.getIsExpanded()}
             activeColumnId={activeCell?.rowId === row.id ? activeCell.columnId : undefined}
-            focusedColumnIndex={
-              focusedCell?.rowIndex === rowIndex ? focusedCell.columnIndex : null
-            }
+            focusedColumnIndex={focusedCell?.rowIndex === rowIndex ? focusedCell.columnIndex : null}
             hasFocusedCell={focusedCell !== null}
+            cellSelectionKey={cellSelectionKey}
             clickable={clickableRows}
           />
         ))}
@@ -70,16 +88,13 @@ export function TableBody<TData extends RowData>({
   const containerHeight = hasPretextData
     ? Math.min(totalHeight, 800) // Pretext: use real total, cap at 800px viewport
     : fixedRowHeight
-    ? Math.min(totalHeight, fixedRowHeight * 20) // Default visible area ~20 rows
-    : 600 // Fallback for variable heights
+      ? Math.min(totalHeight, fixedRowHeight * 20) // Default visible area ~20 rows
+      : 600 // Fallback for variable heights
 
   return (
     <tbody className="yable-tbody">
       <tr style={{ height: 0, padding: 0, border: 'none' }}>
-        <td
-          style={{ height: 0, padding: 0, border: 'none' }}
-          colSpan={visibleColumns.length}
-        >
+        <td style={{ height: 0, padding: 0, border: 'none' }} colSpan={visibleColumns.length}>
           <div
             ref={scrollContainerRef}
             className="yable-virtual-scroll-container"
@@ -120,11 +135,10 @@ export function TableBody<TData extends RowData>({
                           activeCell?.rowId === row.id ? activeCell.columnId : undefined
                         }
                         focusedColumnIndex={
-                          focusedCell?.rowIndex === vRow.index
-                            ? focusedCell.columnIndex
-                            : null
+                          focusedCell?.rowIndex === vRow.index ? focusedCell.columnIndex : null
                         }
                         hasFocusedCell={focusedCell !== null}
+                        cellSelectionKey={cellSelectionKey}
                         clickable={clickableRows}
                         virtualStyle={{
                           position: 'absolute' as const,
@@ -161,6 +175,7 @@ interface TableRowProps<TData extends RowData> {
   activeColumnId?: string
   focusedColumnIndex: number | null
   hasFocusedCell: boolean
+  cellSelectionKey: string
   clickable?: boolean
   virtualStyle?: React.CSSProperties
 }
@@ -175,10 +190,14 @@ function TableRowInner<TData extends RowData>({
   activeColumnId,
   focusedColumnIndex,
   hasFocusedCell,
+  cellSelectionKey: _cellSelectionKey,
   clickable,
   virtualStyle,
 }: TableRowProps<TData>) {
-  const visibleCells = row.getVisibleCells()
+  const allCells = row.getAllCells()
+  const visibleCells = visibleColumns
+    .map((column) => allCells.find((cell) => cell.column.id === column.id))
+    .filter((cell): cell is NonNullable<typeof cell> => cell != null)
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -189,7 +208,7 @@ function TableRowInner<TData extends RowData>({
         } as any)
       }
     },
-    [clickable, table.events, row]
+    [clickable, table.events, row],
   )
 
   const handleDoubleClick = useCallback(
@@ -199,7 +218,7 @@ function TableRowInner<TData extends RowData>({
         event: e.nativeEvent,
       } as any)
     },
-    [table.events, row]
+    [table.events, row],
   )
 
   const handleContextMenu = useCallback(
@@ -209,7 +228,7 @@ function TableRowInner<TData extends RowData>({
         event: e.nativeEvent,
       } as any)
     },
-    [table.events, row]
+    [table.events, row],
   )
 
   return (
@@ -265,7 +284,7 @@ function TableRowInner<TData extends RowData>({
 // We compare by reference for data, and by value for boolean/selection/editing state.
 function areRowPropsEqual<TData extends RowData>(
   prev: TableRowProps<TData>,
-  next: TableRowProps<TData>
+  next: TableRowProps<TData>,
 ): boolean {
   // Different row identity
   if (prev.row.id !== next.row.id) return false
@@ -292,6 +311,7 @@ function areRowPropsEqual<TData extends RowData>(
   if (prev.activeColumnId !== next.activeColumnId) return false
   if (prev.focusedColumnIndex !== next.focusedColumnIndex) return false
   if (prev.hasFocusedCell !== next.hasFocusedCell) return false
+  if (prev.cellSelectionKey !== next.cellSelectionKey) return false
 
   // Virtual positioning
   if (prev.virtualStyle !== next.virtualStyle) {

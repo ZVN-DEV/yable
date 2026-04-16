@@ -3,6 +3,7 @@
 import React, { useCallback } from 'react'
 import {
   canCellEnterEditMode,
+  type CellContext,
   type RowData,
   type Table,
   type Cell,
@@ -52,18 +53,24 @@ export function TableCell<TData extends RowData>({
   const cellStatus = table.getCellStatus(cell.row.id, column.id)
   const cellErrorMessage = table.getCellErrorMessage(cell.row.id, column.id)
   const cellConflictWith = table.getCellConflictWith(cell.row.id, column.id)
+  const selectionRange = table.getCellSelectionRange()
+  const selectionEdges = table.getCellSelectionEdges(rowIndex, columnIndex)
+  const isCellSelected = selectionEdges !== null
+  const isMultiCellSelection =
+    selectionRange !== null &&
+    (selectionRange.start.rowIndex !== selectionRange.end.rowIndex ||
+      selectionRange.start.columnIndex !== selectionRange.end.columnIndex)
 
   // When pending/error/conflict, the rendered value is the user's typed value,
   // not the saved value
   const overrideValue =
-    cellStatus !== 'idle'
-      ? table.getCellRenderValue(cell.row.id, column.id)
-      : undefined
+    cellStatus !== 'idle' ? table.getCellRenderValue(cell.row.id, column.id) : undefined
 
   // Determine cell content
   let content: React.ReactNode
   const cellDef = column.columnDef.cell
   const cellType = column.columnDef.cellType
+  type CellRenderer = (ctx: CellContext<TData, unknown>) => React.ReactNode
 
   if (typeof cellDef === 'function') {
     const ctx = cell.getContext()
@@ -74,9 +81,9 @@ export function TableCell<TData extends RowData>({
         getValue: () => overrideValue,
         renderValue: () => overrideValue,
       }
-      content = (cellDef as Function)(overriddenCtx)
+      content = (cellDef as CellRenderer)(overriddenCtx)
     } else {
-      content = (cellDef as Function)(ctx)
+      content = (cellDef as CellRenderer)(ctx)
     }
   } else if (cellType && !(isEditing || isAlwaysEditable)) {
     content = resolveCellType(cellType, cell.getContext(), column.columnDef.cellTypeProps)
@@ -86,14 +93,6 @@ export function TableCell<TData extends RowData>({
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      table.setFocusedCell({ rowIndex, columnIndex })
-
-      const clickTarget = e.target as HTMLElement | null
-      if (!isInteractiveClickTarget(clickTarget)) {
-        const currentTarget = e.currentTarget as HTMLTableCellElement
-        currentTarget.focus({ preventScroll: true })
-      }
-
       table.events.emit('cell:click', {
         cell,
         row: cell.row,
@@ -105,12 +104,16 @@ export function TableCell<TData extends RowData>({
       if (
         canCellEnterEditMode(table, cell.row, column) &&
         !isAlwaysEditable &&
-        !isEditing
+        !isEditing &&
+        !isMultiCellSelection &&
+        !e.shiftKey &&
+        !e.metaKey &&
+        !e.ctrlKey
       ) {
         table.startEditing(cell.row.id, column.id)
       }
     },
-    [cell, column, columnIndex, isAlwaysEditable, isEditing, rowIndex, table]
+    [cell, column, isAlwaysEditable, isEditing, isMultiCellSelection, table],
   )
 
   const handleDoubleClick = useCallback(
@@ -122,7 +125,7 @@ export function TableCell<TData extends RowData>({
         event: e.nativeEvent,
       } as any)
     },
-    [table, cell]
+    [table, cell],
   )
 
   const handleContextMenu = useCallback(
@@ -134,7 +137,7 @@ export function TableCell<TData extends RowData>({
         event: e.nativeEvent,
       } as any)
     },
-    [table, cell]
+    [table, cell],
   )
 
   const handleFocus = useCallback(() => {
@@ -142,9 +145,39 @@ export function TableCell<TData extends RowData>({
     table.setFocusedCell({ rowIndex, columnIndex })
   }, [columnIndex, keyboardNavigationEnabled, rowIndex, table])
 
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLTableCellElement>) => {
+      if (e.button !== 0) return
+
+      const clickTarget = e.target as HTMLElement | null
+      if (isInteractiveClickTarget(clickTarget)) return
+
+      e.preventDefault()
+      table.setFocusedCell({ rowIndex, columnIndex })
+      table.startCellRangeSelection({ rowIndex, columnIndex }, { extend: e.shiftKey })
+      e.currentTarget.focus({ preventScroll: true })
+    },
+    [columnIndex, rowIndex, table],
+  )
+
+  const handleMouseEnter = useCallback(() => {
+    if (!table.getState().cellSelection?.isDragging) return
+    table.updateCellRangeSelection({ rowIndex, columnIndex })
+  }, [columnIndex, rowIndex, table])
+
+  const handleMouseUp = useCallback(() => {
+    if (!table.getState().cellSelection?.isDragging) return
+    table.endCellRangeSelection()
+  }, [table])
+
   const classNames = [
     'yable-td',
     isFocused && 'yable-cell--focused',
+    isCellSelected && 'yable-cell--selected',
+    selectionEdges?.top && 'yable-cell--selection-top',
+    selectionEdges?.right && 'yable-cell--selection-right',
+    selectionEdges?.bottom && 'yable-cell--selection-bottom',
+    selectionEdges?.left && 'yable-cell--selection-left',
   ]
     .filter(Boolean)
     .join(' ')
@@ -160,10 +193,14 @@ export function TableCell<TData extends RowData>({
       data-column-id={column.id}
       data-row-index={rowIndex}
       data-column-index={columnIndex}
+      data-cell-selected={isCellSelected || undefined}
       aria-rowindex={rowIndex + 1}
       aria-colindex={columnIndex + 1}
       role="gridcell"
       tabIndex={keyboardNavigationEnabled ? (isTabStop ? 0 : -1) : undefined}
+      onMouseDown={handleMouseDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseUp={handleMouseUp}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
@@ -194,7 +231,7 @@ function isInteractiveClickTarget(element: HTMLElement | null): boolean {
   if (!element) return false
 
   const interactive = element.closest(
-    'input, textarea, select, button, a[href], [contenteditable="true"]'
+    'input, textarea, select, button, a[href], [contenteditable="true"]',
   )
 
   return interactive !== null

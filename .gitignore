@@ -9,6 +9,7 @@ dist
 dist/
 *.png
 *.jpg
+coverage/
 
 # Playwright MCP artifacts
 .playwright-mcp/
@@ -22,3 +23,4 @@ AUDIT-REPORT.md
 
 .vercel
 .env*.local
+.omx/

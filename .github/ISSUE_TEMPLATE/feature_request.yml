@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest an improvement or missing capability
+title: '[Feature]: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the user problem first, then the proposed API or behavior.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      placeholder: What workflow is blocked or painful today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      placeholder: API shape, interaction model, or behavior you want
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Workarounds, competitor behavior, or custom code you've tried
+  - type: dropdown
+    id: package
+    attributes:
+      label: Most relevant package
+      options:
+        - '@zvndev/yable-core'
+        - '@zvndev/yable-react'
+        - '@zvndev/yable-vanilla'
+        - '@zvndev/yable-themes'
+        - Docs / demo
+    validations:
+      required: true

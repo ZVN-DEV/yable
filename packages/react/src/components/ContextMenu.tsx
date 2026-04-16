@@ -53,12 +53,12 @@ export function ContextMenu<TData extends RowData>({
       }
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
-        const items = menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')
+        const items = menuRef.current?.querySelectorAll<HTMLElement>(
+          '[role="menuitem"]:not([aria-disabled="true"])',
+        )
         if (!items || items.length === 0) return
 
-        const currentIndex = Array.from(items).findIndex(
-          (el) => el === document.activeElement
-        )
+        const currentIndex = Array.from(items).findIndex((el) => el === document.activeElement)
 
         let nextIndex: number
         if (e.key === 'ArrowDown') {
@@ -69,7 +69,7 @@ export function ContextMenu<TData extends RowData>({
         items[nextIndex]?.focus()
       }
     },
-    [onClose]
+    [onClose],
   )
 
   // Build default menu items
@@ -82,7 +82,9 @@ export function ContextMenu<TData extends RowData>({
         try {
           const text = table.copyToClipboard()
           navigator.clipboard?.writeText(text)
-        } catch {}
+        } catch {
+          // Clipboard access can be unavailable in some browsers or test environments.
+        }
       },
     },
     {
@@ -93,7 +95,9 @@ export function ContextMenu<TData extends RowData>({
         try {
           const text = table.cutCells()
           navigator.clipboard?.writeText(text)
-        } catch {}
+        } catch {
+          // Clipboard access can be unavailable in some browsers or test environments.
+        }
       },
     },
     {
@@ -101,16 +105,15 @@ export function ContextMenu<TData extends RowData>({
       label: 'Paste',
       shortcut: '\u2318V',
       action: () => {
-        navigator.clipboard?.readText().then((text) => {
-          const editing = table.getState().editing
-          if (editing?.activeCell) {
-            table.pasteFromClipboard(
-              text,
-              editing.activeCell.rowId,
-              editing.activeCell.columnId
-            )
-          }
-        }).catch(() => {})
+        navigator.clipboard
+          ?.readText()
+          .then((text) => {
+            const editing = table.getState().editing
+            if (editing?.activeCell) {
+              table.pasteFromClipboard(text, editing.activeCell.rowId, editing.activeCell.columnId)
+            }
+          })
+          .catch(() => {})
       },
     },
     { id: 'sep1', label: '', separator: true },

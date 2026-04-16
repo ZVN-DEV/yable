@@ -1,6 +1,6 @@
 // @zvndev/yable-vanilla — DOM Renderer
 
-import type { RowData, Table, Row, Cell, Header, Column } from '@zvndev/yable-core'
+import type { RowData, Table, Row, Cell, Header, Column, HeaderContext } from '@zvndev/yable-core'
 
 // ---------------------------------------------------------------------------
 // SECURITY: Escape HTML for safe injection into innerHTML
@@ -42,7 +42,7 @@ export function renderTable<TData extends RowData>(
     clickableRows?: boolean
     footer?: boolean
     emptyMessage?: string
-  } = {}
+  } = {},
 ): string {
   // SECURITY: Safe — internal/constant class names composed from boolean flags
   const classes = [
@@ -124,13 +124,22 @@ function renderHeaderCell<TData extends RowData>(header: Header<TData, unknown>)
   // SECURITY: Safe — getPinStyle returns internally computed CSS
   const style = pinned ? getPinStyle(column) : ''
   // SECURITY: Safe — ariaSort derived from boolean/enum internal state
-  const ariaSort = sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : sortable ? 'none' : undefined
+  const ariaSort =
+    sortDir === 'asc'
+      ? 'ascending'
+      : sortDir === 'desc'
+        ? 'descending'
+        : sortable
+          ? 'none'
+          : undefined
   const ariaSortAttr = ariaSort ? ` aria-sort="${ariaSort}"` : ''
 
   const headerDef = column.columnDef.header
-  const content = typeof headerDef === 'function'
-    ? String((headerDef as Function)(header.getContext()))
-    : String(headerDef ?? column.id)
+  type HeaderRenderer = (ctx: HeaderContext<TData, unknown>) => unknown
+  const content =
+    typeof headerDef === 'function'
+      ? String((headerDef as HeaderRenderer)(header.getContext()))
+      : String(headerDef ?? column.id)
 
   // SECURITY: Safe — sortDir is 'asc' | 'desc' from internal enum, sortIndicator uses HTML entities
   let sortIndicator = ''
@@ -156,10 +165,7 @@ function renderHeaderCell<TData extends RowData>(header: Header<TData, unknown>)
 // ---------------------------------------------------------------------------
 // Body
 // ---------------------------------------------------------------------------
-function renderBody<TData extends RowData>(
-  table: Table<TData>,
-  clickableRows?: boolean
-): string {
+function renderBody<TData extends RowData>(table: Table<TData>, clickableRows?: boolean): string {
   const rows = table.getRowModel().rows
   // SECURITY: Safe — internal/constant value
   let html = '<tbody class="yable-tbody">'
@@ -175,7 +181,7 @@ function renderBody<TData extends RowData>(
 function renderRow<TData extends RowData>(
   table: Table<TData>,
   row: Row<TData>,
-  clickable?: boolean
+  clickable?: boolean,
 ): string {
   const isSelected = row.getIsSelected()
   const isExpanded = row.getIsExpanded()
@@ -212,7 +218,7 @@ function renderRow<TData extends RowData>(
 
 function renderCell<TData extends RowData>(
   table: Table<TData>,
-  cell: Cell<TData, unknown>
+  cell: Cell<TData, unknown>,
 ): string {
   const column = cell.column
   const pinned = column.getIsPinned()
@@ -254,6 +260,7 @@ function renderCell<TData extends RowData>(
 function renderFooter<TData extends RowData>(table: Table<TData>): string {
   const footerGroups = table.getFooterGroups()
   if (!footerGroups.length) return ''
+  type FooterRenderer = (ctx: HeaderContext<TData, unknown>) => unknown
 
   // SECURITY: Safe — internal/constant value
   let html = '<tfoot class="yable-tfoot">'
@@ -265,7 +272,7 @@ function renderFooter<TData extends RowData>(table: Table<TData>): string {
       const content = header.isPlaceholder
         ? ''
         : typeof footerDef === 'function'
-          ? String((footerDef as Function)(header.getContext()))
+          ? String((footerDef as FooterRenderer)(header.getContext()))
           : String(footerDef ?? '')
 
       // SECURITY: User data — content escaped via esc()
@@ -283,10 +290,14 @@ function renderFooter<TData extends RowData>(table: Table<TData>): string {
 // Form Elements
 // ---------------------------------------------------------------------------
 function renderFormElement(
-  editConfig: { type?: string; options?: Array<{ label: string; value: unknown }>; placeholder?: string },
+  editConfig: {
+    type?: string
+    options?: Array<{ label: string; value: unknown }>
+    placeholder?: string
+  },
   value: unknown,
   rowId: string,
-  columnId: string
+  columnId: string,
 ): string {
   // SECURITY: Safe — type is from developer-provided column config, constrained to known values below
   const type = editConfig.type ?? 'text'
@@ -318,7 +329,7 @@ function renderSelect(
   value: unknown,
   rowId: string,
   columnId: string,
-  placeholder?: string
+  placeholder?: string,
 ): string {
   // SECURITY: User data — columnId and rowId escaped via escAttr() for data-attributes
   let html = `<select class="yable-select" data-yable-input="${escAttr(columnId)}" data-yable-input-row="${escAttr(rowId)}">`
@@ -367,7 +378,7 @@ export function renderPagination<TData extends RowData>(
     showPageSize?: boolean
     pageSizes?: number[]
     showInfo?: boolean
-  } = {}
+  } = {},
 ): string {
   const { showPageSize = true, pageSizes = [10, 20, 50, 100], showInfo = true } = opts
   const { pageIndex, pageSize } = table.getState().pagination
@@ -383,7 +394,8 @@ export function renderPagination<TData extends RowData>(
   if (showInfo) {
     html += '<div class="yable-pagination-info">'
     // SECURITY: Safe — from, to, totalRows are numeric
-    html += totalRows > 0 ? `<span>${from}\u2013${to} of ${totalRows}</span>` : '<span>No results</span>'
+    html +=
+      totalRows > 0 ? `<span>${from}\u2013${to} of ${totalRows}</span>` : '<span>No results</span>'
 
     if (showPageSize) {
       html += '<select class="yable-pagination-select" data-yable-pagesize>'

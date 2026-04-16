@@ -2,6 +2,8 @@
 
 import type {
   RowData,
+  Row,
+  RowModel,
   Column,
   ColumnDef,
   ColumnDefExtensions,
@@ -25,7 +27,7 @@ import { filterFns } from '../filterFns'
  * so casting to the extensions interface is safe for optional property reads.
  */
 function getExtensions<TData extends RowData, TValue>(
-  columnDef: ColumnDef<TData, TValue>
+  columnDef: ColumnDef<TData, TValue>,
 ): Partial<ColumnDefExtensions<TData, TValue>> {
   return columnDef as Partial<ColumnDefExtensions<TData, TValue>>
 }
@@ -34,7 +36,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
   table: Table<TData>,
   columnDef: ColumnDef<TData, TValue>,
   depth: number,
-  parent?: Column<TData, unknown>
+  parent?: Column<TData, unknown>,
 ): Column<TData, TValue> {
   const id = resolveColumnId(columnDef)
   const ext = getExtensions(columnDef)
@@ -42,6 +44,71 @@ export function createColumn<TData extends RowData, TValue = unknown>(
   // One-shot guard so we don't spam the console on every getSize() call
   // when a column def has invalid min/max bounds.
   let warnedInvalidSizeBounds = false
+
+  const getFacetedRowModel = (): RowModel<TData> => {
+    const coreModel = table.getCoreRowModel()
+    if (table.options.manualFiltering) return coreModel
+
+    const columnFilters = table.getState().columnFilters.filter((filter) => filter.id !== id)
+    const globalFilter = table.getState().globalFilter
+
+    if (columnFilters.length === 0 && !globalFilter) return coreModel
+
+    let filtered = coreModel.rows
+
+    for (const filter of columnFilters) {
+      const filterColumn = table.getColumn(filter.id)
+      if (!filterColumn) continue
+
+      filtered = filtered.filter((row: Row<TData>) => {
+        const filterFn = filterColumn.getFilterFn()
+
+        if (filterFn) {
+          try {
+            return filterFn(row, filter.id, filter.value, () => {})
+          } catch (err) {
+            console.error(
+              `[yable E010] filterFn threw for column "${filter.id}", row "${row.id}":`,
+              err,
+            )
+            return true
+          }
+        }
+
+        const value = row.getValue(filter.id)
+        if (Array.isArray(filter.value)) {
+          return filter.value.some((candidate) => value === candidate)
+        }
+
+        return String(value ?? '')
+          .toLowerCase()
+          .includes(String(filter.value ?? '').toLowerCase())
+      })
+    }
+
+    if (globalFilter) {
+      const searchStr = String(globalFilter).toLowerCase()
+      filtered = filtered.filter((row: Row<TData>) => {
+        return table.getAllLeafColumns().some((candidateColumn: Column<TData, unknown>) => {
+          const value = row.getValue(candidateColumn.id)
+          return String(value ?? '')
+            .toLowerCase()
+            .includes(searchStr)
+        })
+      })
+    }
+
+    const rowsById: Record<string, Row<TData>> = {}
+    for (const row of filtered) {
+      rowsById[row.id] = row
+    }
+
+    return {
+      rows: filtered,
+      flatRows: filtered,
+      rowsById,
+    }
+  }
 
   const column: Column<TData, TValue> = {
     id,
@@ -64,16 +131,10 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       // resulting clamp would silently flip the size. Warn once and resolve
       // by treating minSize as the floor (i.e. min wins). This is documented
       // so callers know which bound takes precedence on misconfiguration.
-      if (
-        typeof min === 'number' &&
-        typeof max === 'number' &&
-        min > max
-      ) {
+      if (typeof min === 'number' && typeof max === 'number' && min > max) {
         if (!warnedInvalidSizeBounds) {
           warnedInvalidSizeBounds = true
-          console.warn(
-            `[yable] column "${id}" has minSize (${min}) > maxSize (${max})`
-          )
+          console.warn(`[yable] column "${id}" has minSize (${min}) > maxSize (${max})`)
         }
         // Min wins: clamp the raw size up to min, ignoring the broken max.
         return Math.max(raw, min)
@@ -96,7 +157,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
         }
         return result
       },
-      { key: `${id}_getFlatColumns` }
+      { key: `${id}_getFlatColumns` },
     ),
 
     getLeafColumns: memo(
@@ -109,14 +170,14 @@ export function createColumn<TData extends RowData, TValue = unknown>(
         }
         return result
       },
-      { key: `${id}_getLeafColumns` }
+      { key: `${id}_getLeafColumns` },
     ),
 
     // Sorting
     getIsSorted: () => {
       const sorting = table.getState().sorting
       const sort = sorting?.find((s) => s.id === id)
-      return sort ? sort.desc ? 'desc' : 'asc' : false
+      return sort ? (sort.desc ? 'desc' : 'asc') : false
     },
     getNextSortingOrder: () => {
       const current = column.getIsSorted()
@@ -139,7 +200,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     getSortingFn: (): SortingFn<TData> => {
       const resolved = resolveSortingFn<TData>(
         ext.sortingFn as string | SortingFn<TData> | undefined,
-        table.options.sortingFns
+        table.options.sortingFns,
       )
       if (resolved) return resolved
 
@@ -165,9 +226,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
 
         if (isMulti) {
           if (existing) {
-            return old.map((s) =>
-              s.id === id ? { ...s, desc: resolvedDesc } : s
-            )
+            return old.map((s) => (s.id === id ? { ...s, desc: resolvedDesc } : s))
           }
           return [...old, { id, desc: resolvedDesc }]
         }
@@ -178,9 +237,10 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     getToggleSortingHandler: () => {
       if (!column.getCanSort()) return undefined
       return (e: unknown) => {
-        const isMulti = e && typeof e === 'object' && 'shiftKey' in e
-          ? !!(e as { shiftKey: boolean }).shiftKey
-          : false
+        const isMulti =
+          e && typeof e === 'object' && 'shiftKey' in e
+            ? !!(e as { shiftKey: boolean }).shiftKey
+            : false
         column.toggleSorting(undefined, isMulti)
       }
     },
@@ -218,7 +278,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     getFilterFn: (): FilterFn<TData> | undefined => {
       return resolveFilterFn<TData>(
         ext.filterFn as string | FilterFn<TData> | undefined,
-        table.options.filterFns
+        table.options.filterFns,
       )
     },
 
@@ -304,9 +364,39 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     },
 
     // Faceting
-    getFacetedRowModel: () => table.getRowModel(),
-    getFacetedUniqueValues: () => new Map(),
-    getFacetedMinMaxValues: () => undefined,
+    getFacetedRowModel,
+    getFacetedUniqueValues: () => {
+      const facetedRows = getFacetedRowModel().rows
+      const values = new Map<unknown, number>()
+
+      for (const row of facetedRows) {
+        const value = row.getValue(id)
+        if (Array.isArray(value)) {
+          for (const item of value) {
+            values.set(item, (values.get(item) ?? 0) + 1)
+          }
+          continue
+        }
+        values.set(value, (values.get(value) ?? 0) + 1)
+      }
+
+      return values
+    },
+    getFacetedMinMaxValues: () => {
+      const facetedRows = getFacetedRowModel().rows
+      let min: number | undefined
+      let max: number | undefined
+
+      for (const row of facetedRows) {
+        const value = row.getValue<number | string>(id)
+        const numeric = typeof value === 'number' ? value : Number(value)
+        if (!Number.isFinite(numeric)) continue
+        min = min == null ? numeric : Math.min(min, numeric)
+        max = max == null ? numeric : Math.max(max, numeric)
+      }
+
+      return min == null || max == null ? undefined : [min, max]
+    },
 
     // Grouping
     getIsGrouped: () => {
@@ -336,11 +426,9 @@ export function createColumn<TData extends RowData, TValue = unknown>(
     const parts = key.split('.')
     const tooDeep = parts.length > MAX_ACCESSOR_DEPTH
     if (tooDeep) {
-      console.error(
-        `[yable] accessor path too deep (>${MAX_ACCESSOR_DEPTH} segments): ${key}`
-      )
+      console.error(`[yable] accessor path too deep (>${MAX_ACCESSOR_DEPTH} segments): ${key}`)
     }
-    column.accessorFn = ((row: TData) => {
+    column.accessorFn = (row: TData) => {
       if (tooDeep) return undefined as unknown as TValue
       let value: unknown = row
       for (const part of parts) {
@@ -348,7 +436,7 @@ export function createColumn<TData extends RowData, TValue = unknown>(
         value = (value as Record<string, unknown>)[part]
       }
       return value as TValue
-    })
+    }
   }
 
   return column

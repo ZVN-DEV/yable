@@ -137,11 +137,11 @@
   transition: background var(--yable-transition-fast);
 }
 
-.yable-th[data-sortable="true"] {
+.yable-th[data-sortable='true'] {
   cursor: pointer;
 }
 
-.yable-th[data-sortable="true"]:hover {
+.yable-th[data-sortable='true']:hover {
   background: var(--yable-bg-row-hover);
 }
 
@@ -164,22 +164,23 @@
   height: calc(var(--yable-sort-icon-size) + 2px);
   color: var(--yable-sort-icon-color);
   opacity: 0;
-  transition: color var(--yable-transition),
-              transform var(--yable-transition),
-              opacity var(--yable-transition);
+  transition:
+    color var(--yable-transition),
+    transform var(--yable-transition),
+    opacity var(--yable-transition);
 }
 
 /* Show sort indicator on header hover */
-.yable-th[data-sortable="true"]:hover .yable-sort-indicator {
+.yable-th[data-sortable='true']:hover .yable-sort-indicator {
   opacity: 0.4;
 }
 
-.yable-sort-indicator[data-active="true"] {
+.yable-sort-indicator[data-active='true'] {
   color: var(--yable-sort-icon-color-active);
   opacity: 1;
 }
 
-.yable-sort-indicator[data-direction="desc"] {
+.yable-sort-indicator[data-direction='desc'] {
   transform: rotate(180deg);
 }
 
@@ -219,8 +220,9 @@
   height: 0%;
   border-radius: 2px;
   background: var(--yable-resize-handle-color);
-  transition: background var(--yable-transition),
-              height var(--yable-transition);
+  transition:
+    background var(--yable-transition),
+    height var(--yable-transition);
 }
 
 .yable-resize-handle:hover::after {
@@ -228,25 +230,25 @@
   height: 50%;
 }
 
-.yable-resize-handle[data-resizing="true"]::after {
+.yable-resize-handle[data-resizing='true']::after {
   background: var(--yable-resize-handle-color-active);
   height: 70%;
 }
 
 /* ── Column Reorder ──────────────────────────────────────────────────────── */
 
-.yable-th[data-reorderable="true"] {
+.yable-th[data-reorderable='true'] {
   cursor: grab;
 }
 
-.yable-th[data-reorderable="true"]:active {
+.yable-th[data-reorderable='true']:active {
   cursor: grabbing;
 }
 
 /* When sortable AND reorderable, sort cursor wins on the content area so the
    header still feels clickable. The drag is initiated from a mousedown that
    moves; a click without movement still triggers the sort. */
-.yable-th[data-sortable="true"][data-reorderable="true"] {
+.yable-th[data-sortable='true'][data-reorderable='true'] {
   cursor: pointer;
 }
 
@@ -264,16 +266,16 @@
   z-index: calc(var(--yable-z-resize) + 1);
 }
 
-.yable-th[data-drag-over="left"]::before {
+.yable-th[data-drag-over='left']::before {
   left: -1px;
 }
 
-.yable-th[data-drag-over="right"]::after {
+.yable-th[data-drag-over='right']::after {
   right: -1px;
 }
 
-.yable-th[data-drag-over="left"]::after,
-.yable-th[data-drag-over="right"]::before {
+.yable-th[data-drag-over='left']::after,
+.yable-th[data-drag-over='right']::before {
   display: none;
 }
 
@@ -299,20 +301,20 @@
   background: var(--yable-bg-row-hover);
 }
 
-.yable-tr[data-selected="true"] {
+.yable-tr[data-selected='true'] {
   background: var(--yable-bg-row-selected);
   box-shadow: inset 2px 0 0 0 var(--yable-accent);
 }
 
-.yable-tr[data-selected="true"]:hover {
+.yable-tr[data-selected='true']:hover {
   background: var(--yable-bg-row-selected);
 }
 
-.yable-tr[data-expanded="true"] {
+.yable-tr[data-expanded='true'] {
   background: var(--yable-bg-row-expanded);
 }
 
-.yable-tr[data-clickable="true"] {
+.yable-tr[data-clickable='true'] {
   cursor: pointer;
 }
 
@@ -354,20 +356,58 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: background var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    background var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
 }
 
-.yable-td[data-editing="true"] {
+.yable-td[data-cell-selected='true'] {
+  --yable-selection-top-width: 0px;
+  --yable-selection-right-width: 0px;
+  --yable-selection-bottom-width: 0px;
+  --yable-selection-left-width: 0px;
+  background: color-mix(in srgb, var(--yable-accent) 10%, transparent);
+  position: relative;
+}
+
+.yable-td[data-cell-selected='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: var(--yable-accent);
+  border-width: var(--yable-selection-top-width) var(--yable-selection-right-width)
+    var(--yable-selection-bottom-width) var(--yable-selection-left-width);
+}
+
+.yable-td.yable-cell--selection-top {
+  --yable-selection-top-width: 2px;
+}
+
+.yable-td.yable-cell--selection-right {
+  --yable-selection-right-width: 2px;
+}
+
+.yable-td.yable-cell--selection-bottom {
+  --yable-selection-bottom-width: 2px;
+}
+
+.yable-td.yable-cell--selection-left {
+  --yable-selection-left-width: 2px;
+}
+
+.yable-td[data-editing='true'] {
   padding: 4px 6px;
   background: var(--yable-bg-cell-editing);
-  box-shadow: inset 0 0 0 2px var(--yable-accent),
-              0 0 0 3px var(--yable-accent-light);
+  box-shadow:
+    inset 0 0 0 2px var(--yable-accent),
+    0 0 0 3px var(--yable-accent-light);
   z-index: 2;
   position: relative;
 }
 
-.yable-td.yable-cell--focused:not([data-editing="true"]) {
+.yable-td.yable-cell--focused:not([data-editing='true']) {
   box-shadow: var(--yable-focus-ring);
   position: relative;
   z-index: calc(var(--yable-z-pinned) + 1);
@@ -375,16 +415,16 @@
 
 /* ── Column Pinning ──────────────────────────────────────────────────────── */
 
-.yable-th[data-pinned="left"],
-.yable-td[data-pinned="left"] {
+.yable-th[data-pinned='left'],
+.yable-td[data-pinned='left'] {
   position: sticky;
   left: var(--yable-pin-offset, 0px);
   z-index: var(--yable-z-pinned);
   background: var(--yable-bg-pinned);
 }
 
-.yable-th[data-pinned="right"],
-.yable-td[data-pinned="right"] {
+.yable-th[data-pinned='right'],
+.yable-td[data-pinned='right'] {
   position: sticky;
   right: var(--yable-pin-offset, 0px);
   z-index: var(--yable-z-pinned);
@@ -392,14 +432,14 @@
 }
 
 /* Shadow on last left-pinned and first right-pinned */
-.yable-th[data-pinned-edge="left"],
-.yable-td[data-pinned-edge="left"] {
+.yable-th[data-pinned-edge='left'],
+.yable-td[data-pinned-edge='left'] {
   box-shadow: var(--yable-shadow-pinned);
   clip-path: inset(0 -10px 0 0);
 }
 
-.yable-th[data-pinned-edge="right"],
-.yable-td[data-pinned-edge="right"] {
+.yable-th[data-pinned-edge='right'],
+.yable-td[data-pinned-edge='right'] {
   box-shadow: calc(var(--yable-shadow-pinned) * -1);
   clip-path: inset(0 0 0 -10px);
 }
@@ -420,7 +460,7 @@
 
 /* ── Row Pinning ─────────────────────────────────────────────────────────── */
 
-.yable-tr[data-pinned="top"] {
+.yable-tr[data-pinned='top'] {
   position: sticky;
   top: 0;
   z-index: calc(var(--yable-z-pinned) - 1);
@@ -428,7 +468,7 @@
   box-shadow: 0 1px 0 var(--yable-border-color);
 }
 
-.yable-tr[data-pinned="bottom"] {
+.yable-tr[data-pinned='bottom'] {
   position: sticky;
   bottom: 0;
   z-index: calc(var(--yable-z-pinned) - 1);
@@ -470,9 +510,10 @@
   background: none;
   cursor: pointer;
   color: var(--yable-text-secondary);
-  transition: transform var(--yable-transition),
-              color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    transform var(--yable-transition),
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
   padding: 0;
   border-radius: var(--yable-border-radius-sm);
 }
@@ -482,7 +523,7 @@
   background: var(--yable-bg-row-hover);
 }
 
-.yable-expand-toggle[data-expanded="true"] {
+.yable-expand-toggle[data-expanded='true'] {
   transform: rotate(90deg);
   color: var(--yable-accent);
 }
@@ -500,9 +541,10 @@
   font-size: var(--yable-input-font-size);
   color: var(--yable-text-primary);
   outline: none;
-  transition: border-color var(--yable-transition-fast),
-              background var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    border-color var(--yable-transition-fast),
+    background var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
 }
 
 .yable-input:hover {
@@ -557,9 +599,10 @@
   background-repeat: no-repeat;
   background-position: right 6px center;
   background-size: 12px;
-  transition: border-color var(--yable-transition-fast),
-              background-color var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    border-color var(--yable-transition-fast),
+    background-color var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
 }
 
 .yable-select:hover {
@@ -582,9 +625,10 @@
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
-  transition: background var(--yable-transition-fast),
-              border-color var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    background var(--yable-transition-fast),
+    border-color var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
 }
 
 .yable-checkbox:checked {
@@ -710,20 +754,21 @@
   font-size: var(--yable-font-size-sm);
   font-weight: var(--yable-font-weight-medium);
   cursor: pointer;
-  transition: background var(--yable-transition-fast),
-              color var(--yable-transition-fast),
-              border-color var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    background var(--yable-transition-fast),
+    color var(--yable-transition-fast),
+    border-color var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
   user-select: none;
   font-variant-numeric: tabular-nums;
 }
 
-.yable-pagination-btn:hover:not(:disabled):not([data-active="true"]) {
+.yable-pagination-btn:hover:not(:disabled):not([data-active='true']) {
   background: var(--yable-pagination-button-bg-hover);
   border-color: var(--yable-border-color);
 }
 
-.yable-pagination-btn[data-active="true"] {
+.yable-pagination-btn[data-active='true'] {
   background: var(--yable-pagination-button-bg-active);
   color: var(--yable-pagination-button-text-active);
   border-color: var(--yable-pagination-button-bg-active);
@@ -751,8 +796,9 @@
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 10px;
-  transition: border-color var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    border-color var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
 }
 
 .yable-pagination-select:hover {
@@ -791,10 +837,11 @@
   font-size: var(--yable-font-size);
   color: var(--yable-text-primary);
   outline: none;
-  transition: border-color var(--yable-transition),
-              background var(--yable-transition),
-              box-shadow var(--yable-transition),
-              width var(--yable-transition-slow);
+  transition:
+    border-color var(--yable-transition),
+    background var(--yable-transition),
+    box-shadow var(--yable-transition),
+    width var(--yable-transition-slow);
   /* Search icon via background-image */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7' cy='7' r='4.5'/%3E%3Cpath d='M10.5 10.5L14 14'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -829,8 +876,9 @@
   cursor: pointer;
   border-radius: 50%;
   margin-left: -30px;
-  transition: color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
 }
 
 .yable-global-filter-clear:hover {
@@ -897,8 +945,12 @@
 }
 
 @keyframes yable-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ── Selection Column ────────────────────────────────────────────────────── */
@@ -914,7 +966,7 @@
 
 /* ── Accessibility ───────────────────────────────────────────────────────── */
 
-.yable [role="columnheader"][aria-sort] {
+.yable [role='columnheader'][aria-sort] {
   cursor: pointer;
 }
 
@@ -955,8 +1007,9 @@
   z-index: var(--yable-z-resize);
   border-radius: 1px;
   pointer-events: auto;
-  transition: width var(--yable-transition-fast),
-              height var(--yable-transition-fast);
+  transition:
+    width var(--yable-transition-fast),
+    height var(--yable-transition-fast);
 }
 
 .yable-fill-handle:hover {
@@ -998,8 +1051,9 @@
   cursor: grab;
   color: var(--yable-text-tertiary);
   border-radius: var(--yable-border-radius-sm);
-  transition: color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
   flex-shrink: 0;
 }
 
@@ -1058,9 +1112,10 @@
   cursor: pointer;
   color: var(--yable-text-secondary);
   border-radius: var(--yable-border-radius-sm);
-  transition: transform var(--yable-transition),
-              color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    transform var(--yable-transition),
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
   flex-shrink: 0;
   margin-right: 4px;
 }
@@ -1070,7 +1125,7 @@
   background: var(--yable-bg-row-hover);
 }
 
-.yable-tree-toggle-btn[data-expanded="true"] {
+.yable-tree-toggle-btn[data-expanded='true'] {
   transform: rotate(90deg);
 }
 
@@ -1087,23 +1142,23 @@
 }
 
 /* Tree depth visual indentation */
-.yable-tr[data-tree-depth="1"] .yable-tree-toggle {
+.yable-tr[data-tree-depth='1'] .yable-tree-toggle {
   padding-left: 20px;
 }
 
-.yable-tr[data-tree-depth="2"] .yable-tree-toggle {
+.yable-tr[data-tree-depth='2'] .yable-tree-toggle {
   padding-left: 40px;
 }
 
-.yable-tr[data-tree-depth="3"] .yable-tree-toggle {
+.yable-tr[data-tree-depth='3'] .yable-tree-toggle {
   padding-left: 60px;
 }
 
-.yable-tr[data-tree-depth="4"] .yable-tree-toggle {
+.yable-tr[data-tree-depth='4'] .yable-tree-toggle {
   padding-left: 80px;
 }
 
-.yable-tr[data-tree-depth="5"] .yable-tree-toggle {
+.yable-tr[data-tree-depth='5'] .yable-tree-toggle {
   padding-left: 100px;
 }
 
@@ -1136,9 +1191,10 @@
   cursor: pointer;
   color: var(--yable-text-secondary);
   border-radius: var(--yable-border-radius-sm);
-  transition: transform var(--yable-transition),
-              color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    transform var(--yable-transition),
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
   flex-shrink: 0;
 }
 
@@ -1171,8 +1227,9 @@
   border: 1px dashed var(--yable-border-color);
   border-radius: var(--yable-border-radius);
   background: var(--yable-bg);
-  transition: border-color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    border-color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
 }
 
 .yable-pivot-zone:hover {
@@ -1217,9 +1274,10 @@
   color: var(--yable-text-primary);
   cursor: grab;
   user-select: none;
-  transition: background var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast),
-              border-color var(--yable-transition-fast);
+  transition:
+    background var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast),
+    border-color var(--yable-transition-fast);
 }
 
 .yable-pivot-field:hover {
@@ -1250,8 +1308,9 @@
   font-size: 12px;
   line-height: 1;
   border-radius: 50%;
-  transition: color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
 }
 
 .yable-pivot-field-remove:hover {
@@ -1316,8 +1375,9 @@
   font-size: inherit;
   color: var(--yable-text-primary);
   outline: none;
-  transition: border-color var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    border-color var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
 }
 
 .yable-formula-bar-input:focus {
@@ -1374,8 +1434,12 @@
 }
 
 @keyframes yable-overlay-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .yable-overlay-loading-content {
@@ -1397,8 +1461,12 @@
 }
 
 @keyframes yable-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ============================================================================
@@ -1650,23 +1718,26 @@
   background: var(--yable-bg);
   border: var(--yable-border-width) solid var(--yable-border-color);
   border-radius: 8px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12),
-              0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
   font-size: var(--yable-font-size-sm);
   animation: yable-ctx-appear 120ms ease;
   overflow: hidden;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-yable-theme="light"]) .yable-ctx-menu {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.2);
+  :root:not([data-yable-theme='light']) .yable-ctx-menu {
+    box-shadow:
+      0 8px 30px rgba(0, 0, 0, 0.4),
+      0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
-[data-yable-theme="dark"] .yable-ctx-menu {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4),
-              0 2px 8px rgba(0, 0, 0, 0.2);
+[data-yable-theme='dark'] .yable-ctx-menu {
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes yable-ctx-appear {
@@ -1691,8 +1762,9 @@
   user-select: none;
   outline: none;
   color: var(--yable-text-primary);
-  transition: background var(--yable-transition-fast),
-              color var(--yable-transition-fast);
+  transition:
+    background var(--yable-transition-fast),
+    color var(--yable-transition-fast);
 }
 
 .yable-ctx-item:hover,
@@ -1819,8 +1891,9 @@
   font-weight: var(--yable-font-weight-medium);
   cursor: pointer;
   border-radius: 6px;
-  transition: color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
 }
 
 .yable-sidebar-tab:hover {
@@ -1844,8 +1917,9 @@
   color: var(--yable-text-tertiary);
   cursor: pointer;
   border-radius: 6px;
-  transition: color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
 }
 
 .yable-sidebar-close:hover {
@@ -1897,9 +1971,10 @@
   font-size: var(--yable-font-size-sm);
   color: var(--yable-text-primary);
   outline: none;
-  transition: border-color var(--yable-transition-fast),
-              background var(--yable-transition-fast),
-              box-shadow var(--yable-transition-fast);
+  transition:
+    border-color var(--yable-transition-fast),
+    background var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
 }
 
 .yable-sidebar-search-input:focus {
@@ -1928,9 +2003,10 @@
   font-size: 11px;
   font-weight: var(--yable-font-weight-medium);
   cursor: pointer;
-  transition: color var(--yable-transition-fast),
-              background var(--yable-transition-fast),
-              border-color var(--yable-transition-fast);
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast),
+    border-color var(--yable-transition-fast);
 }
 
 .yable-sidebar-action-btn:hover {
@@ -2078,8 +2154,9 @@
   cursor: pointer;
   border-radius: 4px;
   flex-shrink: 0;
-  transition: color var(--yable-transition-fast),
-              background var(--yable-transition-fast);
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast);
 }
 
 .yable-sidebar-filter-remove:hover {
@@ -2212,7 +2289,7 @@
     background: #fff !important;
   }
 
-  .yable-print-mode .yable-tr[data-selected="true"] {
+  .yable-print-mode .yable-tr[data-selected='true'] {
     box-shadow: none !important;
     background: transparent !important;
   }
@@ -2232,7 +2309,7 @@
   left: 0;
 }
 
-.yable--rtl .yable-tr[data-selected="true"] {
+.yable--rtl .yable-tr[data-selected='true'] {
   box-shadow: inset -2px 0 0 0 var(--yable-accent);
 }
 
@@ -2452,21 +2529,60 @@
   white-space: nowrap;
 }
 
-.yable-cell-badge--soft.yable-cell-badge--default { background: var(--yable-bg-hover); color: var(--yable-text-secondary); }
-.yable-cell-badge--soft.yable-cell-badge--accent { background: var(--yable-accent-bg, rgba(99, 102, 241, 0.1)); color: var(--yable-accent); }
-.yable-cell-badge--soft.yable-cell-badge--success { background: rgba(52, 211, 153, 0.1); color: #34d399; }
-.yable-cell-badge--soft.yable-cell-badge--warning { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
-.yable-cell-badge--soft.yable-cell-badge--danger { background: rgba(248, 113, 113, 0.1); color: #f87171; }
-.yable-cell-badge--soft.yable-cell-badge--info { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+.yable-cell-badge--soft.yable-cell-badge--default {
+  background: var(--yable-bg-hover);
+  color: var(--yable-text-secondary);
+}
+.yable-cell-badge--soft.yable-cell-badge--accent {
+  background: var(--yable-accent-bg, rgba(99, 102, 241, 0.1));
+  color: var(--yable-accent);
+}
+.yable-cell-badge--soft.yable-cell-badge--success {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+}
+.yable-cell-badge--soft.yable-cell-badge--warning {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+.yable-cell-badge--soft.yable-cell-badge--danger {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+}
+.yable-cell-badge--soft.yable-cell-badge--info {
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+}
 
-.yable-cell-badge--solid.yable-cell-badge--default { background: var(--yable-text-secondary); color: var(--yable-bg); }
-.yable-cell-badge--solid.yable-cell-badge--accent { background: var(--yable-accent); color: #fff; }
-.yable-cell-badge--solid.yable-cell-badge--success { background: #34d399; color: #0a2e1f; }
-.yable-cell-badge--solid.yable-cell-badge--warning { background: #fbbf24; color: #422006; }
-.yable-cell-badge--solid.yable-cell-badge--danger { background: #f87171; color: #2a0a0a; }
-.yable-cell-badge--solid.yable-cell-badge--info { background: #38bdf8; color: #082f49; }
+.yable-cell-badge--solid.yable-cell-badge--default {
+  background: var(--yable-text-secondary);
+  color: var(--yable-bg);
+}
+.yable-cell-badge--solid.yable-cell-badge--accent {
+  background: var(--yable-accent);
+  color: #fff;
+}
+.yable-cell-badge--solid.yable-cell-badge--success {
+  background: #34d399;
+  color: #0a2e1f;
+}
+.yable-cell-badge--solid.yable-cell-badge--warning {
+  background: #fbbf24;
+  color: #422006;
+}
+.yable-cell-badge--solid.yable-cell-badge--danger {
+  background: #f87171;
+  color: #2a0a0a;
+}
+.yable-cell-badge--solid.yable-cell-badge--info {
+  background: #38bdf8;
+  color: #082f49;
+}
 
-.yable-cell-badge--outline { background: transparent; border: 1px solid currentColor; }
+.yable-cell-badge--outline {
+  background: transparent;
+  border: 1px solid currentColor;
+}
 
 /* ── CellCurrency ───────────────────────────────────────────────────────── */
 
@@ -2477,8 +2593,12 @@
   white-space: nowrap;
 }
 
-.yable-cell-currency--positive { color: #34d399; }
-.yable-cell-currency--negative { color: #f87171; }
+.yable-cell-currency--positive {
+  color: #34d399;
+}
+.yable-cell-currency--negative {
+  color: #f87171;
+}
 
 /* ── CellStatus ─────────────────────────────────────────────────────────── */
 
@@ -2500,16 +2620,36 @@
   flex-shrink: 0;
 }
 
-.yable-cell-status--success { color: #34d399; }
-.yable-cell-status--success::before { background: #34d399; }
-.yable-cell-status--warning { color: #fbbf24; }
-.yable-cell-status--warning::before { background: #fbbf24; }
-.yable-cell-status--danger { color: #f87171; }
-.yable-cell-status--danger::before { background: #f87171; }
-.yable-cell-status--info { color: #38bdf8; }
-.yable-cell-status--info::before { background: #38bdf8; }
-.yable-cell-status--default { color: var(--yable-text-secondary); }
-.yable-cell-status--default::before { background: var(--yable-text-secondary); }
+.yable-cell-status--success {
+  color: #34d399;
+}
+.yable-cell-status--success::before {
+  background: #34d399;
+}
+.yable-cell-status--warning {
+  color: #fbbf24;
+}
+.yable-cell-status--warning::before {
+  background: #fbbf24;
+}
+.yable-cell-status--danger {
+  color: #f87171;
+}
+.yable-cell-status--danger::before {
+  background: #f87171;
+}
+.yable-cell-status--info {
+  color: #38bdf8;
+}
+.yable-cell-status--info::before {
+  background: #38bdf8;
+}
+.yable-cell-status--default {
+  color: var(--yable-text-secondary);
+}
+.yable-cell-status--default::before {
+  background: var(--yable-text-secondary);
+}
 
 /* ── CellNumeric ────────────────────────────────────────────────────────── */
 
@@ -2525,8 +2665,12 @@
   color: var(--yable-text-secondary);
 }
 
-.yable-cell-numeric--positive { color: #34d399; }
-.yable-cell-numeric--negative { color: #f87171; }
+.yable-cell-numeric--positive {
+  color: #34d399;
+}
+.yable-cell-numeric--negative {
+  color: #f87171;
+}
 
 /* ── CellRating ─────────────────────────────────────────────────────────── */
 
@@ -2565,10 +2709,18 @@
   flex-shrink: 0;
 }
 
-.yable-cell-boolean--success { color: #34d399; }
-.yable-cell-boolean--success.yable-cell-boolean--dot::before { background: #34d399; }
-.yable-cell-boolean--danger { color: #f87171; }
-.yable-cell-boolean--danger.yable-cell-boolean--dot::before { background: #f87171; }
+.yable-cell-boolean--success {
+  color: #34d399;
+}
+.yable-cell-boolean--success.yable-cell-boolean--dot::before {
+  background: #34d399;
+}
+.yable-cell-boolean--danger {
+  color: #f87171;
+}
+.yable-cell-boolean--danger.yable-cell-boolean--dot::before {
+  background: #f87171;
+}
 
 .yable-cell-boolean--badge {
   padding: 2px 8px;
@@ -2576,8 +2728,12 @@
   font-weight: 500;
 }
 
-.yable-cell-boolean--badge.yable-cell-boolean--success { background: rgba(52, 211, 153, 0.1); }
-.yable-cell-boolean--badge.yable-cell-boolean--danger { background: rgba(248, 113, 113, 0.1); }
+.yable-cell-boolean--badge.yable-cell-boolean--success {
+  background: rgba(52, 211, 153, 0.1);
+}
+.yable-cell-boolean--badge.yable-cell-boolean--danger {
+  background: rgba(248, 113, 113, 0.1);
+}
 
 /* ── CellProgress ───────────────────────────────────────────────────────── */
 
@@ -2604,11 +2760,21 @@
   transition: width 200ms ease;
 }
 
-.yable-cell-progress--accent .yable-cell-progress__fill { background: var(--yable-accent); }
-.yable-cell-progress--default .yable-cell-progress__fill { background: var(--yable-text-secondary); }
-.yable-cell-progress--success .yable-cell-progress__fill { background: #34d399; }
-.yable-cell-progress--warning .yable-cell-progress__fill { background: #fbbf24; }
-.yable-cell-progress--danger .yable-cell-progress__fill { background: #f87171; }
+.yable-cell-progress--accent .yable-cell-progress__fill {
+  background: var(--yable-accent);
+}
+.yable-cell-progress--default .yable-cell-progress__fill {
+  background: var(--yable-text-secondary);
+}
+.yable-cell-progress--success .yable-cell-progress__fill {
+  background: #34d399;
+}
+.yable-cell-progress--warning .yable-cell-progress__fill {
+  background: #fbbf24;
+}
+.yable-cell-progress--danger .yable-cell-progress__fill {
+  background: #f87171;
+}
 
 .yable-cell-progress__label {
   font-variant-numeric: tabular-nums;

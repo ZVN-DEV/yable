@@ -1,15 +1,15 @@
 // @zvndev/yable-react — Table Footer Component
 
-import type { RowData, Table } from '@zvndev/yable-core'
+import React from 'react'
+import type { HeaderContext, RowData, Table } from '@zvndev/yable-core'
 
 interface TableFooterProps<TData extends RowData> {
   table: Table<TData>
 }
 
-export function TableFooter<TData extends RowData>({
-  table,
-}: TableFooterProps<TData>) {
+export function TableFooter<TData extends RowData>({ table }: TableFooterProps<TData>) {
   const footerGroups = table.getFooterGroups()
+  type FooterRenderer = (ctx: HeaderContext<TData, unknown>) => React.ReactNode
 
   if (!footerGroups.length) return null
 
@@ -22,8 +22,8 @@ export function TableFooter<TData extends RowData>({
             const content = header.isPlaceholder
               ? null
               : typeof footerDef === 'function'
-                ? (footerDef as Function)(header.getContext())
-                : footerDef ?? null
+                ? (footerDef as FooterRenderer)(header.getContext())
+                : (footerDef ?? null)
 
             return (
               <td key={header.id} className="yable-td" colSpan={header.colSpan}>

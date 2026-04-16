@@ -32,11 +32,12 @@ We aim to acknowledge reports within 72 hours and provide a remediation plan wit
 In scope:
 
 - `@zvndev/yable-core`, `@zvndev/yable-react`, `@zvndev/yable-vanilla`, `@zvndev/yable-themes`
+- Public demo/docs app under `examples/react-demo`
 - Rendering, formula evaluation, theme injection, clipboard handling, async commit coordination
 
 Out of scope:
 
-- Demo apps under `examples/`
+- Local-only sandboxes or throwaway experiments under `examples/` that are not part of the public launch surface
 - Issues that require a malicious developer with full access to the consuming codebase
 - Denial of service via intentionally malformed input where the consuming app owns validation
 

@@ -77,10 +77,7 @@ export {
   resetLocale,
 } from '@zvndev/yable-core'
 
-export type {
-  YableLocale,
-  PartialLocale,
-} from '@zvndev/yable-core'
+export type { YableLocale, PartialLocale } from '@zvndev/yable-core'
 
 // React-specific types
 export type {
@@ -100,26 +97,23 @@ export type {
   UseVirtualizationOptions,
   UseVirtualizationResult,
 } from './hooks/useVirtualization'
+export { useColumnVirtualization } from './hooks/useColumnVirtualization'
+export type {
+  VirtualColumn,
+  UseColumnVirtualizationOptions,
+  UseColumnVirtualizationResult,
+} from './hooks/useColumnVirtualization'
 export { usePretextMeasurement } from './hooks/usePretextMeasurement'
 export type {
   CellMeasurement,
   UsePretextMeasurementOptions,
   UsePretextMeasurementResult,
 } from './hooks/usePretextMeasurement'
-export {
-  useAutoMeasurements,
-  resolveMeasureRecipe,
-} from './hooks/useAutoMeasurements'
+export { useAutoMeasurements, resolveMeasureRecipe } from './hooks/useAutoMeasurements'
 export type { AutoMeasurementsOptions } from './hooks/useAutoMeasurements'
-export {
-  useTableRowHeights,
-  DEFAULT_TEXT_RECIPE,
-} from './hooks/useTableRowHeights'
+export { useTableRowHeights, DEFAULT_TEXT_RECIPE } from './hooks/useTableRowHeights'
 export type { UseTableRowHeightsOptions } from './hooks/useTableRowHeights'
-export {
-  getMeasureRecipeForCellType,
-  getRegisteredCellTypes,
-} from './cells/resolver'
+export { getMeasureRecipeForCellType, getRegisteredCellTypes } from './cells/resolver'
 
 // Context
 export { useTableContext, TableProvider } from './context'
@@ -132,6 +126,8 @@ export { TableCell } from './components/TableCell'
 export { TableFooter } from './components/TableFooter'
 export { Pagination } from './components/Pagination'
 export { GlobalFilter } from './components/GlobalFilter'
+export { FloatingFilter } from './components/FloatingFilter'
+export { SetFilter } from './components/SetFilter'
 export { SortIndicator } from './components/SortIndicator'
 export { ErrorBoundary, CellErrorBoundary } from './components/ErrorBoundary'
 
@@ -173,7 +169,11 @@ export type { UseClipboardOptions } from './hooks/useClipboard'
 export { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 export type { UseKeyboardNavigationOptions } from './hooks/useKeyboardNavigation'
 export { useFillHandle } from './hooks/useFillHandle'
-export type { FillHandleDragState, UseFillHandleOptions, UseFillHandleReturn } from './hooks/useFillHandle'
+export type {
+  FillHandleDragState,
+  UseFillHandleOptions,
+  UseFillHandleReturn,
+} from './hooks/useFillHandle'
 
 // Feature components
 export { FillHandle } from './components/FillHandle'
@@ -193,11 +193,7 @@ export { ExpandIcon } from './components/ExpandIcon'
 
 // Pivot
 export { PivotConfigPanel } from './components/PivotConfig'
-export type {
-  PivotConfigProps,
-  PivotFieldItem,
-  PivotValueItem,
-} from './components/PivotConfig'
+export type { PivotConfigProps, PivotFieldItem, PivotValueItem } from './components/PivotConfig'
 
 // Loading Overlay
 export { LoadingOverlay } from './components/LoadingOverlay'

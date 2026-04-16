@@ -41,8 +41,10 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "lint": "eslint src",
     "test": "vitest",
     "test:ci": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --passWithNoTests --coverage",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
@@ -61,5 +63,12 @@
     "tsup": "^8.3.0",
     "vitest": "^2.1.0",
     "typescript": "^5.7.0"
+  },
+  "sideEffects": false,
+  "bugs": {
+    "url": "https://github.com/ZVN-DEV/yable/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

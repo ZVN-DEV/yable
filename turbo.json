@@ -10,14 +10,22 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": []
     },
     "test:ci": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": []
     },
-    "lint": {},
+    "test:coverage": {
+      "outputs": ["coverage/**"]
+    },
+    "lint": {
+      "outputs": []
+    },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": []
     },
     "clean": {
       "cache": false

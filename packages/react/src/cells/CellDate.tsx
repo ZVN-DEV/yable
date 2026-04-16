@@ -1,7 +1,6 @@
 // @zvndev/yable-react — CellDate display component
 // Formatted date display with preset and custom format support.
 
-import { useMemo } from 'react'
 import type { RowData, CellContext } from '@zvndev/yable-core'
 import type { CellDateProps, CellMeasureRecipe } from './types'
 
@@ -18,9 +17,10 @@ const PRESETS: Record<string, Intl.DateTimeFormatOptions> = {
   long: { month: 'long', day: 'numeric', year: 'numeric' },
 }
 
-const rtf = typeof Intl !== 'undefined' && Intl.RelativeTimeFormat
-  ? new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
-  : null
+const rtf =
+  typeof Intl !== 'undefined' && Intl.RelativeTimeFormat
+    ? new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+    : null
 
 function formatRelative(date: Date): string {
   if (!rtf) return date.toLocaleDateString()
@@ -44,24 +44,22 @@ export function CellDate<TData extends RowData, TValue>({
   const date = raw instanceof Date ? raw : new Date(String(raw))
   if (isNaN(date.getTime())) return <span className="yable-cell-date">{String(raw)}</span>
 
-  const formatter = useMemo(() => {
-    if (typeof format === 'string' && format !== 'relative') {
-      return new Intl.DateTimeFormat(locale, {
-        ...PRESETS[format],
-        timeZone: 'UTC',
-      })
-    }
-    if (typeof format === 'object') {
-      return new Intl.DateTimeFormat(locale, { ...format, timeZone: 'UTC' })
-    }
-    return null
-  }, [format, locale])
+  const formatter =
+    typeof format === 'string' && format !== 'relative'
+      ? new Intl.DateTimeFormat(locale, {
+          ...PRESETS[format],
+          timeZone: 'UTC',
+        })
+      : typeof format === 'object'
+        ? new Intl.DateTimeFormat(locale, { ...format, timeZone: 'UTC' })
+        : null
 
-  const formatted = format === 'relative'
-    ? formatRelative(date)
-    : formatter
-    ? formatter.format(date)
-    : date.toLocaleDateString(locale)
+  const formatted =
+    format === 'relative'
+      ? formatRelative(date)
+      : formatter
+        ? formatter.format(date)
+        : date.toLocaleDateString(locale)
 
   return (
     <span className={`yable-cell-date ${className ?? ''}`} title={date.toISOString()}>

@@ -47,6 +47,8 @@ export type {
   FilterMeta,
   PaginationState,
   RowSelectionState,
+  CellRange,
+  CellRangeSelectionState,
   VisibilityState,
   ColumnOrderState,
   ColumnPinningState,
@@ -198,12 +200,7 @@ export type { ResolvedKeyboardNavigationCell } from './features/keyboardNavigati
 
 export { en } from './i18n/en'
 export type { YableLocale } from './i18n/en'
-export {
-  createLocale,
-  setDefaultLocale,
-  getDefaultLocale,
-  resetLocale,
-} from './i18n/locales'
+export { createLocale, setDefaultLocale, getDefaultLocale, resetLocale } from './i18n/locales'
 export type { PartialLocale } from './i18n/locales'
 
 // ---------------------------------------------------------------------------
@@ -223,12 +220,7 @@ export {
   generatePivotColumnDefs,
   getInitialPivotState,
 } from './features/pivot'
-export type {
-  PivotFieldConfig,
-  PivotValueConfig,
-  PivotColumn,
-  PivotRow,
-} from './features/pivot'
+export type { PivotFieldConfig, PivotValueConfig, PivotColumn, PivotRow } from './features/pivot'
 
 // Undo / redo
 export { UndoStack, createUndoRedoIntegration } from './features/undoRedo'

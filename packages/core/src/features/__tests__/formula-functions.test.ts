@@ -48,6 +48,15 @@ describe('Math Functions', () => {
     it('should treat boolean TRUE as 1', () => {
       expect(call('SUM', 1, true, false)).toBe(2)
     })
+
+    it('should reject pathologically deep nested arrays', () => {
+      let nested: unknown = 1
+      for (let i = 0; i < 55; i++) {
+        nested = [nested]
+      }
+
+      expect(() => call('SUM', nested)).toThrow(FormulaError)
+    })
   })
 
   describe('AVERAGE / AVG', () => {

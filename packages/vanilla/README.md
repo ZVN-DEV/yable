@@ -43,14 +43,19 @@ const table = createTable({
 
 function render() {
   const container = document.getElementById('table-container')!
-  container.innerHTML = renderTable(table, {
-    striped: true,
-    stickyHeader: true,
-  }) + renderPagination(table)
+  container.innerHTML =
+    renderTable(table, {
+      striped: true,
+      stickyHeader: true,
+    }) + renderPagination(table)
 }
 
 render()
 ```
+
+> Security note: `renderTable()` returns escaped library output that is intended
+> to be injected as-is. Do not concatenate unescaped user HTML into the returned
+> string before assigning to `innerHTML`.
 
 ## API
 
@@ -60,16 +65,16 @@ Returns the full table HTML string.
 
 **Options:**
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `stickyHeader` | `boolean` | `false` | Pin header row on scroll |
-| `striped` | `boolean` | `false` | Alternate row backgrounds |
-| `bordered` | `boolean` | `false` | Add cell borders |
-| `compact` | `boolean` | `false` | Reduce padding |
-| `theme` | `string` | -- | Theme class name suffix |
-| `clickableRows` | `boolean` | `false` | Add clickable row styling |
-| `footer` | `boolean` | `false` | Render table footer |
-| `emptyMessage` | `string` | `"No data"` | Text when there are no rows |
+| Option          | Type      | Default     | Description                 |
+| --------------- | --------- | ----------- | --------------------------- |
+| `stickyHeader`  | `boolean` | `false`     | Pin header row on scroll    |
+| `striped`       | `boolean` | `false`     | Alternate row backgrounds   |
+| `bordered`      | `boolean` | `false`     | Add cell borders            |
+| `compact`       | `boolean` | `false`     | Reduce padding              |
+| `theme`         | `string`  | --          | Theme class name suffix     |
+| `clickableRows` | `boolean` | `false`     | Add clickable row styling   |
+| `footer`        | `boolean` | `false`     | Render table footer         |
+| `emptyMessage`  | `string`  | `"No data"` | Text when there are no rows |
 
 ### `renderPagination(table, options?): string`
 
@@ -77,11 +82,11 @@ Returns pagination controls as an HTML string.
 
 **Options:**
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `showPageSize` | `boolean` | `true` | Show page size dropdown |
-| `pageSizes` | `number[]` | `[10, 20, 50, 100]` | Available page sizes |
-| `showInfo` | `boolean` | `true` | Show row count info |
+| Option         | Type       | Default             | Description             |
+| -------------- | ---------- | ------------------- | ----------------------- |
+| `showPageSize` | `boolean`  | `true`              | Show page size dropdown |
+| `pageSizes`    | `number[]` | `[10, 20, 50, 100]` | Available page sizes    |
+| `showInfo`     | `boolean`  | `true`              | Show row count info     |
 
 ## Event Wiring
 
@@ -92,8 +97,7 @@ container.addEventListener('click', (e) => {
   const target = e.target as HTMLElement
 
   // Sort on header click
-  const columnId = target.closest('[data-yable-sortable="true"]')
-    ?.getAttribute('data-yable-column')
+  const columnId = target.closest('[data-yable-sortable="true"]')?.getAttribute('data-yable-column')
   if (columnId) {
     const column = table.getColumn(columnId)
     column?.toggleSorting()
@@ -101,8 +105,7 @@ container.addEventListener('click', (e) => {
   }
 
   // Pagination
-  const page = target.closest('[data-yable-page]')
-    ?.getAttribute('data-yable-page')
+  const page = target.closest('[data-yable-page]')?.getAttribute('data-yable-page')
   if (page === 'prev') table.previousPage()
   else if (page === 'next') table.nextPage()
   else if (page === 'first') table.firstPage()

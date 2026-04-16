@@ -2,12 +2,7 @@
 // @zvndev/yable-core — Type Definitions
 // ============================================================================
 
-import type {
-  CommitsSlice,
-  OnCommitFn,
-  CellPatch,
-  CommitResult,
-} from './features/commits/types'
+import type { CommitsSlice, OnCommitFn, CellPatch, CommitResult } from './features/commits/types'
 
 // ---------------------------------------------------------------------------
 // Base Types
@@ -44,9 +39,7 @@ export type DeepValue<T, K> = K extends `${infer A}.${infer B}`
 // ---------------------------------------------------------------------------
 
 export interface TableFeature<TData extends RowData = any> {
-  getDefaultOptions?: (
-    table: Table<TData>
-  ) => Partial<TableOptionsResolved<TData>>
+  getDefaultOptions?: (table: Table<TData>) => Partial<TableOptionsResolved<TData>>
 
   getInitialState?: (state: TableState) => TableState
 
@@ -59,7 +52,7 @@ export interface TableFeature<TData extends RowData = any> {
     cell: Cell<TData, unknown>,
     column: Column<TData, unknown>,
     row: Row<TData>,
-    table: Table<TData>
+    table: Table<TData>,
   ) => void
 }
 
@@ -75,36 +68,36 @@ export type ColumnDefBase<TData extends RowData, TValue = unknown> = {
   meta?: ColumnMeta
 }
 
-export type AccessorKeyColumnDef<
-  TData extends RowData,
-  TValue = unknown,
-> = ColumnDefBase<TData, TValue> & {
+export type AccessorKeyColumnDef<TData extends RowData, TValue = unknown> = ColumnDefBase<
+  TData,
+  TValue
+> & {
   accessorKey: DeepKeys<TData> & string
   accessorFn?: never
 } & ColumnDefExtensions<TData, TValue>
 
-export type AccessorFnColumnDef<
-  TData extends RowData,
-  TValue = unknown,
-> = ColumnDefBase<TData, TValue> & {
+export type AccessorFnColumnDef<TData extends RowData, TValue = unknown> = ColumnDefBase<
+  TData,
+  TValue
+> & {
   accessorKey?: never
   accessorFn: (row: TData, index: number) => TValue
   id: string
 } & ColumnDefExtensions<TData, TValue>
 
-export type DisplayColumnDef<
-  TData extends RowData,
-  TValue = unknown,
-> = ColumnDefBase<TData, TValue> & {
+export type DisplayColumnDef<TData extends RowData, TValue = unknown> = ColumnDefBase<
+  TData,
+  TValue
+> & {
   accessorKey?: never
   accessorFn?: never
   id: string
 } & ColumnDefExtensions<TData, TValue>
 
-export type GroupColumnDef<
-  TData extends RowData,
-  TValue = unknown,
-> = ColumnDefBase<TData, TValue> & {
+export type GroupColumnDef<TData extends RowData, TValue = unknown> = ColumnDefBase<
+  TData,
+  TValue
+> & {
   columns: ColumnDef<TData, any>[]
 } & Partial<ColumnDefExtensions<TData, TValue>>
 
@@ -163,21 +156,13 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
    * `table.options.onCommit` for cells in this column. Use for bespoke
    * endpoints, file uploads, etc.
    */
-  commit?: (
-    patch: CellPatch<TData, TValue>
-  ) => Promise<CommitResult> | CommitResult
+  commit?: (patch: CellPatch<TData, TValue>) => Promise<CommitResult> | CommitResult
 
   // Row spanning
-  rowSpan?: (
-    row: Row<TData>,
-    rows: Row<TData>[],
-    rowIndex: number
-  ) => number | undefined
+  rowSpan?: (row: Row<TData>, rows: Row<TData>[], rowIndex: number) => number | undefined
 
   // Styling
-  cellClassName?:
-    | string
-    | ((ctx: CellContext<TData, TValue>) => string | undefined)
+  cellClassName?: string | ((ctx: CellContext<TData, TValue>) => string | undefined)
   headerClassName?: string
   footerClassName?: string
 
@@ -187,7 +172,16 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   tooltipDelay?: number
 
   // Declarative cell type — renders built-in display cell without a cell function
-  cellType?: 'badge' | 'currency' | 'status' | 'numeric' | 'rating' | 'boolean' | 'progress' | 'date' | 'link'
+  cellType?:
+    | 'badge'
+    | 'currency'
+    | 'status'
+    | 'numeric'
+    | 'rating'
+    | 'boolean'
+    | 'progress'
+    | 'date'
+    | 'link'
   cellTypeProps?: Record<string, unknown>
 
   // Pretext measure recipe — used by Pretext auto-measurement to compute row heights.
@@ -223,14 +217,7 @@ export interface ColumnMeta {
 // Cell Edit Config
 // ---------------------------------------------------------------------------
 
-export type CellEditType =
-  | 'text'
-  | 'number'
-  | 'select'
-  | 'toggle'
-  | 'date'
-  | 'checkbox'
-  | 'custom'
+export type CellEditType = 'text' | 'number' | 'select' | 'toggle' | 'date' | 'checkbox' | 'custom'
 
 export interface CellEditConfig<TData extends RowData, TValue = unknown> {
   type: CellEditType
@@ -277,17 +264,11 @@ export interface TableOptions<TData extends RowData> {
   getPaginationRowModel?: (table: Table<TData>) => () => RowModel<TData>
   getGroupedRowModel?: (table: Table<TData>) => () => RowModel<TData>
   getExpandedRowModel?: (table: Table<TData>) => () => RowModel<TData>
-  getFacetedRowModel?: (
-    table: Table<TData>,
-    columnId: string
-  ) => () => RowModel<TData>
-  getFacetedUniqueValues?: (
-    table: Table<TData>,
-    columnId: string
-  ) => () => Map<unknown, number>
+  getFacetedRowModel?: (table: Table<TData>, columnId: string) => () => RowModel<TData>
+  getFacetedUniqueValues?: (table: Table<TData>, columnId: string) => () => Map<unknown, number>
   getFacetedMinMaxValues?: (
     table: Table<TData>,
-    columnId: string
+    columnId: string,
   ) => () => [number, number] | undefined
 
   // Sorting options
@@ -459,6 +440,7 @@ export interface TableState {
   globalFilter: string
   pagination: PaginationState
   rowSelection: RowSelectionState
+  cellSelection?: CellRangeSelectionState
   columnVisibility: VisibilityState
   columnOrder: ColumnOrderState
   columnPinning: ColumnPinningState
@@ -491,7 +473,7 @@ export type SortingState = ColumnSort[]
 export type SortingFn<TData extends RowData> = (
   rowA: Row<TData>,
   rowB: Row<TData>,
-  columnId: string
+  columnId: string,
 ) => number
 
 export type SortingFnOption<TData extends RowData> =
@@ -521,7 +503,7 @@ export type FilterFn<TData extends RowData> = (
   row: Row<TData>,
   columnId: string,
   filterValue: unknown,
-  addMeta: (meta: FilterMeta) => void
+  addMeta: (meta: FilterMeta) => void,
 ) => boolean
 
 export type FilterFnOption<TData extends RowData> =
@@ -555,6 +537,17 @@ export interface PaginationState {
 
 // Selection
 export type RowSelectionState = Record<string, boolean>
+
+export interface CellRange {
+  start: KeyboardNavigationCell
+  end: KeyboardNavigationCell
+}
+
+export interface CellRangeSelectionState {
+  range: CellRange | null
+  anchor: KeyboardNavigationCell | null
+  isDragging: boolean
+}
 
 // Visibility
 export type VisibilityState = Record<string, boolean>
@@ -731,7 +724,7 @@ export interface FormulaState {
 export type AggregationFn<TData extends RowData> = (
   columnId: string,
   leafRows: Row<TData>[],
-  childRows: Row<TData>[]
+  childRows: Row<TData>[],
 ) => unknown
 
 export type AggregationFnOption<TData extends RowData> =
@@ -836,6 +829,20 @@ export interface Table<TData extends RowData> {
   toggleAllPageRowsSelected: (value?: boolean) => void
   setRowSelection: (updater: Updater<RowSelectionState>) => void
   resetRowSelection: (defaultState?: boolean) => void
+  getCellSelectionRange: () => CellRange | null
+  clearCellSelection: () => void
+  selectCell: (
+    cell: KeyboardNavigationCell,
+    options?: { extend?: boolean; keepAnchor?: boolean },
+  ) => void
+  startCellRangeSelection: (cell: KeyboardNavigationCell, options?: { extend?: boolean }) => void
+  updateCellRangeSelection: (cell: KeyboardNavigationCell) => void
+  endCellRangeSelection: () => void
+  getIsCellSelected: (rowIndex: number, columnIndex: number) => boolean
+  getCellSelectionEdges: (
+    rowIndex: number,
+    columnIndex: number,
+  ) => { top: boolean; right: boolean; bottom: boolean; left: boolean } | null
 
   // Visibility API
   setColumnVisibility: (updater: Updater<VisibilityState>) => void
@@ -886,11 +893,7 @@ export interface Table<TData extends RowData> {
   startEditing: (rowId: string, columnId: string) => void
   commitEdit: () => void
   cancelEdit: () => void
-  setPendingValue: (
-    rowId: string,
-    columnId: string,
-    value: unknown
-  ) => void
+  setPendingValue: (rowId: string, columnId: string, value: unknown) => void
   getPendingValue: (rowId: string, columnId: string) => unknown | undefined
   getPendingRow: (rowId: string) => Partial<TData> | undefined
   getAllPendingChanges: () => Record<string, Partial<TData>>
@@ -906,10 +909,7 @@ export interface Table<TData extends RowData> {
   /** Read the merged render value (pending shadows saved). */
   getCellRenderValue: (rowId: string, columnId: string) => unknown
   /** Read the cell's commit status. */
-  getCellStatus: (
-    rowId: string,
-    columnId: string
-  ) => 'idle' | 'pending' | 'error' | 'conflict'
+  getCellStatus: (rowId: string, columnId: string) => 'idle' | 'pending' | 'error' | 'conflict'
   /** Error message if status === 'error'. */
   getCellErrorMessage: (rowId: string, columnId: string) => string | undefined
   /** Conflicting saved value if status === 'conflict'. */
@@ -943,13 +943,18 @@ export interface Table<TData extends RowData> {
 
   // Clipboard API
   copyToClipboard: (options?: ClipboardOptions) => string
-  pasteFromClipboard: (text: string, targetRowId: string, targetColumnId: string, options?: ClipboardOptions) => void
+  pasteFromClipboard: (
+    text: string,
+    targetRowId: string,
+    targetColumnId: string,
+    options?: ClipboardOptions,
+  ) => void
   cutCells: (options?: ClipboardOptions) => string
 
   // Fill Handle API
   fillRange: (
     sourceRange: { startRow: number; startCol: number; endRow: number; endCol: number },
-    targetRange: { startRow: number; startCol: number; endRow: number; endCol: number }
+    targetRange: { startRow: number; startCol: number; endRow: number; endCol: number },
   ) => void
 
   // Formula API
@@ -1140,7 +1145,11 @@ export interface Row<TData extends RowData> {
   // Pinning
   getIsPinned: () => RowPinningPosition | false
   getCanPin: () => boolean
-  pin: (position: RowPinningPosition, includeLeafRows?: boolean, includeParentRows?: boolean) => void
+  pin: (
+    position: RowPinningPosition,
+    includeLeafRows?: boolean,
+    includeParentRows?: boolean,
+  ) => void
 
   // Grouping
   groupingColumnId?: string
@@ -1191,20 +1200,11 @@ export interface CellContext<TData extends RowData, TValue = unknown> {
 // ---------------------------------------------------------------------------
 
 export interface EventEmitter<TEventMap extends Record<string, any>> {
-  on: <K extends keyof TEventMap>(
-    event: K,
-    handler: (payload: TEventMap[K]) => void
-  ) => () => void
+  on: <K extends keyof TEventMap>(event: K, handler: (payload: TEventMap[K]) => void) => () => void
 
-  off: <K extends keyof TEventMap>(
-    event: K,
-    handler: (payload: TEventMap[K]) => void
-  ) => void
+  off: <K extends keyof TEventMap>(event: K, handler: (payload: TEventMap[K]) => void) => void
 
-  emit: <K extends keyof TEventMap>(
-    event: K,
-    payload: TEventMap[K]
-  ) => void
+  emit: <K extends keyof TEventMap>(event: K, payload: TEventMap[K]) => void
 
   removeAllListeners: (event?: keyof TEventMap) => void
 }
@@ -1226,12 +1226,12 @@ export interface YableEventMap<TData extends RowData> {
   'filter:change': FilterChangeEvent
   'page:change': PageChangeEvent
   'state:change': StateChangeEvent
-  'undo': UndoRedoEvent
-  'redo': UndoRedoEvent
+  undo: UndoRedoEvent
+  redo: UndoRedoEvent
   'clipboard:copy': ClipboardEvent_
   'clipboard:paste': ClipboardEvent_
   'clipboard:cut': ClipboardEvent_
-  'fill': FillEvent
+  fill: FillEvent
   'cell:flash': CellFlashEvent
   'row:drag:start': RowDragEvent<TData>
   'row:drag:end': RowDragEndEvent<TData>
@@ -1382,7 +1382,7 @@ export interface ColumnHelper<TData extends RowData> {
     accessor: TAccessor,
     column: TAccessor extends (...args: any) => any
       ? Omit<AccessorFnColumnDef<TData, TValue>, 'accessorFn'>
-      : Omit<AccessorKeyColumnDef<TData, TValue>, 'accessorKey'>
+      : Omit<AccessorKeyColumnDef<TData, TValue>, 'accessorKey'>,
   ) => ColumnDef<TData, TValue>
 
   display: (column: DisplayColumnDef<TData>) => ColumnDef<TData, unknown>
@@ -1393,7 +1393,7 @@ export interface ColumnHelper<TData extends RowData> {
 // React Types (for rowStyle prop — keep minimal)
 // ---------------------------------------------------------------------------
 
-declare namespace React {
+declare module 'react' {
   interface CSSProperties {
     [key: string]: string | number | undefined
   }

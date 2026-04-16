@@ -5,20 +5,26 @@ import type {
   RowData,
   Table,
   Header as HeaderType,
+  Column as ColumnType,
   ColumnOrderState,
+  HeaderContext,
 } from '@zvndev/yable-core'
 import { SortIndicator } from './SortIndicator'
+import { FloatingFilter } from './FloatingFilter'
 
 interface TableHeaderProps<TData extends RowData> {
   table: Table<TData>
+  floatingFilters?: boolean
 }
 
 const DRAG_MIME = 'application/yable-column'
 
 export function TableHeader<TData extends RowData>({
   table,
+  floatingFilters = false,
 }: TableHeaderProps<TData>) {
   const headerGroups = table.getHeaderGroups()
+  const visibleColumns = table.getVisibleLeafColumns()
 
   return (
     <thead className="yable-thead">
@@ -29,7 +35,49 @@ export function TableHeader<TData extends RowData>({
           ))}
         </tr>
       ))}
+
+      {floatingFilters && visibleColumns.length > 0 && (
+        <tr className="yable-header-row yable-header-row--filters">
+          {visibleColumns.map((column) => (
+            <FloatingFilterCell key={`${column.id}-filter`} column={column} />
+          ))}
+        </tr>
+      )}
     </thead>
+  )
+}
+
+function FloatingFilterCell<TData extends RowData>({
+  column,
+}: {
+  column: ColumnType<TData, unknown>
+}) {
+  const style = useMemo((): React.CSSProperties => {
+    const next: React.CSSProperties = {
+      width: column.getSize(),
+      minWidth: column.columnDef.minSize,
+      maxWidth: column.columnDef.maxSize,
+      padding: 6,
+      verticalAlign: 'top',
+    }
+
+    const pinned = column.getIsPinned()
+    if (pinned) {
+      next.position = 'sticky'
+      if (pinned === 'left') {
+        next.left = column.getStart('left')
+      } else {
+        next.right = column.getStart('right')
+      }
+    }
+
+    return next
+  }, [column])
+
+  return (
+    <th className="yable-th yable-th--filter" role="columnheader" style={style}>
+      <FloatingFilter column={column} />
+    </th>
   )
 }
 
@@ -46,13 +94,13 @@ function HeaderCell<TData extends RowData>({
   const sortIndex = column.getSortIndex()
   const canResize = column.getCanResize()
   const canReorder = column.getCanReorder() && !header.isPlaceholder
+  type HeaderRenderer = (ctx: HeaderContext<TData, unknown>) => React.ReactNode
 
-  const headerContent =
-    header.isPlaceholder
-      ? null
-      : typeof column.columnDef.header === 'function'
-        ? (column.columnDef.header as Function)(header.getContext())
-        : column.columnDef.header ?? header.id
+  const headerContent = header.isPlaceholder
+    ? null
+    : typeof column.columnDef.header === 'function'
+      ? (column.columnDef.header as HeaderRenderer)(header.getContext())
+      : (column.columnDef.header ?? header.id)
 
   const style = useMemo((): React.CSSProperties => {
     const s: React.CSSProperties = {
@@ -76,21 +124,12 @@ function HeaderCell<TData extends RowData>({
 
   const pinned = column.getIsPinned()
 
-  // ── Resize ─────────────────────────────────────────────────────────────
-  // The browser dispatches `click` on the lowest common ancestor of the
-  // mousedown/mouseup targets. When the user starts a resize on the handle
-  // and releases the mouse anywhere inside the th (which is common during a
-  // drag), the click event fires on the <th> itself and the th's onClick
-  // would otherwise toggle sorting. We track the time the resize gesture
-  // ended and ignore the next click if it lands within a short window.
   const lastResizeEndRef = useRef(0)
 
   const startResize = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
-      // Don't let the th's mousedown/click see the resize gesture.
       e.stopPropagation()
 
-      // Stamp the end time so the upcoming synthetic click can be suppressed.
       const onEnd = () => {
         lastResizeEndRef.current = Date.now()
         document.removeEventListener('mouseup', onEnd, true)
@@ -102,21 +141,18 @@ function HeaderCell<TData extends RowData>({
       const handler = header.getResizeHandler()
       if (handler) (handler as (ev: unknown) => void)(e.nativeEvent)
     },
-    [header]
+    [header],
   )
 
   const handleResizeClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
   }, [])
 
-  // ── Reorder (HTML5 drag) ───────────────────────────────────────────────
   const [dragOver, setDragOver] = useState<'left' | 'right' | null>(null)
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLTableCellElement>) => {
       if (!canReorder) return
-      // If the gesture started inside the resize handle, cancel — that's a
-      // resize, not a reorder.
       const target = e.target as Element | null
       if (target && target.closest('.yable-resize-handle')) {
         e.preventDefault()
@@ -126,21 +162,17 @@ function HeaderCell<TData extends RowData>({
       e.dataTransfer.effectAllowed = 'move'
       try {
         e.dataTransfer.setData(DRAG_MIME, column.id)
-        // text/plain fallback for browsers that whine about empty payloads
         e.dataTransfer.setData('text/plain', column.id)
       } catch {
-        /* dataTransfer can throw in older browsers — ignore */
+        // Ignore legacy dataTransfer issues.
       }
     },
-    [canReorder, column.id]
+    [canReorder, column.id],
   )
 
   const handleDragOver = useCallback(
     (e: React.DragEvent<HTMLTableCellElement>) => {
       if (!canReorder) return
-      // Only react to a yable column drag — anything else passes through.
-      // `types` is `readonly string[]` in modern DOM lib, but legacy browsers
-      // expose a DOMStringList with the same iteration semantics.
       const types = e.dataTransfer.types as unknown as ArrayLike<string>
       let isYableDrag = false
       for (let i = 0; i < types.length; i++) {
@@ -157,18 +189,14 @@ function HeaderCell<TData extends RowData>({
       const midpoint = rect.left + rect.width / 2
       setDragOver(e.clientX < midpoint ? 'left' : 'right')
     },
-    [canReorder]
+    [canReorder],
   )
 
-  const handleDragLeave = useCallback(
-    (e: React.DragEvent<HTMLTableCellElement>) => {
-      // Only clear if leaving the th itself, not just moving over a child.
-      const next = e.relatedTarget as Node | null
-      if (next && e.currentTarget.contains(next)) return
-      setDragOver(null)
-    },
-    []
-  )
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLTableCellElement>) => {
+    const next = e.relatedTarget as Node | null
+    if (next && e.currentTarget.contains(next)) return
+    setDragOver(null)
+  }, [])
 
   const handleDragEnd = useCallback(() => {
     setDragOver(null)
@@ -180,16 +208,12 @@ function HeaderCell<TData extends RowData>({
       e.preventDefault()
       e.stopPropagation()
       const sourceId = e.dataTransfer.getData(DRAG_MIME)
-      // Read the half from the drop event itself — `dragOver` state is
-      // captured at render time and may be stale within a single task.
       const rect = e.currentTarget.getBoundingClientRect()
       const insertAfter = e.clientX >= rect.left + rect.width / 2
       setDragOver(null)
 
       if (!sourceId || sourceId === column.id) return
 
-      // Build the active column order. State may be empty if the user has
-      // never reordered before — fall back to the visible leaf order.
       const state = table.getState()
       const allLeafs = table.getAllLeafColumns()
       const baseOrder: ColumnOrderState =
@@ -197,9 +221,6 @@ function HeaderCell<TData extends RowData>({
           ? state.columnOrder
           : allLeafs.map((c) => c.id)
 
-      // Some leaf columns may be missing from the persisted order if it was
-      // saved before they existed — splice in any unknowns at their natural
-      // position so we never silently drop a column.
       const next: string[] = []
       const seen = new Set<string>()
       for (const id of baseOrder) {
@@ -226,19 +247,17 @@ function HeaderCell<TData extends RowData>({
 
       table.setColumnOrder(next)
     },
-    [canReorder, column.id, table]
+    [canReorder, column.id, table],
   )
 
-  // ── Click → sort, but suppress if it's the tail end of a resize ────────
   const handleHeaderClick = useCallback(
     (e: React.MouseEvent<HTMLTableCellElement>) => {
       if (!canSort) return
-      // Suppress the synthetic click that follows a resize-drag-release.
       if (Date.now() - lastResizeEndRef.current < 250) return
       const handler = column.getToggleSortingHandler()
       if (handler) handler(e)
     },
-    [canSort, column]
+    [canSort, column],
   )
 
   return (
@@ -271,10 +290,7 @@ function HeaderCell<TData extends RowData>({
       <div className="yable-th-content">
         <span>{headerContent}</span>
         {canSort && (
-          <SortIndicator
-            direction={sortDirection}
-            index={sortIndex > 0 ? sortIndex : undefined}
-          />
+          <SortIndicator direction={sortDirection} index={sortIndex > 0 ? sortIndex : undefined} />
         )}
       </div>
 
@@ -285,7 +301,6 @@ function HeaderCell<TData extends RowData>({
           onMouseDown={startResize}
           onTouchStart={startResize}
           onClick={handleResizeClick}
-          // Resize handle should never start an HTML5 drag of the th.
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
         />

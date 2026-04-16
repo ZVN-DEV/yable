@@ -10,9 +10,16 @@ import {
   type Updater,
 } from '@zvndev/yable-core'
 import { renderTable, renderPagination } from './renderer'
-import { attachEventDelegation, type VanillaEventHandlers, type VanillaEventHandler } from './events'
+import {
+  attachEventDelegation,
+  type VanillaEventHandlers,
+  type VanillaEventHandler,
+} from './events'
 
-export interface CreateTableDOMOptions<TData extends RowData> extends Omit<TableOptions<TData>, 'state' | 'onStateChange'> {
+export interface CreateTableDOMOptions<TData extends RowData> extends Omit<
+  TableOptions<TData>,
+  'state' | 'onStateChange'
+> {
   element: HTMLElement
   /** Optional initial state override */
   initialState?: Partial<TableState>
@@ -28,11 +35,13 @@ export interface CreateTableDOMOptions<TData extends RowData> extends Omit<Table
   emptyMessage?: string
 
   // Pagination display options
-  pagination?: boolean | {
-    showPageSize?: boolean
-    pageSizes?: number[]
-    showInfo?: boolean
-  }
+  pagination?:
+    | boolean
+    | {
+        showPageSize?: boolean
+        pageSizes?: number[]
+        showInfo?: boolean
+      }
 }
 
 export interface TableDOM<TData extends RowData> {
@@ -55,7 +64,7 @@ export interface TableDOM<TData extends RowData> {
 }
 
 export function createTableDOM<TData extends RowData>(
-  options: CreateTableDOMOptions<TData>
+  options: CreateTableDOMOptions<TData>,
 ): TableDOM<TData> {
   const { element, initialState, ...tableOpts } = options
   const {
@@ -121,11 +130,8 @@ export function createTableDOM<TData extends RowData>(
     emptyMessage,
   }
 
-  let paginationDisplayOpts = typeof paginationOpts === 'object'
-    ? paginationOpts
-    : paginationOpts
-      ? {}
-      : undefined
+  let paginationDisplayOpts =
+    typeof paginationOpts === 'object' ? paginationOpts : paginationOpts ? {} : undefined
 
   // Event handlers (registered via .on())
   const handlers: VanillaEventHandlers = {}
@@ -196,16 +202,43 @@ export function createTableDOM<TData extends RowData>(
     },
 
     setOptions(opts) {
-      const { element: _el, initialState: _is, ...rest } = opts as any
+      const rest: Partial<CreateTableDOMOptions<TData>> = { ...opts }
+      delete rest.element
+      delete rest.initialState
       const {
-        stickyHeader: sh, striped: st, bordered: bd, compact: cp,
-        theme: th, clickableRows: cr, footer: ft, emptyMessage: em,
+        stickyHeader: sh,
+        striped: st,
+        bordered: bd,
+        compact: cp,
+        theme: th,
+        clickableRows: cr,
+        footer: ft,
+        emptyMessage: em,
         pagination: pg,
         ...core
       } = rest
 
-      if (sh !== undefined || st !== undefined || bd !== undefined || cp !== undefined || th !== undefined || cr !== undefined || ft !== undefined || em !== undefined) {
-        displayOpts = { ...displayOpts, stickyHeader: sh ?? displayOpts.stickyHeader, striped: st ?? displayOpts.striped, bordered: bd ?? displayOpts.bordered, compact: cp ?? displayOpts.compact, theme: th ?? displayOpts.theme, clickableRows: cr ?? displayOpts.clickableRows, footer: ft ?? displayOpts.footer, emptyMessage: em ?? displayOpts.emptyMessage }
+      if (
+        sh !== undefined ||
+        st !== undefined ||
+        bd !== undefined ||
+        cp !== undefined ||
+        th !== undefined ||
+        cr !== undefined ||
+        ft !== undefined ||
+        em !== undefined
+      ) {
+        displayOpts = {
+          ...displayOpts,
+          stickyHeader: sh ?? displayOpts.stickyHeader,
+          striped: st ?? displayOpts.striped,
+          bordered: bd ?? displayOpts.bordered,
+          compact: cp ?? displayOpts.compact,
+          theme: th ?? displayOpts.theme,
+          clickableRows: cr ?? displayOpts.clickableRows,
+          footer: ft ?? displayOpts.footer,
+          emptyMessage: em ?? displayOpts.emptyMessage,
+        }
       }
 
       if (pg !== undefined) {
