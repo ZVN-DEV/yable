@@ -3,17 +3,17 @@
 import { describe, it, expect } from 'vitest'
 import { createTable } from '../table'
 import { functionalUpdate } from '../../utils'
-import type { TableOptions, TableState, ColumnDef } from '../../types'
+import type { TableOptions, TableState, ColumnDef, RowData } from '../../types'
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 function makeTableWithState(
-  data: any[],
-  columns: ColumnDef<any, any>[],
+  data: RowData[],
+  columns: ColumnDef<RowData, unknown>[],
   stateOverrides: Partial<TableState> = {},
-  optionOverrides: Partial<TableOptions<any>> = {}
+  optionOverrides: Partial<TableOptions<RowData>> = {},
 ) {
   let state: TableState = {
     sorting: [],
@@ -52,7 +52,7 @@ function makeTableWithState(
     ...stateOverrides,
   }
 
-  const table = createTable<any>({
+  const table = createTable<RowData>({
     data,
     columns,
     getRowId: (_, i) => String(i),
@@ -73,10 +73,7 @@ function makeTableWithState(
 
 describe('Empty data edge cases', () => {
   it('should handle empty data array without crashing', () => {
-    const { table } = makeTableWithState(
-      [],
-      [{ accessorKey: 'name', header: 'Name' }]
-    )
+    const { table } = makeTableWithState([], [{ accessorKey: 'name', header: 'Name' }])
 
     const model = table.getCoreRowModel()
     expect(model.rows).toHaveLength(0)
@@ -84,10 +81,7 @@ describe('Empty data edge cases', () => {
   })
 
   it('should handle empty columns array without crashing', () => {
-    const { table } = makeTableWithState(
-      [{ name: 'Alice', age: 30 }],
-      []
-    )
+    const { table } = makeTableWithState([{ name: 'Alice', age: 30 }], [])
 
     const model = table.getCoreRowModel()
     expect(model.rows).toHaveLength(1)
@@ -114,7 +108,7 @@ describe('Undefined and null values', () => {
       [
         { accessorKey: 'name', header: 'Name' },
         { accessorKey: 'age', header: 'Age' },
-      ]
+      ],
     )
 
     const rows = table.getCoreRowModel().rows
@@ -133,7 +127,7 @@ describe('Undefined and null values', () => {
       [
         { accessorKey: 'name', header: 'Name' },
         { accessorKey: 'age', header: 'Age' },
-      ]
+      ],
     )
 
     const rows = table.getCoreRowModel().rows
@@ -156,11 +150,9 @@ describe('Pagination edge cases', () => {
       { name: 'C', age: 3 },
     ]
 
-    const { table } = makeTableWithState(
-      data,
-      [{ accessorKey: 'name', header: 'Name' }],
-      { pagination: { pageIndex: 0, pageSize: 1 } }
-    )
+    const { table } = makeTableWithState(data, [{ accessorKey: 'name', header: 'Name' }], {
+      pagination: { pageIndex: 0, pageSize: 1 },
+    })
 
     const pageRows = table.getPaginationRowModel().rows
     expect(pageRows).toHaveLength(1)
@@ -170,11 +162,9 @@ describe('Pagination edge cases', () => {
   it('should handle very large pageSize (all on one page)', () => {
     const data = Array.from({ length: 10 }, (_, i) => ({ name: `Row${i}`, age: i }))
 
-    const { table } = makeTableWithState(
-      data,
-      [{ accessorKey: 'name', header: 'Name' }],
-      { pagination: { pageIndex: 0, pageSize: 1000000 } }
-    )
+    const { table } = makeTableWithState(data, [{ accessorKey: 'name', header: 'Name' }], {
+      pagination: { pageIndex: 0, pageSize: 1000000 },
+    })
 
     const pageRows = table.getPaginationRowModel().rows
     expect(pageRows).toHaveLength(10)
@@ -186,11 +176,9 @@ describe('Pagination edge cases', () => {
       { name: 'B', age: 2 },
     ]
 
-    const { table } = makeTableWithState(
-      data,
-      [{ accessorKey: 'name', header: 'Name' }],
-      { pagination: { pageIndex: 100, pageSize: 10 } }
-    )
+    const { table } = makeTableWithState(data, [{ accessorKey: 'name', header: 'Name' }], {
+      pagination: { pageIndex: 100, pageSize: 10 },
+    })
 
     // Should not crash — may return empty page
     const pageRows = table.getPaginationRowModel().rows
@@ -216,7 +204,7 @@ describe('Sorting edge cases', () => {
         { accessorKey: 'name', header: 'Name' },
         { accessorKey: 'age', header: 'Age' },
       ],
-      { sorting: [{ id: 'name', desc: false }] }
+      { sorting: [{ id: 'name', desc: false }] },
     )
 
     // Should not throw
@@ -225,11 +213,9 @@ describe('Sorting edge cases', () => {
   })
 
   it('should handle sorting with empty data', () => {
-    const { table } = makeTableWithState(
-      [],
-      [{ accessorKey: 'name', header: 'Name' }],
-      { sorting: [{ id: 'name', desc: false }] }
-    )
+    const { table } = makeTableWithState([], [{ accessorKey: 'name', header: 'Name' }], {
+      sorting: [{ id: 'name', desc: false }],
+    })
 
     const sortedRows = table.getSortedRowModel().rows
     expect(sortedRows).toHaveLength(0)
@@ -247,11 +233,9 @@ describe('Filtering edge cases', () => {
       { name: 'Bob', age: 25 },
     ]
 
-    const { table } = makeTableWithState(
-      data,
-      [{ accessorKey: 'name', header: 'Name' }],
-      { columnFilters: [{ id: 'name', value: '' }] }
-    )
+    const { table } = makeTableWithState(data, [{ accessorKey: 'name', header: 'Name' }], {
+      columnFilters: [{ id: 'name', value: '' }],
+    })
 
     const filteredRows = table.getFilteredRowModel().rows
     // Empty filter should pass all rows or none depending on implementation
@@ -260,11 +244,9 @@ describe('Filtering edge cases', () => {
   })
 
   it('should handle filtering empty data', () => {
-    const { table } = makeTableWithState(
-      [],
-      [{ accessorKey: 'name', header: 'Name' }],
-      { columnFilters: [{ id: 'name', value: 'test' }] }
-    )
+    const { table } = makeTableWithState([], [{ accessorKey: 'name', header: 'Name' }], {
+      columnFilters: [{ id: 'name', value: 'test' }],
+    })
 
     const filteredRows = table.getFilteredRowModel().rows
     expect(filteredRows).toHaveLength(0)
@@ -279,9 +261,7 @@ describe('Column ID edge cases', () => {
   it('should handle column ID with special characters', () => {
     const { table } = makeTableWithState(
       [{ 'user-name': 'Alice', 'user.age': 30 }],
-      [
-        { accessorKey: 'user-name' as any, header: 'User Name' },
-      ]
+      [{ accessorKey: 'user-name' as string, header: 'User Name' }],
     )
 
     const col = table.getColumn('user-name')
@@ -292,9 +272,9 @@ describe('Column ID edge cases', () => {
     const { table } = makeTableWithState(
       [{ '0': 'zero', '1': 'one' }],
       [
-        { accessorKey: '0' as any, header: 'Zero' },
-        { accessorKey: '1' as any, header: 'One' },
-      ]
+        { accessorKey: '0' as string, header: 'Zero' },
+        { accessorKey: '1' as string, header: 'One' },
+      ],
     )
 
     expect(table.getColumn('0')).toBeDefined()
@@ -313,10 +293,7 @@ describe('Row model edge cases', () => {
       { name: 'Bob', age: 25 },
     ]
 
-    const { table } = makeTableWithState(
-      data,
-      [{ accessorKey: 'name', header: 'Name' }]
-    )
+    const { table } = makeTableWithState(data, [{ accessorKey: 'name', header: 'Name' }])
 
     const model = table.getCoreRowModel()
     expect(model.rowsById['0']).toBeDefined()
@@ -334,7 +311,7 @@ describe('Row model edge cases', () => {
       data,
       [{ accessorKey: 'name', header: 'Name' }],
       {},
-      { getRowId: (row) => row.id }
+      { getRowId: (row) => row.id },
     )
 
     const model = table.getCoreRowModel()

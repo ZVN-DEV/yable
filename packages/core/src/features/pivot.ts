@@ -22,7 +22,7 @@ export interface PivotValueConfig {
   /** The column/field id to aggregate */
   field: string
   /** Aggregation function name or custom function */
-  aggregation: keyof typeof aggregationFns | AggregationFn<any>
+  aggregation: keyof typeof aggregationFns | AggregationFn<RowData>
   /** Optional label override */
   label?: string
 }
@@ -63,7 +63,7 @@ export interface PivotColumn {
   /** Which value field this column represents */
   valueField: string
   /** Aggregation function for this column */
-  aggregation: keyof typeof aggregationFns | AggregationFn<any>
+  aggregation: keyof typeof aggregationFns | AggregationFn<RowData>
   /** Whether this is a subtotal column */
   isSubtotal?: boolean
 }
@@ -86,7 +86,7 @@ export interface PivotRow {
   /** Aggregated values keyed by pivot column id */
   values: Record<string, unknown>
   /** Original data rows that feed into this pivot row */
-  sourceRows: any[]
+  sourceRows: unknown[]
 }
 
 // ---------------------------------------------------------------------------
@@ -101,7 +101,7 @@ export class PivotEngine<TData extends RowData> {
   constructor(
     data: TData[],
     config: PivotConfig,
-    getValueFn: (row: TData, field: string) => unknown
+    getValueFn: (row: TData, field: string) => unknown,
   ) {
     this.data = data
     this.config = config
@@ -121,7 +121,9 @@ export class PivotEngine<TData extends RowData> {
       for (const vf of valueFields) {
         columns.push({
           id: `pivot_val_${vf.field}`,
-          header: vf.label ?? `${vf.field} (${typeof vf.aggregation === 'string' ? vf.aggregation : 'custom'})`,
+          header:
+            vf.label ??
+            `${vf.field} (${typeof vf.aggregation === 'string' ? vf.aggregation : 'custom'})`,
           path: [],
           valueField: vf.field,
           aggregation: vf.aggregation,
@@ -139,9 +141,10 @@ export class PivotEngine<TData extends RowData> {
         const aggLabel = typeof vf.aggregation === 'string' ? vf.aggregation : 'custom'
         columns.push({
           id: `pivot_${path.join('_')}_${vf.field}`,
-          header: valueFields.length > 1
-            ? `${pathLabel} - ${vf.label ?? vf.field} (${aggLabel})`
-            : pathLabel,
+          header:
+            valueFields.length > 1
+              ? `${pathLabel} - ${vf.label ?? vf.field} (${aggLabel})`
+              : pathLabel,
           path,
           valueField: vf.field,
           aggregation: vf.aggregation,
@@ -181,15 +184,17 @@ export class PivotEngine<TData extends RowData> {
         values[col.id] = this.aggregate(this.data, col)
       }
 
-      return [{
-        id: 'pivot_all',
-        path: [],
-        label: 'All',
-        depth: 0,
-        hasChildren: false,
-        values,
-        sourceRows: this.data,
-      }]
+      return [
+        {
+          id: 'pivot_all',
+          path: [],
+          label: 'All',
+          depth: 0,
+          hasChildren: false,
+          values,
+          sourceRows: this.data,
+        },
+      ]
     }
 
     const rows: PivotRow[] = []
@@ -253,7 +258,7 @@ export class PivotEngine<TData extends RowData> {
     depth: number,
     parentPath: string[],
     pivotColumns: PivotColumn[],
-    result: PivotRow[]
+    result: PivotRow[],
   ): void {
     if (depth >= rowFields.length) return
 
@@ -341,7 +346,12 @@ export class PivotEngine<TData extends RowData> {
 
     if (typeof aggregation === 'function') {
       // Custom aggregation function — adapt the signature
-      return aggregation(valueField, [] as any, [] as any)
+      // Cast needed: AggregationFn<RowData> expects Row<RowData>[] but Row<TData> is structurally compatible at runtime
+      return aggregation(
+        valueField,
+        [] as unknown as Row<RowData>[],
+        [] as unknown as Row<RowData>[],
+      )
     }
 
     // Use built-in aggregation function
@@ -397,7 +407,7 @@ export class PivotEngine<TData extends RowData> {
 export function getPivotRowModel<TData extends RowData>(
   table: Table<TData>,
   data: TData[],
-  config: PivotConfig
+  config: PivotConfig,
 ): {
   rowModel: RowModel<TData>
   columns: PivotColumn[]
@@ -408,7 +418,7 @@ export function getPivotRowModel<TData extends RowData>(
       return column.accessorFn(item, 0)
     }
     // Fallback: direct property access
-    return (item as any)[field]
+    return (item as Record<string, unknown>)[field]
   }
 
   const engine = new PivotEngine(data, config, getValueFn)
@@ -428,7 +438,7 @@ export function getPivotRowModel<TData extends RowData>(
     } as unknown as TData
 
     const row = createRow(table, pr.id, pivotData, index, pr.depth)
-    ;(row as any)._pivotRow = pr
+    ;(row as Row<TData> & { _pivotRow?: PivotRow })._pivotRow = pr
     return row
   })
 
@@ -454,17 +464,17 @@ export function getPivotRowModel<TData extends RowData>(
  */
 export function generatePivotColumnDefs<TData extends RowData>(
   config: PivotConfig,
-  pivotColumns: PivotColumn[]
-): ColumnDef<TData, any>[] {
-  const columnDefs: ColumnDef<TData, any>[] = []
+  pivotColumns: PivotColumn[],
+): ColumnDef<TData, unknown>[] {
+  const columnDefs: ColumnDef<TData, unknown>[] = []
 
   // Row label column (shows the row group value)
   if (config.rowFields.length > 0) {
     columnDefs.push({
       id: '_pivotLabel',
       header: config.rowFields.map((f) => f.label ?? f.field).join(' / '),
-      accessorFn: (row: any) => row._pivotLabel ?? '',
-    } as any)
+      accessorFn: (row: TData) => (row as Record<string, unknown>)._pivotLabel ?? '',
+    } as ColumnDef<TData, unknown>)
   }
 
   // Value columns
@@ -472,8 +482,8 @@ export function generatePivotColumnDefs<TData extends RowData>(
     columnDefs.push({
       id: pc.id,
       header: pc.header,
-      accessorFn: (row: any) => row[pc.id] ?? null,
-    } as any)
+      accessorFn: (row: TData) => (row as Record<string, unknown>)[pc.id] ?? null,
+    } as ColumnDef<TData, unknown>)
   }
 
   return columnDefs

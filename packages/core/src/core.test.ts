@@ -8,7 +8,7 @@ import { filterFns } from './filterFns'
 import { aggregationFns } from './aggregationFns'
 import { EventEmitterImpl } from './events/EventEmitter'
 import { functionalUpdate, memo, shallowEqual, range, clamp } from './utils'
-import type { TableOptions, TableState } from './types'
+import type { TableOptions, TableState, RowData, Row } from './types'
 
 // ---------------------------------------------------------------------------
 // Test data
@@ -24,11 +24,51 @@ interface Person {
 }
 
 const testData: Person[] = [
-  { id: 1, firstName: 'Alice', lastName: 'Johnson', age: 32, department: 'Engineering', salary: 125000, active: true },
-  { id: 2, firstName: 'Bob', lastName: 'Smith', age: 28, department: 'Design', salary: 95000, active: true },
-  { id: 3, firstName: 'Carol', lastName: 'Williams', age: 45, department: 'Engineering', salary: 210000, active: true },
-  { id: 4, firstName: 'David', lastName: 'Brown', age: 35, department: 'Product', salary: 140000, active: false },
-  { id: 5, firstName: 'Eve', lastName: 'Davis', age: 26, department: 'Engineering', salary: 85000, active: true },
+  {
+    id: 1,
+    firstName: 'Alice',
+    lastName: 'Johnson',
+    age: 32,
+    department: 'Engineering',
+    salary: 125000,
+    active: true,
+  },
+  {
+    id: 2,
+    firstName: 'Bob',
+    lastName: 'Smith',
+    age: 28,
+    department: 'Design',
+    salary: 95000,
+    active: true,
+  },
+  {
+    id: 3,
+    firstName: 'Carol',
+    lastName: 'Williams',
+    age: 45,
+    department: 'Engineering',
+    salary: 210000,
+    active: true,
+  },
+  {
+    id: 4,
+    firstName: 'David',
+    lastName: 'Brown',
+    age: 35,
+    department: 'Product',
+    salary: 140000,
+    active: false,
+  },
+  {
+    id: 5,
+    firstName: 'Eve',
+    lastName: 'Davis',
+    age: 26,
+    department: 'Engineering',
+    salary: 85000,
+    active: true,
+  },
 ]
 
 const columnHelper = createColumnHelper<Person>()
@@ -112,7 +152,7 @@ describe('Utils', () => {
   it('shallowEqual compares objects', () => {
     expect(shallowEqual({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(true)
     expect(shallowEqual({ a: 1 }, { a: 2 })).toBe(false)
-    expect(shallowEqual({ a: 1 }, { a: 1, b: 2 } as any)).toBe(false)
+    expect(shallowEqual({ a: 1 }, { a: 1, b: 2 } as Record<string, number>)).toBe(false)
   })
 
   it('range generates arrays', () => {
@@ -134,7 +174,7 @@ describe('Utils', () => {
         callCount++
         return 'result'
       },
-      { key: 'test' }
+      { key: 'test' },
     )
 
     expect(fn()).toBe('result')
@@ -151,7 +191,7 @@ describe('EventEmitter', () => {
     const emitter = new EventEmitterImpl()
     const handler = vi.fn()
     emitter.on('cell:click', handler)
-    emitter.emit('cell:click', { type: 'cell:click' } as any)
+    emitter.emit('cell:click', { type: 'cell:click' } as Record<string, unknown>)
     expect(handler).toHaveBeenCalledOnce()
   })
 
@@ -160,7 +200,7 @@ describe('EventEmitter', () => {
     const handler = vi.fn()
     emitter.on('cell:click', handler)
     emitter.off('cell:click', handler)
-    emitter.emit('cell:click', { type: 'cell:click' } as any)
+    emitter.emit('cell:click', { type: 'cell:click' } as Record<string, unknown>)
     expect(handler).not.toHaveBeenCalled()
   })
 
@@ -171,8 +211,8 @@ describe('EventEmitter', () => {
     emitter.on('cell:click', h1)
     emitter.on('row:click', h2)
     emitter.removeAllListeners()
-    emitter.emit('cell:click', { type: 'cell:click' } as any)
-    emitter.emit('row:click', { type: 'row:click' } as any)
+    emitter.emit('cell:click', { type: 'cell:click' } as Record<string, unknown>)
+    emitter.emit('row:click', { type: 'row:click' } as Record<string, unknown>)
     expect(h1).not.toHaveBeenCalled()
     expect(h2).not.toHaveBeenCalled()
   })
@@ -408,14 +448,14 @@ describe('Cell Editing', () => {
 // ---------------------------------------------------------------------------
 describe('sortingFns', () => {
   it('alphanumeric sorts strings correctly', () => {
-    const mockRowA = { getValue: () => 'apple' } as any
-    const mockRowB = { getValue: () => 'banana' } as any
+    const mockRowA = { getValue: () => 'apple' } as unknown as Row<RowData>
+    const mockRowB = { getValue: () => 'banana' } as unknown as Row<RowData>
     expect(sortingFns.alphanumeric(mockRowA, mockRowB, 'col')).toBeLessThan(0)
   })
 
   it('datetime sorts dates', () => {
-    const mockRowA = { getValue: () => new Date('2024-01-01') } as any
-    const mockRowB = { getValue: () => new Date('2024-06-01') } as any
+    const mockRowA = { getValue: () => new Date('2024-01-01') } as unknown as Row<RowData>
+    const mockRowB = { getValue: () => new Date('2024-06-01') } as unknown as Row<RowData>
     expect(sortingFns.datetime(mockRowA, mockRowB, 'col')).toBeLessThan(0)
   })
 })
@@ -425,19 +465,19 @@ describe('sortingFns', () => {
 // ---------------------------------------------------------------------------
 describe('filterFns', () => {
   it('includesString matches substring', () => {
-    const mockRow = { getValue: () => 'Hello World' } as any
+    const mockRow = { getValue: () => 'Hello World' } as unknown as Row<RowData>
     expect(filterFns.includesString(mockRow, 'col', 'world')).toBe(true)
     expect(filterFns.includesString(mockRow, 'col', 'xyz')).toBe(false)
   })
 
   it('equals matches exact value', () => {
-    const mockRow = { getValue: () => 42 } as any
+    const mockRow = { getValue: () => 42 } as unknown as Row<RowData>
     expect(filterFns.equals(mockRow, 'col', 42)).toBe(true)
     expect(filterFns.equals(mockRow, 'col', 43)).toBe(false)
   })
 
   it('inNumberRange checks bounds', () => {
-    const mockRow = { getValue: () => 50 } as any
+    const mockRow = { getValue: () => 50 } as unknown as Row<RowData>
     expect(filterFns.inNumberRange(mockRow, 'col', [0, 100])).toBe(true)
     expect(filterFns.inNumberRange(mockRow, 'col', [60, 100])).toBe(false)
   })
@@ -452,7 +492,7 @@ describe('aggregationFns', () => {
       { getValue: () => 10 },
       { getValue: () => 20 },
       { getValue: () => 30 },
-    ] as any[]
+    ] as unknown as Row<RowData>[]
     expect(aggregationFns.sum('col', rows, rows)).toBe(60)
   })
 
@@ -461,7 +501,7 @@ describe('aggregationFns', () => {
       { getValue: () => 10 },
       { getValue: () => 20 },
       { getValue: () => 30 },
-    ] as any[]
+    ] as unknown as Row<RowData>[]
     expect(aggregationFns.mean('col', rows, rows)).toBe(20)
   })
 
@@ -470,7 +510,7 @@ describe('aggregationFns', () => {
       { getValue: () => 10 },
       { getValue: () => 5 },
       { getValue: () => 20 },
-    ] as any[]
+    ] as unknown as Row<RowData>[]
     expect(aggregationFns.min('col', rows, rows)).toBe(5)
   })
 
@@ -479,12 +519,12 @@ describe('aggregationFns', () => {
       { getValue: () => 10 },
       { getValue: () => 5 },
       { getValue: () => 20 },
-    ] as any[]
+    ] as unknown as Row<RowData>[]
     expect(aggregationFns.max('col', rows, rows)).toBe(20)
   })
 
   it('count returns row count', () => {
-    const rows = [{}, {}, {}] as any[]
+    const rows = [{}, {}, {}] as unknown as Row<RowData>[]
     expect(aggregationFns.count('col', rows, rows)).toBe(3)
   })
 })
@@ -634,7 +674,14 @@ describe('Column Ordering', () => {
   it('setColumnOrder changes column order', () => {
     const { table, getState } = createTestTable()
     table.setColumnOrder(['salary', 'age', 'firstName', 'lastName', 'department', 'active'])
-    expect(getState().columnOrder).toEqual(['salary', 'age', 'firstName', 'lastName', 'department', 'active'])
+    expect(getState().columnOrder).toEqual([
+      'salary',
+      'age',
+      'firstName',
+      'lastName',
+      'department',
+      'active',
+    ])
   })
 
   it('resetColumnOrder resets to default when passed true', () => {

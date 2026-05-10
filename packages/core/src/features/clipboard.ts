@@ -1,7 +1,7 @@
 // @zvndev/yable-core — Clipboard Feature
 // Copy (Ctrl+C), Cut (Ctrl+X), Paste (Ctrl+V) with configurable delimiters.
 
-import type { RowData, Table, Row, Column } from '../types'
+import type { RowData, Table, Row, Column, ColumnDefExtensions } from '../types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -34,7 +34,7 @@ export interface ParseOptions {
 export function serializeCells<TData extends RowData>(
   rows: Row<TData>[],
   columns: Column<TData, unknown>[],
-  options: SerializeOptions
+  options: SerializeOptions,
 ): string {
   const { delimiter, rowDelimiter, includeHeaders } = options
   const lines: string[] = []
@@ -43,9 +43,7 @@ export function serializeCells<TData extends RowData>(
   if (includeHeaders) {
     const headerLine = columns
       .map((col) => {
-        const header = typeof col.columnDef.header === 'string'
-          ? col.columnDef.header
-          : col.id
+        const header = typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id
         return escapeDelimited(header, delimiter)
       })
       .join(delimiter)
@@ -72,10 +70,7 @@ export function serializeCells<TData extends RowData>(
  * Parses a delimited text string (typically from clipboard) into a 2D array
  * of string values.
  */
-export function parseClipboardText(
-  text: string,
-  options: ParseOptions
-): string[][] {
+export function parseClipboardText(text: string, options: ParseOptions): string[][] {
   const { delimiter, rowDelimiter } = options
 
   if (!text || text.trim() === '') return []
@@ -139,7 +134,7 @@ export function applyCellPaste<TData extends RowData>(
   targetRowId: string,
   targetColumnId: string,
   rows: Row<TData>[],
-  columns: Column<TData, unknown>[]
+  columns: Column<TData, unknown>[],
 ): { rowId: string; columnId: string; value: unknown }[] {
   const pastedCells: { rowId: string; columnId: string; value: unknown }[] = []
 
@@ -166,11 +161,11 @@ export function applyCellPaste<TData extends RowData>(
       const value = rowData[colOffset]!
 
       // Check if the column is editable
-      const editable = (targetCol.columnDef as any).editable
+      const editable = (targetCol.columnDef as Partial<ColumnDefExtensions<TData>>).editable
       if (editable === false) continue
 
       // Parse value based on column edit config
-      const editConfig = (targetCol.columnDef as any).editConfig
+      const editConfig = (targetCol.columnDef as Partial<ColumnDefExtensions<TData>>).editConfig
       let parsedValue: unknown = value
 
       if (editConfig?.parse) {

@@ -1,11 +1,9 @@
 // @zvndev/yable-core — Clipboard Tests
 
 import { describe, it, expect } from 'vitest'
-import {
-  serializeCells,
-  parseClipboardText,
-} from '../clipboard'
+import { serializeCells, parseClipboardText } from '../clipboard'
 import type { SerializeOptions, ParseOptions } from '../clipboard'
+import type { RowData, Row, Column } from '../../types'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,15 +26,15 @@ function mockRows(data: Record<string, unknown>[]) {
     id: String(i),
     index: i,
     getValue: (colId: string) => d[colId],
-  })) as any[]
+  })) as unknown as Row<RowData>[]
 }
 
 /** Create mock columns */
-function mockColumns(ids: string[], headers?: string[]) {
+function mockColumns(ids: string[], headers?: string[]): Column<RowData, unknown>[] {
   return ids.map((id, i) => ({
     id,
     columnDef: { header: headers?.[i] ?? id },
-  })) as any[]
+  })) as unknown as Column<RowData, unknown>[]
 }
 
 // ===========================================================================

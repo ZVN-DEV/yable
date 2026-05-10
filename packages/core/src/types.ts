@@ -8,6 +8,7 @@ import type { CommitsSlice, OnCommitFn, CellPatch, CommitResult } from './featur
 // Base Types
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- base constraint must use `any` so user data types can extend it
 export type RowData = Record<string, any>
 
 export type Updater<T> = T | ((prev: T) => T)
@@ -18,8 +19,10 @@ export type NoInfer<T> = [T][T extends unknown ? 0 : never]
 
 export type DeepKeys<T> = unknown extends T
   ? string
-  : T extends Record<string, any>
+  : // eslint-disable-next-line @typescript-eslint/no-explicit-any -- recursive mapped type requires `any` for structural compatibility
+    T extends Record<string, any>
     ? {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- recursive mapped type requires `any` for structural compatibility
         [K in keyof T & string]: T[K] extends Record<string, any>
           ? `${K}` | `${K}.${DeepKeys<T[K]>}`
           : `${K}`
@@ -38,7 +41,7 @@ export type DeepValue<T, K> = K extends `${infer A}.${infer B}`
 // Feature System
 // ---------------------------------------------------------------------------
 
-export interface TableFeature<TData extends RowData = any> {
+export interface TableFeature<TData extends RowData = RowData> {
   getDefaultOptions?: (table: Table<TData>) => Partial<TableOptionsResolved<TData>>
 
   getInitialState?: (state: TableState) => TableState
@@ -98,6 +101,7 @@ export type GroupColumnDef<TData extends RowData, TValue = unknown> = ColumnDefB
   TData,
   TValue
 > & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- child columns can have any value type
   columns: ColumnDef<TData, any>[]
 } & Partial<ColumnDefExtensions<TData, TValue>>
 
@@ -247,6 +251,7 @@ export interface CellEditRenderProps<TData extends RowData, TValue = unknown> {
 
 export interface TableOptions<TData extends RowData> {
   data: TData[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- columns can have any value type
   columns: ColumnDef<TData, any>[]
   state?: Partial<TableState>
   onStateChange?: OnChangeFn<TableState>
@@ -483,12 +488,12 @@ export type SortingFnOption<TData extends RowData> =
   | (string & {})
 
 export interface BuiltInSortingFns {
-  alphanumeric: SortingFn<any>
-  alphanumericCaseSensitive: SortingFn<any>
-  text: SortingFn<any>
-  textCaseSensitive: SortingFn<any>
-  datetime: SortingFn<any>
-  basic: SortingFn<any>
+  alphanumeric: SortingFn<RowData>
+  alphanumericCaseSensitive: SortingFn<RowData>
+  text: SortingFn<RowData>
+  textCaseSensitive: SortingFn<RowData>
+  datetime: SortingFn<RowData>
+  basic: SortingFn<RowData>
 }
 
 // Filtering
@@ -512,21 +517,21 @@ export type FilterFnOption<TData extends RowData> =
   | (string & {})
 
 export interface BuiltInFilterFns {
-  includesString: FilterFn<any>
-  includesStringSensitive: FilterFn<any>
-  equalsString: FilterFn<any>
-  equalsStringSensitive: FilterFn<any>
-  arrIncludes: FilterFn<any>
-  arrIncludesAll: FilterFn<any>
-  arrIncludesSome: FilterFn<any>
-  equals: FilterFn<any>
-  weakEquals: FilterFn<any>
-  inNumberRange: FilterFn<any>
+  includesString: FilterFn<RowData>
+  includesStringSensitive: FilterFn<RowData>
+  equalsString: FilterFn<RowData>
+  equalsStringSensitive: FilterFn<RowData>
+  arrIncludes: FilterFn<RowData>
+  arrIncludesAll: FilterFn<RowData>
+  arrIncludesSome: FilterFn<RowData>
+  equals: FilterFn<RowData>
+  weakEquals: FilterFn<RowData>
+  inNumberRange: FilterFn<RowData>
 }
 
 export interface FilterMeta {
   itemRank?: unknown
-  [key: string]: unknown
+  [key: string]: unknown // index signature intentionally uses unknown
 }
 
 // Pagination
@@ -664,6 +669,7 @@ export interface PivotConfig {
   /** Fields to aggregate as values */
   valueFields: {
     field: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- aggregation operates on generic row data
     aggregation: string | AggregationFn<any>
     label?: string
   }[]
@@ -1199,6 +1205,7 @@ export interface CellContext<TData extends RowData, TValue = unknown> {
 // Event System Types
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- interfaces without index signatures don't satisfy Record<string, unknown>
 export interface EventEmitter<TEventMap extends Record<string, any>> {
   on: <K extends keyof TEventMap>(event: K, handler: (payload: TEventMap[K]) => void) => () => void
 
@@ -1373,6 +1380,7 @@ export interface RowEditCommitEvent<TData extends RowData> {
 export interface ColumnHelper<TData extends RowData> {
   accessor: <
     TAccessor extends DeepKeys<TData> | ((row: TData) => unknown),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- required for generic function type inference
     TValue extends TAccessor extends (...args: any) => infer R
       ? R
       : TAccessor extends DeepKeys<TData>
@@ -1380,6 +1388,7 @@ export interface ColumnHelper<TData extends RowData> {
         : never,
   >(
     accessor: TAccessor,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- required for conditional type discrimination
     column: TAccessor extends (...args: any) => any
       ? Omit<AccessorFnColumnDef<TData, TValue>, 'accessorFn'>
       : Omit<AccessorKeyColumnDef<TData, TValue>, 'accessorKey'>,

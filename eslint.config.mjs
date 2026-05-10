@@ -31,10 +31,17 @@ export default tseslint.config(
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
     },
     settings: {
       react: { version: 'detect' },
+    },
+  },
+  // Files with legacy `any` that cannot be cleaned up without a larger refactor
+  {
+    files: ['packages/core/src/utils.ts', 'packages/core/src/features/formulas/**'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
 )

@@ -4,6 +4,8 @@ import type {
   RowData,
   Cell,
   Column,
+  ColumnDef,
+  ColumnDefExtensions,
   Row,
   Table,
   CellContext,
@@ -13,7 +15,7 @@ export function createCell<TData extends RowData, TValue = unknown>(
   table: Table<TData>,
   row: Row<TData>,
   column: Column<TData, TValue>,
-  columnId: string
+  columnId: string,
 ): Cell<TData, TValue> {
   const cell: Cell<TData, TValue> = {
     id: `${row.id}_${columnId}`,
@@ -52,10 +54,7 @@ export function createCell<TData extends RowData, TValue = unknown>(
 
     getIsEditing: () => {
       const editing = table.getState().editing
-      return (
-        editing?.activeCell?.rowId === row.id &&
-        editing?.activeCell?.columnId === columnId
-      )
+      return editing?.activeCell?.rowId === row.id && editing?.activeCell?.columnId === columnId
     },
     getIsAlwaysEditable: () => {
       return !!column.columnDef.meta?.alwaysEditable
@@ -65,7 +64,9 @@ export function createCell<TData extends RowData, TValue = unknown>(
       // Row span is resolved externally via resolveRowSpans and
       // consumed by the renderer. This method provides a hook
       // for the column def's rowSpan callback if present.
-      const rowSpanFn = (column.columnDef as any).rowSpan
+      const rowSpanFn = (
+        column.columnDef as ColumnDef<TData, TValue> & ColumnDefExtensions<TData, TValue>
+      ).rowSpan
       if (typeof rowSpanFn === 'function') {
         const rows = table.getRowModel().rows
         const rowIndex = rows.findIndex((r) => r.id === row.id)

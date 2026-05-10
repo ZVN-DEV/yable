@@ -6,7 +6,7 @@ export const filterFns = {
   includesString: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = String(row.getValue(columnId) ?? '').toLowerCase()
     return value.includes(String(filterValue ?? '').toLowerCase())
@@ -15,7 +15,7 @@ export const filterFns = {
   includesStringSensitive: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = String(row.getValue(columnId) ?? '')
     return value.includes(String(filterValue ?? ''))
@@ -24,7 +24,7 @@ export const filterFns = {
   equalsString: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = String(row.getValue(columnId) ?? '').toLowerCase()
     return value === String(filterValue ?? '').toLowerCase()
@@ -33,7 +33,7 @@ export const filterFns = {
   equalsStringSensitive: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = String(row.getValue(columnId) ?? '')
     return value === String(filterValue ?? '')
@@ -42,7 +42,7 @@ export const filterFns = {
   arrIncludes: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = row.getValue<unknown[]>(columnId)
     return Array.isArray(value) && value.includes(filterValue)
@@ -51,35 +51,27 @@ export const filterFns = {
   arrIncludesAll: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = row.getValue<unknown[]>(columnId)
     const arr = filterValue as unknown[]
-    return (
-      Array.isArray(value) &&
-      Array.isArray(arr) &&
-      arr.every((v) => value.includes(v))
-    )
+    return Array.isArray(value) && Array.isArray(arr) && arr.every((v) => value.includes(v))
   },
 
   arrIncludesSome: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = row.getValue<unknown[]>(columnId)
     const arr = filterValue as unknown[]
-    return (
-      Array.isArray(value) &&
-      Array.isArray(arr) &&
-      arr.some((v) => value.includes(v))
-    )
+    return Array.isArray(value) && Array.isArray(arr) && arr.some((v) => value.includes(v))
   },
 
   equals: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     return row.getValue(columnId) === filterValue
   },
@@ -87,16 +79,15 @@ export const filterFns = {
   weakEquals: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
-    // eslint-disable-next-line eqeqeq
     return row.getValue(columnId) == filterValue
   },
 
   inNumberRange: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = row.getValue<number>(columnId)
     const [min, max] = filterValue as [number | undefined, number | undefined]
@@ -109,7 +100,7 @@ export const filterFns = {
   inDateRange: <TData extends RowData>(
     row: Row<TData>,
     columnId: string,
-    filterValue: unknown
+    filterValue: unknown,
   ): boolean => {
     const value = row.getValue<Date | string>(columnId)
     if (value == null) return false
@@ -125,6 +116,6 @@ export const filterFns = {
     }
     return true
   },
-} as const satisfies Record<string, FilterFn<any>>
+} as const satisfies Record<string, FilterFn<RowData>>
 
 export type BuiltInFilterFn = keyof typeof filterFns

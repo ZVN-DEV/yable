@@ -17,8 +17,9 @@ interface TestData {
 }
 
 function makeTable(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TValue variance
   colDefs: ColumnDef<TestData, any>[],
-  stateOverrides: Partial<TableState> = {}
+  stateOverrides: Partial<TableState> = {},
 ) {
   let state: TableState = {
     sorting: [],
@@ -80,9 +81,7 @@ function makeTable(
 
 describe('createColumn with accessorKey', () => {
   it('should create a column with id from accessorKey', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     const col = table.getColumn('name')
     expect(col).toBeDefined()
@@ -90,9 +89,7 @@ describe('createColumn with accessorKey', () => {
   })
 
   it('should set up accessorFn from accessorKey', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     const col = table.getColumn('name')!
     const row = { name: 'Test', age: 99, email: '', nested: { value: 0 } }
@@ -101,6 +98,7 @@ describe('createColumn with accessorKey', () => {
 
   it('should support nested accessorKey (dot notation)', () => {
     const { table } = makeTable([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- testing dot-path accessor outside DeepKeys
       { accessorKey: 'nested.value' as any, header: 'Nested', id: 'nested_val' },
     ])
 
@@ -137,9 +135,7 @@ describe('createColumn with accessorFn', () => {
 
 describe('createColumn with display column (no accessor)', () => {
   it('should create a column without accessorFn', () => {
-    const { table } = makeTable([
-      { id: 'actions', header: 'Actions' },
-    ])
+    const { table } = makeTable([{ id: 'actions', header: 'Actions' }])
 
     const col = table.getColumn('actions')!
     expect(col.id).toBe('actions')
@@ -154,46 +150,38 @@ describe('createColumn with display column (no accessor)', () => {
 
 describe('Column sorting methods', () => {
   it('getIsSorted should return false when not sorted', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     const col = table.getColumn('name')!
     expect(col.getIsSorted()).toBe(false)
   })
 
   it('getIsSorted should return "asc" when sorted ascending', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name' }],
-      { sorting: [{ id: 'name', desc: false }] }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }], {
+      sorting: [{ id: 'name', desc: false }],
+    })
 
     const col = table.getColumn('name')!
     expect(col.getIsSorted()).toBe('asc')
   })
 
   it('getIsSorted should return "desc" when sorted descending', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name' }],
-      { sorting: [{ id: 'name', desc: true }] }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }], {
+      sorting: [{ id: 'name', desc: true }],
+    })
 
     const col = table.getColumn('name')!
     expect(col.getIsSorted()).toBe('desc')
   })
 
   it('getCanSort should return true by default', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     expect(table.getColumn('name')!.getCanSort()).toBe(true)
   })
 
   it('getCanSort should return false when enableSorting is false', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name', enableSorting: false },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name', enableSorting: false }])
 
     expect(table.getColumn('name')!.getCanSort()).toBe(false)
   })
@@ -205,9 +193,7 @@ describe('Column sorting methods', () => {
 
 describe('Column filtering methods', () => {
   it('getCanFilter should return true by default', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     expect(table.getColumn('name')!.getCanFilter()).toBe(true)
   })
@@ -221,19 +207,17 @@ describe('Column filtering methods', () => {
   })
 
   it('getIsFiltered should return true when filter is active', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name' }],
-      { columnFilters: [{ id: 'name', value: 'Alice' }] }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }], {
+      columnFilters: [{ id: 'name', value: 'Alice' }],
+    })
 
     expect(table.getColumn('name')!.getIsFiltered()).toBe(true)
   })
 
   it('getFilterValue should return the active filter value', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name' }],
-      { columnFilters: [{ id: 'name', value: 'Alice' }] }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }], {
+      columnFilters: [{ id: 'name', value: 'Alice' }],
+    })
 
     expect(table.getColumn('name')!.getFilterValue()).toBe('Alice')
   })
@@ -245,18 +229,15 @@ describe('Column filtering methods', () => {
 
 describe('Column visibility methods', () => {
   it('getIsVisible should return true by default', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     expect(table.getColumn('name')!.getIsVisible()).toBe(true)
   })
 
   it('getIsVisible should return false when column is hidden', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name' }],
-      { columnVisibility: { name: false } }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }], {
+      columnVisibility: { name: false },
+    })
 
     expect(table.getColumn('name')!.getIsVisible()).toBe(false)
   })
@@ -268,27 +249,23 @@ describe('Column visibility methods', () => {
 
 describe('Column pinning methods', () => {
   it('getIsPinned should return false when not pinned', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     expect(table.getColumn('name')!.getIsPinned()).toBe(false)
   })
 
   it('getIsPinned should return "left" when pinned left', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name' }],
-      { columnPinning: { left: ['name'], right: [] } }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }], {
+      columnPinning: { left: ['name'], right: [] },
+    })
 
     expect(table.getColumn('name')!.getIsPinned()).toBe('left')
   })
 
   it('getIsPinned should return "right" when pinned right', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name' }],
-      { columnPinning: { left: [], right: ['name'] } }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }], {
+      columnPinning: { left: [], right: ['name'] },
+    })
 
     expect(table.getColumn('name')!.getIsPinned()).toBe('right')
   })
@@ -300,26 +277,21 @@ describe('Column pinning methods', () => {
 
 describe('Column sizing', () => {
   it('should return default size of 150', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name' },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name' }])
 
     expect(table.getColumn('name')!.getSize()).toBe(150)
   })
 
   it('should return custom size from column def', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name', size: 200 },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name', size: 200 }])
 
     expect(table.getColumn('name')!.getSize()).toBe(200)
   })
 
   it('should return override size from state', () => {
-    const { table } = makeTable(
-      [{ accessorKey: 'name', header: 'Name', size: 200 }],
-      { columnSizing: { name: 300 } }
-    )
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name', size: 200 }], {
+      columnSizing: { name: 300 },
+    })
 
     expect(table.getColumn('name')!.getSize()).toBe(300)
   })
@@ -341,16 +313,12 @@ describe('Column sizing min/max bounds', () => {
   })
 
   it('clamps a small size up to minSize', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name', size: 50, minSize: 100 },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name', size: 50, minSize: 100 }])
     expect(table.getColumn('name')!.getSize()).toBe(100)
   })
 
   it('clamps a large size down to maxSize', () => {
-    const { table } = makeTable([
-      { accessorKey: 'name', header: 'Name', size: 500, maxSize: 300 },
-    ])
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name', size: 500, maxSize: 300 }])
     expect(table.getColumn('name')!.getSize()).toBe(300)
   })
 
@@ -398,17 +366,16 @@ describe('createColumn accessorKey depth guard', () => {
 
   it('rejects accessorKey paths deeper than MAX_ACCESSOR_DEPTH', () => {
     // Build a path with MAX_ACCESSOR_DEPTH + 1 segments
-    const tooDeepKey = Array.from(
-      { length: MAX_ACCESSOR_DEPTH + 1 },
-      (_, i) => `s${i}`
-    ).join('.')
+    const tooDeepKey = Array.from({ length: MAX_ACCESSOR_DEPTH + 1 }, (_, i) => `s${i}`).join('.')
 
     const { table } = makeTable([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- testing depth guard with dynamic key
       { accessorKey: tooDeepKey as any, header: 'Deep', id: 'deep' },
     ])
 
     const col = table.getColumn('deep')!
     // Build a deeply-nested object so a real walk would actually find a value.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamically building a deeply nested object for depth-guard test
     const row: any = {}
     let cursor = row
     for (let i = 0; i < MAX_ACCESSOR_DEPTH + 1; i++) {

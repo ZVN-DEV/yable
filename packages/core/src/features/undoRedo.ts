@@ -102,7 +102,7 @@ export class UndoStack {
  */
 export function createUndoRedoIntegration<TData extends RowData>(
   table: Table<TData>,
-  options?: UndoRedoOptions
+  options?: UndoRedoOptions,
 ): {
   undoStack: UndoStack
   undo: () => void
@@ -120,8 +120,9 @@ export function createUndoRedoIntegration<TData extends RowData>(
   // Wrap setPendingValue to track undo actions
   table.setPendingValue = (rowId: string, columnId: string, value: unknown) => {
     // Capture old value before applying
-    const oldValue = table.getPendingValue(rowId, columnId)
-      ?? (() => {
+    const oldValue =
+      table.getPendingValue(rowId, columnId) ??
+      (() => {
         try {
           const row = table.getRow(rowId, true)
           return row.getValue(columnId)
@@ -152,7 +153,7 @@ export function createUndoRedoIntegration<TData extends RowData>(
     originalSetPendingValue(action.rowId, action.columnId, action.oldValue)
 
     // Emit undo event
-    table.events.emit('undo' as any, {
+    table.events.emit('undo', {
       action,
       state: stack.getState(),
     })
@@ -166,7 +167,7 @@ export function createUndoRedoIntegration<TData extends RowData>(
     originalSetPendingValue(action.rowId, action.columnId, action.newValue)
 
     // Emit redo event
-    table.events.emit('redo' as any, {
+    table.events.emit('redo', {
       action,
       state: stack.getState(),
     })
