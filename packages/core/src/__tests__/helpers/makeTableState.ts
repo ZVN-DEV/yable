@@ -110,6 +110,7 @@ export function makeTableState(overrides: Partial<TableState> = {}): TableState 
  * returned defs are still shaped for {@link TestRow}, so you'll usually
  * want to write your own column defs in that case.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TValue variance: ColumnDef<T, string> is not assignable to ColumnDef<T, unknown>
 export function makeColumnDefs(): ColumnDef<TestRow, any>[] {
   const helper = createColumnHelper<TestRow>()
   return [
@@ -159,6 +160,7 @@ export interface MakeTestTableOptions {
   /** Number of rows to seed. Defaults to 3. */
   rowCount?: number
   /** Override the default column set. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TValue variance: ColumnDef<T, string> is not assignable to ColumnDef<T, unknown>
   columns?: ColumnDef<TestRow, any>[]
   /** Override the default row data (wins over `rowCount`). */
   data?: TestRow[]

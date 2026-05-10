@@ -7,13 +7,8 @@
 // Design rationale lives at:
 // docs/superpowers/specs/2026-04-07-data-update-patterns-design.md
 
-import type {
-  CommitsSlice,
-  CommitRecord,
-  CellPatch,
-  CommitResult,
-  OnCommitFn,
-} from './types'
+import type { RowData } from '../../types'
+import type { CommitsSlice, CommitRecord, CellPatch, CommitResult, OnCommitFn } from './types'
 import { CommitError } from './CommitError'
 
 // ---------------------------------------------------------------------------
@@ -34,12 +29,12 @@ export interface CommitStore {
 
 export interface CoordinatorOptions {
   /** Table-level commit handler. May be undefined. */
-  onCommit?: OnCommitFn<any>
+  onCommit?: OnCommitFn<RowData>
   /**
    * Per-column commit override. Coordinator calls this to find a per-cell
    * handler; if it returns undefined, the table-level `onCommit` is used.
    */
-  resolveColumnCommit?: (columnId: string) => OnCommitFn<any> | undefined
+  resolveColumnCommit?: (columnId: string) => OnCommitFn<RowData> | undefined
   /** Default 'failed'. */
   rowCommitRetryMode?: 'failed' | 'batch'
 }
@@ -56,7 +51,8 @@ function shallowEqualValue(a: unknown, b: unknown): boolean {
   const bk = Object.keys(b as object)
   if (ak.length !== bk.length) return false
   for (const k of ak) {
-    if (!Object.is((a as any)[k], (b as any)[k])) return false
+    if (!Object.is((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]))
+      return false
   }
   return true
 }
@@ -65,7 +61,7 @@ function setCell(
   slice: CommitsSlice,
   rowId: string,
   columnId: string,
-  next: CommitRecord
+  next: CommitRecord,
 ): CommitsSlice {
   const cells = { ...slice.cells }
   const row = { ...(cells[rowId] ?? {}) }
@@ -74,11 +70,7 @@ function setCell(
   return { ...slice, cells }
 }
 
-function deleteCell(
-  slice: CommitsSlice,
-  rowId: string,
-  columnId: string
-): CommitsSlice {
+function deleteCell(slice: CommitsSlice, rowId: string, columnId: string): CommitsSlice {
   if (!slice.cells[rowId]?.[columnId]) return slice
   const cells = { ...slice.cells }
   const row = { ...cells[rowId] }
@@ -95,10 +87,7 @@ function deleteCell(
 // createCommitCoordinator
 // ---------------------------------------------------------------------------
 
-export function createCommitCoordinator(
-  store: CommitStore,
-  opts: CoordinatorOptions
-) {
+export function createCommitCoordinator(store: CommitStore, opts: CoordinatorOptions) {
   /** Allocate the next opId, mutating the slice via store.setSlice. */
   function allocateOpId(): number {
     const slice = store.getSlice()
@@ -116,16 +105,13 @@ export function createCommitCoordinator(
    * Dispatch a batch of patches. Splits the batch by handler (table-level vs
    * per-column override) and runs each split independently in parallel.
    */
-  async function dispatch(
-    incoming: Omit<CellPatch, 'signal' | 'row'>[]
-  ): Promise<void> {
+  async function dispatch(incoming: Omit<CellPatch, 'signal' | 'row'>[]): Promise<void> {
     if (incoming.length === 0) return
 
     // Split by which handler will be used
-    const groups = new Map<OnCommitFn<any>, typeof incoming>()
+    const groups = new Map<OnCommitFn<RowData>, typeof incoming>()
     for (const patch of incoming) {
-      const handler =
-        opts.resolveColumnCommit?.(patch.columnId) ?? opts.onCommit
+      const handler = opts.resolveColumnCommit?.(patch.columnId) ?? opts.onCommit
       if (!handler) continue // No handler defined → silently no-op
       const list = groups.get(handler) ?? []
       list.push(patch)
@@ -140,8 +126,8 @@ export function createCommitCoordinator(
   }
 
   async function runOne(
-    handler: OnCommitFn<any>,
-    incoming: Omit<CellPatch, 'signal' | 'row'>[]
+    handler: OnCommitFn<RowData>,
+    incoming: Omit<CellPatch, 'signal' | 'row'>[],
   ): Promise<void> {
     // 1. Allocate one opId per cell. Each cell gets its own AbortController so
     //    later edits to the same cell can abort the in-flight handler.
@@ -176,7 +162,7 @@ export function createCommitCoordinator(
         columnId: p.columnId,
         value: p.value,
         previousValue: p.previousValue,
-        row: store.getRow(p.rowId) as any,
+        row: store.getRow(p.rowId) as RowData,
         signal: controllers.get(key)!.signal,
       }
     })
@@ -209,13 +195,11 @@ export function createCommitCoordinator(
                 ...live,
                 status: 'error',
                 errorMessage: msg,
-              })
+              }),
             )
           } else {
             // This cell was in the batch but not the error map → succeeded
-            store.setSlice(
-              deleteCell(store.getSlice(), patch.rowId, patch.columnId)
-            )
+            store.setSlice(deleteCell(store.getSlice(), patch.rowId, patch.columnId))
           }
         } else {
           const msg = thrown instanceof Error ? thrown.message : String(thrown)
@@ -224,7 +208,7 @@ export function createCommitCoordinator(
               ...live,
               status: 'error',
               errorMessage: msg,
-            })
+            }),
           )
         }
       } else {
@@ -237,9 +221,7 @@ export function createCommitCoordinator(
         // where the consumer's data store hasn't yet caught up to the
         // resolved value — it'll noop if pending == saved.
         void resolved
-        store.setSlice(
-          deleteCell(store.getSlice(), patch.rowId, patch.columnId)
-        )
+        store.setSlice(deleteCell(store.getSlice(), patch.rowId, patch.columnId))
       }
     }
   }
@@ -357,7 +339,7 @@ export function createCommitCoordinator(
 
   function getCellStatus(
     rowId: string,
-    columnId: string
+    columnId: string,
   ): 'idle' | 'pending' | 'error' | 'conflict' {
     return getRecord(rowId, columnId)?.status ?? 'idle'
   }

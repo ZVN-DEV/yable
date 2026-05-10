@@ -3,6 +3,12 @@
 import type { RowData, Row, Table, RowPinningPosition } from '../types'
 import { createCell } from './cell'
 
+/** Tree data metadata attached to rows by treeData.ts via flattenTree. */
+interface TreeRowMeta {
+  _treeDepth?: number
+  _isLeaf?: boolean
+}
+
 export function createRow<TData extends RowData>(
   table: Table<TData>,
   id: string,
@@ -202,10 +208,10 @@ export function createRow<TData extends RowData>(
       }
     },
     getTreeDepth: () => {
-      return (row as any)._treeDepth ?? depth
+      return (row as Row<TData> & TreeRowMeta)._treeDepth ?? depth
     },
     isLeaf: () => {
-      return (row as any)._isLeaf ?? row.subRows.length === 0
+      return (row as Row<TData> & TreeRowMeta)._isLeaf ?? row.subRows.length === 0
     },
   }
 

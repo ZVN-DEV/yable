@@ -50,7 +50,7 @@ function makeStore(rows: Record<string, Record<string, unknown>> = {}) {
       slice = next
     },
     getSavedValue: (rowId, colId) => data[rowId]?.[colId],
-    getRow: (rowId) => data[rowId] as any,
+    getRow: (rowId) => data[rowId] as unknown,
     rowExists: (rowId) => rowId in data,
   }
   return {

@@ -1,12 +1,11 @@
 // @zvndev/yable-core — Typed Event Emitter
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- interfaces without index signatures (e.g. YableEventMap) don't satisfy Record<string, unknown>
 export class EventEmitterImpl<TEventMap extends Record<string, any>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- handler variance: Set stores typed handlers keyed by event name
   private listeners = new Map<keyof TEventMap, Set<(payload: any) => void>>()
 
-  on<K extends keyof TEventMap>(
-    event: K,
-    handler: (payload: TEventMap[K]) => void
-  ): () => void {
+  on<K extends keyof TEventMap>(event: K, handler: (payload: TEventMap[K]) => void): () => void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set())
     }
@@ -16,10 +15,7 @@ export class EventEmitterImpl<TEventMap extends Record<string, any>> {
     return () => this.off(event, handler)
   }
 
-  off<K extends keyof TEventMap>(
-    event: K,
-    handler: (payload: TEventMap[K]) => void
-  ): void {
+  off<K extends keyof TEventMap>(event: K, handler: (payload: TEventMap[K]) => void): void {
     this.listeners.get(event)?.delete(handler)
   }
 

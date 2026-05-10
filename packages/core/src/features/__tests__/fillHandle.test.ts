@@ -4,6 +4,12 @@ import { describe, it, expect } from 'vitest'
 import { detectPattern, generateFillValues } from '../fillHandle'
 import type { FillPattern } from '../fillHandle'
 
+// Discriminated union member types for test assertions
+type ConstantPattern = Extract<FillPattern, { type: 'constant' }>
+type SequencePattern = Extract<FillPattern, { type: 'sequence' }>
+type DateSequencePattern = Extract<FillPattern, { type: 'date-sequence' }>
+type RepeatPattern = Extract<FillPattern, { type: 'repeat' }>
+
 // ===========================================================================
 // detectPattern
 // ===========================================================================
@@ -12,64 +18,64 @@ describe('detectPattern', () => {
   it('should return constant for empty array', () => {
     const pattern = detectPattern([])
     expect(pattern.type).toBe('constant')
-    expect((pattern as any).value).toBe('')
+    expect((pattern as ConstantPattern).value).toBe('')
   })
 
   it('should detect single number as sequence with step 1', () => {
     const pattern = detectPattern([5])
     expect(pattern.type).toBe('sequence')
-    expect((pattern as any).start).toBe(5)
-    expect((pattern as any).step).toBe(1)
+    expect((pattern as SequencePattern).start).toBe(5)
+    expect((pattern as SequencePattern).step).toBe(1)
   })
 
   it('should detect constant for single string', () => {
     const pattern = detectPattern(['hello'])
     expect(pattern.type).toBe('constant')
-    expect((pattern as any).value).toBe('hello')
+    expect((pattern as ConstantPattern).value).toBe('hello')
   })
 
   it('should detect linear sequence [1,2,3]', () => {
     const pattern = detectPattern([1, 2, 3])
     expect(pattern.type).toBe('sequence')
-    expect((pattern as any).start).toBe(1)
-    expect((pattern as any).step).toBe(1)
+    expect((pattern as SequencePattern).start).toBe(1)
+    expect((pattern as SequencePattern).step).toBe(1)
   })
 
   it('should detect linear sequence with step 2: [2,4,6]', () => {
     const pattern = detectPattern([2, 4, 6])
     expect(pattern.type).toBe('sequence')
-    expect((pattern as any).start).toBe(2)
-    expect((pattern as any).step).toBe(2)
+    expect((pattern as SequencePattern).start).toBe(2)
+    expect((pattern as SequencePattern).step).toBe(2)
   })
 
   it('should detect linear sequence with step 10: [10,20,30]', () => {
     const pattern = detectPattern([10, 20, 30])
     expect(pattern.type).toBe('sequence')
-    expect((pattern as any).step).toBe(10)
+    expect((pattern as SequencePattern).step).toBe(10)
   })
 
   it('should detect decreasing sequence [30,20,10]', () => {
     const pattern = detectPattern([30, 20, 10])
     expect(pattern.type).toBe('sequence')
-    expect((pattern as any).step).toBe(-10)
+    expect((pattern as SequencePattern).step).toBe(-10)
   })
 
   it('should detect constant step 0 for [5,5,5]', () => {
     const pattern = detectPattern([5, 5, 5])
     expect(pattern.type).toBe('sequence')
-    expect((pattern as any).step).toBe(0)
+    expect((pattern as SequencePattern).step).toBe(0)
   })
 
   it('should detect repeating pattern ["a","b","a","b"]', () => {
     const pattern = detectPattern(['a', 'b', 'a', 'b'])
     expect(pattern.type).toBe('repeat')
-    expect((pattern as any).values).toEqual(['a', 'b'])
+    expect((pattern as RepeatPattern).values).toEqual(['a', 'b'])
   })
 
   it('should detect repeating pattern of length 1: ["x","x","x"]', () => {
     const pattern = detectPattern(['x', 'x', 'x'])
     expect(pattern.type).toBe('repeat')
-    expect((pattern as any).values).toEqual(['x'])
+    expect((pattern as RepeatPattern).values).toEqual(['x'])
   })
 
   it('should detect date sequence', () => {
@@ -78,14 +84,14 @@ describe('detectPattern', () => {
     const d3 = new Date('2024-01-03')
     const pattern = detectPattern([d1, d2, d3])
     expect(pattern.type).toBe('date-sequence')
-    expect((pattern as any).stepMs).toBe(86400000) // 1 day
+    expect((pattern as DateSequencePattern).stepMs).toBe(86400000) // 1 day
   })
 
   it('should detect single date as date-sequence with 1 day step', () => {
     const d1 = new Date('2024-06-15')
     const pattern = detectPattern([d1])
     expect(pattern.type).toBe('date-sequence')
-    expect((pattern as any).stepMs).toBe(86400000)
+    expect((pattern as DateSequencePattern).stepMs).toBe(86400000)
   })
 
   it('should detect date string sequence', () => {
@@ -96,14 +102,14 @@ describe('detectPattern', () => {
   it('should detect numeric string sequence', () => {
     const pattern = detectPattern(['1', '2', '3'])
     expect(pattern.type).toBe('sequence')
-    expect((pattern as any).start).toBe(1)
-    expect((pattern as any).step).toBe(1)
+    expect((pattern as SequencePattern).start).toBe(1)
+    expect((pattern as SequencePattern).step).toBe(1)
   })
 
   it('should fall back to repeat for non-pattern strings', () => {
     const pattern = detectPattern(['apple', 'banana', 'cherry'])
     expect(pattern.type).toBe('repeat')
-    expect((pattern as any).values).toEqual(['apple', 'banana', 'cherry'])
+    expect((pattern as RepeatPattern).values).toEqual(['apple', 'banana', 'cherry'])
   })
 })
 

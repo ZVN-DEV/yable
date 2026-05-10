@@ -10,6 +10,7 @@ import {
   isLeafRow,
 } from '../treeData'
 import type { TreeNode } from '../treeData'
+import type { RowData, Row } from '../../types'
 
 // ---------------------------------------------------------------------------
 // Test Data
@@ -62,9 +63,7 @@ describe('buildTreeFromPaths', () => {
     const california = usa.children.find((c) => c.path[1] === 'California')!
     expect(california.depth).toBe(1)
 
-    const sf = california.children.find((c) =>
-      c.path.includes('San Francisco')
-    )!
+    const sf = california.children.find((c) => c.path.includes('San Francisco'))!
     expect(sf.depth).toBe(2)
   })
 
@@ -76,9 +75,7 @@ describe('buildTreeFromPaths', () => {
     const california = usa.children.find((c) => c.path[1] === 'California')!
     expect(california.isLeaf).toBe(false)
 
-    const sf = california.children.find((c) =>
-      c.path.includes('San Francisco')
-    )!
+    const sf = california.children.find((c) => c.path.includes('San Francisco'))!
     expect(sf.isLeaf).toBe(true)
   })
 
@@ -90,9 +87,7 @@ describe('buildTreeFromPaths', () => {
     const california = usa.children.find((c) => c.key === 'USA/California')!
     expect(california).toBeDefined()
 
-    const sf = california.children.find(
-      (c) => c.key === 'USA/California/San Francisco'
-    )!
+    const sf = california.children.find((c) => c.key === 'USA/California/San Francisco')!
     expect(sf).toBeDefined()
   })
 
@@ -130,10 +125,7 @@ describe('buildTreeFromPaths', () => {
       { name: 'Child1', value: 10 },
       { name: 'Child2', value: 20 },
     ]
-    const tree = buildTreeFromPaths(orphanData, (item) => [
-      'SyntheticParent',
-      item.name,
-    ])
+    const tree = buildTreeFromPaths(orphanData, (item) => ['SyntheticParent', item.name])
     // Should create synthetic parent "SyntheticParent"
     expect(tree).toHaveLength(1)
     expect(tree[0]!.children).toHaveLength(2)
@@ -170,9 +162,7 @@ describe('filterTreeData', () => {
   it('should keep parent hierarchy when child matches', () => {
     const tree = buildTreeFromPaths(flatLocations, getLocationPath)
 
-    const filtered = filterTreeData(tree, (node) =>
-      node.data.name === 'San Francisco'
-    )
+    const filtered = filterTreeData(tree, (node) => node.data.name === 'San Francisco')
 
     expect(filtered).toHaveLength(1) // USA
     expect(filtered[0]!.children).toHaveLength(1) // California only
@@ -198,9 +188,7 @@ describe('filterTreeData', () => {
 
     const filtered = filterTreeData(
       tree,
-      (node) =>
-        node.data.name === 'San Francisco' ||
-        node.data.name === 'Los Angeles'
+      (node) => node.data.name === 'San Francisco' || node.data.name === 'Los Angeles',
     )
 
     const california = filtered[0]!.children[0]!
@@ -222,14 +210,10 @@ describe('sortTreeData', () => {
     const tree = buildTreeFromPaths(flatLocations, getLocationPath)
 
     // Sort children by name descending
-    const sorted = sortTreeData(tree, (a, b) =>
-      b.data.name.localeCompare(a.data.name)
-    )
+    const sorted = sortTreeData(tree, (a, b) => b.data.name.localeCompare(a.data.name))
 
     const sortedUsa = sorted[0]!
-    const childNames = sortedUsa.children.map(
-      (c) => c.path[c.path.length - 1]
-    )
+    const childNames = sortedUsa.children.map((c) => c.path[c.path.length - 1])
     // New York should come before California in descending order
     expect(childNames[0]).toBe('New York')
     expect(childNames[1]).toBe('California')
@@ -238,9 +222,7 @@ describe('sortTreeData', () => {
   it('should sort leaf-level nodes', () => {
     const tree = buildTreeFromPaths(flatLocations, getLocationPath)
 
-    const sorted = sortTreeData(tree, (a, b) =>
-      a.data.name.localeCompare(b.data.name)
-    )
+    const sorted = sortTreeData(tree, (a, b) => a.data.name.localeCompare(b.data.name))
 
     const ca = sorted[0]!.children.find((c) => c.key === 'USA/California')!
     const caChildNames = ca.children.map((c) => c.data.name)
@@ -251,9 +233,7 @@ describe('sortTreeData', () => {
     const tree = buildTreeFromPaths(flatLocations, getLocationPath)
     const originalFirstChildKey = tree[0]!.children[0]!.key
 
-    sortTreeData(tree, (a, b) =>
-      b.data.name.localeCompare(a.data.name)
-    )
+    sortTreeData(tree, (a, b) => b.data.name.localeCompare(a.data.name))
 
     expect(tree[0]!.children[0]!.key).toBe(originalFirstChildKey)
   })
@@ -270,9 +250,8 @@ describe('aggregateTreeValues', () => {
     const aggregated = aggregateTreeValues(
       tree,
       'value',
-      (values: unknown[]) =>
-        (values as number[]).reduce((a, b) => a + b, 0),
-      (data) => data.value
+      (values: unknown[]) => (values as number[]).reduce((a, b) => a + b, 0),
+      (data) => data.value,
     )
 
     // San Francisco (leaf) = 20
@@ -289,9 +268,8 @@ describe('aggregateTreeValues', () => {
     const aggregated = aggregateTreeValues<LocationData>(
       [],
       'value',
-      (values: unknown[]) =>
-        (values as number[]).reduce((a, b) => a + b, 0),
-      (data) => data.value
+      (values: unknown[]) => (values as number[]).reduce((a, b) => a + b, 0),
+      (data) => data.value,
     )
     expect(aggregated.size).toBe(0)
   })
@@ -311,9 +289,8 @@ describe('aggregateTreeValues', () => {
     const aggregated = aggregateTreeValues(
       single,
       'value',
-      (values: unknown[]) =>
-        (values as number[]).reduce((a, b) => a + b, 0),
-      (data) => data.value
+      (values: unknown[]) => (values as number[]).reduce((a, b) => a + b, 0),
+      (data) => data.value,
     )
 
     expect(aggregated.get('Root')).toBe(42)
@@ -326,25 +303,25 @@ describe('aggregateTreeValues', () => {
 
 describe('Row helper utilities', () => {
   it('getTreeDepth should return _treeDepth when present', () => {
-    const mockRow = { _treeDepth: 3, depth: 0 } as any
+    const mockRow = { _treeDepth: 3, depth: 0 } as unknown as Row<RowData>
     expect(getTreeDepth(mockRow)).toBe(3)
   })
 
   it('getTreeDepth should fall back to row.depth', () => {
-    const mockRow = { depth: 2 } as any
+    const mockRow = { depth: 2 } as unknown as Row<RowData>
     expect(getTreeDepth(mockRow)).toBe(2)
   })
 
   it('isLeafRow should return _isLeaf when present', () => {
-    const mockRow = { _isLeaf: true, subRows: [{}] } as any
+    const mockRow = { _isLeaf: true, subRows: [{}] } as unknown as Row<RowData>
     expect(isLeafRow(mockRow)).toBe(true)
   })
 
   it('isLeafRow should fall back to subRows check', () => {
-    const mockRow = { subRows: [] } as any
+    const mockRow = { subRows: [] } as unknown as Row<RowData>
     expect(isLeafRow(mockRow)).toBe(true)
 
-    const mockRowWithChildren = { subRows: [{}] } as any
+    const mockRowWithChildren = { subRows: [{}] } as unknown as Row<RowData>
     expect(isLeafRow(mockRowWithChildren)).toBe(false)
   })
 })

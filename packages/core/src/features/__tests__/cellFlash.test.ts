@@ -96,7 +96,12 @@ describe('detectCellChanges', () => {
   })
 
   it('should return empty map for null/undefined data', () => {
-    const flashes = detectCellChanges(null as any, null as any, flashColumns, getRowId)
+    const flashes = detectCellChanges(
+      null as unknown as StockData[],
+      null as unknown as StockData[],
+      flashColumns,
+      getRowId,
+    )
     expect(flashes.size).toBe(0)
   })
 
@@ -112,8 +117,8 @@ describe('detectCellChanges', () => {
   })
 
   it('should not flash when old value is undefined', () => {
-    const oldData = [{ id: '1', price: undefined, name: 'AAPL' }] as any[]
-    const newData = [{ id: '1', price: 100, name: 'AAPL' }] as any[]
+    const oldData = [{ id: '1', price: undefined, name: 'AAPL' }] as unknown as StockData[]
+    const newData = [{ id: '1', price: 100, name: 'AAPL' }] as unknown as StockData[]
 
     const flashes = detectCellChanges(oldData, newData, flashColumns, getRowId)
     // Old value is undefined, so no flash

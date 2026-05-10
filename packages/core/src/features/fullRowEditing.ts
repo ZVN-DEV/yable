@@ -2,7 +2,8 @@
 // All editable cells in a row edit simultaneously.
 // Tab moves between cells within the row, Enter commits, Escape cancels.
 
-import type { RowData, Table } from '../types'
+import type { RowData, Table, ColumnDefExtensions, EditingState, YableEventMap } from '../types'
+import { getCommitCoordinator } from '../core/table'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,7 +39,7 @@ export interface RowEditCancelEvent<TData extends RowData> {
  * This adds `startRowEditing`, `commitRowEdit`, and `cancelRowEdit` methods.
  */
 export function createFullRowEditingIntegration<TData extends RowData>(
-  table: Table<TData>
+  table: Table<TData>,
 ): {
   /** Get set of currently editing row IDs */
   getEditingRows: () => Set<string>
@@ -68,7 +69,9 @@ export function createFullRowEditingIntegration<TData extends RowData>(
 
     return columns
       .filter((col) => {
-        const editable = (col.columnDef as any).editable
+        const editable = (
+          col.columnDef as typeof col.columnDef & Partial<ColumnDefExtensions<TData>>
+        ).editable
         if (typeof editable === 'function') return editable(row)
         return !!editable
       })
@@ -99,10 +102,10 @@ export function createFullRowEditingIntegration<TData extends RowData>(
       table.startEditing(rowId, editableColumnIds[0]!)
     }
 
-    table.events.emit('row:edit:start' as any, {
+    table.events.emit('row:edit:start', {
       rowId,
       row,
-    })
+    } as YableEventMap<TData>['row:edit:start'])
   }
 
   const commitRowEdit = (rowId: string) => {
@@ -116,9 +119,7 @@ export function createFullRowEditingIntegration<TData extends RowData>(
 
     // Gather all pending values for this row
     const pendingRow = table.getPendingRow(rowId)
-    const values: Record<string, unknown> = pendingRow
-      ? { ...pendingRow }
-      : {}
+    const values: Record<string, unknown> = pendingRow ? { ...pendingRow } : {}
 
     // Validate all editable columns
     const editableColumnIds = getEditableColumns(rowId)
@@ -128,7 +129,9 @@ export function createFullRowEditingIntegration<TData extends RowData>(
       const column = table.getColumn(colId)
       if (!column) continue
 
-      const editConfig = (column.columnDef as any).editConfig
+      const editConfig = (
+        column.columnDef as typeof column.columnDef & Partial<ColumnDefExtensions<TData>>
+      ).editConfig
       if (editConfig?.validate) {
         const value = values[colId] ?? row.getValue(colId)
         const error = editConfig.validate(value, row)
@@ -156,7 +159,7 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     // fall back to the legacy onEditCommit hook.
     const opts = table.options
     if (opts.onCommit) {
-      const coordinator = (table as any).__commitCoordinator
+      const coordinator = getCommitCoordinator(table as Table<RowData>)
       if (coordinator) {
         const patches = editableColumnIds.map((colId) => {
           let previousValue: unknown
@@ -180,21 +183,21 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     }
 
     // Clear pending values for this row
-    table.setEditing((old: any) => {
-      const pendingValues = { ...(old?.pendingValues ?? {}) }
+    table.setEditing((old: EditingState) => {
+      const pendingValues = { ...(old.pendingValues ?? {}) }
       delete pendingValues[rowId]
       return {
         ...old,
         pendingValues,
-        activeCell: old?.activeCell?.rowId === rowId ? undefined : old?.activeCell,
+        activeCell: old.activeCell?.rowId === rowId ? undefined : old.activeCell,
       }
     })
 
-    table.events.emit('row:edit:commit' as any, {
+    table.events.emit('row:edit:commit', {
       rowId,
       row,
       values,
-    })
+    } as YableEventMap<TData>['row:edit:commit'])
   }
 
   const cancelRowEdit = (rowId: string) => {
@@ -209,20 +212,20 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     editingRows.delete(rowId)
 
     // Clear pending values for this row
-    table.setEditing((old: any) => {
-      const pendingValues = { ...(old?.pendingValues ?? {}) }
+    table.setEditing((old: EditingState) => {
+      const pendingValues = { ...(old.pendingValues ?? {}) }
       delete pendingValues[rowId]
       return {
         ...old,
         pendingValues,
-        activeCell: old?.activeCell?.rowId === rowId ? undefined : old?.activeCell,
+        activeCell: old.activeCell?.rowId === rowId ? undefined : old.activeCell,
       }
     })
 
-    table.events.emit('row:edit:cancel' as any, {
+    table.events.emit('row:edit:cancel', {
       rowId,
       row,
-    })
+    } as YableEventMap<TData>['row:edit:cancel'])
   }
 
   const isRowEditing = (rowId: string) => editingRows.has(rowId)
@@ -251,7 +254,7 @@ export function handleRowEditKeyDown<TData extends RowData>(
   e: KeyboardEvent,
   rowId: string,
   table: Table<TData>,
-  integration: ReturnType<typeof createFullRowEditingIntegration<TData>>
+  integration: ReturnType<typeof createFullRowEditingIntegration<TData>>,
 ): void {
   if (!integration.isRowEditing(rowId)) return
 
@@ -274,19 +277,15 @@ export function handleRowEditKeyDown<TData extends RowData>(
 
     const editing = table.getState().editing
     const currentColId = editing?.activeCell?.columnId
-    const currentIndex = currentColId
-      ? editableColumns.indexOf(currentColId)
-      : -1
+    const currentIndex = currentColId ? editableColumns.indexOf(currentColId) : -1
 
     let nextIndex: number
     if (e.shiftKey) {
       // Move backward
-      nextIndex =
-        currentIndex <= 0 ? editableColumns.length - 1 : currentIndex - 1
+      nextIndex = currentIndex <= 0 ? editableColumns.length - 1 : currentIndex - 1
     } else {
       // Move forward
-      nextIndex =
-        currentIndex >= editableColumns.length - 1 ? 0 : currentIndex + 1
+      nextIndex = currentIndex >= editableColumns.length - 1 ? 0 : currentIndex + 1
     }
 
     const nextColId = editableColumns[nextIndex]

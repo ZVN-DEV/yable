@@ -10,28 +10,26 @@ import type {
   GroupColumnDef,
 } from './types'
 
-export function createColumnHelper<
-  TData extends RowData
->(): ColumnHelper<TData> {
+export function createColumnHelper<TData extends RowData>(): ColumnHelper<TData> {
   return {
-    accessor: (
-      accessorOrKey: any,
-      column: any
-    ): any => {
+    accessor: ((
+      accessorOrKey: string | ((row: TData, index: number) => unknown),
+      column: Record<string, unknown>,
+    ): ColumnDef<TData, unknown> => {
       if (typeof accessorOrKey === 'function') {
         return {
           ...column,
           accessorFn: accessorOrKey,
           id: column.id ?? (typeof column.header === 'string' ? column.header : undefined),
-        } satisfies AccessorFnColumnDef<TData, any>
+        } as unknown as AccessorFnColumnDef<TData, unknown>
       }
 
       return {
         ...column,
         accessorKey: accessorOrKey,
         id: column?.id ?? String(accessorOrKey),
-      } satisfies AccessorKeyColumnDef<TData, any>
-    },
+      } as unknown as AccessorKeyColumnDef<TData, unknown>
+    }) as ColumnHelper<TData>['accessor'],
 
     display: (column: DisplayColumnDef<TData, unknown>): ColumnDef<TData, unknown> => {
       return column

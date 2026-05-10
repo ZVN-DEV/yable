@@ -27,7 +27,8 @@ const salesData: SalesData[] = [
   { region: 'West', product: 'Gadget', quarter: 'Q2', revenue: 110, units: 4 },
 ]
 
-const getVal = (row: SalesData, field: string): unknown => (row as any)[field]
+const getVal = (row: SalesData, field: string): unknown =>
+  (row as unknown as Record<string, unknown>)[field]
 
 function createEngine(config: PivotConfig) {
   return new PivotEngine(salesData, config, getVal)
@@ -58,9 +59,7 @@ describe('PivotEngine — generateColumns', () => {
     const cols = engine.generateColumns()
     // Q1 and Q2 each get one value column => 2 columns
     expect(cols).toHaveLength(2)
-    expect(cols.map((c) => c.path)).toEqual(
-      expect.arrayContaining([['Q1'], ['Q2']])
-    )
+    expect(cols.map((c) => c.path)).toEqual(expect.arrayContaining([['Q1'], ['Q2']]))
   })
 
   it('should generate multiple value columns per column path', () => {
@@ -209,7 +208,7 @@ describe('PivotEngine — generateRows', () => {
         columnFields: [],
         valueFields: [{ field: 'revenue', aggregation: 'sum' }],
       },
-      getVal
+      getVal,
     )
     const rows = emptyEngine.generateRows()
     expect(rows).toHaveLength(0)
@@ -223,7 +222,7 @@ describe('PivotEngine — generateRows', () => {
         columnFields: [],
         valueFields: [{ field: 'revenue', aggregation: 'sum' }],
       },
-      getVal
+      getVal,
     )
     const rows = singleEngine.generateRows()
     expect(rows).toHaveLength(1)

@@ -2,20 +2,23 @@
 
 import { describe, it, expect, vi } from 'vitest'
 import { resolveRowSpans, getRowSpan, isCellSpanned } from '../rowSpanning'
-import type { RowSpanMap } from '../rowSpanning'
+import type { RowSpanMap, RowSpanFn } from '../rowSpanning'
+import type { RowData, Row, ColumnDef } from '../../types'
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 /** Create minimal mock rows */
-function mockRows(count: number) {
+function mockRows(count: number): Row<RowData>[] {
   return Array.from({ length: count }, (_, i) => ({
     id: `row_${i}`,
     index: i,
     getValue: () => `val_${i}`,
-  })) as any[]
+  })) as unknown as Row<RowData>[]
 }
+
+type ColDefWithSpan = ColumnDef<RowData, unknown> & { rowSpan?: RowSpanFn<RowData> }
 
 // ===========================================================================
 // resolveRowSpans
@@ -27,11 +30,12 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         id: 'name',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 2 : 1),
+        rowSpan: (_row: Row<RowData>, _rows: Row<RowData>[], rowIndex: number) =>
+          rowIndex === 0 ? 2 : 1,
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
 
     // Row 0 should span 2
     expect(getRowSpan(map, 0, 'name')).toBe(2)
@@ -47,11 +51,12 @@ describe('resolveRowSpans', () => {
       {
         id: 'name',
         // Try to span 10 starting from row 1 — only 2 rows remain
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 1 ? 10 : 1),
+        rowSpan: (_row: Row<RowData>, _rows: Row<RowData>[], rowIndex: number) =>
+          rowIndex === 1 ? 10 : 1,
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
 
     // Should be clamped to 2 (rows 1 and 2)
     expect(getRowSpan(map, 1, 'name')).toBe(2)
@@ -67,7 +72,7 @@ describe('resolveRowSpans', () => {
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
     expect(map.size).toBe(0)
   })
 
@@ -76,11 +81,12 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         id: 'name',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 0 : -1),
+        rowSpan: (_row: Row<RowData>, _rows: Row<RowData>[], rowIndex: number) =>
+          rowIndex === 0 ? 0 : -1,
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
     // 0 and -1 both clamp to 1, so no span entries
     expect(map.size).toBe(0)
   })
@@ -90,15 +96,17 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         id: 'col_a',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 2 : 1),
+        rowSpan: (_row: Row<RowData>, _rows: Row<RowData>[], rowIndex: number) =>
+          rowIndex === 0 ? 2 : 1,
       },
       {
         id: 'col_b',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 3 : 1),
+        rowSpan: (_row: Row<RowData>, _rows: Row<RowData>[], rowIndex: number) =>
+          rowIndex === 0 ? 3 : 1,
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
 
     expect(getRowSpan(map, 0, 'col_a')).toBe(2)
     expect(getRowSpan(map, 1, 'col_a')).toBe(0)
@@ -118,7 +126,7 @@ describe('resolveRowSpans', () => {
       },
     ]
 
-    const map = resolveRowSpans([], colDefs as any)
+    const map = resolveRowSpans([], colDefs as ColDefWithSpan[])
     expect(map.size).toBe(0)
   })
 
@@ -128,7 +136,7 @@ describe('resolveRowSpans', () => {
       { id: 'name' }, // No rowSpan
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
     expect(map.size).toBe(0)
   })
 
@@ -137,11 +145,12 @@ describe('resolveRowSpans', () => {
     const colDefs = [
       {
         accessorKey: 'status',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 2 : 1),
+        rowSpan: (_row: Row<RowData>, _rows: Row<RowData>[], rowIndex: number) =>
+          rowIndex === 0 ? 2 : 1,
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
     expect(getRowSpan(map, 0, 'status')).toBe(2)
   })
 
@@ -157,7 +166,7 @@ describe('resolveRowSpans', () => {
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
 
     expect(map.size).toBe(0)
     expect(consoleError).toHaveBeenCalled()
@@ -176,11 +185,12 @@ describe('isCellSpanned', () => {
     const colDefs = [
       {
         id: 'name',
-        rowSpan: (_row: any, _rows: any[], rowIndex: number) => (rowIndex === 0 ? 3 : 1),
+        rowSpan: (_row: Row<RowData>, _rows: Row<RowData>[], rowIndex: number) =>
+          rowIndex === 0 ? 3 : 1,
       },
     ]
 
-    const map = resolveRowSpans(rows, colDefs as any)
+    const map = resolveRowSpans(rows, colDefs as ColDefWithSpan[])
 
     expect(isCellSpanned(map, 0, 'name')).toBe(false) // span origin
     expect(isCellSpanned(map, 1, 'name')).toBe(true) // consumed

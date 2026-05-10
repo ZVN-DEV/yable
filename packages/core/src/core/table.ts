@@ -53,10 +53,22 @@ import {
   normalizeCellRange,
 } from '../features/selection'
 import { createCommitCoordinator } from '../features/commits/coordinator'
+import type { CommitCoordinator, CoordinatorOptions } from '../features/commits/coordinator'
 import type { CellPatch, CommitsSlice } from '../features/commits/types'
+
+// ---------------------------------------------------------------------------
+// Private commit coordinator storage — avoids `(table as any).__commitCoordinator`
+// ---------------------------------------------------------------------------
+
+const commitCoordinatorMap = new WeakMap<Table<RowData>, CommitCoordinator>()
 
 // Re-export resolvers for convenience (they live in resolvers.ts to avoid circular deps)
 export { resolveSortingFn, resolveFilterFn } from './resolvers'
+
+/** Package-internal access to the commit coordinator for a given table instance. */
+export function getCommitCoordinator(table: Table<RowData>): CommitCoordinator | undefined {
+  return commitCoordinatorMap.get(table)
+}
 
 // ---------------------------------------------------------------------------
 // Initial State
@@ -173,8 +185,7 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
   // Table Instance
   // ---------------------------------------------------------------------------
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- built up incrementally, typed on return
-  const table: any = {
+  const table: Table<TData> = {
     options: resolvedOptions,
 
     // State
@@ -712,12 +723,12 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
         }
         // Fire-and-forget — coordinator updates the slice asynchronously,
         // and the table re-renders via state changes
-        void (table as any).__commitCoordinator?.dispatch([
-          { rowId, columnId, value: pendingValue, previousValue },
-        ])
+        void commitCoordinatorMap
+          .get(table as Table<RowData>)
+          ?.dispatch([{ rowId, columnId, value: pendingValue, previousValue }])
       } else if (hasPending && opts.onEditCommit) {
         // Legacy fallback
-        opts.onEditCommit({ [rowId]: { [columnId]: pendingValue } as any })
+        opts.onEditCommit({ [rowId]: { [columnId]: pendingValue } as Partial<TData> })
       }
     },
     cancelEdit: () => {
@@ -891,14 +902,35 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       // Fall back to global default locale
       return (getDefaultLocale() as unknown as Record<string, string>)[key] ?? key
     },
+
+    // Stubs for externally-wired features — filled in by integration functions
+    // (undoRedo, fillHandle, formulas, rowDragging, fullRowEditing, pivot)
+    undo: () => {},
+    redo: () => {},
+    canUndo: () => false,
+    canRedo: () => false,
+    clearUndoHistory: () => {},
+    fillRange: () => {},
+    setFormula: () => {},
+    getFormula: () => undefined,
+    evaluateFormulas: () => {},
+    moveRow: () => {},
+    startRowEditing: () => {},
+    commitRowEdit: () => {},
+    cancelRowEdit: () => {},
+    getPivotRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
   }
 
   // ---------------------------------------------------------------------------
   // Wire up state updaters to use table instance
   // ---------------------------------------------------------------------------
 
+  // makeStateUpdater requires loosely-typed setState/getState/options due to its
+  // mapped-type signature. Cast the table to satisfy the parameter shape.
   const wireUpdater = <V>(key: keyof TableState) => {
-    return makeStateUpdater(key, table) as (updater: Updater<V>) => void
+    return makeStateUpdater(key, table as Parameters<typeof makeStateUpdater>[1]) as (
+      updater: Updater<V>,
+    ) => void
   }
 
   table.setSorting = wireUpdater<SortingState>('sorting')
@@ -1336,17 +1368,18 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       },
     },
     {
-      onCommit: resolvedOptions.onCommit as any,
+      onCommit: resolvedOptions.onCommit as CoordinatorOptions['onCommit'],
       resolveColumnCommit: (columnId: string) => {
         const col = table.getColumn(columnId)
-        const def = col?.columnDef as any
+        type ColDefWithCommit = ColumnDef<TData> & { commit?: CoordinatorOptions['onCommit'] }
+        const def = col?.columnDef as ColDefWithCommit | undefined
         return def?.commit
       },
       rowCommitRetryMode: resolvedOptions.rowCommitRetryMode ?? 'failed',
     },
   )
 
-  ;(table as any).__commitCoordinator = commitCoordinator
+  commitCoordinatorMap.set(table as Table<RowData>, commitCoordinator)
 
   // Wire new table methods (override the literal stubs)
   table.getCellRenderValue = (rowId: string, columnId: string) => {
@@ -1412,7 +1445,7 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
 
   // Sweep triggers — fire on data ref change
   const originalSetOptions = table.setOptions
-  table.setOptions = (updater: Updater<TableOptions<TData>>) => {
+  table.setOptions = (updater: Updater<TableOptionsResolved<TData>>) => {
     originalSetOptions(updater)
     const data = table.options.data
     if (data !== lastDataRef) {
@@ -1568,7 +1601,7 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     return text
   }
 
-  return table as Table<TData>
+  return table
 }
 
 // ---------------------------------------------------------------------------

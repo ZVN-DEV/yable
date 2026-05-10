@@ -1,7 +1,7 @@
 // @zvndev/yable-core — Row Dragging Feature
 // Provides row reorder logic and drag state management.
 
-import type { RowData, Table, Updater } from '../types'
+import type { RowData, Table, Updater, YableEventMap } from '../types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,11 +54,7 @@ export function getInitialRowDragState(): RowDragState {
  * Returns a new data array with the row at `fromIndex` moved to `toIndex`.
  * Does NOT mutate the original array.
  */
-export function moveRow<TData>(
-  data: TData[],
-  fromIndex: number,
-  toIndex: number
-): TData[] {
+export function moveRow<TData>(data: TData[], fromIndex: number, toIndex: number): TData[] {
   if (fromIndex === toIndex) return data
   if (fromIndex < 0 || fromIndex >= data.length) return data
   if (toIndex < 0 || toIndex >= data.length) return data
@@ -83,7 +79,7 @@ export function createRowDragIntegration<TData extends RowData>(
     onReorder?: (data: TData[], event: RowReorderEvent) => void
     getData: () => TData[]
     setData: (data: TData[]) => void
-  }
+  },
 ): {
   getRowDragState: () => RowDragState
   setRowDragState: (updater: Updater<RowDragState>) => void
@@ -112,11 +108,11 @@ export function createRowDragIntegration<TData extends RowData>(
       overRowId: null,
       dropPosition: null,
     }
-    table.events.emit('row:drag:start' as any, {
+    table.events.emit('row:drag:start', {
       rowId,
       rowIndex: row.index,
       row,
-    })
+    } as YableEventMap<TData>['row:drag:start'])
   }
 
   const updateDragOver = (overRowId: string, position: 'before' | 'after') => {
@@ -136,16 +132,12 @@ export function createRowDragIntegration<TData extends RowData>(
 
     const data = options.getData()
     const fromIndex = data.findIndex((_, i) => {
-      const rowId = table.options.getRowId
-        ? table.options.getRowId(data[i]!, i)
-        : String(i)
+      const rowId = table.options.getRowId ? table.options.getRowId(data[i]!, i) : String(i)
       return rowId === draggingRowId
     })
 
     const toIndex = data.findIndex((_, i) => {
-      const rowId = table.options.getRowId
-        ? table.options.getRowId(data[i]!, i)
-        : String(i)
+      const rowId = table.options.getRowId ? table.options.getRowId(data[i]!, i) : String(i)
       return rowId === overRowId
     })
 
@@ -155,8 +147,7 @@ export function createRowDragIntegration<TData extends RowData>(
     }
 
     const adjustedToIndex = dropPosition === 'after' ? toIndex + 1 : toIndex
-    const finalToIndex =
-      fromIndex < adjustedToIndex ? adjustedToIndex - 1 : adjustedToIndex
+    const finalToIndex = fromIndex < adjustedToIndex ? adjustedToIndex - 1 : adjustedToIndex
 
     const newData = moveRow(data, fromIndex, finalToIndex)
     options.setData(newData)
@@ -168,14 +159,14 @@ export function createRowDragIntegration<TData extends RowData>(
     }
 
     options.onReorder?.(newData, reorderEvent)
-    table.events.emit('row:reorder' as any, reorderEvent)
+    table.events.emit('row:reorder', reorderEvent)
 
     const row = table.getRow(draggingRowId, true)
-    table.events.emit('row:drag:end' as any, {
+    table.events.emit('row:drag:end', {
       rowId: draggingRowId,
       row,
       cancelled: false,
-    })
+    } as YableEventMap<TData>['row:drag:end'])
 
     dragState = getInitialRowDragState()
   }
@@ -185,11 +176,11 @@ export function createRowDragIntegration<TData extends RowData>(
     if (draggingRowId) {
       try {
         const row = table.getRow(draggingRowId, true)
-        table.events.emit('row:drag:end' as any, {
+        table.events.emit('row:drag:end', {
           rowId: draggingRowId,
           row,
           cancelled: true,
-        })
+        } as YableEventMap<TData>['row:drag:end'])
       } catch {
         // Row may no longer exist
       }
@@ -206,7 +197,7 @@ export function createRowDragIntegration<TData extends RowData>(
       ? table.options.getRowId(data[fromIndex]!, fromIndex)
       : String(fromIndex)
 
-    table.events.emit('row:reorder' as any, {
+    table.events.emit('row:reorder', {
       fromIndex,
       toIndex,
       rowId,

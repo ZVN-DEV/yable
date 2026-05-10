@@ -6,31 +6,24 @@ export const sortingFns = {
   alphanumeric: <TData extends RowData>(
     rowA: Row<TData>,
     rowB: Row<TData>,
-    columnId: string
+    columnId: string,
   ): number => {
-    return compareAlphanumeric(
-      toString(rowA.getValue(columnId)),
-      toString(rowB.getValue(columnId))
-    )
+    return compareAlphanumeric(toString(rowA.getValue(columnId)), toString(rowB.getValue(columnId)))
   },
 
   alphanumericCaseSensitive: <TData extends RowData>(
     rowA: Row<TData>,
     rowB: Row<TData>,
-    columnId: string
+    columnId: string,
   ): number => {
     return compareAlphanumeric(
       toString(rowA.getValue(columnId)),
       toString(rowB.getValue(columnId)),
-      false
+      false,
     )
   },
 
-  text: <TData extends RowData>(
-    rowA: Row<TData>,
-    rowB: Row<TData>,
-    columnId: string
-  ): number => {
+  text: <TData extends RowData>(rowA: Row<TData>, rowB: Row<TData>, columnId: string): number => {
     const a = toString(rowA.getValue(columnId)).toLowerCase()
     const b = toString(rowB.getValue(columnId)).toLowerCase()
     return a.localeCompare(b)
@@ -39,7 +32,7 @@ export const sortingFns = {
   textCaseSensitive: <TData extends RowData>(
     rowA: Row<TData>,
     rowB: Row<TData>,
-    columnId: string
+    columnId: string,
   ): number => {
     const a = toString(rowA.getValue(columnId))
     const b = toString(rowB.getValue(columnId))
@@ -49,23 +42,19 @@ export const sortingFns = {
   datetime: <TData extends RowData>(
     rowA: Row<TData>,
     rowB: Row<TData>,
-    columnId: string
+    columnId: string,
   ): number => {
     const a = rowA.getValue<Date | string | number>(columnId)
     const b = rowB.getValue<Date | string | number>(columnId)
     return toDate(a).getTime() - toDate(b).getTime()
   },
 
-  basic: <TData extends RowData>(
-    rowA: Row<TData>,
-    rowB: Row<TData>,
-    columnId: string
-  ): number => {
+  basic: <TData extends RowData>(rowA: Row<TData>, rowB: Row<TData>, columnId: string): number => {
     const a = rowA.getValue(columnId)
     const b = rowB.getValue(columnId)
     return compareBasic(a as number | string, b as number | string)
   },
-} as const satisfies Record<string, SortingFn<any>>
+} as const satisfies Record<string, SortingFn<RowData>>
 
 export type BuiltInSortingFn = keyof typeof sortingFns
 
@@ -95,11 +84,7 @@ function compareBasic(a: number | string, b: number | string): number {
  * Alphanumeric comparison that handles mixed text and numbers.
  * "item2" comes before "item10".
  */
-function compareAlphanumeric(
-  a: string,
-  b: string,
-  caseInsensitive = true
-): number {
+function compareAlphanumeric(a: string, b: string, caseInsensitive = true): number {
   const aStr = caseInsensitive ? a.toLowerCase() : a
   const bStr = caseInsensitive ? b.toLowerCase() : b
 

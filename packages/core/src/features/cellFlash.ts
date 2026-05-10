@@ -59,8 +59,8 @@ export function detectCellChanges<TData extends RowData>(
     for (const col of columns) {
       if (!col.enableCellFlash) continue
 
-      const oldVal = (oldRow as any)[col.id]
-      const newVal = (newRow as any)[col.id]
+      const oldVal = (oldRow as Record<string, unknown>)[col.id]
+      const newVal = (newRow as Record<string, unknown>)[col.id]
 
       if (oldVal !== newVal && oldVal !== undefined) {
         let direction: 'up' | 'down' | 'change' = 'change'

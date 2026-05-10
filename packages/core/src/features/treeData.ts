@@ -7,6 +7,15 @@
 import type { RowData, Row, Table, RowModel } from '../types'
 import { createRow } from '../core/row'
 
+/** Tree metadata attached to Row objects during flattenTree. */
+interface TreeRowMeta {
+  _treeDepth?: number
+  _isLeaf?: boolean
+  _treePath?: string[]
+  _treeKey?: string
+  _hasChildren?: boolean
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -58,7 +67,7 @@ export interface TreeDataOptions<TData extends RowData> {
  */
 export function buildTreeFromPaths<TData extends RowData>(
   data: TData[],
-  getDataPath: (item: TData) => string[]
+  getDataPath: (item: TData) => string[],
 ): TreeNode<TData>[] {
   const rootNodes: TreeNode<TData>[] = []
   const nodeMap = new Map<string, TreeNode<TData>>()
@@ -144,7 +153,7 @@ export function buildTreeFromPaths<TData extends RowData>(
 export function flattenTree<TData extends RowData>(
   table: Table<TData>,
   treeNodes: TreeNode<TData>[],
-  expanded: Record<string, boolean> | true
+  expanded: Record<string, boolean> | true,
 ): Row<TData>[] {
   const rows: Row<TData>[] = []
   let index = 0
@@ -157,18 +166,17 @@ export function flattenTree<TData extends RowData>(
       const row = createRow(table, rowId, node.data, index, node.depth, subRows, parentId)
 
       // Attach tree metadata to the row
-      ;(row as any)._treeDepth = node.depth
-      ;(row as any)._isLeaf = node.isLeaf
-      ;(row as any)._treePath = node.path
-      ;(row as any)._treeKey = node.key
-      ;(row as any)._hasChildren = node.children.length > 0
+      const meta = row as Row<TData> & TreeRowMeta
+      meta._treeDepth = node.depth
+      meta._isLeaf = node.isLeaf
+      meta._treePath = node.path
+      meta._treeKey = node.key
+      meta._hasChildren = node.children.length > 0
 
       rows.push(row)
       index++
 
-      const isExpanded =
-        expanded === true ||
-        (typeof expanded === 'object' && expanded[rowId])
+      const isExpanded = expanded === true || (typeof expanded === 'object' && expanded[rowId])
 
       if (isExpanded && node.children.length > 0) {
         const childRows: Row<TData>[] = []
@@ -197,7 +205,7 @@ export function flattenTree<TData extends RowData>(
  */
 export function filterTreeData<TData extends RowData>(
   nodes: TreeNode<TData>[],
-  predicate: (node: TreeNode<TData>) => boolean
+  predicate: (node: TreeNode<TData>) => boolean,
 ): TreeNode<TData>[] {
   const result: TreeNode<TData>[] = []
 
@@ -227,16 +235,13 @@ export function filterTreeData<TData extends RowData>(
  */
 export function sortTreeData<TData extends RowData>(
   nodes: TreeNode<TData>[],
-  compareFn: (a: TreeNode<TData>, b: TreeNode<TData>) => number
+  compareFn: (a: TreeNode<TData>, b: TreeNode<TData>) => number,
 ): TreeNode<TData>[] {
   const sorted = [...nodes].sort(compareFn)
 
   return sorted.map((node) => ({
     ...node,
-    children:
-      node.children.length > 0
-        ? sortTreeData(node.children, compareFn)
-        : node.children,
+    children: node.children.length > 0 ? sortTreeData(node.children, compareFn) : node.children,
   }))
 }
 
@@ -250,7 +255,7 @@ export function sortTreeData<TData extends RowData>(
 export function getTreeRowModel<TData extends RowData>(
   table: Table<TData>,
   data: TData[],
-  getDataPath: (item: TData) => string[]
+  getDataPath: (item: TData) => string[],
 ): RowModel<TData> {
   // 1. Build tree from flat data
   const tree = buildTreeFromPaths(data, getDataPath)
@@ -278,19 +283,15 @@ export function getTreeRowModel<TData extends RowData>(
 /**
  * Get the tree depth for a row (shortcut for row._treeDepth).
  */
-export function getTreeDepth<TData extends RowData>(
-  row: Row<TData>
-): number {
-  return (row as any)._treeDepth ?? row.depth
+export function getTreeDepth<TData extends RowData>(row: Row<TData>): number {
+  return (row as Row<TData> & TreeRowMeta)._treeDepth ?? row.depth
 }
 
 /**
  * Check if a row is a leaf node (no children).
  */
-export function isLeafRow<TData extends RowData>(
-  row: Row<TData>
-): boolean {
-  return (row as any)._isLeaf ?? row.subRows.length === 0
+export function isLeafRow<TData extends RowData>(row: Row<TData>): boolean {
+  return (row as Row<TData> & TreeRowMeta)._isLeaf ?? row.subRows.length === 0
 }
 
 /**
@@ -298,7 +299,7 @@ export function isLeafRow<TData extends RowData>(
  */
 export function getParentRow<TData extends RowData>(
   row: Row<TData>,
-  table: Table<TData>
+  table: Table<TData>,
 ): Row<TData> | undefined {
   if (!row.parentId) return undefined
   try {
@@ -315,7 +316,7 @@ export function aggregateTreeValues<TData extends RowData>(
   nodes: TreeNode<TData>[],
   _columnId: string,
   aggregationFn: (values: unknown[]) => unknown,
-  getValueFromData: (data: TData) => unknown
+  getValueFromData: (data: TData) => unknown,
 ): Map<string, unknown> {
   const aggregated = new Map<string, unknown>()
 

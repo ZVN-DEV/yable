@@ -1,13 +1,6 @@
 // @zvndev/yable-core — Header Group Model
 
-import type {
-  RowData,
-  Header,
-  HeaderGroup,
-  HeaderContext,
-  Column,
-  Table,
-} from '../types'
+import type { RowData, Header, HeaderGroup, HeaderContext, Column, Table } from '../types'
 
 export function createHeader<TData extends RowData, TValue = unknown>(
   table: Table<TData>,
@@ -22,7 +15,7 @@ export function createHeader<TData extends RowData, TValue = unknown>(
     rowSpan: number
     headerGroup: HeaderGroup<TData>
     subHeaders: Header<TData, unknown>[]
-  }
+  },
 ): Header<TData, TValue> {
   const id = opts.id ?? column.id
 
@@ -74,13 +67,15 @@ export function createHeader<TData extends RowData, TValue = unknown>(
 
       return (event: unknown) => {
         const e = event as MouseEvent | TouchEvent
-        const startX = 'touches' in e ? (e as TouchEvent).touches[0]!.clientX : (e as MouseEvent).clientX
+        const startX =
+          'touches' in e ? (e as TouchEvent).touches[0]!.clientX : (e as MouseEvent).clientX
         const startSize = header.getSize()
 
         const onMove = (moveEvent: MouseEvent | TouchEvent) => {
-          const currentX = 'touches' in moveEvent
-            ? (moveEvent as TouchEvent).touches[0]!.clientX
-            : (moveEvent as MouseEvent).clientX
+          const currentX =
+            'touches' in moveEvent
+              ? (moveEvent as TouchEvent).touches[0]!.clientX
+              : (moveEvent as MouseEvent).clientX
           const delta = currentX - startX
 
           table.setColumnSizing((old) => ({
@@ -92,7 +87,7 @@ export function createHeader<TData extends RowData, TValue = unknown>(
         const onEnd = () => {
           document.removeEventListener('mousemove', onMove)
           document.removeEventListener('mouseup', onEnd)
-          document.removeEventListener('touchmove', onMove as any)
+          document.removeEventListener('touchmove', onMove as EventListener)
           document.removeEventListener('touchend', onEnd)
 
           table.setColumnSizingInfo((old) => ({
@@ -113,7 +108,7 @@ export function createHeader<TData extends RowData, TValue = unknown>(
 
         document.addEventListener('mousemove', onMove)
         document.addEventListener('mouseup', onEnd)
-        document.addEventListener('touchmove', onMove as any)
+        document.addEventListener('touchmove', onMove as EventListener)
         document.addEventListener('touchend', onEnd)
       }
     },
@@ -124,13 +119,10 @@ export function createHeader<TData extends RowData, TValue = unknown>(
 
 export function buildHeaderGroups<TData extends RowData>(
   table: Table<TData>,
-  allColumns: Column<TData, unknown>[]
+  allColumns: Column<TData, unknown>[],
 ): HeaderGroup<TData>[] {
   // Build leaf-level header group first
-  const maxDepth = allColumns.reduce(
-    (max, col) => Math.max(max, col.depth),
-    0
-  )
+  const maxDepth = allColumns.reduce((max, col) => Math.max(max, col.depth), 0)
 
   const headerGroups: HeaderGroup<TData>[] = []
 
@@ -166,7 +158,7 @@ export function buildHeaderGroups<TData extends RowData>(
           rowSpan: 1,
           headerGroup,
           subHeaders: [],
-        })
+        }),
       )
 
     headerGroups.push(headerGroup)
@@ -191,7 +183,7 @@ export function buildHeaderGroups<TData extends RowData>(
             rowSpan: column.columns.length ? 1 : maxDepth - depth + 1,
             headerGroup,
             subHeaders: [],
-          })
+          }),
         )
 
       headerGroups.push(headerGroup)

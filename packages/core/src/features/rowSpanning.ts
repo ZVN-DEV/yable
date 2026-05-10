@@ -22,7 +22,7 @@ export type RowSpanMap = Map<string, number>
 export type RowSpanFn<TData extends RowData> = (
   row: Row<TData>,
   rows: Row<TData>[],
-  rowIndex: number
+  rowIndex: number,
 ) => number | undefined
 
 // ---------------------------------------------------------------------------
@@ -50,7 +50,7 @@ function spanKey(rowIndex: number, columnId: string): string {
  */
 export function resolveRowSpans<TData extends RowData>(
   rows: Row<TData>[],
-  columnDefs: ColumnDef<TData, any>[]
+  columnDefs: ColumnDef<TData, unknown>[],
 ): RowSpanMap {
   const map: RowSpanMap = new Map()
 
@@ -60,8 +60,7 @@ export function resolveRowSpans<TData extends RowData>(
     if (!rowSpanFn) continue
 
     const columnId =
-      colDef.id ??
-      ('accessorKey' in colDef ? (colDef.accessorKey as string) : undefined)
+      colDef.id ?? ('accessorKey' in colDef ? (colDef.accessorKey as string) : undefined)
     if (!columnId) continue
 
     let i = 0
@@ -73,10 +72,7 @@ export function resolveRowSpans<TData extends RowData>(
       try {
         span = rowSpanFn(row, rows, i) ?? 1
       } catch (err) {
-        console.error(
-          `[yable] rowSpanFn threw for column "${columnId}", row index ${i}:`,
-          err
-        )
+        console.error(`[yable] rowSpanFn threw for column "${columnId}", row index ${i}:`, err)
         span = 1 // safe default: no spanning
       }
 
@@ -116,7 +112,7 @@ export function resolveRowSpans<TData extends RowData>(
 export function getRowSpan(
   map: RowSpanMap,
   rowIndex: number,
-  columnId: string
+  columnId: string,
 ): number | undefined {
   return map.get(spanKey(rowIndex, columnId))
 }
@@ -124,10 +120,6 @@ export function getRowSpan(
 /**
  * Check if a cell should be skipped because a span from above covers it.
  */
-export function isCellSpanned(
-  map: RowSpanMap,
-  rowIndex: number,
-  columnId: string
-): boolean {
+export function isCellSpanned(map: RowSpanMap, rowIndex: number, columnId: string): boolean {
   return map.get(spanKey(rowIndex, columnId)) === 0
 }

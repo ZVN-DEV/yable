@@ -2,6 +2,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { tokenize, parseFormula, FormulaError } from '../formulas/parser'
+import type { BinaryOpNode, FunctionCallNode } from '../formulas/parser'
 import { evaluate } from '../formulas/evaluator'
 import type { CellValueResolver, RangeValueResolver } from '../formulas/evaluator'
 import {
@@ -178,20 +179,20 @@ describe('FormulaParser', () => {
     const ast = parseFormula('=1+2*3')
     // Should be: 1 + (2*3), i.e., + at top with left=1, right=binaryOp(*)
     expect(ast.type).toBe('binaryOp')
-    const binOp = ast as any
+    const binOp = ast as BinaryOpNode
     expect(binOp.operator).toBe('+')
     expect(binOp.left).toEqual({ type: 'number', value: 1 })
     expect(binOp.right.type).toBe('binaryOp')
-    expect(binOp.right.operator).toBe('*')
+    expect((binOp.right as BinaryOpNode).operator).toBe('*')
   })
 
   it('should parse parentheses overriding precedence ((1+2)*3)', () => {
     const ast = parseFormula('=(1+2)*3')
     expect(ast.type).toBe('binaryOp')
-    const binOp = ast as any
+    const binOp = ast as BinaryOpNode
     expect(binOp.operator).toBe('*')
     expect(binOp.left.type).toBe('binaryOp')
-    expect(binOp.left.operator).toBe('+')
+    expect((binOp.left as BinaryOpNode).operator).toBe('+')
     expect(binOp.right).toEqual({ type: 'number', value: 3 })
   })
 
@@ -216,7 +217,7 @@ describe('FormulaParser', () => {
   it('should parse function calls with arguments', () => {
     const ast = parseFormula('=SUM(1,2,3)')
     expect(ast.type).toBe('functionCall')
-    const fn = ast as any
+    const fn = ast as FunctionCallNode
     expect(fn.name).toBe('SUM')
     expect(fn.args).toHaveLength(3)
   })
@@ -224,16 +225,16 @@ describe('FormulaParser', () => {
   it('should parse nested function calls', () => {
     const ast = parseFormula('=SUM(1,MAX(2,3))')
     expect(ast.type).toBe('functionCall')
-    const fn = ast as any
-    expect(fn.args[1].type).toBe('functionCall')
-    expect(fn.args[1].name).toBe('MAX')
+    const fn = ast as FunctionCallNode
+    expect(fn.args[1]!.type).toBe('functionCall')
+    expect((fn.args[1] as FunctionCallNode).name).toBe('MAX')
   })
 
   it('should parse empty function call', () => {
     // e.g., =NOW() — zero args
     const ast = parseFormula('=SUM()')
     expect(ast.type).toBe('functionCall')
-    expect((ast as any).args).toHaveLength(0)
+    expect((ast as FunctionCallNode).args).toHaveLength(0)
   })
 
   it('should throw on missing closing parenthesis', () => {
@@ -255,13 +256,13 @@ describe('FormulaParser', () => {
   it('should parse the ^ exponent operator', () => {
     const ast = parseFormula('=2^3')
     expect(ast.type).toBe('binaryOp')
-    expect((ast as any).operator).toBe('^')
+    expect((ast as BinaryOpNode).operator).toBe('^')
   })
 
   it('should parse the & concatenation operator', () => {
     const ast = parseFormula('="a"&"b"')
     expect(ast.type).toBe('binaryOp')
-    expect((ast as any).operator).toBe('&')
+    expect((ast as BinaryOpNode).operator).toBe('&')
   })
 })
 

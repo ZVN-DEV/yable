@@ -1,7 +1,7 @@
 // @zvndev/yable-core — Fill Handle Feature
 // Drag corner to auto-fill cells with pattern detection.
 
-import type { RowData, Table, Row, Column } from '../types'
+import type { RowData, Table, Row, Column, ColumnDefExtensions } from '../types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -57,7 +57,7 @@ export function detectPattern(values: unknown[]): FillPattern {
 
   // Check if all values are numeric strings
   const allNumericStrings = values.every(
-    (v) => typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v))
+    (v) => typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v)),
   )
   if (allNumericStrings) {
     const nums = values.map((v) => Number(v))
@@ -88,9 +88,7 @@ export function detectPattern(values: unknown[]): FillPattern {
   }
 
   // Check if all values are date strings (YYYY-MM-DD)
-  const allDateStrings = values.every(
-    (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)
-  )
+  const allDateStrings = values.every((v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v))
   if (allDateStrings) {
     const dates = (values as string[]).map((v) => new Date(v))
     if (dates.every((d) => !isNaN(d.getTime())) && dates.length >= 2) {
@@ -133,7 +131,7 @@ export function detectPattern(values: unknown[]): FillPattern {
 export function generateFillValues(
   pattern: FillPattern,
   count: number,
-  sourceLength: number
+  sourceLength: number,
 ): unknown[] {
   const result: unknown[] = []
 
@@ -175,7 +173,7 @@ export function detectAndFill<TData extends RowData>(
   sourceRange: { startRow: number; startCol: number; endRow: number; endCol: number },
   targetRange: { startRow: number; startCol: number; endRow: number; endCol: number },
   rows: Row<TData>[],
-  columns: Column<TData, unknown>[]
+  columns: Column<TData, unknown>[],
 ): { rowId: string; columnId: string; value: unknown }[] {
   const filledCells: { rowId: string; columnId: string; value: unknown }[] = []
 
@@ -188,7 +186,9 @@ export function detectAndFill<TData extends RowData>(
     const column = columns[colIdx]!
 
     // Check if column is editable
-    const editable = (column.columnDef as any).editable
+    const editable = (
+      column.columnDef as typeof column.columnDef & Partial<ColumnDefExtensions<TData>>
+    ).editable
     if (editable === false) continue
 
     // Gather source values for this column

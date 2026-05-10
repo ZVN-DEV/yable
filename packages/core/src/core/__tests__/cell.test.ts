@@ -15,8 +15,9 @@ interface TestData {
 }
 
 function makeTable(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TValue variance
   colDefs: ColumnDef<TestData, any>[],
-  stateOverrides: Partial<TableState> = {}
+  stateOverrides: Partial<TableState> = {},
 ) {
   let state: TableState = {
     sorting: [],
@@ -99,7 +100,7 @@ describe('cell.getRowSpan', () => {
       {
         accessorKey: 'name',
         header: 'Name',
-        rowSpan:() => 2,
+        rowSpan: () => 2,
       },
     ])
     const row = table.getRowModel().rows[0]!
@@ -112,7 +113,7 @@ describe('cell.getRowSpan', () => {
       {
         accessorKey: 'name',
         header: 'Name',
-        rowSpan:() => {
+        rowSpan: () => {
           throw new Error('boom')
         },
       },
