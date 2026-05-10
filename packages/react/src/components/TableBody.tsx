@@ -231,6 +231,9 @@ function TableRowInner<TData extends RowData>({
     [table.events, row],
   )
 
+  const selectionEnabled = Boolean(table.options.enableRowSelection)
+  const expansionEnabled = Boolean(table.options.enableExpanding)
+
   return (
     <>
       <tr
@@ -241,6 +244,8 @@ function TableRowInner<TData extends RowData>({
         data-clickable={clickable || undefined}
         data-row-id={row.id}
         data-row-index={rowIndex}
+        aria-selected={selectionEnabled ? isSelected : undefined}
+        aria-expanded={expansionEnabled ? isExpanded : undefined}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onContextMenu={handleContextMenu}

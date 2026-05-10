@@ -1,6 +1,6 @@
 // @zvndev/yable-react — Main Table Component
 
-import React, { useMemo, useState, useCallback, useRef } from 'react'
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import type { HeaderGroup, RowData, Table as TableInstance } from '@zvndev/yable-core'
 import { TableProvider } from '../context'
 import type { TableProps } from '../types'
@@ -57,6 +57,7 @@ export function Table<TData extends RowData>({
   floatingFilters,
   columnVirtualization,
   columnVirtualizationOverscan,
+  ariaLabel,
   ...rest
 }: TableProps<TData>) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -137,6 +138,64 @@ export function Table<TData extends RowData>({
   const contextMenu = useContextMenu()
   useKeyboardNavigation(table, { containerRef })
 
+  // ---- aria-live announcements for sort, filter, and pagination changes ----
+  const [announcement, setAnnouncement] = useState('')
+  const prevSortingRef = useRef(table.getState().sorting)
+  const prevFilterCountRef = useRef(rows.length)
+  const prevHasFiltersRef = useRef(isFiltered)
+  const prevPaginationRef = useRef(table.getState().pagination)
+  const isFirstRenderRef = useRef(true)
+
+  useEffect(() => {
+    // Skip announcements on first render
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+
+    const currentSorting = table.getState().sorting
+    const currentPagination = table.getState().pagination
+    const currentRowCount = rows.length
+    const currentIsFiltered = isFiltered
+
+    // Check for sorting changes
+    if (JSON.stringify(currentSorting) !== JSON.stringify(prevSortingRef.current)) {
+      prevSortingRef.current = currentSorting
+      const firstSort = currentSorting[0]
+      if (firstSort) {
+        const column = table.getColumn(firstSort.id)
+        const headerDef = column?.columnDef.header
+        const columnName = typeof headerDef === 'string' ? headerDef : firstSort.id
+        const direction = firstSort.desc ? 'descending' : 'ascending'
+        setAnnouncement(`Sorted by ${columnName} ${direction}`)
+        return
+      }
+    }
+
+    // Check for filter result count changes
+    if (
+      currentRowCount !== prevFilterCountRef.current ||
+      currentIsFiltered !== prevHasFiltersRef.current
+    ) {
+      prevFilterCountRef.current = currentRowCount
+      prevHasFiltersRef.current = currentIsFiltered
+      if (currentIsFiltered) {
+        setAnnouncement(`${currentRowCount} rows after filtering`)
+        return
+      }
+    }
+
+    // Check for pagination changes
+    if (JSON.stringify(currentPagination) !== JSON.stringify(prevPaginationRef.current)) {
+      prevPaginationRef.current = currentPagination
+      const pageCount = table.getPageCount()
+      if (pageCount > 0) {
+        setAnnouncement(`Page ${currentPagination.pageIndex + 1} of ${pageCount}`)
+        return
+      }
+    }
+  })
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
@@ -174,6 +233,7 @@ export function Table<TData extends RowData>({
         data-theme={theme}
         dir={direction}
         role="grid"
+        aria-label={ariaLabel ?? 'Data table'}
         aria-rowcount={table.getRowModel().rows.length}
         aria-colcount={table.getVisibleLeafColumns().length}
         onContextMenu={handleContextMenu}
@@ -252,6 +312,23 @@ export function Table<TData extends RowData>({
             table={table}
           />
         )}
+
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          style={{
+            position: 'absolute',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+            clip: 'rect(0,0,0,0)',
+            whiteSpace: 'nowrap',
+            border: 0,
+          }}
+        >
+          {announcement}
+        </div>
       </div>
     </TableProvider>
   )

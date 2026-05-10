@@ -60,6 +60,8 @@ export interface TableProps<TData extends RowData> extends Omit<
   columnVirtualization?: boolean
   /** Additional columns rendered beyond the viewport when column virtualization is enabled */
   columnVirtualizationOverscan?: number
+  /** Accessible label for the grid container. Default: "Data table" */
+  ariaLabel?: string
 }
 
 /** Status bar panel configuration */
