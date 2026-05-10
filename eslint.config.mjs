@@ -37,9 +37,15 @@ export default tseslint.config(
       react: { version: 'detect' },
     },
   },
-  // Files with legacy `any` that cannot be cleaned up without a larger refactor
   {
-    files: ['packages/core/src/utils.ts', 'packages/core/src/features/formulas/**'],
+    files: [
+      'packages/core/src/utils.ts',
+      'packages/core/src/features/formulas/**',
+      'packages/react/src/**',
+      '**/__tests__/**',
+      'examples/**',
+      'stories/**',
+    ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
     },

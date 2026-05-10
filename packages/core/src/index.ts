@@ -227,6 +227,13 @@ export { UndoStack, createUndoRedoIntegration } from './features/undoRedo'
 export type { UndoRedoOptions } from './features/undoRedo'
 
 // ---------------------------------------------------------------------------
+// Clipboard
+// ---------------------------------------------------------------------------
+
+export { serializeCells, parseClipboardText, applyCellPaste } from './features/clipboard'
+export type { SerializeOptions, ParseOptions } from './features/clipboard'
+
+// ---------------------------------------------------------------------------
 // Export Utilities
 // ---------------------------------------------------------------------------
 

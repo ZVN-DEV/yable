@@ -1,15 +1,19 @@
 // @zvndev/yable-react — useClipboard + core clipboard function tests
 
 import { describe, it, expect } from 'vitest'
-import { serializeCells, parseClipboardText } from '../../../core/src/features/clipboard'
-import type { SerializeOptions, ParseOptions } from '../../../core/src/features/clipboard'
-import type { Row, Column, RowData } from '@zvndev/yable-core'
+import {
+  serializeCells,
+  parseClipboardText,
+  type SerializeOptions,
+  type ParseOptions,
+  type Row,
+  type Column,
+  type RowData,
+} from '@zvndev/yable-core'
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-type TestRow = { id: string; name: string; age: number; notes: string }
 
 const defaultSerializeOpts: SerializeOptions = {
   delimiter: '\t',

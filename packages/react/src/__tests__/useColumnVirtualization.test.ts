@@ -3,11 +3,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useColumnVirtualization } from '../hooks/useColumnVirtualization'
-import type {
-  UseColumnVirtualizationOptions,
-  UseColumnVirtualizationResult,
-} from '../hooks/useColumnVirtualization'
-import type { Column, RowData } from '@zvndev/yable-core'
+import type { UseColumnVirtualizationOptions } from '../hooks/useColumnVirtualization'
+import type { Column } from '@zvndev/yable-core'
 
 // ---------------------------------------------------------------------------
 // Mock rAF so scroll handlers fire synchronously
@@ -304,10 +301,7 @@ describe('useColumnVirtualization', () => {
 
       expect(result.current.totalWidth).toBe(800) // 50 + 120 + 300 + 80 + 250
 
-      // Verify start offsets are cumulative
-      const offsets = result.current.virtualColumns.map((vc) => vc.start)
       const expectedOffsets = [0, 50, 170, 470, 550]
-
       for (const vc of result.current.virtualColumns) {
         expect(vc.start).toBe(expectedOffsets[vc.index])
       }
