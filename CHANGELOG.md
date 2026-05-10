@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — Unreleased
+
+### Security
+
+- Fix prototype pollution vector in `getDeepValue` accessor — blocks `__proto__`, `constructor`, `prototype` path segments
+- Switch `CellLink` URL validation from blocklist to allowlist — only allows `http:`, `https:`, `mailto:`, `tel:`, and relative URLs
+- Add maximum formula string length guard (10,000 characters) to prevent tokenizer memory exhaustion
+- Bump `@chenglou/pretext` peer dependency minimum to `>=0.0.5` (fixes algorithmic DoS)
+
+### Added
+
+- `exportToCsv()` — export table data as CSV with quoting, BOM, custom delimiter support
+- `exportToJson()` — export table data as JSON keyed by column headers
+- `aria-label` prop on Table component (defaults to "Data table")
+- `aria-live` status region announces sort, filter, and pagination changes to screen readers
+- `aria-selected` on table rows when row selection is enabled
+- `aria-expanded` on expandable/tree data rows
+- Home/End keyboard navigation (first/last cell in row)
+- Ctrl+Home/Ctrl+End (first/last cell in table)
+- PageUp/PageDown keyboard navigation
+
+### Changed
+
+- Table constructor is now properly typed internally (eliminates `const table: any` pattern)
+- `@typescript-eslint/no-explicit-any` escalated from `warn` to `error`
+
+### Fixed
+
+- Reduced `any` usage across core package from 114 to <60 instances
+
 ## [Unreleased]
 
 ### Added

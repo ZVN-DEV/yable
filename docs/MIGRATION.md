@@ -1,0 +1,402 @@
+# Coming from TanStack Table
+
+A practical migration guide for developers moving from TanStack Table (v8) to Yable.
+
+## Why migrate?
+
+Yable ships a formula engine, pivot tables, async cell commits, clipboard, fill handle, undo/redo, and keyboard navigation in the MIT-licensed core -- features that TanStack Table either doesn't support or leaves as DIY exercises. The headless engine is zero-dependency with a similar column-helper API, so the migration surface is small while the built-in feature set is significantly larger.
+
+## Side-by-side API comparison
+
+### Column definitions
+
+Both libraries use a `createColumnHelper` pattern with type-safe accessors.
+
+**TanStack Table**
+
+```typescript
+import { createColumnHelper } from '@tanstack/react-table'
+
+const columnHelper = createColumnHelper<Person>()
+
+const columns = [
+  columnHelper.accessor('name', {
+    header: 'Name',
+    cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor('age', {
+    header: () => 'Age',
+  }),
+  columnHelper.display({
+    id: 'actions',
+    cell: (props) => <button>Edit</button>,
+  }),
+]
+```
+
+**Yable**
+
+```typescript
+import { createColumnHelper } from '@zvndev/yable-react'
+
+const columnHelper = createColumnHelper<Person>()
+
+const columns = [
+  columnHelper.accessor('name', {
+    header: 'Name',
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor('age', {
+    header: 'Age',
+  }),
+  columnHelper.display({
+    id: 'actions',
+    cell: (props) => <button>Edit</button>,
+  }),
+]
+```
+
+The column helper API is nearly identical. The main differences:
+
+- Yable adds `editable`, `editConfig`, `cellType`, `cellTypeProps`, `tooltip`, and `cellClassName` to column definitions
+- Yable adds per-column `commit` handlers for async saves
+
+### Table creation
+
+**TanStack Table**
+
+```tsx
+import { useReactTable, getCoreRowModel } from '@tanstack/react-table'
+
+const table = useReactTable({
+  data,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+})
+```
+
+**Yable**
+
+```tsx
+import { useTable } from '@zvndev/yable-react'
+
+const table = useTable({
+  data,
+  columns,
+})
+```
+
+Yable's `useTable` includes all row model pipelines (core, sorted, filtered, paginated) by default. You don't need to import and wire individual row model functions.
+
+### Sorting state
+
+**TanStack Table**
+
+```tsx
+const [sorting, setSorting] = useState<SortingState>([])
+
+const table = useReactTable({
+  state: { sorting },
+  onSortingChange: setSorting,
+  getSortedRowModel: getSortedRowModel(),
+})
+```
+
+**Yable**
+
+```tsx
+// Uncontrolled — Yable manages sorting state internally
+const table = useTable({ data, columns })
+
+// Controlled — same pattern as TanStack
+const [sorting, setSorting] = useState<SortingState>([])
+const table = useTable({
+  data,
+  columns,
+  state: { sorting },
+  onSortingChange: setSorting,
+})
+```
+
+Column-level sorting options (`enableSorting`, `sortingFn`, `sortDescFirst`) work the same way.
+
+### Filtering
+
+**TanStack Table**
+
+```tsx
+const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+const [globalFilter, setGlobalFilter] = useState('')
+
+const table = useReactTable({
+  state: { columnFilters, globalFilter },
+  onColumnFiltersChange: setColumnFilters,
+  onGlobalFilterChange: setGlobalFilter,
+  getFilteredRowModel: getFilteredRowModel(),
+})
+```
+
+**Yable**
+
+```tsx
+// Uncontrolled — filtering works out of the box
+const table = useTable({ data, columns })
+
+// The GlobalFilter component handles the UI
+<GlobalFilter table={table} placeholder="Search..." debounce={300} />
+
+// Programmatic column filter
+table.setColumnFilters([{ id: 'department', value: 'Engineering' }])
+```
+
+Yable ships a `<GlobalFilter>` component with built-in debounce. Filter functions (`filterFn` on column defs) use the same string keys: `includesString`, `equalsString`, `inNumberRange`, etc.
+
+### Pagination
+
+**TanStack Table**
+
+```tsx
+const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+
+const table = useReactTable({
+  state: { pagination },
+  onPaginationChange: setPagination,
+  getPaginationRowModel: getPaginationRowModel(),
+})
+
+// You build your own pagination UI
+```
+
+**Yable**
+
+```tsx
+const table = useTable({
+  data,
+  columns,
+  initialState: {
+    pagination: { pageIndex: 0, pageSize: 10 },
+  },
+})
+
+// Built-in pagination component
+<Table table={table}>
+  <Pagination table={table} showPageSize pageSizes={[5, 10, 25, 50]} showInfo />
+</Table>
+```
+
+### Row selection
+
+**TanStack Table**
+
+```tsx
+const [rowSelection, setRowSelection] = useState({})
+
+const table = useReactTable({
+  state: { rowSelection },
+  onRowSelectionChange: setRowSelection,
+  enableRowSelection: true,
+})
+```
+
+**Yable**
+
+```tsx
+// Enabled by default — just works
+const table = useTable({ data, columns })
+
+// Or controlled
+const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+const table = useTable({
+  data,
+  columns,
+  state: { rowSelection },
+  onRowSelectionChange: setRowSelection,
+})
+```
+
+### Cell rendering
+
+**TanStack Table**
+
+```tsx
+// Manual table rendering with flexRender
+import { flexRender } from '@tanstack/react-table'
+
+;<table>
+  <tbody>
+    {table.getRowModel().rows.map((row) => (
+      <tr key={row.id}>
+        {row.getVisibleCells().map((cell) => (
+          <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
+</table>
+```
+
+**Yable**
+
+```tsx
+// One component — rendering is handled for you
+import { Table } from '@zvndev/yable-react'
+
+;<Table table={table} striped stickyHeader />
+```
+
+Yable's `<Table>` component renders the full table structure (thead, tbody, tfoot, cells) from a single component. You can still access `table.getRowModel()` for custom rendering if needed.
+
+## What you get for free
+
+Features Yable includes out of the box that TanStack Table requires you to build yourself or doesn't support:
+
+| Feature                                                       | TanStack Table                | Yable    |
+| ------------------------------------------------------------- | ----------------------------- | -------- |
+| Cell editing (text, number, select, date, toggle, checkbox)   | DIY                           | Built-in |
+| Async cell commits with optimistic UI                         | Not supported                 | Built-in |
+| Keyboard navigation (arrow keys, Tab, Home/End, Page Up/Down) | Not supported                 | Built-in |
+| Clipboard (copy/cut/paste)                                    | Not supported                 | Built-in |
+| Fill handle (drag to auto-fill)                               | Not supported                 | Built-in |
+| Undo / Redo                                                   | Not supported                 | Built-in |
+| Formula engine (17 functions, parser, dependency graph)       | Not supported                 | Built-in |
+| Pivot tables                                                  | Not supported                 | Built-in |
+| Row virtualization component                                  | DIY (needs @tanstack/virtual) | Built-in |
+| CSV / JSON export                                             | DIY                           | Built-in |
+| Theme system (8 themes, dark mode, 100+ CSS variables)        | Not supported                 | Built-in |
+| Pre-built React components (Table, Pagination, GlobalFilter)  | Not supported                 | Built-in |
+
+## What's different
+
+Key architectural differences to be aware of:
+
+1. **No row model imports.** TanStack requires you to import and pass `getCoreRowModel`, `getSortedRowModel`, etc. Yable includes all row model pipelines by default.
+
+2. **Built-in rendering.** TanStack is purely headless -- you write every `<table>`, `<tr>`, `<td>`. Yable ships a `<Table>` component that handles rendering, but the core engine (`@zvndev/yable-core`) is still fully headless if you want manual control.
+
+3. **State management.** Both support controlled and uncontrolled state. Yable's `useTable` hook manages state internally by default, so you only need `useState` when you want to read or control a specific state slice.
+
+4. **Column def extensions.** Yable column defs support extra properties for editing (`editable`, `editConfig`), styling (`cellClassName`, `headerClassName`), tooltips (`tooltip`, `headerTooltip`), declarative cell types (`cellType`, `cellTypeProps`), and async commits (`commit`).
+
+5. **Event system.** Yable has a built-in event emitter (`table.events.on('cell:click', ...)`) for cell, row, header, edit, selection, sort, filter, and pagination events. TanStack doesn't have an event system.
+
+6. **Theming.** Yable ships `@zvndev/yable-themes` with 8 themes and 100+ CSS custom properties. TanStack doesn't include any styling.
+
+## Step-by-step migration
+
+### 1. Swap packages
+
+```bash
+# Remove TanStack
+npm uninstall @tanstack/react-table @tanstack/table-core
+
+# Install Yable
+npm install @zvndev/yable-core @zvndev/yable-react @zvndev/yable-themes
+```
+
+### 2. Update imports
+
+```typescript
+// Before
+import { useReactTable, createColumnHelper, getCoreRowModel, ... } from '@tanstack/react-table'
+
+// After
+import { useTable, createColumnHelper, Table, Pagination, GlobalFilter } from '@zvndev/yable-react'
+import '@zvndev/yable-themes'
+```
+
+### 3. Simplify table creation
+
+Remove all `get*RowModel` imports and calls. Replace `useReactTable` with `useTable`:
+
+```typescript
+// Before
+const table = useReactTable({
+  data,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  state: { sorting, pagination },
+  onSortingChange: setSorting,
+  onPaginationChange: setPagination,
+})
+
+// After
+const table = useTable({
+  data,
+  columns,
+  state: { sorting, pagination },
+  onSortingChange: setSorting,
+  onPaginationChange: setPagination,
+})
+```
+
+### 4. Replace manual table rendering
+
+Replace your `flexRender` / manual `<table>` markup with the `<Table>` component:
+
+```tsx
+// Before
+<table>
+  <thead>
+    {table.getHeaderGroups().map(headerGroup => (
+      <tr key={headerGroup.id}>
+        {headerGroup.headers.map(header => (
+          <th key={header.id}>
+            {flexRender(header.column.columnDef.header, header.getContext())}
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+  <tbody>
+    {table.getRowModel().rows.map(row => (
+      <tr key={row.id}>
+        {row.getVisibleCells().map(cell => (
+          <td key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+// After
+<Table table={table} striped stickyHeader>
+  <Pagination table={table} showPageSize />
+</Table>
+```
+
+### 5. Add built-in features you were building manually
+
+Now that you have Yable, turn on features that used to require custom code:
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableCellEditing: true, // cell editing
+  enableKeyboardNavigation: true, // arrow key navigation (on by default)
+  enableClipboard: true, // copy/paste
+  enableUndoRedo: true, // undo/redo
+  onEditCommit: (changes) => {
+    // handle saves
+    // ...
+  },
+})
+```
+
+### 6. Clean up custom code
+
+After migration, look for custom code you can remove:
+
+- Custom pagination UI -- replaced by `<Pagination>`
+- Custom global filter -- replaced by `<GlobalFilter>`
+- Manual table rendering boilerplate -- replaced by `<Table>`
+- Custom sorting/filtering state wiring -- now automatic
+- Any virtualization setup with `@tanstack/virtual` -- now built into Yable's Table component
