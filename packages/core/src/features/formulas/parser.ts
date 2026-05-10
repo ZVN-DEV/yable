@@ -94,7 +94,13 @@ const FUNCTION_PATTERN = /^[A-Za-z_]\w*(?=\()/
 const BOOLEAN_PATTERN = /^(TRUE|FALSE)\b/i
 const COMPARISON_OPERATORS = ['>=', '<=', '<>', '!=', '>', '<', '=']
 
+export const MAX_FORMULA_LENGTH = 10_000
+
 export function tokenize(formula: string): Token[] {
+  if (formula.length > MAX_FORMULA_LENGTH) {
+    throw new FormulaError(`Formula exceeds maximum length of ${MAX_FORMULA_LENGTH} characters`)
+  }
+
   const tokens: Token[] = []
 
   // Remove leading '=' if present
@@ -257,7 +263,7 @@ export class FormulaParser {
 
     if (this.pos < this.tokens.length) {
       throw new FormulaError(
-        `Unexpected token '${this.tokens[this.pos]!.value}' at position ${this.tokens[this.pos]!.position}`
+        `Unexpected token '${this.tokens[this.pos]!.value}' at position ${this.tokens[this.pos]!.position}`,
       )
     }
 
@@ -268,7 +274,7 @@ export class FormulaParser {
     this.depth++
     if (this.depth > MAX_PARSE_DEPTH) {
       throw new FormulaError(
-        `Formula exceeds maximum nesting depth of ${MAX_PARSE_DEPTH}. Simplify the expression.`
+        `Formula exceeds maximum nesting depth of ${MAX_PARSE_DEPTH}. Simplify the expression.`,
       )
     }
   }
@@ -372,9 +378,7 @@ export class FormulaParser {
       return expr
     }
 
-    throw new FormulaError(
-      `Unexpected token '${token.value}' at position ${token.position}`
-    )
+    throw new FormulaError(`Unexpected token '${token.value}' at position ${token.position}`)
   }
 
   private parseFunctionCall(): FunctionCallNode {
