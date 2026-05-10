@@ -54,7 +54,7 @@
     "@zvndev/yable-core": "workspace:*"
   },
   "peerDependencies": {
-    "@chenglou/pretext": ">=0.0.4",
+    "@chenglou/pretext": ">=0.0.5",
     "@zvndev/yable-themes": "workspace:*",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"

@@ -65,12 +65,18 @@ export function memo<TResult>(
  */
 export const MAX_ACCESSOR_DEPTH = 32
 
+/** Keys that must never be traversed during deep property access. */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
 /**
  * Access a deeply-nested value from an object using dot-notation key.
  * e.g. `getDeepValue(row, 'address.city')` → `row.address.city`
  *
  * Paths deeper than `MAX_ACCESSOR_DEPTH` segments are rejected with a
  * console.error and `undefined` is returned, to prevent runaway walks.
+ *
+ * Path segments matching `__proto__`, `constructor`, or `prototype` are
+ * blocked to prevent prototype-pollution attacks.
  */
 export function getDeepValue<T, K extends DeepKeys<T>>(obj: T, key: K): DeepValue<T, K> {
   const path = key as string
@@ -81,6 +87,7 @@ export function getDeepValue<T, K extends DeepKeys<T>>(obj: T, key: K): DeepValu
   }
   let current: unknown = obj
   for (const part of parts) {
+    if (UNSAFE_KEYS.has(part)) return undefined as DeepValue<T, K>
     if (current == null) return undefined as DeepValue<T, K>
     current = (current as Record<string, unknown>)[part]
   }

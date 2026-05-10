@@ -12,12 +12,15 @@ export const measureRecipe: CellMeasureRecipe = {
 }
 
 function isSafeUrl(url: string): boolean {
-  const normalized = String(url).toLowerCase().trim()
-  return (
-    !normalized.startsWith('javascript:') &&
-    !normalized.startsWith('data:text/html') &&
-    !normalized.startsWith('vbscript:')
-  )
+  const normalized = String(url).trim()
+  // Allow relative URLs (start with / or # or ?)
+  if (/^[/#?]/.test(normalized)) return true
+  try {
+    const parsed = new URL(normalized, 'https://placeholder.invalid')
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol)
+  } catch {
+    return false
+  }
 }
 
 export function CellLink<TData extends RowData, TValue>({
@@ -30,9 +33,7 @@ export function CellLink<TData extends RowData, TValue>({
   if (raw == null || raw === '') return null
 
   const label = String(raw)
-  const url = typeof href === 'function'
-    ? href(raw)
-    : href ?? label
+  const url = typeof href === 'function' ? href(raw) : (href ?? label)
 
   const safeUrl = isSafeUrl(url) ? url : undefined
 
@@ -48,7 +49,11 @@ export function CellLink<TData extends RowData, TValue>({
       rel={external ? 'noopener noreferrer' : undefined}
     >
       {label}
-      {external && <span className="yable-cell-link__icon" aria-hidden>&#8599;</span>}
+      {external && (
+        <span className="yable-cell-link__icon" aria-hidden>
+          &#8599;
+        </span>
+      )}
     </a>
   )
 }
