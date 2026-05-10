@@ -1,5 +1,35 @@
 # @zvndev/yable-vanilla
 
+## 0.3.0
+
+### Minor Changes
+
+- Security hardening, accessibility, export utilities, type safety, and test coverage improvements.
+
+  ### Security
+  - Prototype pollution guard on `getDeepValue` (blocks `__proto__`, `constructor`, `prototype`)
+  - URL allowlist validation in `CellLink` (only `http:`, `https:`, `mailto:`, `tel:`)
+  - Formula length limit (10,000 chars) in formula parser
+  - CSV formula injection mitigation in `exportToCsv`
+
+  ### Added
+  - `exportToCsv()` and `exportToJson()` export utilities with full RFC 4180 compliance
+  - `ariaLabel` prop on React `<Table>` component
+  - `aria-live` region for sort/filter/page change announcements
+  - `aria-selected` and `aria-expanded` on table rows
+  - TanStack Table migration guide (`docs/MIGRATION.md`)
+
+  ### Changed
+  - Table constructor is now fully typed (eliminated ~90 `any` casts)
+  - ESLint `no-explicit-any` escalated to error (remaining `any` count: 22)
+  - 127 new tests (722 total), covering security, accessibility, export, virtualization, clipboard, and error boundary
+
+### Patch Changes
+
+- Updated dependencies
+  - @zvndev/yable-core@1.0.0
+  - @zvndev/yable-themes@1.0.0
+
 ## 0.2.1
 
 ### Patch Changes
