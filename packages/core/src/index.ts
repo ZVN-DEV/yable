@@ -227,6 +227,13 @@ export { UndoStack, createUndoRedoIntegration } from './features/undoRedo'
 export type { UndoRedoOptions } from './features/undoRedo'
 
 // ---------------------------------------------------------------------------
+// Export Utilities
+// ---------------------------------------------------------------------------
+
+export { exportToCsv, exportToJson } from './features/export'
+export type { ExportOptions as CsvJsonExportOptions, CsvExportOptions } from './features/export'
+
+// ---------------------------------------------------------------------------
 // Async Commit (Task #10)
 // ---------------------------------------------------------------------------
 export { CommitError } from './features/commits/CommitError'
