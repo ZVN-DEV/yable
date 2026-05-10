@@ -260,6 +260,20 @@ describe('exportToCsv', () => {
     expect(lines[2]).toBe('')
   })
 
+  it('sanitizes formula injection (values starting with =, +, -, @)', () => {
+    const table = makeExportTable([
+      { id: '0', name: '=SUM(A1:A10)', age: 30, email: '+cmd|/C calc' },
+      { id: '1', name: '-1+1', age: 25, email: '@SUM(A1)' },
+    ])
+    const csv = exportToCsv(table, { bom: false })
+
+    // Values starting with formula-trigger characters should be tab-prefixed
+    expect(csv).toContain('\t=SUM(A1:A10)')
+    expect(csv).toContain('\t+cmd|/C calc')
+    expect(csv).toContain('\t-1+1')
+    expect(csv).toContain('\t@SUM(A1)')
+  })
+
   it('uses custom quote character', () => {
     const table = makeExportTable([
       { id: '0', name: "It's here, now", age: 30, email: 'test@test.com' },

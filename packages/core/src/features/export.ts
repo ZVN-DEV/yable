@@ -71,6 +71,20 @@ function resolveColumns<TData extends RowData>(
   return table.getVisibleLeafColumns()
 }
 
+const CSV_FORMULA_PREFIX = /^[=+\-@\t\r]/
+
+/**
+ * Sanitize a value that could be interpreted as a formula by spreadsheet
+ * software (Excel, Google Sheets). Prefixes with a tab character to
+ * neutralise formula interpretation while preserving the displayed value.
+ */
+function sanitizeFormulaInjection(value: string): string {
+  if (CSV_FORMULA_PREFIX.test(value)) {
+    return '\t' + value
+  }
+  return value
+}
+
 /**
  * Quote a CSV value if it contains the delimiter, a newline, or the quote
  * character. Escape quote characters by doubling them.
@@ -126,7 +140,7 @@ export function exportToCsv<TData extends RowData>(
   for (const row of rows) {
     const line = columns
       .map((col) => {
-        const value = getCellString(row, col, options?.formatters)
+        const value = sanitizeFormulaInjection(getCellString(row, col, options?.formatters))
         return quoteCsvValue(value, delimiter, quoteChar)
       })
       .join(delimiter)
