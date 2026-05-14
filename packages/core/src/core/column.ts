@@ -301,9 +301,22 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       return ext.enableHiding !== false
     },
     toggleVisibility: (value?: boolean) => {
+      const resolved = value ?? !column.getIsVisible()
+
+      // If hiding (resolved === false), check guards
+      if (resolved === false) {
+        // lockVisible: column-level lock prevents hiding
+        if (ext.lockVisible) return
+
+        // suppressDragHidesColumns: prevent hiding during active column drag
+        // Default is true when not explicitly set
+        const suppress = table.options.suppressDragHidesColumns !== false
+        if (suppress && table.getIsColumnDragActive()) return
+      }
+
       table.setColumnVisibility((old) => ({
         ...old,
-        [id]: value ?? !column.getIsVisible(),
+        [id]: resolved,
       }))
     },
     getToggleVisibilityHandler: () => {

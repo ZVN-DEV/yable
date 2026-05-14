@@ -131,6 +131,12 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
 
   // Visibility
   enableHiding?: boolean
+  /**
+   * When true, this column's visibility cannot be toggled to hidden.
+   * `toggleVisibility(false)` becomes a no-op; `toggleVisibility(true)` still works.
+   * Useful for columns that should always remain visible (e.g. checkbox, actions).
+   */
+  lockVisible?: boolean
 
   // Pinning
   enablePinning?: boolean
@@ -313,6 +319,12 @@ export interface TableOptions<TData extends RowData> {
   // Visibility options
   enableHiding?: boolean
   onColumnVisibilityChange?: OnChangeFn<VisibilityState>
+  /**
+   * When true (default), columns cannot be hidden while a column drag is in
+   * progress. Prevents accidental column hiding caused by `dragleave` events
+   * during reorder operations. Set to `false` to allow hiding during drag.
+   */
+  suppressDragHidesColumns?: boolean
 
   // Column ordering options
   enableColumnReorder?: boolean
@@ -978,6 +990,12 @@ export interface Table<TData extends RowData> {
 
   // Pivot API
   getPivotRowModel: () => RowModel<TData>
+
+  // Column Drag State (used by suppressDragHidesColumns)
+  /** Signal that a column header drag has started. */
+  setColumnDragActive: (active: boolean) => void
+  /** Returns true while a column header drag is in progress. */
+  getIsColumnDragActive: () => boolean
 
   // Event Emitter
   events: EventEmitter<YableEventMap<TData>>

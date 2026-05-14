@@ -91,6 +91,11 @@ export type {
 
 // Hooks
 export { useTable } from './useTable'
+export { useTablePersistence } from './hooks/useTablePersistence'
+export type {
+  UseTablePersistenceOptions,
+  UseTablePersistenceReturn,
+} from './hooks/useTablePersistence'
 export { useVirtualization } from './hooks/useVirtualization'
 export type {
   VirtualRow,

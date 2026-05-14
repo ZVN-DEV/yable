@@ -181,6 +181,9 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
   // T1-10: per-instance warning flag
   let _largeDatasetWarned = false
 
+  // Column drag state — mutable flag, not part of serializable TableState
+  let _columnDragActive = false
+
   // ---------------------------------------------------------------------------
   // Table Instance
   // ---------------------------------------------------------------------------
@@ -902,6 +905,12 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       // Fall back to global default locale
       return (getDefaultLocale() as unknown as Record<string, string>)[key] ?? key
     },
+
+    // Column Drag State (used by suppressDragHidesColumns)
+    setColumnDragActive: (active: boolean) => {
+      _columnDragActive = active
+    },
+    getIsColumnDragActive: () => _columnDragActive,
 
     // Stubs for externally-wired features — filled in by integration functions
     // (undoRedo, fillHandle, formulas, rowDragging, fullRowEditing, pivot)

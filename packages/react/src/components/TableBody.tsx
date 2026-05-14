@@ -1,6 +1,6 @@
 // @zvndev/yable-react — Table Body Component
 
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { Column, RowData, Table, Row } from '@zvndev/yable-core'
 import { TableCell } from './TableCell'
 import { CellErrorBoundary } from './ErrorBoundary'
@@ -9,9 +9,14 @@ import { useVirtualization } from '../hooks/useVirtualization'
 interface TableBodyProps<TData extends RowData> {
   table: Table<TData>
   clickableRows?: boolean
+  colgroup?: React.ReactNode
 }
 
-export function TableBody<TData extends RowData>({ table, clickableRows }: TableBodyProps<TData>) {
+export function TableBody<TData extends RowData>({
+  table,
+  clickableRows,
+  colgroup,
+}: TableBodyProps<TData>) {
   const rows = table.getRowModel().rows
   const visibleColumns = table.getVisibleLeafColumns()
   const activeCell = table.getState().editing.activeCell
@@ -31,6 +36,23 @@ export function TableBody<TData extends RowData>({ table, clickableRows }: Table
   const pretextHeights = options.pretextHeights ?? null
   const pretextPrefixSums = options.pretextPrefixSums ?? null
 
+  // Derive a stable hash from columnSizing so the virtualization hook can
+  // invalidate its row-height cache when column widths change (text wrapping).
+  const columnSizing = table.getState().columnSizing
+  const columnSizingHash = useMemo(() => {
+    const entries = Object.entries(columnSizing)
+    if (entries.length === 0) return 0
+    // Simple numeric hash: sum of (charCode-weighted key + value)
+    let h = 0
+    for (const [key, value] of entries) {
+      for (let i = 0; i < key.length; i++) {
+        h = (h * 31 + key.charCodeAt(i)) | 0
+      }
+      h = (h * 31 + (value | 0)) | 0
+    }
+    return h
+  }, [columnSizing])
+
   const { virtualRows, totalHeight } = useVirtualization({
     containerRef: scrollContainerRef,
     totalRows: rows.length,
@@ -39,6 +61,7 @@ export function TableBody<TData extends RowData>({ table, clickableRows }: Table
     estimateRowHeight,
     pretextHeights,
     pretextPrefixSums,
+    columnSizingHash,
   })
 
   const cellSelectionKey = cellSelection.range
@@ -118,6 +141,7 @@ export function TableBody<TData extends RowData>({ table, clickableRows }: Table
                   borderCollapse: 'collapse',
                 }}
               >
+                {colgroup}
                 <tbody>
                   {virtualRows.map((vRow) => {
                     const row = rows[vRow.index]

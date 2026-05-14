@@ -204,23 +204,51 @@ export function Table<TData extends RowData>({
     [contextMenu, table],
   )
 
+  const enableRowVirtualization = renderTable.options.enableVirtualization ?? false
+
+  const visibleLeafColumns = renderTable.getVisibleLeafColumns()
+  const columnSizing = renderTable.getState().columnSizing
+
+  const colgroup = useMemo(() => {
+    if (visibleLeafColumns.length === 0) return null
+    return (
+      <colgroup>
+        {visibleLeafColumns.map((col) => (
+          <col key={col.id} style={{ width: col.getSize() }} />
+        ))}
+      </colgroup>
+    )
+  }, [visibleLeafColumns, columnSizing])
+
+  const outerTableStyle = useMemo((): React.CSSProperties | undefined => {
+    if (columnVirtualState.isVirtualized) {
+      return {
+        width: columnVirtualState.visibleWidth,
+        minWidth: columnVirtualState.visibleWidth,
+        marginLeft: columnVirtualState.startOffset,
+        tableLayout: 'fixed',
+      }
+    }
+    if (enableRowVirtualization) {
+      return { tableLayout: 'fixed' }
+    }
+    return undefined
+  }, [
+    columnVirtualState.isVirtualized,
+    columnVirtualState.visibleWidth,
+    columnVirtualState.startOffset,
+    enableRowVirtualization,
+  ])
+
   const tableNode = (
     <table
       className="yable-table"
-      style={
-        columnVirtualState.isVirtualized
-          ? {
-              width: columnVirtualState.visibleWidth,
-              minWidth: columnVirtualState.visibleWidth,
-              marginLeft: columnVirtualState.startOffset,
-              tableLayout: 'fixed',
-            }
-          : undefined
-      }
+      style={outerTableStyle}
       data-column-virtualized={columnVirtualState.isVirtualized || undefined}
     >
+      {enableRowVirtualization && colgroup}
       <TableHeader table={renderTable} floatingFilters={floatingFilters} />
-      <TableBody table={renderTable} clickableRows={clickableRows} />
+      <TableBody table={renderTable} clickableRows={clickableRows} colgroup={colgroup} />
       {footer && <TableFooter table={renderTable} />}
     </table>
   )

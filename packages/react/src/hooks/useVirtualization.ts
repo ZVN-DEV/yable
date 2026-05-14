@@ -18,6 +18,12 @@ export interface UseVirtualizationOptions {
   pretextHeights?: Float64Array | null
   /** Pre-computed prefix sums for O(log n) scroll lookups */
   pretextPrefixSums?: Float64Array | null
+  /**
+   * Opaque key that changes when column widths change.
+   * When this value changes the height cache is invalidated because column
+   * resizing can affect text wrapping and therefore row heights.
+   */
+  columnSizingHash?: string | number
 }
 
 export interface UseVirtualizationResult {
@@ -26,9 +32,15 @@ export interface UseVirtualizationResult {
   startIndex: number
   endIndex: number
   scrollTo: (index: number) => void
+  /**
+   * Manually clear the row-height cache and force recalculation.
+   * Call this when cell content changes (data mutations, font-size changes, etc.)
+   * that may affect row heights.
+   */
+  invalidateRowHeights: () => void
 }
 
-const EMPTY_RESULT: Omit<UseVirtualizationResult, 'scrollTo'> = {
+const EMPTY_RESULT: Omit<UseVirtualizationResult, 'scrollTo' | 'invalidateRowHeights'> = {
   virtualRows: [],
   totalHeight: 0,
   startIndex: 0,
@@ -39,12 +51,13 @@ const EMPTY_RESULT: Omit<UseVirtualizationResult, 'scrollTo'> = {
  * Computes which rows are visible in a scrollable container and returns
  * positioning data so only those rows (plus an overscan buffer) are rendered.
  *
- * Returns `{ virtualRows, totalHeight, startIndex, endIndex, scrollTo }`.
+ * Returns `{ virtualRows, totalHeight, startIndex, endIndex, scrollTo, invalidateRowHeights }`.
  * Re-renders are triggered by scroll (rAF-throttled) and ResizeObserver
  * container resize. Supports fixed, variable, and Pretext-pre-measured heights.
  *
- * Gotcha: variable-height mode caches measured heights per index — pass new
- * `pretextHeights` arrays (or change `totalRows`) to invalidate the cache.
+ * The height cache is automatically invalidated when `totalRows`, `isFixedHeight`,
+ * or `columnSizingHash` changes. For manual invalidation (e.g. after data mutations
+ * or font-size changes), call `invalidateRowHeights()`.
  */
 export function useVirtualization({
   containerRef,
@@ -54,6 +67,7 @@ export function useVirtualization({
   estimateRowHeight: _estimateRowHeight,
   pretextHeights,
   pretextPrefixSums,
+  columnSizingHash,
 }: UseVirtualizationOptions): UseVirtualizationResult {
   const hasPretextHeights = !!(
     pretextHeights &&
@@ -64,6 +78,11 @@ export function useVirtualization({
 
   // Cache for variable row heights (index -> measured or estimated size)
   const heightCacheRef = useRef<Map<number, number>>(new Map())
+
+  // Monotonic version counter — incremented on every cache invalidation to
+  // force dependents (totalHeight, virtualRows) to recompute.
+  const heightCacheVersionRef = useRef(0)
+  const [heightCacheVersion, setHeightCacheVersion] = useState(0)
 
   const getRowHeight = useCallback(
     (index: number): number => {
@@ -79,7 +98,9 @@ export function useVirtualization({
       heightCacheRef.current.set(index, height)
       return height
     },
-    [rowHeight, isFixedHeight, hasPretextHeights, pretextHeights],
+    // heightCacheVersion forces a new callback identity after cache invalidation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rowHeight, isFixedHeight, hasPretextHeights, pretextHeights, heightCacheVersion],
   )
 
   const [scrollState, setScrollState] = useState<{
@@ -150,6 +171,23 @@ export function useVirtualization({
     }
   }, [totalRows, isFixedHeight])
 
+  // Clear height cache when column sizing changes (text wrapping may change row heights)
+  useEffect(() => {
+    if (!isFixedHeight && columnSizingHash !== undefined) {
+      heightCacheRef.current.clear()
+      heightCacheVersionRef.current += 1
+      setHeightCacheVersion(heightCacheVersionRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnSizingHash])
+
+  // Imperative cache invalidation for consumers
+  const invalidateRowHeights = useCallback(() => {
+    heightCacheRef.current.clear()
+    heightCacheVersionRef.current += 1
+    setHeightCacheVersion(heightCacheVersionRef.current)
+  }, [])
+
   // scrollTo must be declared before any early returns (rules of hooks)
   const scrollTo = useCallback(
     (index: number) => {
@@ -193,13 +231,23 @@ export function useVirtualization({
       total += getRowHeight(i)
     }
     return total
-  }, [totalRows, rowHeight, isFixedHeight, getRowHeight, hasPretextHeights, pretextPrefixSums])
+    // heightCacheVersion ensures totalHeight recalculates after cache invalidation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    totalRows,
+    rowHeight,
+    isFixedHeight,
+    getRowHeight,
+    hasPretextHeights,
+    pretextPrefixSums,
+    heightCacheVersion,
+  ])
 
   const { scrollTop, containerHeight } = scrollState
 
   // Edge case: no rows
   if (totalRows === 0) {
-    return { ...EMPTY_RESULT, scrollTo }
+    return { ...EMPTY_RESULT, scrollTo, invalidateRowHeights }
   }
 
   // Edge case: container not yet measured
@@ -210,6 +258,7 @@ export function useVirtualization({
       startIndex: 0,
       endIndex: 0,
       scrollTo,
+      invalidateRowHeights,
     }
   }
 
@@ -327,5 +376,6 @@ export function useVirtualization({
     startIndex: overscanStart,
     endIndex: overscanEnd,
     scrollTo,
+    invalidateRowHeights,
   }
 }

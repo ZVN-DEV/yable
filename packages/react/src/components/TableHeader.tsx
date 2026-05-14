@@ -166,8 +166,9 @@ function HeaderCell<TData extends RowData>({
       } catch {
         // Ignore legacy dataTransfer issues.
       }
+      table.setColumnDragActive(true)
     },
-    [canReorder, column.id],
+    [canReorder, column.id, table],
   )
 
   const handleDragOver = useCallback(
@@ -200,7 +201,8 @@ function HeaderCell<TData extends RowData>({
 
   const handleDragEnd = useCallback(() => {
     setDragOver(null)
-  }, [])
+    table.setColumnDragActive(false)
+  }, [table])
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLTableCellElement>) => {
@@ -211,6 +213,7 @@ function HeaderCell<TData extends RowData>({
       const rect = e.currentTarget.getBoundingClientRect()
       const insertAfter = e.clientX >= rect.left + rect.width / 2
       setDragOver(null)
+      table.setColumnDragActive(false)
 
       if (!sourceId || sourceId === column.id) return
 
