@@ -1,0 +1,42 @@
+---
+title: Column Visibility
+description: Show or hide columns dynamically with programmatic control.
+---
+
+Show or hide columns dynamically.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableHiding: true,
+  initialState: {
+    columnVisibility: {
+      email: false, // Hide the email column by default
+    },
+  },
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Hide a column
+table.getColumn('email')?.toggleVisibility(false)
+
+// Show a column
+table.getColumn('email')?.toggleVisibility(true)
+
+// Toggle visibility
+table.getColumn('email')?.toggleVisibility()
+
+// Show/hide all
+table.toggleAllColumnsVisible(true)
+table.toggleAllColumnsVisible(false)
+
+// Check visibility
+table.getColumn('email')?.getIsVisible() // boolean
+table.getIsAllColumnsVisible() // boolean
+```

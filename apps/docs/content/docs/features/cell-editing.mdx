@@ -1,0 +1,104 @@
+---
+title: Cell Editing
+description: Edit cell values inline with validation, formatting, and multiple input types.
+---
+
+Edit cell values inline with validation, formatting, and multiple input types.
+
+### How to Enable
+
+1. Set `enableCellEditing: true` on the table options
+2. Set `editable: true` on columns that should be editable
+3. Provide an `editConfig` with the editor type
+4. Handle commits via `onEditCommit`
+
+### Edit Config
+
+```typescript
+interface CellEditConfig {
+  type: 'text' | 'number' | 'select' | 'toggle' | 'date' | 'checkbox' | 'custom'
+  options?: { label: string; value: unknown }[] // For 'select' type
+  getOptions?: (row: Row) => { label: string; value: unknown }[] // Dynamic options
+  validate?: (value, row) => string | null // Return error message or null
+  parse?: (inputValue: string) => TValue // Parse input string to typed value
+  format?: (value: TValue) => string // Format value for display
+  placeholder?: string
+  render?: (props: CellEditRenderProps) => unknown // Custom editor render
+}
+```
+
+### Example
+
+```typescript
+const columns = [
+  columnHelper.accessor('name', {
+    header: 'Name',
+    editable: true,
+    editConfig: {
+      type: 'text',
+      placeholder: 'Enter name...',
+      validate: (value) => {
+        if (!value) return 'Required'
+        if (String(value).length < 2) return 'Too short'
+        return null
+      },
+    },
+  }),
+  columnHelper.accessor('status', {
+    header: 'Status',
+    editable: true,
+    editConfig: {
+      type: 'select',
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Inactive', value: 'inactive' },
+        { label: 'Pending', value: 'pending' },
+      ],
+    },
+  }),
+  columnHelper.accessor('approved', {
+    header: 'Approved',
+    editable: true,
+    editConfig: { type: 'toggle' },
+  }),
+]
+
+const table = useTable({
+  data,
+  columns,
+  enableCellEditing: true,
+  onEditCommit: (changes) => {
+    // changes: Record<rowId, Partial<TData>>
+    console.log('Committed:', changes)
+  },
+})
+```
+
+### Table Methods
+
+```typescript
+table.startEditing(rowId, columnId) // Enter edit mode on a cell
+table.commitEdit() // Commit the active edit
+table.cancelEdit() // Cancel the active edit
+table.setPendingValue(rowId, columnId, value) // Set a pending value
+table.getPendingValue(rowId, columnId) // Read a pending value
+table.getAllPendingChanges() // Get all uncommitted changes
+table.hasPendingChanges() // Check if any changes are pending
+table.commitAllPending() // Commit all pending changes at once
+table.discardAllPending() // Discard all pending changes
+table.getValidationErrors() // Get validation errors
+table.isValid() // Check if all pending values are valid
+```
+
+### Always-Editable Cells
+
+To make a cell always show its editor (like a spreadsheet), set `alwaysEditable` in the column meta:
+
+```typescript
+columnHelper.accessor('quantity', {
+  header: 'Qty',
+  editable: true,
+  editConfig: { type: 'number' },
+  meta: { alwaysEditable: true },
+})
+```

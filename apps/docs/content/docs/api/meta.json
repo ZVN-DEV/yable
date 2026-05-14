@@ -1,0 +1,22 @@
+{
+  "title": "API Reference",
+  "pages": [
+    "index",
+    "create-table",
+    "column-helper",
+    "table-options",
+    "table-instance",
+    "column-instance",
+    "row-instance",
+    "cell-instance",
+    "header",
+    "state-types",
+    "sorting-functions",
+    "filter-functions",
+    "aggregation-functions",
+    "column-definition-types",
+    "async-commit-types",
+    "event-types",
+    "utility-functions"
+  ]
+}

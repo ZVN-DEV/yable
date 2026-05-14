@@ -1,0 +1,24 @@
+---
+title: createTable
+description: Creates and returns a table instance. The main entry point for @zvndev/yable-core.
+---
+
+```typescript
+function createTable<TData extends RowData>(
+  options: TableOptions<TData>
+): Table<TData>
+```
+
+Creates and returns a table instance. This is the main entry point for `@zvndev/yable-core`. The table instance provides all APIs for reading and manipulating table state.
+
+**Example:**
+
+```typescript
+import { createTable, createColumnHelper } from '@zvndev/yable-core'
+
+const table = createTable({
+  data: myData,
+  columns: myColumns,
+  onStateChange: (updater) => { /* handle state updates */ },
+})
+```

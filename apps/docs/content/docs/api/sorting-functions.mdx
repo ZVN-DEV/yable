@@ -1,0 +1,15 @@
+---
+title: Built-in Sorting Functions
+description: Built-in sorting comparators available via sortingFns from @zvndev/yable-core.
+---
+
+Import: `import { sortingFns } from '@zvndev/yable-core'`
+
+| Name | Signature | Description |
+|---|---|---|
+| `sortingFns.alphanumeric` | `(rowA, rowB, columnId) => number` | Natural sort (case-insensitive). `"item2"` sorts before `"item10"`. |
+| `sortingFns.alphanumericCaseSensitive` | `(rowA, rowB, columnId) => number` | Natural sort (case-sensitive) |
+| `sortingFns.text` | `(rowA, rowB, columnId) => number` | Locale-aware string comparison (case-insensitive) |
+| `sortingFns.textCaseSensitive` | `(rowA, rowB, columnId) => number` | Locale-aware string comparison (case-sensitive) |
+| `sortingFns.datetime` | `(rowA, rowB, columnId) => number` | Sorts Date objects and parseable date strings |
+| `sortingFns.basic` | `(rowA, rowB, columnId) => number` | Simple `>` / `<` comparison |

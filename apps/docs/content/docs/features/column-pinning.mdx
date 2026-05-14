@@ -1,0 +1,53 @@
+---
+title: Column Pinning
+description: Freeze columns to the left or right edge of the table so they remain visible during horizontal scrolling.
+---
+
+Freeze columns to the left or right edge of the table so they remain visible during horizontal scrolling.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableColumnPinning: true,
+  initialState: {
+    columnPinning: {
+      left: ['name'],
+      right: ['actions'],
+    },
+  },
+})
+```
+
+### Column Option
+
+```typescript
+columnHelper.accessor('name', {
+  header: 'Name',
+  enablePinning: true,
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Pin a column to the left
+table.getColumn('name')?.pin('left')
+
+// Pin to the right
+table.getColumn('actions')?.pin('right')
+
+// Unpin
+table.getColumn('name')?.pin(false)
+
+// Check pin status
+table.getColumn('name')?.getIsPinned() // 'left' | 'right' | false
+
+// Set all pinning at once
+table.setColumnPinning({ left: ['name', 'id'], right: ['actions'] })
+
+// Check if any columns are pinned
+table.getIsSomeColumnsPinned('left') // boolean
+```

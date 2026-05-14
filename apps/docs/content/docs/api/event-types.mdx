@@ -1,0 +1,56 @@
+---
+title: Event Types
+description: Event payload interfaces for cell clicks, row clicks, header clicks, edits, selection, sorting, filtering, pagination, and state changes.
+---
+
+```typescript
+interface CellClickEvent<TData> {
+  cell: Cell<TData>
+  row: Row<TData>
+  column: Column<TData>
+  originalEvent?: unknown
+}
+
+interface RowClickEvent<TData> {
+  row: Row<TData>
+  cells: Cell<TData>[]
+  originalEvent?: unknown
+}
+
+interface HeaderClickEvent<TData> {
+  column: Column<TData>
+  header: Header<TData>
+  originalEvent?: unknown
+}
+
+interface CellEditEvent<TData> {
+  cell: Cell<TData>
+  row: Row<TData>
+  column: Column<TData>
+  value: unknown
+  previousValue?: unknown
+}
+
+interface SelectionChangeEvent<TData> {
+  selection: RowSelectionState
+  selectedRows: Row<TData>[]
+}
+
+interface SortChangeEvent {
+  sorting: SortingState
+}
+
+interface FilterChangeEvent {
+  columnFilters: ColumnFiltersState
+  globalFilter: string
+}
+
+interface PageChangeEvent {
+  pagination: PaginationState
+}
+
+interface StateChangeEvent {
+  state: TableState
+  previousState: TableState
+}
+```

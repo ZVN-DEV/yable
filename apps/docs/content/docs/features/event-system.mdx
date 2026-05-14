@@ -1,0 +1,66 @@
+---
+title: Event System
+description: A typed event emitter for responding to table interactions like clicks, edits, and state changes.
+---
+
+Yable includes a typed event emitter for responding to table interactions.
+
+### Available Events
+
+| Event                | Payload                | Description             |
+| -------------------- | ---------------------- | ----------------------- |
+| `cell:click`         | `CellClickEvent`       | Cell was clicked        |
+| `cell:dblclick`      | `CellClickEvent`       | Cell was double-clicked |
+| `cell:contextmenu`   | `CellClickEvent`       | Cell right-click        |
+| `row:click`          | `RowClickEvent`        | Row was clicked         |
+| `row:dblclick`       | `RowClickEvent`        | Row was double-clicked  |
+| `row:contextmenu`    | `RowClickEvent`        | Row right-click         |
+| `header:click`       | `HeaderClickEvent`     | Header cell was clicked |
+| `header:contextmenu` | `HeaderClickEvent`     | Header right-click      |
+| `cell:edit:start`    | `CellEditEvent`        | Cell entered edit mode  |
+| `cell:edit:commit`   | `CellEditEvent`        | Cell edit was committed |
+| `cell:edit:cancel`   | `CellEditEvent`        | Cell edit was cancelled |
+| `selection:change`   | `SelectionChangeEvent` | Row selection changed   |
+| `sort:change`        | `SortChangeEvent`      | Sorting changed         |
+| `filter:change`      | `FilterChangeEvent`    | Filters changed         |
+| `page:change`        | `PageChangeEvent`      | Pagination changed      |
+| `state:change`       | `StateChangeEvent`     | Any state changed       |
+
+### How to Use
+
+```typescript
+// Subscribe to events
+const unsubscribe = table.events.on('cell:click', (event) => {
+  console.log('Clicked cell:', event.column.id, event.row.original)
+})
+
+// Unsubscribe
+unsubscribe()
+
+// Or use off()
+table.events.off('cell:click', handler)
+
+// Emit custom events
+table.events.emit('cell:click', {
+  cell: someCell,
+  row: someRow,
+  column: someColumn,
+})
+
+// Remove all listeners
+table.events.removeAllListeners()
+```
+
+### Table Callback Options
+
+You can also handle events via table options:
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  onCellClick: (event) => console.log('Cell clicked:', event),
+  onRowClick: (event) => console.log('Row clicked:', event),
+  onHeaderClick: (event) => console.log('Header clicked:', event),
+})
+```

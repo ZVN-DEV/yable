@@ -1,0 +1,39 @@
+---
+title: Undo / Redo
+description: Track edit history and allow users to undo/redo changes with a configurable stack size.
+---
+
+Track edit history and allow users to undo/redo changes.
+
+### How It Works
+
+Yable ships a real `UndoStack` that records `cell-edit` actions and supports push/undo/redo with a configurable stack size. It is exported from `@zvndev/yable-core` alongside `createUndoRedoIntegration` for wiring it into a table instance.
+
+```typescript
+import { UndoStack } from '@zvndev/yable-core'
+
+const stack = new UndoStack(50) // maxSize = 50 actions
+
+stack.push({
+  type: 'cell-edit',
+  rowId: 'row-1',
+  columnId: 'name',
+  oldValue: 'Alice',
+  newValue: 'Alice Johnson',
+  timestamp: Date.now(),
+})
+
+const undone = stack.undo() // UndoAction | undefined — moves to redo stack
+const redone = stack.redo() // UndoAction | undefined — moves back to undo stack
+```
+
+### Pending-value "undo"
+
+For transient, uncommitted edits, the editing system also lets you discard or commit pending values without touching the undo stack:
+
+```typescript
+table.setPendingValue('row-1', 'name', 'New Name')
+table.hasPendingChanges() // true
+table.discardAllPending() // drop uncommitted edits
+table.commitAllPending() // persist via onEditCommit
+```

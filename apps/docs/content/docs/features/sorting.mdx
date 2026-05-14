@@ -1,0 +1,84 @@
+---
+title: Sorting
+description: Sort rows by one or more columns with built-in and custom sort functions.
+---
+
+Sort rows by one or more columns. Click a header to cycle through ascending, descending, and unsorted. Hold Shift to add multi-column sorts.
+
+### How to Enable
+
+Sorting is enabled by default at the table level (`enableSorting: true`). Enable it per column:
+
+```typescript
+columnHelper.accessor('name', {
+  header: 'Name',
+  enableSorting: true,
+})
+```
+
+### Table Options
+
+| Option                 | Type                       | Default    | Description                                          |
+| ---------------------- | -------------------------- | ---------- | ---------------------------------------------------- |
+| `enableSorting`        | `boolean`                  | `true`     | Enable/disable sorting globally                      |
+| `enableMultiSort`      | `boolean`                  | `true`     | Allow sorting by multiple columns                    |
+| `enableSortingRemoval` | `boolean`                  | `true`     | Allow removing sort (third click)                    |
+| `maxMultiSortColCount` | `number`                   | `Infinity` | Max simultaneous sort columns                        |
+| `manualSorting`        | `boolean`                  | `false`    | If true, sorting is handled externally (server-side) |
+| `sortDescFirst`        | `boolean`                  | `false`    | Start with descending on first click                 |
+| `isMultiSortEvent`     | `(e) => boolean`           | Shift key  | Which modifier key triggers multi-sort               |
+| `onSortingChange`      | `OnChangeFn<SortingState>` | --         | Callback when sorting state changes                  |
+
+### Column Options
+
+| Option          | Type                                    | Default  | Description                           |
+| --------------- | --------------------------------------- | -------- | ------------------------------------- |
+| `enableSorting` | `boolean`                               | `true`   | Enable sorting for this column        |
+| `sortingFn`     | `SortingFnOption`                       | `'auto'` | Sort function name or custom function |
+| `sortDescFirst` | `boolean`                               | `false`  | Start descending for this column      |
+| `invertSorting` | `boolean`                               | `false`  | Invert sort direction                 |
+| `sortUndefined` | `false \| -1 \| 1 \| 'first' \| 'last'` | --       | Where to place `undefined` values     |
+
+### Built-in Sorting Functions
+
+| Name                        | Description                                                    |
+| --------------------------- | -------------------------------------------------------------- |
+| `alphanumeric`              | Natural sort -- `"item2"` before `"item10"` (case-insensitive) |
+| `alphanumericCaseSensitive` | Natural sort (case-sensitive)                                  |
+| `text`                      | Locale-aware string comparison (case-insensitive)              |
+| `textCaseSensitive`         | Locale-aware string comparison (case-sensitive)                |
+| `datetime`                  | Sorts Date objects and date strings by timestamp               |
+| `basic`                     | Simple `>` / `<` comparison for numbers and strings            |
+
+### Custom Sort Function
+
+```typescript
+columnHelper.accessor('priority', {
+  header: 'Priority',
+  sortingFn: (rowA, rowB, columnId) => {
+    const order = { high: 3, medium: 2, low: 1 }
+    const a = order[rowA.getValue<string>(columnId)] ?? 0
+    const b = order[rowB.getValue<string>(columnId)] ?? 0
+    return a - b
+  },
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Set sorting
+table.setSorting([{ id: 'name', desc: false }])
+
+// Add a sort column
+table.setSorting((prev) => [...prev, { id: 'age', desc: true }])
+
+// Reset to no sorting
+table.resetSorting(true)
+
+// Toggle sort on a specific column
+table.getColumn('name')?.toggleSorting()
+
+// Check if a column is sorted
+const direction = table.getColumn('name')?.getIsSorted() // 'asc' | 'desc' | false
+```

@@ -1,0 +1,97 @@
+---
+title: Column Instance
+description: Properties and methods available on column objects returned by table.getColumn() or table.getAllColumns().
+---
+
+Returned by `table.getColumn(id)` or accessed from `table.getAllColumns()`.
+
+### Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique column identifier |
+| `depth` | `number` | Nesting depth (0 for top-level) |
+| `columnDef` | `ColumnDef` | The original column definition |
+| `columns` | `Column[]` | Child columns (for group columns) |
+| `parent` | `Column \| undefined` | Parent column (if nested) |
+| `accessorFn` | `(row, index) => TValue` | Value accessor function |
+
+### Traversal
+
+| Method | Return | Description |
+|---|---|---|
+| `getFlatColumns()` | `Column[]` | This column + all nested flat columns |
+| `getLeafColumns()` | `Column[]` | Leaf columns in this column's tree |
+
+### Sizing
+
+| Method | Return | Description |
+|---|---|---|
+| `getSize()` | `number` | Current width in px |
+| `getStart(position?)` | `number` | Start offset in px |
+| `getAfter(position?)` | `number` | Remaining space after this column |
+| `getCanResize()` | `boolean` | Can this column be resized? |
+| `getIsResizing()` | `boolean` | Is this column currently being resized? |
+| `resetSize()` | `void` | Reset to default size |
+
+### Sorting
+
+| Method | Return | Description |
+|---|---|---|
+| `getCanSort()` | `boolean` | Can this column be sorted? |
+| `getCanMultiSort()` | `boolean` | Can participate in multi-sort? |
+| `getSortingFn()` | `SortingFn` | Get the active sorting function |
+| `getNextSortingOrder()` | `SortDirection \| false` | What the next click would do |
+| `getIsSorted()` | `false \| SortDirection` | Current sort direction |
+| `getSortIndex()` | `number` | Sort priority index (multi-sort) |
+| `clearSorting()` | `void` | Remove sort from this column |
+| `toggleSorting(desc?, isMulti?)` | `void` | Toggle or set sort direction |
+| `getToggleSortingHandler()` | `(event) => void` | Event handler for sort toggle |
+
+### Filtering
+
+| Method | Return | Description |
+|---|---|---|
+| `getCanFilter()` | `boolean` | Can this column be filtered? |
+| `getCanGlobalFilter()` | `boolean` | Included in global filter? |
+| `getIsFiltered()` | `boolean` | Is a filter active on this column? |
+| `getFilterValue()` | `unknown` | Current filter value |
+| `getFilterIndex()` | `number` | Index in the column filters array |
+| `setFilterValue(value)` | `void` | Set filter value for this column |
+| `getFilterFn()` | `FilterFn \| undefined` | Get the active filter function |
+
+### Visibility
+
+| Method | Return | Description |
+|---|---|---|
+| `getCanHide()` | `boolean` | Can this column be hidden? |
+| `getIsVisible()` | `boolean` | Is this column visible? |
+| `toggleVisibility(value?)` | `void` | Show/hide this column |
+| `getToggleVisibilityHandler()` | `(event) => void` | Event handler for visibility toggle |
+
+### Pinning
+
+| Method | Return | Description |
+|---|---|---|
+| `getCanPin()` | `boolean` | Can this column be pinned? |
+| `getIsPinned()` | `ColumnPinningPosition \| false` | `'left'`, `'right'`, or `false` |
+| `pin(position)` | `void` | Pin to `'left'`, `'right'`, or `false` (unpin) |
+| `getPinnedIndex()` | `number` | Index among pinned columns |
+
+### Faceting
+
+| Method | Return | Description |
+|---|---|---|
+| `getFacetedRowModel()` | `RowModel` | Faceted row model for this column |
+| `getFacetedUniqueValues()` | `Map<unknown, number>` | Unique values and counts |
+| `getFacetedMinMaxValues()` | `[number, number] \| undefined` | Min/max for numeric columns |
+
+### Grouping
+
+| Method | Return | Description |
+|---|---|---|
+| `getCanGroup()` | `boolean` | Can this column be grouped? |
+| `getIsGrouped()` | `boolean` | Is this column currently grouped? |
+| `getGroupedIndex()` | `number` | Index in grouping array |
+| `toggleGrouping()` | `void` | Toggle grouping on this column |
+| `getAggregationFn()` | `AggregationFn \| undefined` | Get the aggregation function |

@@ -1,0 +1,36 @@
+---
+title: Column Ordering
+description: Reorder columns programmatically with initial state and updater functions.
+---
+
+Reorder columns programmatically.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  initialState: {
+    columnOrder: ['name', 'department', 'salary'],
+  },
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Set column order
+table.setColumnOrder(['name', 'department', 'salary', 'startDate'])
+
+// Reorder via updater function
+table.setColumnOrder((prev) => {
+  const next = [...prev]
+  // Swap first two columns
+  ;[next[0], next[1]] = [next[1]!, next[0]!]
+  return next
+})
+
+// Reset to original order
+table.resetColumnOrder(true)
+```

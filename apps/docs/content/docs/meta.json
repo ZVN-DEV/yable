@@ -1,0 +1,15 @@
+{
+  "title": "Yable",
+  "pages": [
+    "---Introduction---",
+    "index",
+    "quickstart",
+    "---Features---",
+    "features",
+    "---API Reference---",
+    "api",
+    "---Guides---",
+    "migration",
+    "errors"
+  ]
+}

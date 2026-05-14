@@ -1,0 +1,36 @@
+---
+title: Export
+description: Export table data to CSV or JSON format with configurable columns and delimiters.
+---
+
+Export table data to CSV or JSON format.
+
+### How to Use
+
+```typescript
+// Export as JSON
+const json = table.exportData({ format: 'json' })
+
+// Export as CSV
+const csv = table.exportData({ format: 'csv' })
+
+// Export all rows (not just current page)
+const all = table.exportData({ format: 'csv', allRows: true })
+
+// Export specific columns
+const partial = table.exportData({
+  format: 'csv',
+  columns: ['name', 'email', 'department'],
+})
+```
+
+### ExportOptions
+
+| Option           | Type              | Default  | Description                                           |
+| ---------------- | ----------------- | -------- | ----------------------------------------------------- |
+| `format`         | `'csv' \| 'json'` | `'json'` | Output format                                         |
+| `allRows`        | `boolean`         | `false`  | Include all rows (ignore pagination)                  |
+| `columns`        | `string[]`        | --       | Specific column IDs to include (default: all visible) |
+| `includeHeaders` | `boolean`         | --       | Include column headers in output                      |
+| `delimiter`      | `string`          | `','`    | CSV delimiter                                         |
+| `fileName`       | `string`          | --       | Suggested file name                                   |

@@ -1,0 +1,225 @@
+---
+title: Table Instance
+description: The object returned by createTable() or useTable(), with all methods grouped by feature.
+---
+
+The object returned by `createTable()` or `useTable()`. All methods are grouped by feature.
+
+### State
+
+| Method | Return | Description |
+|---|---|---|
+| `getState()` | `TableState` | Get the complete current state |
+| `setState(updater)` | `void` | Update the entire state |
+| `setOptions(updater)` | `void` | Update table options |
+| `reset()` | `void` | Reset all state to initial values |
+
+### Column API
+
+| Method | Return | Description |
+|---|---|---|
+| `getAllColumns()` | `Column[]` | All columns (including group parents) |
+| `getAllFlatColumns()` | `Column[]` | All leaf columns (flat) |
+| `getAllLeafColumns()` | `Column[]` | All leaf columns |
+| `getColumn(id)` | `Column \| undefined` | Get a column by ID |
+| `getVisibleFlatColumns()` | `Column[]` | Visible leaf columns (respecting order/visibility) |
+| `getVisibleLeafColumns()` | `Column[]` | Same as `getVisibleFlatColumns()` |
+| `getLeftVisibleLeafColumns()` | `Column[]` | Left-pinned visible columns |
+| `getRightVisibleLeafColumns()` | `Column[]` | Right-pinned visible columns |
+| `getCenterVisibleLeafColumns()` | `Column[]` | Unpinned visible columns |
+
+### Header API
+
+| Method | Return | Description |
+|---|---|---|
+| `getHeaderGroups()` | `HeaderGroup[]` | All header groups |
+| `getLeftHeaderGroups()` | `HeaderGroup[]` | Left-pinned header groups |
+| `getRightHeaderGroups()` | `HeaderGroup[]` | Right-pinned header groups |
+| `getCenterHeaderGroups()` | `HeaderGroup[]` | Unpinned header groups |
+| `getFooterGroups()` | `HeaderGroup[]` | Footer groups (reversed header groups) |
+| `getLeftFooterGroups()` | `HeaderGroup[]` | Left-pinned footer groups |
+| `getRightFooterGroups()` | `HeaderGroup[]` | Right-pinned footer groups |
+| `getCenterFooterGroups()` | `HeaderGroup[]` | Unpinned footer groups |
+
+### Row Model API
+
+| Method | Return | Description |
+|---|---|---|
+| `getCoreRowModel()` | `RowModel` | Raw data as rows (no filtering/sorting) |
+| `getRowModel()` | `RowModel` | Final row model (filtered, sorted, paginated) |
+| `getRow(id, searchAll?)` | `Row` | Get a specific row by ID |
+| `getFilteredRowModel()` | `RowModel` | Rows after filtering |
+| `getPreFilteredRowModel()` | `RowModel` | Rows before filtering (= core model) |
+| `getSortedRowModel()` | `RowModel` | Rows after sorting |
+| `getPreSortedRowModel()` | `RowModel` | Rows before sorting (= filtered model) |
+| `getPaginationRowModel()` | `RowModel` | Rows after pagination |
+| `getPrePaginationRowModel()` | `RowModel` | Rows before pagination (= sorted model) |
+| `getGroupedRowModel()` | `RowModel` | Rows after grouping |
+| `getPreGroupedRowModel()` | `RowModel` | Rows before grouping |
+| `getExpandedRowModel()` | `RowModel` | Rows after expansion |
+| `getPreExpandedRowModel()` | `RowModel` | Rows before expansion |
+
+### Sorting API
+
+| Method | Return | Description |
+|---|---|---|
+| `setSorting(updater)` | `void` | Set the sorting state |
+| `resetSorting(defaultState?)` | `void` | Reset sorting |
+
+### Filtering API
+
+| Method | Return | Description |
+|---|---|---|
+| `setColumnFilters(updater)` | `void` | Set column filter state |
+| `resetColumnFilters(defaultState?)` | `void` | Reset column filters |
+| `setGlobalFilter(updater)` | `void` | Set global filter value |
+| `resetGlobalFilter(defaultState?)` | `void` | Reset global filter |
+
+### Pagination API
+
+| Method | Return | Description |
+|---|---|---|
+| `getPageCount()` | `number` | Total number of pages |
+| `getRowCount()` | `number` | Total number of rows |
+| `getCanPreviousPage()` | `boolean` | Can navigate to previous page |
+| `getCanNextPage()` | `boolean` | Can navigate to next page |
+| `previousPage()` | `void` | Go to previous page |
+| `nextPage()` | `void` | Go to next page |
+| `firstPage()` | `void` | Go to first page |
+| `lastPage()` | `void` | Go to last page |
+| `setPagination(updater)` | `void` | Set pagination state |
+| `setPageIndex(updater)` | `void` | Set page index |
+| `setPageSize(size)` | `void` | Set page size |
+| `resetPageIndex(defaultState?)` | `void` | Reset page index |
+| `resetPageSize(defaultState?)` | `void` | Reset page size |
+| `resetPagination(defaultState?)` | `void` | Reset all pagination |
+
+### Selection API
+
+| Method | Return | Description |
+|---|---|---|
+| `getSelectedRowModel()` | `RowModel` | Model of selected rows |
+| `getFilteredSelectedRowModel()` | `RowModel` | Selected rows (filtered) |
+| `getGroupedSelectedRowModel()` | `RowModel` | Selected rows (grouped) |
+| `getIsAllRowsSelected()` | `boolean` | All rows selected? |
+| `getIsSomeRowsSelected()` | `boolean` | Some (but not all) rows selected? |
+| `getIsAllPageRowsSelected()` | `boolean` | All current page rows selected? |
+| `getIsSomePageRowsSelected()` | `boolean` | Some current page rows selected? |
+| `toggleAllRowsSelected(value?)` | `void` | Select/deselect all rows |
+| `toggleAllPageRowsSelected(value?)` | `void` | Select/deselect current page rows |
+| `setRowSelection(updater)` | `void` | Set row selection state |
+| `resetRowSelection(defaultState?)` | `void` | Reset row selection |
+
+### Visibility API
+
+| Method | Return | Description |
+|---|---|---|
+| `setColumnVisibility(updater)` | `void` | Set column visibility state |
+| `resetColumnVisibility(defaultState?)` | `void` | Reset column visibility |
+| `toggleAllColumnsVisible(value?)` | `void` | Show/hide all columns |
+| `getIsAllColumnsVisible()` | `boolean` | All columns visible? |
+| `getIsSomeColumnsVisible()` | `boolean` | Some columns visible? |
+
+### Column Order API
+
+| Method | Return | Description |
+|---|---|---|
+| `setColumnOrder(updater)` | `void` | Set column order |
+| `resetColumnOrder(defaultState?)` | `void` | Reset column order |
+
+### Column Pinning API
+
+| Method | Return | Description |
+|---|---|---|
+| `setColumnPinning(updater)` | `void` | Set column pinning state |
+| `resetColumnPinning(defaultState?)` | `void` | Reset column pinning |
+| `getIsSomeColumnsPinned(position?)` | `boolean` | Any columns pinned? |
+
+### Column Sizing API
+
+| Method | Return | Description |
+|---|---|---|
+| `setColumnSizing(updater)` | `void` | Set column sizing state |
+| `setColumnSizingInfo(updater)` | `void` | Set sizing info (resize-in-progress data) |
+| `resetColumnSizing(defaultState?)` | `void` | Reset column sizing |
+| `getTotalSize()` | `number` | Total width of all visible columns |
+| `getLeftTotalSize()` | `number` | Total width of left-pinned columns |
+| `getRightTotalSize()` | `number` | Total width of right-pinned columns |
+| `getCenterTotalSize()` | `number` | Total width of unpinned columns |
+
+### Expanding API
+
+| Method | Return | Description |
+|---|---|---|
+| `setExpanded(updater)` | `void` | Set expanded state |
+| `toggleAllRowsExpanded(expanded?)` | `void` | Expand/collapse all |
+| `resetExpanded(defaultState?)` | `void` | Reset expanded state |
+| `getCanSomeRowsExpand()` | `boolean` | Any rows can expand? |
+| `getIsAllRowsExpanded()` | `boolean` | All expandable rows expanded? |
+| `getIsSomeRowsExpanded()` | `boolean` | Some rows expanded? |
+| `getExpandedDepth()` | `number` | Maximum expansion depth |
+
+### Row Pinning API
+
+| Method | Return | Description |
+|---|---|---|
+| `setRowPinning(updater)` | `void` | Set row pinning state |
+| `resetRowPinning(defaultState?)` | `void` | Reset row pinning |
+| `getTopRows()` | `Row[]` | Top-pinned rows |
+| `getBottomRows()` | `Row[]` | Bottom-pinned rows |
+| `getCenterRows()` | `Row[]` | Unpinned rows |
+
+### Grouping API
+
+| Method | Return | Description |
+|---|---|---|
+| `setGrouping(updater)` | `void` | Set grouping state |
+| `resetGrouping(defaultState?)` | `void` | Reset grouping |
+
+### Editing API
+
+| Method | Return | Description |
+|---|---|---|
+| `startEditing(rowId, columnId)` | `void` | Enter edit mode on a cell |
+| `commitEdit()` | `void` | Commit the active edit |
+| `cancelEdit()` | `void` | Cancel the active edit |
+| `setPendingValue(rowId, columnId, value)` | `void` | Set a pending edit value |
+| `getPendingValue(rowId, columnId)` | `unknown \| undefined` | Get a pending edit value |
+| `getPendingRow(rowId)` | `Partial<TData> \| undefined` | Get all pending values for a row |
+| `getAllPendingChanges()` | `Record<string, Partial<TData>>` | Get all pending changes |
+| `hasPendingChanges()` | `boolean` | Any uncommitted changes? |
+| `commitAllPending()` | `void` | Commit all pending changes (triggers `onEditCommit`) |
+| `discardAllPending()` | `void` | Discard all pending changes |
+| `getValidationErrors()` | `Record<string, Record<string, string>>` | Get validation errors |
+| `isValid()` | `boolean` | All pending values valid? |
+| `setEditing(updater)` | `void` | Set editing state directly |
+| `resetEditing(defaultState?)` | `void` | Reset editing state |
+
+### Async Commit API
+
+| Method | Return | Description |
+|---|---|---|
+| `getCellRenderValue(rowId, columnId)` | `unknown` | Returns pending value if commit is in-flight, otherwise saved value |
+| `getCellStatus(rowId, columnId)` | `CellStatus` | Returns `'idle' \| 'pending' \| 'error' \| 'conflict'` |
+| `getCellErrorMessage(rowId, columnId)` | `string \| undefined` | Error message from failed commit |
+| `getCellConflictWith(rowId, columnId)` | `unknown` | The server value that conflicts with the pending value |
+| `commit()` | `Promise<void>` | Dispatch all pending edits (used when `autoCommit: false`) |
+| `retryCommit(rowId, columnId)` | `Promise<void>` | Retry a failed commit |
+| `dismissCommit(rowId, columnId)` | `void` | Dismiss an error/conflict and revert to saved value |
+| `dismissAllCommits()` | `void` | Dismiss all errors and conflicts |
+
+### Export API
+
+| Method | Return | Description |
+|---|---|---|
+| `exportData(options?)` | `string` | Export table data as CSV or JSON string |
+
+### Event Emitter
+
+| Property | Type | Description |
+|---|---|---|
+| `events` | `EventEmitter<YableEventMap>` | Typed event emitter |
+| `events.on(event, handler)` | `() => void` | Subscribe (returns unsubscribe function) |
+| `events.off(event, handler)` | `void` | Unsubscribe |
+| `events.emit(event, payload)` | `void` | Emit an event |
+| `events.removeAllListeners(event?)` | `void` | Remove all listeners |

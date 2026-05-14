@@ -1,0 +1,34 @@
+---
+title: Row Pinning
+description: Pin rows to the top or bottom of the table so they remain visible when scrolling.
+---
+
+Pin rows to the top or bottom of the table so they remain visible when scrolling.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableRowPinning: true,
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Pin a row to the top
+table.getRow('0').pin('top')
+
+// Pin to the bottom
+table.getRow('0').pin('bottom')
+
+// Unpin
+table.getRow('0').pin(false)
+
+// Get pinned rows
+table.getTopRows() // Row[]
+table.getBottomRows() // Row[]
+table.getCenterRows() // Row[] (unpinned rows)
+```

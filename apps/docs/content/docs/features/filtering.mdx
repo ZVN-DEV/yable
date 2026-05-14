@@ -1,0 +1,89 @@
+---
+title: Filtering
+description: Filter rows with per-column filters and a global search across all columns.
+---
+
+Filter rows with per-column filters and/or a global search across all columns.
+
+### How to Enable
+
+Filtering is enabled by default. Use `setColumnFilters` or `setGlobalFilter` to apply filters.
+
+### Table Options
+
+| Option                  | Type                             | Default | Description                               |
+| ----------------------- | -------------------------------- | ------- | ----------------------------------------- |
+| `enableFilters`         | `boolean`                        | `true`  | Enable/disable all filtering              |
+| `enableColumnFilters`   | `boolean`                        | `true`  | Enable per-column filters                 |
+| `enableGlobalFilter`    | `boolean`                        | `true`  | Enable global search                      |
+| `manualFiltering`       | `boolean`                        | `false` | Handle filtering externally (server-side) |
+| `globalFilterFn`        | `FilterFnOption`                 | --      | Custom global filter function             |
+| `onColumnFiltersChange` | `OnChangeFn<ColumnFiltersState>` | --      | Callback when column filters change       |
+| `onGlobalFilterChange`  | `OnChangeFn<string>`             | --      | Callback when global filter changes       |
+
+### Column Options
+
+| Option               | Type             | Default | Description                             |
+| -------------------- | ---------------- | ------- | --------------------------------------- |
+| `enableColumnFilter` | `boolean`        | `true`  | Enable filtering for this column        |
+| `enableGlobalFilter` | `boolean`        | `true`  | Include this column in global search    |
+| `filterFn`           | `FilterFnOption` | --      | Filter function name or custom function |
+
+### Built-in Filter Functions
+
+| Name                      | Description                         |
+| ------------------------- | ----------------------------------- |
+| `includesString`          | Case-insensitive substring match    |
+| `includesStringSensitive` | Case-sensitive substring match      |
+| `equalsString`            | Case-insensitive exact string match |
+| `equalsStringSensitive`   | Case-sensitive exact string match   |
+| `arrIncludes`             | Array contains value                |
+| `arrIncludesAll`          | Array contains all values           |
+| `arrIncludesSome`         | Array contains at least one value   |
+| `equals`                  | Strict equality (`===`)             |
+| `weakEquals`              | Loose equality (`==`)               |
+| `inNumberRange`           | Number within `[min, max]` range    |
+| `inDateRange`             | Date within `[start, end]` range    |
+
+### Examples
+
+```typescript
+// Column filter -- show only "Engineering" department
+table.setColumnFilters([{ id: 'department', value: 'Engineering' }])
+
+// Multiple column filters
+table.setColumnFilters([
+  { id: 'department', value: 'Engineering' },
+  { id: 'salary', value: [100000, 150000] }, // with inNumberRange filter
+])
+
+// Global filter -- search across all columns
+table.setGlobalFilter('alice')
+
+// Clear all filters
+table.resetColumnFilters(true)
+table.resetGlobalFilter(true)
+```
+
+### Custom Filter Function
+
+```typescript
+columnHelper.accessor('tags', {
+  header: 'Tags',
+  filterFn: (row, columnId, filterValue) => {
+    const tags = row.getValue<string[]>(columnId)
+    return tags.some((tag) => tag.toLowerCase().includes(String(filterValue).toLowerCase()))
+  },
+})
+```
+
+### React: GlobalFilter Component
+
+```tsx
+import { GlobalFilter } from '@zvndev/yable-react'
+;<GlobalFilter
+  table={table}
+  placeholder="Search..."
+  debounce={300} // ms delay before applying filter
+/>
+```

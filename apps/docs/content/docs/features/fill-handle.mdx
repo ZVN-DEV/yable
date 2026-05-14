@@ -1,0 +1,23 @@
+---
+title: Fill Handle
+description: Drag the fill handle to auto-fill adjacent cells with pattern detection for sequences, dates, and repeating values.
+---
+
+Drag the fill handle at the bottom-right corner of a selected cell to auto-fill adjacent cells, like in Excel. Pattern detection supports constants, arithmetic sequences, date sequences, and repeating values.
+
+### Core primitives
+
+The fill handle logic lives in `packages/core/src/features/fillHandle.ts`. The React hook `useFillHandle` in `@zvndev/yable-react` wires it into a live table.
+
+```typescript
+import { detectPattern } from '@zvndev/yable-core'
+
+// Detect a pattern from source values, then project it over the destination range
+const pattern = detectPattern([1, 2, 3])
+// -> { type: 'sequence', start: 1, step: 1 }
+```
+
+### Notes
+
+- Supported patterns: `constant`, `sequence` (numeric), `date-sequence`, and `repeat`
+- Fully covered by `packages/core/src/features/__tests__/fillHandle.test.ts`

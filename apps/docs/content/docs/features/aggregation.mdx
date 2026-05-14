@@ -1,0 +1,43 @@
+---
+title: Aggregation
+description: Calculate summary values for grouped rows with built-in and custom aggregation functions.
+---
+
+Calculate summary values for grouped rows. Aggregation functions run on each group's leaf rows.
+
+### Built-in Aggregation Functions
+
+| Name          | Description               |
+| ------------- | ------------------------- |
+| `sum`         | Sum of numeric values     |
+| `min`         | Minimum numeric value     |
+| `max`         | Maximum numeric value     |
+| `extent`      | `[min, max]` tuple        |
+| `mean`        | Average of numeric values |
+| `median`      | Median of numeric values  |
+| `unique`      | Array of unique values    |
+| `uniqueCount` | Count of unique values    |
+| `count`       | Number of rows            |
+
+### How to Use
+
+```typescript
+columnHelper.accessor('salary', {
+  header: 'Salary',
+  aggregationFn: 'sum',
+  aggregatedCell: ({ getValue }) => `Total: $${getValue().toLocaleString()}`,
+})
+```
+
+### Custom Aggregation
+
+```typescript
+columnHelper.accessor('salary', {
+  header: 'Salary',
+  aggregationFn: (columnId, leafRows, childRows) => {
+    const values = leafRows.map((row) => row.getValue<number>(columnId))
+    return values.reduce((sum, val) => sum + val, 0) / values.length
+  },
+  aggregatedCell: ({ getValue }) => `Avg: $${getValue().toLocaleString()}`,
+})
+```

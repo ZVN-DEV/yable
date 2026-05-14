@@ -1,0 +1,165 @@
+---
+title: TableOptions
+description: The configuration object passed to createTable() or useTable(), including all feature options.
+---
+
+The configuration object passed to `createTable()` or `useTable()`.
+
+### Required
+
+| Option | Type | Description |
+|---|---|---|
+| `data` | `TData[]` | The data array to display |
+| `columns` | `ColumnDef<TData, any>[]` | Column definitions |
+
+### State Management
+
+| Option | Type | Description |
+|---|---|---|
+| `state` | `Partial<TableState>` | Controlled state (merged with internal state) |
+| `onStateChange` | `OnChangeFn<TableState>` | Called when any state changes |
+| `initialState` | `Partial<TableState>` | Initial state values |
+
+### Row Identity
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `getRowId` | `(row, index, parent?) => string` | `String(index)` | Custom row ID generator |
+
+### Sorting Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableSorting` | `boolean` | `true` | Enable sorting globally |
+| `enableMultiSort` | `boolean` | `true` | Allow multi-column sorting |
+| `enableSortingRemoval` | `boolean` | `true` | Allow removing sort on third click |
+| `maxMultiSortColCount` | `number` | `Infinity` | Max simultaneous sort columns |
+| `manualSorting` | `boolean` | `false` | Disable client-side sorting (for server-side) |
+| `sortingFns` | `Record<string, SortingFn>` | -- | Additional named sorting functions |
+| `onSortingChange` | `OnChangeFn<SortingState>` | -- | Sorting state change callback |
+| `isMultiSortEvent` | `(e) => boolean` | Shift key | Multi-sort modifier key test |
+
+### Filtering Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableFilters` | `boolean` | `true` | Enable all filtering |
+| `enableColumnFilters` | `boolean` | `true` | Enable per-column filters |
+| `enableGlobalFilter` | `boolean` | `true` | Enable global search |
+| `manualFiltering` | `boolean` | `false` | Disable client-side filtering |
+| `filterFns` | `Record<string, FilterFn>` | -- | Additional named filter functions |
+| `globalFilterFn` | `FilterFnOption` | -- | Custom global filter function |
+| `onColumnFiltersChange` | `OnChangeFn<ColumnFiltersState>` | -- | Column filters change callback |
+| `onGlobalFilterChange` | `OnChangeFn<string>` | -- | Global filter change callback |
+| `getColumnCanGlobalFilter` | `(column) => boolean` | -- | Per-column global filter opt-out |
+
+### Pagination Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `manualPagination` | `boolean` | `false` | Disable client-side pagination |
+| `pageCount` | `number` | -- | Total page count (server-side) |
+| `rowCount` | `number` | -- | Total row count (server-side) |
+| `autoResetPageIndex` | `boolean` | `true` | Reset to page 0 on data change |
+| `onPaginationChange` | `OnChangeFn<PaginationState>` | -- | Pagination change callback |
+
+### Selection Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableRowSelection` | `boolean \| (row) => boolean` | `true` | Enable row selection |
+| `enableMultiRowSelection` | `boolean \| (row) => boolean` | `true` | Allow selecting multiple rows |
+| `enableSubRowSelection` | `boolean \| (row) => boolean` | `true` | Auto-select sub-rows |
+| `onRowSelectionChange` | `OnChangeFn<RowSelectionState>` | -- | Selection change callback |
+
+### Visibility Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableHiding` | `boolean` | `true` | Enable column visibility toggling |
+| `onColumnVisibilityChange` | `OnChangeFn<VisibilityState>` | -- | Visibility change callback |
+
+### Column Ordering
+
+| Option | Type | Description |
+|---|---|---|
+| `onColumnOrderChange` | `OnChangeFn<ColumnOrderState>` | Column order change callback |
+
+### Column Pinning
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableColumnPinning` | `boolean` | -- | Enable column pinning |
+| `onColumnPinningChange` | `OnChangeFn<ColumnPinningState>` | -- | Pinning change callback |
+
+### Column Sizing
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableColumnResizing` | `boolean` | `true` | Enable column drag-to-resize |
+| `columnResizeMode` | `'onChange' \| 'onEnd'` | `'onChange'` | When to update widths |
+| `columnResizeDirection` | `'ltr' \| 'rtl'` | `'ltr'` | Resize direction |
+| `onColumnSizingChange` | `OnChangeFn<ColumnSizingState>` | -- | Sizing change callback |
+| `onColumnSizingInfoChange` | `OnChangeFn<ColumnSizingInfoState>` | -- | Resize info change callback |
+
+### Expanding Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableExpanding` | `boolean` | `true` | Enable row expanding |
+| `getSubRows` | `(row, index) => TData[] \| undefined` | -- | Return child rows for tree data |
+| `getRowCanExpand` | `(row) => boolean` | -- | Custom expand-ability check |
+| `manualExpanding` | `boolean` | `false` | Disable client-side expansion |
+| `paginateExpandedRows` | `boolean` | -- | Include expanded rows in pagination |
+| `renderDetailPanel` | `(row) => unknown` | -- | Detail panel renderer |
+| `onExpandedChange` | `OnChangeFn<ExpandedState>` | -- | Expanded state change callback |
+
+### Row Pinning Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableRowPinning` | `boolean \| (row) => boolean` | `false` | Enable row pinning |
+| `keepPinnedRows` | `boolean` | -- | Keep pinned rows when filtering |
+| `onRowPinningChange` | `OnChangeFn<RowPinningState>` | -- | Row pinning change callback |
+
+### Grouping Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableGrouping` | `boolean` | `false` | Enable row grouping |
+| `manualGrouping` | `boolean` | `false` | Disable client-side grouping |
+| `onGroupingChange` | `OnChangeFn<GroupingState>` | -- | Grouping change callback |
+
+### Cell Editing Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableCellEditing` | `boolean` | -- | Enable cell editing globally |
+| `onEditingChange` | `OnChangeFn<EditingState>` | -- | Editing state change callback |
+| `onEditCommit` | `(changes: Record<string, Partial<TData>>) => void` | -- | Called when edits are committed |
+
+### Event Handlers
+
+| Option | Type | Description |
+|---|---|---|
+| `onCellClick` | `(event: CellClickEvent) => void` | Cell click handler |
+| `onCellDoubleClick` | `(event: CellClickEvent) => void` | Cell double-click handler |
+| `onCellContextMenu` | `(event: CellClickEvent) => void` | Cell right-click handler |
+| `onRowClick` | `(event: RowClickEvent) => void` | Row click handler |
+| `onRowDoubleClick` | `(event: RowClickEvent) => void` | Row double-click handler |
+| `onRowContextMenu` | `(event: RowClickEvent) => void` | Row right-click handler |
+| `onHeaderClick` | `(event: HeaderClickEvent) => void` | Header click handler |
+| `onHeaderContextMenu` | `(event: HeaderClickEvent) => void` | Header right-click handler |
+
+### Export Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableExport` | `boolean` | -- | Enable export functionality |
+
+### Styling
+
+| Option | Type | Description |
+|---|---|---|
+| `rowClassName` | `string \| (row) => string \| undefined` | CSS class for rows |
+| `rowStyle` | `CSSProperties \| (row) => CSSProperties` | Inline style for rows |

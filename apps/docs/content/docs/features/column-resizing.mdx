@@ -1,0 +1,36 @@
+---
+title: Column Resizing
+description: Drag column borders to resize columns with configurable resize modes.
+---
+
+Drag column borders to resize columns.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableColumnResizing: true,
+  columnResizeMode: 'onChange', // or 'onEnd'
+  columnResizeDirection: 'ltr', // or 'rtl'
+})
+```
+
+### Column Option
+
+```typescript
+columnHelper.accessor('name', {
+  header: 'Name',
+  size: 200, // Default width in px
+  minSize: 100, // Minimum width
+  maxSize: 400, // Maximum width
+  enableResizing: true,
+})
+```
+
+### Notes
+
+- `columnResizeMode: 'onChange'` updates widths as the user drags
+- `columnResizeMode: 'onEnd'` only updates when the user releases the mouse
+- The `table.getTotalSize()` method returns the total width of all visible columns

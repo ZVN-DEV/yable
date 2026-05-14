@@ -1,0 +1,84 @@
+---
+title: Column Definition Types
+description: Column definition interfaces including ColumnDefBase, ColumnDefExtensions, and CellEditConfig.
+---
+
+### ColumnDefBase
+
+Shared by all column types:
+
+```typescript
+type ColumnDefBase<TData, TValue> = {
+  id?: string
+  header?: string | ((ctx: HeaderContext<TData, TValue>) => unknown)
+  footer?: string | ((ctx: HeaderContext<TData, TValue>) => unknown)
+  cell?: string | ((ctx: CellContext<TData, TValue>) => unknown)
+  meta?: ColumnMeta
+}
+```
+
+### ColumnDefExtensions
+
+Optional configuration shared by accessor and display columns:
+
+```typescript
+interface ColumnDefExtensions<TData, TValue> {
+  // Sizing
+  size?: number
+  minSize?: number
+  maxSize?: number
+
+  // Sorting
+  enableSorting?: boolean
+  sortingFn?: SortingFnOption
+  sortDescFirst?: boolean
+  sortUndefined?: false | -1 | 1 | 'first' | 'last'
+  invertSorting?: boolean
+
+  // Filtering
+  enableColumnFilter?: boolean
+  enableGlobalFilter?: boolean
+  filterFn?: FilterFnOption
+
+  // Visibility
+  enableHiding?: boolean
+
+  // Pinning
+  enablePinning?: boolean
+
+  // Resizing
+  enableResizing?: boolean
+
+  // Grouping
+  enableGrouping?: boolean
+  getGroupingValue?: (row: TData) => unknown
+
+  // Aggregation
+  aggregationFn?: AggregationFnOption
+  aggregatedCell?: string | ((ctx: CellContext) => unknown)
+
+  // Cell editing
+  editable?: boolean | ((row: Row) => boolean)
+  editConfig?: CellEditConfig
+
+  // Styling
+  cellClassName?: string | ((ctx: CellContext) => string | undefined)
+  headerClassName?: string
+  footerClassName?: string
+}
+```
+
+### CellEditConfig
+
+```typescript
+interface CellEditConfig<TData, TValue> {
+  type: 'text' | 'number' | 'select' | 'toggle' | 'date' | 'checkbox' | 'custom'
+  options?: { label: string; value: unknown }[]
+  getOptions?: (row: Row) => { label: string; value: unknown }[]
+  validate?: (value: TValue, row: Row) => string | null
+  parse?: (inputValue: string) => TValue
+  format?: (value: TValue) => string
+  placeholder?: string
+  render?: (props: CellEditRenderProps) => unknown
+}
+```

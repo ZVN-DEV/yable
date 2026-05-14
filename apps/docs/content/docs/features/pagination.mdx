@@ -1,0 +1,50 @@
+---
+title: Pagination
+description: Slice the row model into pages with configurable page sizes.
+---
+
+Slice the row model into pages with configurable page sizes.
+
+### How to Enable
+
+Pagination is always active by default (page size 10). Configure via `initialState` or controlled state.
+
+### Table Options
+
+| Option               | Type                          | Default | Description                                |
+| -------------------- | ----------------------------- | ------- | ------------------------------------------ |
+| `manualPagination`   | `boolean`                     | `false` | Handle pagination externally (server-side) |
+| `pageCount`          | `number`                      | --      | Total page count (for server-side)         |
+| `rowCount`           | `number`                      | --      | Total row count (for server-side)          |
+| `autoResetPageIndex` | `boolean`                     | `true`  | Reset to page 0 when data changes          |
+| `onPaginationChange` | `OnChangeFn<PaginationState>` | --      | Callback when pagination state changes     |
+
+### Programmatic Control
+
+```typescript
+table.nextPage()
+table.previousPage()
+table.firstPage()
+table.lastPage()
+table.setPageIndex(3)
+table.setPageSize(25)
+table.getCanNextPage() // boolean
+table.getCanPreviousPage() // boolean
+table.getPageCount() // total pages
+table.getRowCount() // total rows
+```
+
+### React: Pagination Component
+
+```tsx
+import { Pagination } from '@zvndev/yable-react'
+;<Table table={table}>
+  <Pagination
+    table={table}
+    showPageSize // Show page size dropdown
+    pageSizes={[10, 25, 50, 100]}
+    showInfo // Show "1-10 of 50" text
+    showFirstLast // Show first/last page buttons
+  />
+</Table>
+```

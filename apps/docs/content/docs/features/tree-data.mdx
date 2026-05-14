@@ -1,0 +1,54 @@
+---
+title: Tree Data
+description: Display hierarchical/nested data with expand/collapse controls and sub-rows.
+---
+
+Display hierarchical/nested data with expand/collapse controls. Rows can have sub-rows, forming a tree structure.
+
+### How to Enable
+
+Provide a `getSubRows` function that returns child rows:
+
+```typescript
+interface FileNode {
+  name: string
+  size: number
+  children?: FileNode[]
+}
+
+const data: FileNode[] = [
+  {
+    name: 'src',
+    size: 0,
+    children: [
+      { name: 'index.ts', size: 1200 },
+      { name: 'utils.ts', size: 850 },
+      {
+        name: 'components',
+        size: 0,
+        children: [
+          { name: 'Table.tsx', size: 2400 },
+          { name: 'Cell.tsx', size: 1100 },
+        ],
+      },
+    ],
+  },
+  { name: 'package.json', size: 500 },
+]
+
+const table = useTable({
+  data,
+  columns,
+  getSubRows: (row) => row.children,
+  enableExpanding: true,
+})
+```
+
+### Row Properties
+
+```typescript
+row.depth // 0 for top-level, 1 for children, etc.
+row.subRows // Child rows
+row.parentId // Parent row ID (if nested)
+row.getCanExpand() // true if row has sub-rows
+```

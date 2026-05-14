@@ -1,0 +1,93 @@
+---
+title: State Types
+description: All state interfaces, individual state types, and the updater pattern used throughout the table API.
+---
+
+### TableState
+
+```typescript
+interface TableState {
+  sorting: SortingState
+  columnFilters: ColumnFiltersState
+  globalFilter: string
+  pagination: PaginationState
+  rowSelection: RowSelectionState
+  columnVisibility: VisibilityState
+  columnOrder: ColumnOrderState
+  columnPinning: ColumnPinningState
+  columnSizing: ColumnSizingState
+  columnSizingInfo: ColumnSizingInfoState
+  expanded: ExpandedState
+  rowPinning: RowPinningState
+  grouping: GroupingState
+  editing: EditingState
+}
+```
+
+### Individual State Types
+
+```typescript
+// Sorting
+type SortingState = ColumnSort[]
+interface ColumnSort { id: string; desc: boolean }
+type SortDirection = 'asc' | 'desc'
+
+// Filtering
+type ColumnFiltersState = ColumnFilter[]
+interface ColumnFilter { id: string; value: unknown }
+
+// Pagination
+interface PaginationState { pageIndex: number; pageSize: number }
+
+// Selection
+type RowSelectionState = Record<string, boolean>
+
+// Visibility
+type VisibilityState = Record<string, boolean>
+
+// Column Order
+type ColumnOrderState = string[]
+
+// Column Pinning
+interface ColumnPinningState { left?: string[]; right?: string[] }
+
+// Column Sizing
+type ColumnSizingState = Record<string, number>
+interface ColumnSizingInfoState {
+  startOffset: number | null
+  startSize: number | null
+  deltaOffset: number | null
+  deltaPercentage: number | null
+  isResizingColumn: string | false
+  columnSizingStart: [string, number][]
+}
+
+// Expanded
+type ExpandedState = Record<string, boolean> | true
+
+// Row Pinning
+interface RowPinningState { top?: string[]; bottom?: string[] }
+
+// Grouping
+type GroupingState = string[]
+
+// Editing
+interface EditingState {
+  activeCell?: { rowId: string; columnId: string }
+  pendingValues: Record<string, Record<string, unknown>>
+}
+```
+
+### Updater Pattern
+
+All state setters accept an `Updater<T>`, which is either a direct value or an updater function:
+
+```typescript
+type Updater<T> = T | ((prev: T) => T)
+
+// Direct value
+table.setSorting([{ id: 'name', desc: false }])
+
+// Updater function
+table.setSorting((prev) => [...prev, { id: 'age', desc: true }])
+```

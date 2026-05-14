@@ -1,0 +1,27 @@
+---
+title: Pivot Tables
+description: Transform flat data into cross-tabulated views with row groups, column groups, and value aggregations.
+---
+
+Transform flat data into cross-tabulated views. Pivoting ships in Yable's MIT-licensed core.
+
+### How to Enable
+
+Pivot tables are built on top of grouping and aggregation. Configure row groups, column groups, and value aggregations:
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableGrouping: true,
+  initialState: {
+    grouping: ['region', 'category'], // Row grouping
+  },
+})
+```
+
+### Notes
+
+- Pivot tables build on the [grouping](/docs/features/column-grouping) + [aggregation](/docs/features/aggregation) features
+- A full `PivotEngine` with row fields, column fields, value fields, subtotals, and grand totals is exported from `@zvndev/yable-core` (`PivotEngine`, `getPivotRowModel`, `generatePivotColumnDefs`, `getInitialPivotState`, `PivotConfig`)
+- You can also fall back to plain grouping + aggregation for lighter-weight pivot-style views

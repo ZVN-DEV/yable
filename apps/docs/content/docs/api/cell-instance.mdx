@@ -1,0 +1,39 @@
+---
+title: Cell Instance
+description: Properties and methods available on cell objects accessed via row.getVisibleCells() or row.getAllCells().
+---
+
+Accessed via `row.getVisibleCells()` or `row.getAllCells()`.
+
+### Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique cell identifier (`{rowId}_{columnId}`) |
+| `row` | `Row` | Parent row |
+| `column` | `Column` | Parent column |
+
+### Methods
+
+| Method | Return | Description |
+|---|---|---|
+| `getValue()` | `TValue` | Get the typed cell value |
+| `renderValue()` | `TValue` | Get render-ready value |
+| `getContext()` | `CellContext` | Get full render context (table, row, column, cell) |
+| `getIsEditing()` | `boolean` | Is this cell in edit mode? |
+| `getIsAlwaysEditable()` | `boolean` | Is this cell always editable? |
+
+### CellContext
+
+The object returned by `cell.getContext()`:
+
+```typescript
+interface CellContext<TData, TValue> {
+  table: Table<TData>
+  column: Column<TData, TValue>
+  row: Row<TData>
+  cell: Cell<TData, TValue>
+  getValue: () => TValue
+  renderValue: () => TValue
+}
+```

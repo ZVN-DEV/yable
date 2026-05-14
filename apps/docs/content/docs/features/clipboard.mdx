@@ -1,0 +1,39 @@
+---
+title: Clipboard
+description: Copy, cut, and paste table data with configurable delimiters for Excel compatibility.
+---
+
+Copy, cut, and paste table data with configurable delimiters. Defaults to tab-separated values for Excel compatibility.
+
+### Core primitives
+
+The core package exports `serializeCells`, `parseClipboardText`, and related helpers from `packages/core/src/features/clipboard.ts`. Use them directly, or drive clipboard interactions from the React hook `useClipboard` in `@zvndev/yable-react`.
+
+```typescript
+import { serializeCells } from '@zvndev/yable-core'
+
+// Serialize selected rows/columns to clipboard text (TSV by default)
+const text = serializeCells(selectedRows, selectedColumns, {
+  delimiter: '\t',
+  rowDelimiter: '\n',
+  includeHeaders: false,
+})
+await navigator.clipboard.writeText(text)
+```
+
+### Bulk export (CSV/JSON)
+
+For bulk copy operations outside of a selection, `exportData()` is the simpler path:
+
+```typescript
+const csv = table.exportData({ format: 'csv' })
+navigator.clipboard.writeText(csv)
+
+const allCsv = table.exportData({ format: 'csv', allRows: true })
+navigator.clipboard.writeText(allCsv)
+
+const partial = table.exportData({
+  format: 'csv',
+  columns: ['name', 'email'],
+})
+```

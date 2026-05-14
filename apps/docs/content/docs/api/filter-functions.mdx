@@ -1,0 +1,20 @@
+---
+title: Built-in Filter Functions
+description: Built-in filter predicates available via filterFns from @zvndev/yable-core.
+---
+
+Import: `import { filterFns } from '@zvndev/yable-core'`
+
+| Name | Filter Value Type | Description |
+|---|---|---|
+| `filterFns.includesString` | `string` | Case-insensitive substring match |
+| `filterFns.includesStringSensitive` | `string` | Case-sensitive substring match |
+| `filterFns.equalsString` | `string` | Case-insensitive exact match |
+| `filterFns.equalsStringSensitive` | `string` | Case-sensitive exact match |
+| `filterFns.arrIncludes` | `unknown` | Array contains the filter value |
+| `filterFns.arrIncludesAll` | `unknown[]` | Array contains all filter values |
+| `filterFns.arrIncludesSome` | `unknown[]` | Array contains at least one filter value |
+| `filterFns.equals` | `unknown` | Strict equality (`===`) |
+| `filterFns.weakEquals` | `unknown` | Loose equality (`==`) |
+| `filterFns.inNumberRange` | `[number?, number?]` | Number within min/max range |
+| `filterFns.inDateRange` | `[Date?, Date?]` | Date within start/end range |

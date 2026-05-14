@@ -1,0 +1,39 @@
+---
+title: Row Expanding / Master-Detail
+description: Expand rows to show detail content below them for master-detail patterns.
+---
+
+Expand rows to show detail content below them. Useful for master-detail patterns.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableExpanding: true,
+  renderDetailPanel: (row) => (
+    <div>
+      <h3>Details for {row.original.name}</h3>
+      <p>Email: {row.original.email}</p>
+    </div>
+  ),
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Expand a row
+table.getRow('0').toggleExpanded(true)
+
+// Expand all rows
+table.toggleAllRowsExpanded(true)
+
+// Collapse all
+table.toggleAllRowsExpanded(false)
+
+// Check expansion state
+table.getRow('0').getIsExpanded() // boolean
+table.getIsAllRowsExpanded() // boolean
+```

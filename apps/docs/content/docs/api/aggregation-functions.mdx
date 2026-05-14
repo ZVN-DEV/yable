@@ -1,0 +1,18 @@
+---
+title: Built-in Aggregation Functions
+description: Built-in aggregation reducers available via aggregationFns from @zvndev/yable-core.
+---
+
+Import: `import { aggregationFns } from '@zvndev/yable-core'`
+
+| Name | Return Type | Description |
+|---|---|---|
+| `aggregationFns.sum` | `number` | Sum of numeric leaf values |
+| `aggregationFns.min` | `number` | Minimum numeric leaf value |
+| `aggregationFns.max` | `number` | Maximum numeric leaf value |
+| `aggregationFns.extent` | `[number, number]` | `[min, max]` tuple |
+| `aggregationFns.mean` | `number` | Average of numeric leaf values |
+| `aggregationFns.median` | `number` | Median of numeric leaf values |
+| `aggregationFns.unique` | `unknown[]` | Array of unique leaf values |
+| `aggregationFns.uniqueCount` | `number` | Count of unique leaf values |
+| `aggregationFns.count` | `number` | Number of leaf rows |

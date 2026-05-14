@@ -1,0 +1,36 @@
+---
+title: Header & HeaderGroup
+description: Header and HeaderGroup interfaces for rendering table headers and footers.
+---
+
+### HeaderGroup
+
+```typescript
+interface HeaderGroup<TData> {
+  id: string
+  depth: number
+  headers: Header<TData>[]
+}
+```
+
+### Header
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | `string` | Header identifier |
+| `index` | `number` | Position within the header group |
+| `depth` | `number` | Header group depth |
+| `column` | `Column` | Associated column |
+| `headerGroup` | `HeaderGroup` | Parent header group |
+| `subHeaders` | `Header[]` | Sub-headers (for group columns) |
+| `colSpan` | `number` | Column span |
+| `rowSpan` | `number` | Row span |
+| `isPlaceholder` | `boolean` | True if this is a placeholder header |
+
+| Method | Return | Description |
+|---|---|---|
+| `getLeafHeaders()` | `Header[]` | All leaf headers under this header |
+| `getSize()` | `number` | Width in px |
+| `getStart(position?)` | `number` | Start offset in px |
+| `getContext()` | `HeaderContext` | Full render context |
+| `getResizeHandler()` | `(event) => void \| undefined` | Resize drag handler |

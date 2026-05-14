@@ -1,0 +1,21 @@
+---
+title: Utility Functions
+description: Helper functions exported from @zvndev/yable-core for state updates, memoization, and common operations.
+---
+
+Import from `@zvndev/yable-core`:
+
+| Function | Signature | Description |
+|---|---|---|
+| `functionalUpdate` | `(updater: Updater<T>, old: T) => T` | Apply an updater (value or function) to a previous value |
+| `memo` | `(deps, fn, opts) => () => T` | Create a memoized getter with dependency tracking |
+| `makeStateUpdater` | `(key, table) => (updater) => void` | Create a state slice updater |
+| `getDeepValue` | `(obj, path) => unknown` | Access nested object value by dot-separated path |
+| `shallowEqual` | `(a, b) => boolean` | Shallow comparison of two values |
+| `noop` | `() => void` | No-op function |
+| `identity` | `(x) => x` | Identity function |
+| `isFunction` | `(val) => boolean` | Type guard for functions |
+| `range` | `(start, end) => number[]` | Generate an array of numbers |
+| `flattenBy` | `(arr, fn) => T[]` | Recursively flatten an array by a child accessor |
+| `uniqueBy` | `(arr, fn) => T[]` | Deduplicate an array by a key accessor |
+| `clamp` | `(value, min, max) => number` | Clamp a number within a range |

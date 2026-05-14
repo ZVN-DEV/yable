@@ -1,0 +1,74 @@
+---
+title: Row Instance
+description: Properties and methods available on row objects accessed via table.getRowModel().rows or table.getRow(id).
+---
+
+Accessed via `table.getRowModel().rows` or `table.getRow(id)`.
+
+### Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique row identifier |
+| `index` | `number` | Row index in the current array |
+| `original` | `TData` | The original data object |
+| `depth` | `number` | Nesting depth (0 for top-level) |
+| `parentId` | `string \| undefined` | Parent row ID (tree data) |
+| `subRows` | `Row[]` | Child rows (tree data) |
+| `groupingColumnId` | `string \| undefined` | Column ID this row groups by |
+| `groupingValue` | `unknown` | Group key value |
+
+### Value Access
+
+| Method | Return | Description |
+|---|---|---|
+| `getValue<TValue>(columnId)` | `TValue` | Get the typed value for a column |
+| `renderValue<TValue>(columnId)` | `TValue` | Get render-ready value |
+
+### Cell Access
+
+| Method | Return | Description |
+|---|---|---|
+| `getAllCells()` | `Cell[]` | All cells in this row |
+| `getVisibleCells()` | `Cell[]` | Visible cells only |
+| `getLeftVisibleCells()` | `Cell[]` | Left-pinned visible cells |
+| `getRightVisibleCells()` | `Cell[]` | Right-pinned visible cells |
+| `getCenterVisibleCells()` | `Cell[]` | Unpinned visible cells |
+
+### Selection
+
+| Method | Return | Description |
+|---|---|---|
+| `getIsSelected()` | `boolean` | Is this row selected? |
+| `getIsSomeSelected()` | `boolean` | Some sub-rows selected? |
+| `getIsAllSubRowsSelected()` | `boolean` | All sub-rows selected? |
+| `getCanSelect()` | `boolean` | Can this row be selected? |
+| `getCanMultiSelect()` | `boolean` | Can participate in multi-select? |
+| `getCanSelectSubRows()` | `boolean` | Can sub-rows be auto-selected? |
+| `toggleSelected(value?, opts?)` | `void` | Select/deselect this row |
+| `getToggleSelectedHandler()` | `(event) => void` | Event handler for selection toggle |
+
+### Expanding
+
+| Method | Return | Description |
+|---|---|---|
+| `getIsExpanded()` | `boolean` | Is this row expanded? |
+| `getCanExpand()` | `boolean` | Can this row be expanded? |
+| `getIsGrouped()` | `boolean` | Is this a group row? |
+| `toggleExpanded(expanded?)` | `void` | Toggle expansion |
+| `getToggleExpandedHandler()` | `(event) => void` | Event handler for expand toggle |
+
+### Pinning
+
+| Method | Return | Description |
+|---|---|---|
+| `getIsPinned()` | `RowPinningPosition \| false` | `'top'`, `'bottom'`, or `false` |
+| `getCanPin()` | `boolean` | Can this row be pinned? |
+| `pin(position, includeLeaf?, includeParent?)` | `void` | Pin to `'top'`, `'bottom'`, or unpin |
+
+### Grouping
+
+| Method | Return | Description |
+|---|---|---|
+| `getGroupingValue(columnId)` | `unknown` | Get the grouping value for a column |
+| `getLeafRows()` | `Row[]` | Get all leaf rows under this group |

@@ -1,0 +1,45 @@
+---
+title: Column Grouping
+description: Group rows by column values with multi-level grouping support.
+---
+
+Group rows by column values. When grouping is active, rows with the same value in the grouped column are collapsed under a group header row.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableGrouping: true,
+  initialState: {
+    grouping: ['department'], // Group by department
+  },
+})
+```
+
+### Column Option
+
+```typescript
+columnHelper.accessor('department', {
+  header: 'Department',
+  enableGrouping: true,
+  getGroupingValue: (row) => row.department, // Custom grouping value
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Set grouping
+table.setGrouping(['department'])
+
+// Multi-level grouping
+table.setGrouping(['department', 'status'])
+
+// Toggle grouping on a column
+table.getColumn('department')?.toggleGrouping()
+
+// Clear grouping
+table.resetGrouping(true)
+```

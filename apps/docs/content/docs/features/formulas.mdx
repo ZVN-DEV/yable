@@ -1,0 +1,20 @@
+---
+title: Formulas
+description: A spreadsheet-grade formula engine with 17 built-in functions, expression parser, evaluator, and dependency tracker.
+---
+
+A spreadsheet-grade formula engine with 17 built-in functions (extensible), an expression parser, evaluator, and dependency tracker.
+
+### Capabilities
+
+- **17 built-in functions** across math, statistics, text, and logical categories (extensible with custom functions)
+- **Expression parser** that handles cell references, ranges, and nested function calls
+- **Dependency tracking** with automatic recalculation when referenced cells change
+- **Circular reference detection** to prevent infinite loops
+
+### Notes
+
+- The formula engine is included in `@zvndev/yable-core` and works with any adapter
+- Built-in functions: `SUM`, `AVG`, `COUNT`, `COUNTA`, `MIN`, `MAX`, `IF`, `CONCAT`, `ROUND`, `ABS`, `FLOOR`, `CEILING`, `POWER`, `SQRT`, `LEN`, `UPPER`, `LOWER` (plus aliases `AVERAGE`, `CONCATENATE`, `CEIL`, `POW`)
+- Register custom functions via the formula engine API
+- This feature ships in Yable's MIT-licensed core

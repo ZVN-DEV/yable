@@ -1,0 +1,71 @@
+---
+title: Row Selection
+description: Select rows with single-click or checkboxes, supporting single, multi, and sub-row selection.
+---
+
+Select rows with single-click or checkboxes. Supports single selection, multi-selection, and sub-row selection.
+
+### How to Enable
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableRowSelection: true, // or (row) => boolean for conditional
+  enableMultiRowSelection: true, // Allow selecting multiple rows
+  enableSubRowSelection: true, // Select sub-rows when parent is selected
+  onRowSelectionChange: (updater) => {
+    /* handle changes */
+  },
+})
+```
+
+### Programmatic Control
+
+```typescript
+// Select a row
+table.getRow('0').toggleSelected(true)
+
+// Toggle
+table.getRow('0').toggleSelected()
+
+// Select all rows on current page
+table.toggleAllPageRowsSelected(true)
+
+// Select all rows (all pages)
+table.toggleAllRowsSelected(true)
+
+// Check selection state
+table.getRow('0').getIsSelected() // boolean
+table.getIsAllRowsSelected() // boolean
+table.getIsSomeRowsSelected() // boolean
+table.getIsAllPageRowsSelected() // boolean
+table.getSelectedRowModel() // RowModel of selected rows
+
+// Clear selection
+table.resetRowSelection(true)
+```
+
+### Selection Column Pattern
+
+Add a checkbox column for row selection:
+
+```typescript
+columnHelper.display({
+  id: 'selection',
+  header: ({ table }) => (
+    <input
+      type="checkbox"
+      checked={table.getIsAllPageRowsSelected()}
+      onChange={table.toggleAllPageRowsSelected}
+    />
+  ),
+  cell: ({ row }) => (
+    <input
+      type="checkbox"
+      checked={row.getIsSelected()}
+      onChange={row.getToggleSelectedHandler()}
+    />
+  ),
+})
+```

@@ -1,0 +1,63 @@
+---
+title: createColumnHelper
+description: Returns a type-safe column definition builder with accessor, display, and group methods.
+---
+
+```typescript
+function createColumnHelper<TData extends RowData>(): ColumnHelper<TData>
+```
+
+Returns a type-safe column definition builder. The helper provides three methods:
+
+### `.accessor(accessorKeyOrFn, options)`
+
+Define a column that reads data from each row.
+
+**Key accessor:**
+
+```typescript
+const col = columnHelper.accessor('name', {
+  header: 'Name',
+  enableSorting: true,
+})
+// Infers: accessorKey = 'name', value type = TData['name']
+```
+
+**Function accessor:**
+
+```typescript
+const col = columnHelper.accessor(
+  (row) => `${row.firstName} ${row.lastName}`,
+  {
+    id: 'fullName',
+    header: 'Full Name',
+  }
+)
+```
+
+### `.display(options)`
+
+Define a non-data column (actions, checkboxes, etc.). Requires an `id`.
+
+```typescript
+const col = columnHelper.display({
+  id: 'actions',
+  header: 'Actions',
+  cell: ({ row }) => `<button>Edit ${row.original.name}</button>`,
+})
+```
+
+### `.group(options)`
+
+Define a column group header that contains child columns.
+
+```typescript
+const col = columnHelper.group({
+  id: 'contact',
+  header: 'Contact Info',
+  columns: [
+    columnHelper.accessor('email', { header: 'Email' }),
+    columnHelper.accessor('phone', { header: 'Phone' }),
+  ],
+})
+```

@@ -1,0 +1,29 @@
+{
+  "title": "Features",
+  "pages": [
+    "index",
+    "sorting",
+    "filtering",
+    "pagination",
+    "cell-editing",
+    "column-pinning",
+    "column-resizing",
+    "column-visibility",
+    "column-ordering",
+    "column-grouping",
+    "aggregation",
+    "row-selection",
+    "row-expanding",
+    "row-pinning",
+    "tree-data",
+    "pivot-tables",
+    "undo-redo",
+    "clipboard",
+    "fill-handle",
+    "formulas",
+    "async-commits",
+    "export",
+    "event-system",
+    "i18n"
+  ]
+}

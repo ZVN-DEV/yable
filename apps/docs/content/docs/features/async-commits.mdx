@@ -1,0 +1,146 @@
+---
+title: Async Cell Commits
+description: Save cell edits to a backend with built-in optimistic updates, error handling, retry, and conflict detection.
+---
+
+Yable ships first-class support for optimistic UI with async commit, error handling, retry, and conflict detection — the gap every other React grid leaves to the consumer.
+
+### The minimum viable example
+
+```tsx
+import { useTable, Table } from '@zvndev/yable-react'
+import type { CellPatch } from '@zvndev/yable-core'
+
+function MyTable() {
+  const onCommit = async (patches: CellPatch<Row>[]) => {
+    const res = await fetch('/api/save', {
+      method: 'POST',
+      body: JSON.stringify(patches),
+    })
+    if (!res.ok) throw new Error('Save failed')
+    // Update your local data store however you do it (React Query, Zustand, etc.)
+    // The cell automatically clears once your saved data matches the pending value.
+  }
+
+  const table = useTable({
+    data,
+    columns,
+    enableCellEditing: true,
+    onCommit,
+    getRowId: (row) => row.id,
+  })
+
+  return <Table table={table} />
+}
+```
+
+That's it. Pending state, error state, retry, and conflict UI are all rendered automatically.
+
+### Cell Status Lifecycle
+
+Each cell has a status: `idle` | `pending` | `error` | `conflict`.
+
+| Status     | Meaning                        | Cell renders                           |
+| ---------- | ------------------------------ | -------------------------------------- |
+| `idle`     | No in-flight commit            | Saved value, no decoration             |
+| `pending`  | Commit in flight               | Pending value with reduced opacity + progress cursor |
+| `error`    | Commit failed                  | Pending value with red border, retry icon, dismiss icon |
+| `conflict` | Saved value changed underneath | Pending value with orange border, "keep mine" / "accept theirs" buttons |
+
+### Table Options
+
+| Option               | Type                  | Default    | Description                                                                     |
+| -------------------- | --------------------- | ---------- | ------------------------------------------------------------------------------- |
+| `onCommit`           | `OnCommitFn<TData>`   | --         | Async handler for saving cell edits. Resolve = success, throw = failure.        |
+| `autoCommit`         | `boolean`             | `true`     | Fire `onCommit` after each edit; if `false`, batch edits until `table.commit()` |
+| `rowCommitRetryMode` | `'failed' \| 'batch'` | `'failed'` | On retry: resend only failed cells or entire batch                              |
+
+### Table API
+
+| Method                              | Return                | Description                                         |
+| ----------------------------------- | --------------------- | --------------------------------------------------- |
+| `getCellStatus(rowId, colId)`       | `CellStatus`          | Get commit status of a cell                         |
+| `getCellRenderValue(rowId, colId)`  | `unknown`             | Get display value (pending or saved)                |
+| `getCellErrorMessage(rowId, colId)` | `string \| undefined` | Get error message for failed cell                   |
+| `getCellConflictWith(rowId, colId)` | `unknown`             | Get conflicting server value                        |
+| `commit()`                          | `Promise<void>`       | Commit all pending edits (when `autoCommit: false`) |
+| `retryCommit(rowId, colId)`         | `Promise<void>`       | Retry a failed commit                               |
+| `dismissCommit(rowId, colId)`       | `void`                | Dismiss an error/conflict and revert                |
+| `dismissAllCommits()`               | `void`                | Dismiss all errors/conflicts                        |
+
+### Per-cell error precision
+
+If your API returns per-field validation errors, throw a `CommitError`:
+
+```tsx
+import { CommitError } from '@zvndev/yable-core'
+
+const onCommit = async (patches) => {
+  const res = await fetch('/api/save', { ... })
+  if (!res.ok) {
+    const body = await res.json()
+    // body.errors looks like: { row1: { email: 'must be unique' } }
+    throw new CommitError(body.errors)
+  }
+}
+```
+
+Cells listed in the error map go to `error`. Cells in the same batch but NOT in the error map are treated as successful.
+
+### Bulk save mode
+
+If you want a "Save all" button instead of saving on Enter, set `autoCommit: false` and call `table.commit()` from your button handler:
+
+```tsx
+const table = useTable({
+  data,
+  columns,
+  enableCellEditing: true,
+  autoCommit: false,
+  onCommit,
+})
+
+return (
+  <>
+    <button onClick={() => table.commit()}>Save all</button>
+    <Table table={table} />
+  </>
+)
+```
+
+### Per-column commit handler
+
+Some columns need their own handler (file uploads, bespoke endpoints):
+
+```tsx
+helper.accessor('avatar', {
+  header: 'Avatar',
+  editable: true,
+  commit: async (patch) => {
+    const url = await uploadFile(patch.value)
+    // ... persist
+  },
+})
+```
+
+Per-column commits run in parallel with the table-level batch.
+
+### What the consumer is responsible for
+
+- **Updating saved data** — Yable does NOT mutate `rowData`. Your `onCommit` handler must update whatever data store you pass to `data={...}`. Once the saved value matches the pending value, Yable auto-clears the pending state.
+- **Validation BEFORE commit** — use the existing per-column `editConfig.validate` hook for synchronous client-side validation. Validation failures put the cell in error WITHOUT firing a network call.
+- **Cancellation** — every patch carries an `AbortSignal`. Wire it to `fetch` if you want to abort in-flight requests when the user starts a new edit on the same cell.
+
+### What Yable handles automatically
+
+- **Stale settlement** — older in-flight commits are silently dropped if a newer commit lands first
+- **Auto-clear** — when refetched data matches the pending value, the pending state clears automatically
+- **Orphaned GC** — if a row disappears while a commit is in flight, the record is cleaned up
+- **Conflict detection** — if the saved value changes between dispatch and settlement, the cell enters `conflict` status
+- **Abort signals** — each patch carries an `AbortSignal` that fires when a newer edit supersedes it
+
+### Notes
+
+- The `@zvndev/yable-react` adapter renders cell status badges automatically via `<TableCell>`
+- Conflict resolution is left to the consumer — dismiss to revert, or apply the pending value again
+- See [`docs/superpowers/specs/2026-04-07-data-update-patterns-design.md`](./superpowers/specs/2026-04-07-data-update-patterns-design.md) for the full design rationale

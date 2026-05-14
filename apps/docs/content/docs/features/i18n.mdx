@@ -1,0 +1,40 @@
+---
+title: i18n
+description: Internationalization support for table UI strings with locale creation and swapping.
+---
+
+Internationalization support for table UI strings. The core package exports a `YableLocale` interface and helpers for creating and swapping locales.
+
+### How to Use
+
+```typescript
+import {
+  en,
+  createLocale,
+  setDefaultLocale,
+  getDefaultLocale,
+  resetLocale,
+} from '@zvndev/yable-core'
+
+// Build a partial override on top of English
+const frCa = createLocale(en, {
+  paginationPage: 'Page',
+  paginationOf: 'de',
+  searchPlaceholder: 'Rechercher…',
+})
+
+// Make it the new default for any new tables
+setDefaultLocale(frCa)
+
+// Read the currently active locale
+const current = getDefaultLocale()
+
+// Reset back to built-in English
+resetLocale()
+```
+
+### Notes
+
+- Default locale is English (`en`) — see `packages/core/src/i18n/en.ts` for the full key list
+- Built-in React components (pagination, global filter, etc.) read strings from the active locale
+- Custom text can still be passed via component props (`emptyMessage`, `placeholder`, etc.) to override on a per-instance basis
