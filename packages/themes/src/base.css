@@ -237,18 +237,15 @@
 
 /* ── Column Reorder ──────────────────────────────────────────────────────── */
 
-.yable-th[data-reorderable='true'] {
+.yable-th[data-reorderable='true'] > .yable-th-content {
   cursor: grab;
 }
 
-.yable-th[data-reorderable='true']:active {
+.yable-th[data-reorderable='true'] > .yable-th-content:active {
   cursor: grabbing;
 }
 
-/* When sortable AND reorderable, sort cursor wins on the content area so the
-   header still feels clickable. The drag is initiated from a mousedown that
-   moves; a click without movement still triggers the sort. */
-.yable-th[data-sortable='true'][data-reorderable='true'] {
+.yable-th[data-sortable='true'][data-reorderable='true'] > .yable-th-content {
   cursor: pointer;
 }
 

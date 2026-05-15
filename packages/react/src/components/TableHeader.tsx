@@ -151,13 +151,8 @@ function HeaderCell<TData extends RowData>({
   const [dragOver, setDragOver] = useState<'left' | 'right' | null>(null)
 
   const handleDragStart = useCallback(
-    (e: React.DragEvent<HTMLTableCellElement>) => {
+    (e: React.DragEvent<HTMLDivElement>) => {
       if (!canReorder) return
-      const target = e.target as Element | null
-      if (target && target.closest('.yable-resize-handle')) {
-        e.preventDefault()
-        return
-      }
       e.stopPropagation()
       e.dataTransfer.effectAllowed = 'move'
       try {
@@ -282,15 +277,17 @@ function HeaderCell<TData extends RowData>({
       }
       role="columnheader"
       colSpan={header.colSpan}
-      draggable={canReorder || undefined}
       onClick={handleHeaderClick}
-      onDragStart={canReorder ? handleDragStart : undefined}
       onDragOver={canReorder ? handleDragOver : undefined}
       onDragLeave={canReorder ? handleDragLeave : undefined}
-      onDragEnd={canReorder ? handleDragEnd : undefined}
       onDrop={canReorder ? handleDrop : undefined}
     >
-      <div className="yable-th-content">
+      <div
+        className="yable-th-content"
+        draggable={canReorder || undefined}
+        onDragStart={canReorder ? handleDragStart : undefined}
+        onDragEnd={canReorder ? handleDragEnd : undefined}
+      >
         <span>{headerContent}</span>
         {canSort && (
           <SortIndicator direction={sortDirection} index={sortIndex > 0 ? sortIndex : undefined} />
@@ -304,8 +301,6 @@ function HeaderCell<TData extends RowData>({
           onMouseDown={startResize}
           onTouchStart={startResize}
           onClick={handleResizeClick}
-          draggable={false}
-          onDragStart={(e) => e.preventDefault()}
         />
       )}
     </th>
