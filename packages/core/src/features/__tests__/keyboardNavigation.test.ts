@@ -5,6 +5,7 @@ import { createColumnHelper } from '../../columnHelper'
 import { createTable } from '../../core/table'
 import { functionalUpdate } from '../../utils'
 import {
+  canCellEnterEditMode,
   getCellPositionByIds,
   getNextFocusedCell,
   getResolvedFocusedCell,
@@ -215,5 +216,116 @@ describe('keyboard navigation', () => {
       rowIndex: 3,
       columnIndex: 0,
     })
+  })
+})
+
+describe('canCellEnterEditMode — editConfig inference', () => {
+  const editableColumnHelper = createColumnHelper<GridRow>()
+
+  function createEditTable(cols: ReturnType<typeof editableColumnHelper.accessor>[]) {
+    let state: TableState = {
+      sorting: [],
+      columnFilters: [],
+      globalFilter: '',
+      pagination: { pageIndex: 0, pageSize: 10 },
+      rowSelection: {},
+      columnVisibility: {},
+      columnOrder: [],
+      columnPinning: { left: [], right: [] },
+      columnSizing: {},
+      columnSizingInfo: {
+        startOffset: null,
+        startSize: null,
+        deltaOffset: null,
+        deltaPercentage: null,
+        isResizingColumn: false,
+        columnSizingStart: [],
+      },
+      expanded: {},
+      rowPinning: { top: [], bottom: [] },
+      grouping: [],
+      editing: { activeCell: undefined, pendingValues: {} },
+      commits: { cells: {}, nextOpId: 1 },
+      keyboardNavigation: { focusedCell: null },
+      undoRedo: { undoStack: [], redoStack: [], maxSize: 50 },
+      fillHandle: { isDragging: false },
+      formulas: { enabled: false, formulas: {}, computedValues: {}, errors: {} },
+      rowDrag: { draggingRowId: null, overRowId: null, dropPosition: null },
+      pivot: {
+        enabled: false,
+        config: { rowFields: [], columnFields: [], valueFields: [] },
+        expandedRowGroups: {},
+        expandedColumnGroups: {},
+      },
+    }
+
+    const table = createTable<GridRow>({
+      data,
+      columns: cols,
+      state,
+      enableCellEditing: true,
+      onStateChange: (updater) => {
+        state = functionalUpdate(updater, state)
+        table.setOptions((prev) => ({ ...prev, state }))
+      },
+    })
+
+    return table
+  }
+
+  it('infers editable when editConfig is present and editable is omitted', () => {
+    const cols = [
+      editableColumnHelper.accessor('a', {
+        header: 'A',
+        editConfig: { type: 'text' },
+      }),
+    ]
+    const table = createEditTable(cols)
+    const row = table.getCoreRowModel().rows[0]!
+    const column = table.getAllLeafColumns()[0]!
+
+    expect(canCellEnterEditMode(table, row, column)).toBe(true)
+  })
+
+  it('respects editable: false even when editConfig is present', () => {
+    const cols = [
+      editableColumnHelper.accessor('a', {
+        header: 'A',
+        editable: false,
+        editConfig: { type: 'text' },
+      }),
+    ]
+    const table = createEditTable(cols)
+    const row = table.getCoreRowModel().rows[0]!
+    const column = table.getAllLeafColumns()[0]!
+
+    expect(canCellEnterEditMode(table, row, column)).toBe(false)
+  })
+
+  it('still works with editable: true and no editConfig', () => {
+    const cols = [
+      editableColumnHelper.accessor('a', {
+        header: 'A',
+        editable: true,
+      }),
+    ]
+    const table = createEditTable(cols)
+    const row = table.getCoreRowModel().rows[0]!
+    const column = table.getAllLeafColumns()[0]!
+
+    expect(canCellEnterEditMode(table, row, column)).toBe(true)
+  })
+
+  it('returns false when neither editable nor editConfig is set', () => {
+    const cols = [
+      editableColumnHelper.accessor('a', {
+        header: 'A',
+      }),
+    ]
+    const table = createEditTable(cols)
+    const row = table.getCoreRowModel().rows[0]!
+    const column = table.getAllLeafColumns()[0]!
+
+    expect(canCellEnterEditMode(table, row, column)).toBe(false)
   })
 })

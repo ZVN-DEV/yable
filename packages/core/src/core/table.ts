@@ -974,7 +974,11 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
         depth: number,
         parent?: Column<TData, unknown>,
       ): Column<TData, unknown> => {
-        const column = createColumn(table, colDef, depth, parent)
+        // Merge defaultColumnDef under the column def — column-specific values win
+        const mergedColDef = resolvedOptions.defaultColumnDef
+          ? ({ ...resolvedOptions.defaultColumnDef, ...colDef } as ColumnDef<TData>)
+          : colDef
+        const column = createColumn(table, mergedColDef, depth, parent)
         allColumns.push(column)
         columnMap.set(column.id, column)
 

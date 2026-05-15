@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import type { HeaderGroup, RowData, Table as TableInstance } from '@zvndev/yable-core'
 import { TableProvider } from '../context'
+import { useYableDefaults } from '../YableProvider'
 import type { TableProps } from '../types'
 import { TableHeader } from './TableHeader'
 import { TableBody } from './TableBody'
@@ -30,11 +31,11 @@ function filterHeaderGroups<TData extends RowData>(
 
 export function Table<TData extends RowData>({
   table,
-  stickyHeader,
-  striped,
-  bordered,
-  compact,
-  theme,
+  stickyHeader: stickyHeaderProp,
+  striped: stripedProp,
+  bordered: borderedProp,
+  compact: compactProp,
+  theme: themeProp,
   clickableRows,
   footer,
   loading,
@@ -48,7 +49,7 @@ export function Table<TData extends RowData>({
   renderLoading,
   children,
   className,
-  direction,
+  direction: directionProp,
   statusBar,
   statusBarPanels,
   sidebar,
@@ -57,9 +58,19 @@ export function Table<TData extends RowData>({
   floatingFilters,
   columnVirtualization,
   columnVirtualizationOverscan,
-  ariaLabel,
+  ariaLabel: ariaLabelProp,
   ...rest
 }: TableProps<TData>) {
+  // Merge provider-level tableProps under explicit props (explicit wins)
+  const { tableProps: providerTableProps } = useYableDefaults()
+  const stickyHeader = stickyHeaderProp ?? providerTableProps?.stickyHeader
+  const striped = stripedProp ?? providerTableProps?.striped
+  const bordered = borderedProp ?? providerTableProps?.bordered
+  const compact = compactProp ?? providerTableProps?.compact
+  const theme = themeProp ?? providerTableProps?.theme
+  const direction = directionProp ?? providerTableProps?.direction
+  const ariaLabel = ariaLabelProp ?? providerTableProps?.ariaLabel
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarPanel, setSidebarPanel] = useState<'columns' | 'filters'>(
     defaultSidebarPanel ?? 'columns',

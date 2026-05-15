@@ -123,6 +123,10 @@ export { getMeasureRecipeForCellType, getRegisteredCellTypes } from './cells/res
 // Context
 export { useTableContext, TableProvider } from './context'
 
+// Project-wide defaults provider
+export { YableProvider, useYableDefaults } from './YableProvider'
+export type { YableDefaults } from './YableProvider'
+
 // Components
 export { Table } from './components/Table'
 export { TableHeader } from './components/TableHeader'
@@ -282,3 +286,6 @@ export type { UsePrintLayoutOptions } from './hooks/usePrintLayout'
 // Theme
 export { useTheme } from './hooks/useTheme'
 export type { UseThemeOptions } from './hooks/useTheme'
+
+// Utilities
+export { mergeEditChanges } from './utils/mergeEditChanges'

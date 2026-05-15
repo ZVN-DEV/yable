@@ -11,6 +11,7 @@ import {
   type Table,
   type Updater,
 } from '@zvndev/yable-core'
+import { useYableDefaults } from './YableProvider'
 
 /**
  * Shallow-compare two objects. Returns true if all own keys are strictly equal.
@@ -41,9 +42,21 @@ function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boolean {
  * function identity from the parent is always invoked — even if every other
  * option key is shallow-equal to the previous render.
  */
-export function useTable<TData extends RowData>(
-  options: TableOptions<TData>
-): Table<TData> {
+export function useTable<TData extends RowData>(options: TableOptions<TData>): Table<TData> {
+  // Merge provider-level defaultColumnDef under the table's own defaultColumnDef.
+  // Table-level values always take precedence over provider defaults.
+  const providerDefaults = useYableDefaults()
+  const optionsWithDefaults = useMemo(() => {
+    if (!providerDefaults.defaultColumnDef) return options
+    return {
+      ...options,
+      defaultColumnDef: {
+        ...providerDefaults.defaultColumnDef,
+        ...options.defaultColumnDef,
+      },
+    }
+  }, [options, providerDefaults.defaultColumnDef])
+
   // Internal state — only used if consumer doesn't provide controlled state
   const [state, setState] = useState<TableState>(() => ({
     sorting: [],
@@ -88,14 +101,14 @@ export function useTable<TData extends RowData>(
 
   // Track previous options to avoid recomputing when consumer passes
   // a structurally identical but referentially new options object
-  const prevOptionsRef = useRef(options)
+  const prevOptionsRef = useRef(optionsWithDefaults)
   const stableOptions = useMemo(() => {
-    if (shallowEqual(prevOptionsRef.current as any, options as any)) {
+    if (shallowEqual(prevOptionsRef.current as any, optionsWithDefaults as any)) {
       return prevOptionsRef.current
     }
-    prevOptionsRef.current = options
-    return options
-  }, [options])
+    prevOptionsRef.current = optionsWithDefaults
+    return optionsWithDefaults
+  }, [optionsWithDefaults])
 
   // Latest-ref for onStateChange so the wrapper always invokes the freshest
   // callback identity, even when every other key in `options` is shallow-equal
@@ -109,20 +122,17 @@ export function useTable<TData extends RowData>(
       ...state,
       ...stableOptions.state,
     }),
-    [state, stableOptions.state]
+    [state, stableOptions.state],
   )
 
-  const onStateChange = useCallback(
-    (updater: Updater<TableState>) => {
-      const latest = onStateChangeRef.current
-      if (latest) {
-        latest(updater)
-      } else {
-        setState((prev) => functionalUpdate(updater, prev))
-      }
-    },
-    []
-  )
+  const onStateChange = useCallback((updater: Updater<TableState>) => {
+    const latest = onStateChangeRef.current
+    if (latest) {
+      latest(updater)
+    } else {
+      setState((prev) => functionalUpdate(updater, prev))
+    }
+  }, [])
 
   const resolvedOptions: TableOptions<TData> = useMemo(
     () => ({
@@ -130,7 +140,7 @@ export function useTable<TData extends RowData>(
       state: resolvedState,
       onStateChange,
     }),
-    [stableOptions, resolvedState, onStateChange]
+    [stableOptions, resolvedState, onStateChange],
   )
 
   // Create or update the table instance
@@ -139,12 +149,15 @@ export function useTable<TData extends RowData>(
   if (!tableRef.current) {
     tableRef.current = createTable(resolvedOptions)
   } else {
-    tableRef.current.setOptions((prev) => ({
-      ...prev,
-      ...resolvedOptions,
-      state: resolvedState,
-      onStateChange,
-    }) as TableOptionsResolved<TData>)
+    tableRef.current.setOptions(
+      (prev) =>
+        ({
+          ...prev,
+          ...resolvedOptions,
+          state: resolvedState,
+          onStateChange,
+        }) as TableOptionsResolved<TData>,
+    )
   }
 
   // Clean up event listeners on unmount to prevent memory leaks in SPAs

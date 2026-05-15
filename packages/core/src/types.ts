@@ -259,6 +259,12 @@ export interface TableOptions<TData extends RowData> {
   data: TData[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- columns can have any value type
   columns: ColumnDef<TData, any>[]
+  /**
+   * Default column definition values applied to every column.
+   * Column-specific values take precedence over these defaults.
+   */
+  defaultColumnDef?: Partial<ColumnDefBase<TData, unknown>> &
+    Partial<ColumnDefExtensions<TData, unknown>>
   state?: Partial<TableState>
   onStateChange?: OnChangeFn<TableState>
   initialState?: Partial<TableState>

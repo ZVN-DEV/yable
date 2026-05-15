@@ -17,7 +17,9 @@ export interface ResolvedKeyboardNavigationCell<TData extends RowData> {
   column: Column<TData, unknown>
 }
 
-function getRowsAndColumns<TData extends RowData>(table: Table<TData>): {
+function getRowsAndColumns<TData extends RowData>(
+  table: Table<TData>,
+): {
   rows: Row<TData>[]
   columns: Column<TData, unknown>[]
 } {
@@ -28,7 +30,7 @@ function getRowsAndColumns<TData extends RowData>(table: Table<TData>): {
 }
 
 export function getFirstKeyboardCell<TData extends RowData>(
-  table: Table<TData>
+  table: Table<TData>,
 ): KeyboardNavigationCell | null {
   const { rows, columns } = getRowsAndColumns(table)
   if (rows.length === 0 || columns.length === 0) return null
@@ -36,7 +38,7 @@ export function getFirstKeyboardCell<TData extends RowData>(
 }
 
 export function getLastKeyboardCell<TData extends RowData>(
-  table: Table<TData>
+  table: Table<TData>,
 ): KeyboardNavigationCell | null {
   const { rows, columns } = getRowsAndColumns(table)
   if (rows.length === 0 || columns.length === 0) return null
@@ -48,7 +50,7 @@ export function getLastKeyboardCell<TData extends RowData>(
 
 export function normalizeFocusedCell<TData extends RowData>(
   table: Table<TData>,
-  cell: KeyboardNavigationCell | null | undefined
+  cell: KeyboardNavigationCell | null | undefined,
 ): KeyboardNavigationCell | null {
   if (!cell) return null
 
@@ -63,7 +65,7 @@ export function normalizeFocusedCell<TData extends RowData>(
 
 export function getResolvedFocusedCell<TData extends RowData>(
   table: Table<TData>,
-  cell: KeyboardNavigationCell | null | undefined
+  cell: KeyboardNavigationCell | null | undefined,
 ): ResolvedKeyboardNavigationCell<TData> | null {
   const normalized = normalizeFocusedCell(table, cell)
   if (!normalized) return null
@@ -84,7 +86,7 @@ export function getResolvedFocusedCell<TData extends RowData>(
 export function getCellPositionByIds<TData extends RowData>(
   table: Table<TData>,
   rowId: string,
-  columnId: string
+  columnId: string,
 ): KeyboardNavigationCell | null {
   const { rows, columns } = getRowsAndColumns(table)
   const rowIndex = rows.findIndex((row) => row.id === rowId)
@@ -98,13 +100,23 @@ export function getCellPositionByIds<TData extends RowData>(
 export function canCellEnterEditMode<TData extends RowData>(
   table: Table<TData>,
   row: Row<TData>,
-  column: Column<TData, unknown>
+  column: Column<TData, unknown>,
 ): boolean {
   if (table.options.enableCellEditing === false) return false
 
-  const editable = (column.columnDef as { editable?: boolean | ((row: Row<TData>) => boolean) }).editable
+  const def = column.columnDef as {
+    editable?: boolean | ((row: Row<TData>) => boolean)
+    editConfig?: unknown
+  }
+
+  const editable = def.editable
   if (typeof editable === 'function') {
     return editable(row)
+  }
+
+  // Infer editable: true when editConfig is present and editable is not explicitly false
+  if (editable === undefined && def.editConfig != null) {
+    return true
   }
 
   return !!editable
@@ -112,7 +124,7 @@ export function canCellEnterEditMode<TData extends RowData>(
 
 function getInitialFocusedCell<TData extends RowData>(
   table: Table<TData>,
-  action: KeyboardNavigationAction
+  action: KeyboardNavigationAction,
 ): KeyboardNavigationCell | null {
   if (action.type === 'tab' && action.shiftKey) {
     return getLastKeyboardCell(table)
@@ -128,7 +140,7 @@ function getInitialFocusedCell<TData extends RowData>(
 function getDisplayValue<TData extends RowData>(
   table: Table<TData>,
   row: Row<TData>,
-  column: Column<TData, unknown>
+  column: Column<TData, unknown>,
 ): unknown {
   const pending = table.getPendingValue(row.id, column.id)
   if (pending !== undefined) return pending
@@ -144,7 +156,7 @@ function isEmptyValue(value: unknown): boolean {
 function getBoundaryCell<TData extends RowData>(
   table: Table<TData>,
   current: KeyboardNavigationCell,
-  direction: 'up' | 'down' | 'left' | 'right'
+  direction: 'up' | 'down' | 'left' | 'right',
 ): KeyboardNavigationCell | null {
   const { rows, columns } = getRowsAndColumns(table)
   if (rows.length === 0 || columns.length === 0) return null
@@ -201,7 +213,7 @@ function getBoundaryCell<TData extends RowData>(
 export function getNextFocusedCell<TData extends RowData>(
   table: Table<TData>,
   current: KeyboardNavigationCell | null | undefined,
-  action: KeyboardNavigationAction
+  action: KeyboardNavigationAction,
 ): KeyboardNavigationCell | null {
   const base = normalizeFocusedCell(table, current) ?? getInitialFocusedCell(table, action)
   if (!base) return null

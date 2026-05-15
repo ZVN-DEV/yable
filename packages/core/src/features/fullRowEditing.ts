@@ -69,10 +69,11 @@ export function createFullRowEditingIntegration<TData extends RowData>(
 
     return columns
       .filter((col) => {
-        const editable = (
-          col.columnDef as typeof col.columnDef & Partial<ColumnDefExtensions<TData>>
-        ).editable
+        const def = col.columnDef as typeof col.columnDef & Partial<ColumnDefExtensions<TData>>
+        const editable = def.editable
         if (typeof editable === 'function') return editable(row)
+        // Infer editable: true when editConfig is present and editable is not explicitly false
+        if (editable === undefined && def.editConfig != null) return true
         return !!editable
       })
       .map((col) => col.id)
