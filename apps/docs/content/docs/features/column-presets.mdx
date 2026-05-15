@@ -1,0 +1,149 @@
+---
+title: Column Presets
+description: Pre-built column definitions for common patterns like selection checkboxes, row numbers, and action buttons.
+---
+
+# Column Presets
+
+Column presets are factory functions that return fully configured column definitions for common patterns. They eliminate boilerplate and ensure consistent behavior.
+
+## Selection Column
+
+Add a checkbox column for row selection:
+
+```tsx
+import { selectColumn, useTable, Table } from '@zvndev/yable-react'
+
+const columns = [
+  selectColumn(),
+  // ... your data columns
+]
+
+export function MyTable() {
+  const table = useTable({
+    data,
+    columns,
+    enableRowSelection: true,
+  })
+
+  return <Table table={table} />
+}
+```
+
+The select column renders a header checkbox that toggles all page rows, with an indeterminate state when some rows are selected. Each row gets its own checkbox.
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | `string` | `'_select'` | Column ID |
+| `size` | `number` | `40` | Column width in px |
+| `headerAriaLabel` | `string` | `'Select all rows'` | Accessibility label for header checkbox |
+
+## Row Number Column
+
+Display row numbers:
+
+```tsx
+import { rowNumberColumn } from '@zvndev/yable-react'
+
+const columns = [
+  rowNumberColumn(),
+  // ... your data columns
+]
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | `string` | `'_rowNumber'` | Column ID |
+| `header` | `string` | `'#'` | Header text |
+| `size` | `number` | `50` | Column width in px |
+| `startFrom` | `number` | `1` | First row number |
+
+## Actions Column
+
+Add action buttons to each row:
+
+```tsx
+import { actionsColumn } from '@zvndev/yable-react'
+
+const columns = [
+  // ... your data columns
+  actionsColumn({
+    actions: [
+      {
+        label: 'Edit',
+        icon: <EditIcon />,
+        onClick: (row) => openEditor(row.original),
+      },
+      {
+        label: 'Delete',
+        icon: <TrashIcon />,
+        onClick: (row) => deleteRow(row.original.id),
+        hidden: (row) => row.original.isProtected,
+      },
+    ],
+  }),
+]
+```
+
+Actions can be static or dynamic (computed per-row):
+
+```tsx
+actionsColumn({
+  actions: (row) => [
+    { label: 'View', onClick: () => navigate(`/item/${row.original.id}`) },
+    ...(row.original.canEdit
+      ? [{ label: 'Edit', onClick: () => editItem(row.original) }]
+      : []),
+  ],
+})
+```
+
+### Action Item Properties
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `label` | `string` | Button label (shown as title if icon is provided) |
+| `icon` | `ReactNode` | Optional icon to render instead of text |
+| `onClick` | `(row: Row<TData>) => void` | Click handler |
+| `hidden` | `(row: Row<TData>) => boolean` | Conditionally hide this action |
+| `disabled` | `(row: Row<TData>) => boolean` | Conditionally disable this action |
+
+## Expand Column
+
+Add an expand/collapse toggle for detail panels or tree data:
+
+```tsx
+import { expandColumn } from '@zvndev/yable-react'
+
+const columns = [
+  expandColumn(),
+  // ... your data columns
+]
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | `string` | `'_expand'` | Column ID |
+| `size` | `number` | `40` | Column width in px |
+
+## Combining Presets
+
+Presets compose naturally with regular columns:
+
+```tsx
+const columns = [
+  selectColumn(),
+  expandColumn(),
+  rowNumberColumn(),
+  // ... data columns ...
+  actionsColumn({ actions: [...] }),
+]
+```
+
+All presets disable sorting, filtering, and reordering by default. Selection, row number, and expand columns also set `lockVisible: true` to prevent accidental hiding.

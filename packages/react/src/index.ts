@@ -287,5 +287,25 @@ export type { UsePrintLayoutOptions } from './hooks/usePrintLayout'
 export { useTheme } from './hooks/useTheme'
 export type { UseThemeOptions } from './hooks/useTheme'
 
+// Column Presets
+export { selectColumn } from './presets'
+export type { SelectColumnOptions } from './presets'
+export { rowNumberColumn } from './presets'
+export type { RowNumberColumnOptions } from './presets'
+export { actionsColumn } from './presets'
+export type { ActionsColumnOptions, ActionItem } from './presets'
+export { expandColumn } from './presets'
+export type { ExpandColumnOptions } from './presets'
+
+// Cell Layout Primitives
+export { CellStack } from './primitives'
+export type { CellStackProps } from './primitives'
+export { CellRow } from './primitives'
+export type { CellRowProps } from './primitives'
+export { CellWithIcon } from './primitives'
+export type { CellWithIconProps } from './primitives'
+export { CellText } from './primitives'
+export type { CellTextProps } from './primitives'
+
 // Utilities
 export { mergeEditChanges } from './utils/mergeEditChanges'

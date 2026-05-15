@@ -173,6 +173,9 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
 
   // Styling
   cellClassName?: string | ((ctx: CellContext<TData, TValue>) => string | undefined)
+  cellStyle?:
+    | React.CSSProperties
+    | ((ctx: CellContext<TData, TValue>) => React.CSSProperties | undefined)
   headerClassName?: string
   footerClassName?: string
 

@@ -1,0 +1,157 @@
+---
+title: Cell Types
+description: Use declarative cellType to render styled data cells without custom components.
+---
+
+# Cell Types
+
+Yable includes 9 built-in display cell types that render common data patterns without writing custom `cell` functions. Set `cellType` on a column definition and Yable handles the rendering.
+
+## Usage
+
+```typescript
+import { createColumnHelper } from '@zvndev/yable-react'
+
+interface Product {
+  name: string
+  price: number
+  status: string
+  rating: number
+  inStock: boolean
+  progress: number
+  launchDate: string
+  url: string
+  category: string
+}
+
+const col = createColumnHelper<Product>()
+
+const columns = [
+  col.accessor('price', {
+    header: 'Price',
+    cellType: 'currency',
+    cellTypeProps: { currency: 'USD' },
+  }),
+  col.accessor('status', {
+    header: 'Status',
+    cellType: 'status',
+    cellTypeProps: {
+      colorMap: {
+        active: 'green',
+        inactive: 'gray',
+        pending: 'yellow',
+      },
+    },
+  }),
+  col.accessor('rating', {
+    header: 'Rating',
+    cellType: 'rating',
+  }),
+  col.accessor('category', {
+    header: 'Category',
+    cellType: 'badge',
+    cellTypeProps: { variant: 'info', appearance: 'soft' },
+  }),
+]
+```
+
+## Available Cell Types
+
+### `badge`
+
+Renders categorical data as a styled pill/badge.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'default' \| 'success' \| 'warning' \| 'error' \| 'info'` | `'default'` | Color variant |
+| `appearance` | `'soft' \| 'solid' \| 'outline'` | `'soft'` | Visual style |
+| `className` | `string` | — | Additional CSS class |
+
+### `currency`
+
+Formats numbers with currency symbols and locale-aware separators.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `currency` | `string` | `'USD'` | ISO 4217 currency code |
+| `locale` | `string` | `'en-US'` | Locale for number formatting |
+
+### `status`
+
+Displays a color dot with a text label.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `colorMap` | `Record<string, string>` | — | Maps values to CSS colors |
+
+### `numeric`
+
+Right-aligned number with tabular (monospace) figures.
+
+### `rating`
+
+Visual star/dot rating display.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `max` | `number` | `5` | Maximum rating value |
+| `symbol` | `string` | `'★'` | Character for filled rating |
+| `emptySymbol` | `string` | `'☆'` | Character for empty rating |
+
+### `boolean`
+
+Visual true/false indicator (checkmark or cross).
+
+### `progress`
+
+Inline progress bar.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `max` | `number` | `100` | Maximum value |
+| `showLabel` | `boolean` | `false` | Show percentage text |
+
+### `date`
+
+Formatted date display.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `format` | `string` | — | Date format string |
+| `locale` | `string` | `'en-US'` | Locale for date formatting |
+
+### `link`
+
+Clickable URL or text link.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `target` | `string` | `'_blank'` | Link target attribute |
+| `rel` | `string` | `'noopener noreferrer'` | Link rel attribute |
+
+## Cell Type vs Custom Cell
+
+Use `cellType` when you want styled output with zero code. Use a custom `cell` function when you need full control:
+
+```typescript
+// cellType — declarative, zero component code
+col.accessor('status', {
+  cellType: 'badge',
+  cellTypeProps: { variant: 'success' },
+})
+
+// cell function — full control
+col.accessor('status', {
+  cell: ({ getValue }) => (
+    <span className={`badge badge-${getValue()}`}>
+      {getValue()}
+    </span>
+  ),
+})
+```
+
+`cellType` and `cell` are mutually exclusive — if both are set, `cell` takes precedence.
+
+## Pretext Integration
+
+Each built-in cell type exports a measurement recipe for Pretext auto-sizing. When using `cellType`, row height measurement is automatic. For custom `cell` functions, provide a `measureRecipe` on the column definition.

@@ -126,31 +126,28 @@ That's it -- you have a rendered table. But it doesn't do anything interactive y
 
 ## Step 6: Add Sorting
 
-Sorting is enabled by default at the table level. You just need to enable it on the columns you want to be sortable:
+Sorting is enabled by default — all columns are sortable out of the box. If you only want *some* columns to be sortable, disable it on the ones you don't want:
 
 ```typescript
 // columns.ts — updated
 export const columns = [
   columnHelper.accessor('name', {
     header: 'Name',
-    enableSorting: true,
   }),
   columnHelper.accessor('department', {
     header: 'Department',
-    enableSorting: true,
   }),
   columnHelper.accessor('salary', {
     header: 'Salary',
-    enableSorting: true,
     cell: ({ getValue }) => `$${getValue().toLocaleString()}`,
   }),
   columnHelper.accessor('startDate', {
     header: 'Start Date',
-    enableSorting: true,
     sortingFn: 'datetime',
   }),
   columnHelper.accessor('active', {
     header: 'Active',
+    enableSorting: false,
     cell: ({ getValue }) => (getValue() ? 'Yes' : 'No'),
   }),
 ]
@@ -272,7 +269,6 @@ Enable editing on the table and configure individual columns:
 export const columns = [
   columnHelper.accessor('name', {
     header: 'Name',
-    enableSorting: true,
     editable: true,
     editConfig: {
       type: 'text',
@@ -284,7 +280,6 @@ export const columns = [
   }),
   columnHelper.accessor('department', {
     header: 'Department',
-    enableSorting: true,
     editable: true,
     editConfig: {
       type: 'select',
@@ -297,7 +292,6 @@ export const columns = [
   }),
   columnHelper.accessor('salary', {
     header: 'Salary',
-    enableSorting: true,
     editable: true,
     editConfig: {
       type: 'number',
@@ -310,7 +304,6 @@ export const columns = [
   }),
   columnHelper.accessor('startDate', {
     header: 'Start Date',
-    enableSorting: true,
     sortingFn: 'datetime',
     editable: true,
     editConfig: { type: 'date' },
@@ -326,6 +319,8 @@ export const columns = [
 Then handle edit commits in your component:
 
 ```tsx
+import { mergeEditChanges } from '@zvndev/yable-react'
+
 export function EmployeeTable() {
   const [data, setData] = useState(employees)
 
@@ -334,14 +329,7 @@ export function EmployeeTable() {
     columns,
     enableCellEditing: true,
     onEditCommit: (changes) => {
-      // changes is Record<string, Partial<Employee>>
-      // key is the row ID, value is the changed fields
-      setData((prev) =>
-        prev.map((row, i) => {
-          const rowChanges = changes[String(i)]
-          return rowChanges ? { ...row, ...rowChanges } : row
-        })
-      )
+      setData((prev) => mergeEditChanges(prev, changes))
     },
   })
 
@@ -469,7 +457,7 @@ Here is the full working example with all features combined:
 
 ```tsx
 import { useState } from 'react'
-import { createColumnHelper, useTable, Table, Pagination, GlobalFilter } from '@zvndev/yable-react'
+import { createColumnHelper, useTable, Table, Pagination, GlobalFilter, mergeEditChanges } from '@zvndev/yable-react'
 import type { SortingState } from '@zvndev/yable-react'
 import '@zvndev/yable-themes'
 
@@ -490,13 +478,11 @@ const columnHelper = createColumnHelper<Employee>()
 const columns = [
   columnHelper.accessor('name', {
     header: 'Name',
-    enableSorting: true,
     editable: true,
     editConfig: { type: 'text' },
   }),
   columnHelper.accessor('department', {
     header: 'Department',
-    enableSorting: true,
     editable: true,
     editConfig: {
       type: 'select',
@@ -509,14 +495,12 @@ const columns = [
   }),
   columnHelper.accessor('salary', {
     header: 'Salary',
-    enableSorting: true,
     editable: true,
     editConfig: { type: 'number' },
     cell: ({ getValue }) => `$${getValue().toLocaleString()}`,
   }),
   columnHelper.accessor('startDate', {
     header: 'Start Date',
-    enableSorting: true,
     sortingFn: 'datetime',
   }),
   columnHelper.accessor('active', {
@@ -549,12 +533,7 @@ export function EmployeeTable() {
     onSortingChange: setSorting,
     enableCellEditing: true,
     onEditCommit: (changes) => {
-      setData((prev) =>
-        prev.map((row, i) => {
-          const rowChanges = changes[String(i)]
-          return rowChanges ? { ...row, ...rowChanges } : row
-        })
-      )
+      setData((prev) => mergeEditChanges(prev, changes))
     },
     initialState: {
       pagination: { pageIndex: 0, pageSize: 5 },

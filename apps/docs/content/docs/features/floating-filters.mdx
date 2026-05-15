@@ -1,0 +1,68 @@
+---
+title: Floating Filters
+description: Inline filter inputs rendered below column headers for quick per-column filtering.
+---
+
+# Floating Filters
+
+Floating filters add a filter input row directly below the column headers. Users can filter each column without opening a separate filter panel.
+
+## Enabling Floating Filters
+
+Pass `floatingFilters` to the `<Table>` component:
+
+```tsx
+import { useTable, Table } from '@zvndev/yable-react'
+
+export function ProductTable() {
+  const table = useTable({ data, columns })
+
+  return <Table table={table} floatingFilters />
+}
+```
+
+## How It Works
+
+Yable automatically picks the right filter UI based on the column's data:
+
+- **12 or fewer unique values** → multi-select set filter (checkboxes)
+- **More than 12 unique values** → text input with debounced search
+
+The filter variant is determined per-column using `column.getFacetedUniqueValues()`.
+
+## Combining with Column Filters
+
+Floating filters use the same filter state as programmatic column filters. Setting a filter via the floating UI updates `columnFilters` state, and vice versa:
+
+```tsx
+// These are equivalent:
+table.setColumnFilters([{ id: 'department', value: 'Engineering' }])
+// ...and selecting "Engineering" in the department floating filter
+```
+
+## Custom Filter Functions
+
+Pair floating filters with custom filter functions on column definitions:
+
+```typescript
+col.accessor('salary', {
+  header: 'Salary',
+  filterFn: 'inNumberRange',
+})
+
+col.accessor('name', {
+  header: 'Name',
+  filterFn: 'includesString',
+})
+```
+
+## Styling
+
+Floating filter cells use the `.yable-th--filter` class. Customize spacing and appearance:
+
+```css
+.yable-th--filter {
+  padding: 4px 8px;
+  background: var(--yable-header-bg);
+}
+```

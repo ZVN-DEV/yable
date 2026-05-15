@@ -170,6 +170,16 @@ export function TableCell<TData extends RowData>({
     table.endCellRangeSelection()
   }, [table])
 
+  const cellClassNameDef = column.columnDef.cellClassName
+  const userClassName =
+    typeof cellClassNameDef === 'function' ? cellClassNameDef(cell.getContext()) : cellClassNameDef
+
+  const cellStyleDef = column.columnDef.cellStyle
+  const userStyle =
+    typeof cellStyleDef === 'function' ? cellStyleDef(cell.getContext()) : cellStyleDef
+
+  const mergedStyle = userStyle ? { ...style, ...userStyle } : style
+
   const classNames = [
     'yable-td',
     isFocused && 'yable-cell--focused',
@@ -178,6 +188,7 @@ export function TableCell<TData extends RowData>({
     selectionEdges?.right && 'yable-cell--selection-right',
     selectionEdges?.bottom && 'yable-cell--selection-bottom',
     selectionEdges?.left && 'yable-cell--selection-left',
+    userClassName,
   ]
     .filter(Boolean)
     .join(' ')
@@ -185,7 +196,7 @@ export function TableCell<TData extends RowData>({
   return (
     <td
       className={classNames}
-      style={style}
+      style={mergedStyle}
       data-editing={isEditing || undefined}
       data-focused={isFocused || undefined}
       data-pinned={pinned || undefined}
