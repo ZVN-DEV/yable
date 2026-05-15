@@ -5,7 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] — Unreleased
+## [0.4.0] — 2026-05-15
+
+### Added
+
+- **Column presets** — `selectColumn()`, `rowNumberColumn()`, `actionsColumn()`, `expandColumn()` factory functions for common column patterns
+- **Cell layout primitives** — `CellStack`, `CellRow`, `CellWithIcon`, `CellText` components for composing rich cell content
+- **`cellStyle` prop** — inline styles on column definitions (static object or context function)
+- **`defaultColumnDef`** — table-level default column definition merged under every column
+- **`YableProvider`** — React context for project-wide table defaults (striped, bordered, theme, defaultColumnDef, etc.)
+- **`mergeEditChanges()`** — utility to apply `onEditCommit` changes to data arrays with referential stability
+- **`useTablePersistence()`** — hook for localStorage persistence with debounced writes, version-gated schema migration, and SSR safety
+- **Editable inference** — columns with `editConfig` are automatically editable without explicitly setting `editable: true`
+- **Documentation** — cell types guide (9 built-in types), floating filters guide, column presets guide
+
+### Fixed
+
+- `cellClassName` was defined in types but never applied to `<td>` elements — now properly resolved and rendered
+- Column resize handle triggered column reorder due to `draggable` on parent `<th>` — moved `draggable` to content div
+- Fixed quickstart sorting docs contradiction (sorting is enabled by default, not opt-in per column)
+- Updated quickstart `onEditCommit` example to use `mergeEditChanges`
+
+## [0.3.0] — 2026-05-13
 
 ### Security
 
@@ -85,7 +106,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `@zvndev/yable-vanilla` — vanilla JS/DOM renderer with `renderTable()` and `renderPagination()`
 - `@zvndev/yable-themes` — 8 built-in themes and 100+ CSS custom properties
 
-[Unreleased]: https://github.com/ZVN-DEV/yable/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ZVN-DEV/yable/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/ZVN-DEV/yable/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/ZVN-DEV/yable/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ZVN-DEV/yable/releases/tag/v0.2.0
 [0.1.1]: https://github.com/ZVN-DEV/yable/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ZVN-DEV/yable/releases/tag/v0.1.0
