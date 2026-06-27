@@ -139,6 +139,7 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 - Sorting -- single and multi-column, 6 built-in comparators, custom sort functions
 - Filtering -- column filters, global search, 11 built-in filter functions, custom predicates
 - Pagination -- client-side and server-side, configurable page sizes
+- Server state -- same columns/table surface with manual sorting, filtering, pagination, cursor loading, and optimistic row updates via `useServerTable`
 - Grouping -- row grouping by any column with 9 built-in aggregation functions
 - Tree data -- nested/hierarchical row support with expand/collapse
 

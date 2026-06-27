@@ -1,11 +1,12 @@
 // @zvndev/yable-react — Cell editing tests
 
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { beforeAll, describe, it, expect } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { createColumnHelper } from '@zvndev/yable-core'
 import { useTable } from '../useTable'
 import { Table } from '../components/Table'
+import { CellInput } from '../form/CellInput'
 
 // ---------------------------------------------------------------------------
 // Test data
@@ -24,15 +25,16 @@ const testData: TestRow[] = [
 
 const col = createColumnHelper<TestRow>()
 
+beforeAll(() => {
+  Element.prototype.scrollIntoView = () => {}
+})
+
 // ---------------------------------------------------------------------------
 // Helper — renders a Table with data displayed via default cell rendering
 // ---------------------------------------------------------------------------
 
 function TestCellDisplay({ data = testData }: { data?: TestRow[] }) {
-  const columns = [
-    col.accessor('name', { header: 'Name' }),
-    col.accessor('age', { header: 'Age' }),
-  ]
+  const columns = [col.accessor('name', { header: 'Name' }), col.accessor('age', { header: 'Age' })]
 
   const table = useTable<TestRow>({
     data,
@@ -56,6 +58,28 @@ function TestEditableTable({ data = testData }: { data?: TestRow[] }) {
     col.accessor('age', {
       header: 'Age',
       editable: true,
+    }),
+  ]
+
+  const table = useTable<TestRow>({
+    data,
+    columns,
+    getRowId: (row) => row.id,
+  })
+
+  return <Table table={table} />
+}
+
+function TestAlwaysEditableTable({ data = testData }: { data?: TestRow[] }) {
+  const columns = [
+    col.accessor('name', {
+      header: 'Name',
+      editable: true,
+      meta: { alwaysEditable: true },
+      cell: (context) => <CellInput context={context} />,
+    }),
+    col.accessor('age', {
+      header: 'Age',
     }),
   ]
 
@@ -137,5 +161,14 @@ describe('Editable cells', () => {
     cells.forEach((cell) => {
       expect(cell).not.toHaveAttribute('data-cell-status')
     })
+  })
+
+  it('rerenders always-editable cells when pending values change', () => {
+    render(<TestAlwaysEditableTable />)
+
+    const input = screen.getByDisplayValue('Alice')
+    fireEvent.change(input, { target: { value: 'Alice QA' } })
+
+    expect(screen.getByDisplayValue('Alice QA')).toBeInTheDocument()
   })
 })

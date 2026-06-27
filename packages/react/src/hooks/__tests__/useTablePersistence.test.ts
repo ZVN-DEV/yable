@@ -159,7 +159,7 @@ describe('useTablePersistence', () => {
     // Now it should be written — only persisted keys
     expect(storage.setItem).toHaveBeenCalledWith('test', expect.any(String))
 
-    const written = JSON.parse((storage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1])
+    const written = JSON.parse((storage.setItem as ReturnType<typeof vi.fn>).mock.calls[0]![1])
     expect(written.version).toBe(0)
     expect(written.state.columnVisibility).toEqual({ age: false })
     expect(written.state.columnSizing).toEqual({ name: 200 })
@@ -190,7 +190,7 @@ describe('useTablePersistence', () => {
 
     // Only one write should have happened
     expect(storage.setItem).toHaveBeenCalledTimes(1)
-    const written = JSON.parse((storage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1])
+    const written = JSON.parse((storage.setItem as ReturnType<typeof vi.fn>).mock.calls[0]![1])
     expect(written.state.columnVisibility).toEqual({ b: false })
   })
 
@@ -271,7 +271,7 @@ describe('useTablePersistence', () => {
       vi.advanceTimersByTime(0)
     })
 
-    const written = JSON.parse((storage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1])
+    const written = JSON.parse((storage.setItem as ReturnType<typeof vi.fn>).mock.calls[0]![1])
     expect(written.version).toBe(5)
   })
 })

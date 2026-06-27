@@ -13,29 +13,36 @@ export function selectColumn<TData extends RowData>(
   return {
     id,
     header: ({ table }) => (
-      <input
-        type="checkbox"
-        checked={table.getIsAllPageRowsSelected()}
-        ref={(el) => {
-          if (el)
-            el.indeterminate =
-              table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()
-        }}
-        onChange={() => table.toggleAllPageRowsSelected()}
-        aria-label={headerAriaLabel}
-      />
+      <label className="yable-checkbox-hitbox" onClick={(event) => event.stopPropagation()}>
+        <input
+          type="checkbox"
+          className="yable-checkbox"
+          checked={table.getIsAllPageRowsSelected()}
+          ref={(el) => {
+            if (el)
+              el.indeterminate =
+                table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()
+          }}
+          onChange={() => table.toggleAllPageRowsSelected()}
+          aria-label={headerAriaLabel}
+        />
+      </label>
     ),
     cell: ({ row }) => (
-      <input
-        type="checkbox"
-        checked={row.getIsSelected()}
-        disabled={!row.getCanSelect()}
-        onChange={row.getToggleSelectedHandler()}
-        aria-label={`Select row`}
-      />
+      <label className="yable-checkbox-hitbox" onClick={(event) => event.stopPropagation()}>
+        <input
+          type="checkbox"
+          className="yable-checkbox"
+          checked={row.getIsSelected()}
+          disabled={!row.getCanSelect()}
+          onChange={row.getToggleSelectedHandler()}
+          aria-label="Select row"
+        />
+      </label>
     ),
     size,
-    enableSorting: false,
+    enableSorting: true,
+    sortingFn: (rowA, rowB) => Number(rowA.getIsSelected()) - Number(rowB.getIsSelected()),
     enableColumnFilter: false,
     enableResizing: false,
     enableReorder: false,

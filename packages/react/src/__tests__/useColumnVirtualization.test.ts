@@ -144,6 +144,38 @@ describe('useColumnVirtualization', () => {
       expect(result.current.totalWidth).toBe(450) // 100 + 150 + 200
     })
 
+    it('recomputes offsets when sizingKey changes for stable column references', () => {
+      let aSize = 100
+      let bSize = 150
+      const columns = [
+        {
+          id: 'a',
+          getSize: () => aSize,
+          columnDef: { header: 'a' },
+        },
+        {
+          id: 'b',
+          getSize: () => bSize,
+          columnDef: { header: 'b' },
+        },
+      ] as unknown as Column<TestRow, unknown>[]
+
+      const { result, rerender, opts } = renderColumnVirtualization({
+        columns,
+        clientWidth: 120,
+        sizingKey: 'a:100|b:150',
+      })
+
+      expect(result.current.totalWidth).toBe(250)
+
+      aSize = 180
+      bSize = 220
+      rerender({ ...opts, sizingKey: 'a:180|b:220' })
+
+      expect(result.current.totalWidth).toBe(400)
+      expect(result.current.virtualColumns[0]?.size).toBe(180)
+    })
+
     it('includes overscan columns on both sides', () => {
       // 12 cols x 120px, container 300px, overscan 2
       const { result, mock, ref } = renderColumnVirtualization({
@@ -305,6 +337,31 @@ describe('useColumnVirtualization', () => {
       for (const vc of result.current.virtualColumns) {
         expect(vc.start).toBe(expectedOffsets[vc.index])
       }
+    })
+
+    it('recomputes sizes when stable column objects report new widths', () => {
+      let width = 100
+      const columns = [
+        {
+          id: 'resizable',
+          getSize: () => width,
+          columnDef: { header: 'resizable' },
+        } as unknown as Column<TestRow, unknown>,
+      ]
+
+      const { result, rerender, opts } = renderColumnVirtualization({
+        columns,
+        clientWidth: 50,
+        sizingKey: 'resizable:100',
+      })
+
+      expect(result.current.totalWidth).toBe(100)
+
+      width = 180
+      rerender({ ...opts, sizingKey: 'resizable:180' })
+
+      expect(result.current.totalWidth).toBe(180)
+      expect(result.current.virtualColumns[0]?.size).toBe(180)
     })
   })
 

@@ -28,9 +28,7 @@ Complete reference for all public exports from `@zvndev/yable-core`.
 ## createTable
 
 ```typescript
-function createTable<TData extends RowData>(
-  options: TableOptions<TData>
-): Table<TData>
+function createTable<TData extends RowData>(options: TableOptions<TData>): Table<TData>
 ```
 
 Creates and returns a table instance. This is the main entry point for `@zvndev/yable-core`. The table instance provides all APIs for reading and manipulating table state.
@@ -43,7 +41,9 @@ import { createTable, createColumnHelper } from '@zvndev/yable-core'
 const table = createTable({
   data: myData,
   columns: myColumns,
-  onStateChange: (updater) => { /* handle state updates */ },
+  onStateChange: (updater) => {
+    /* handle state updates */
+  },
 })
 ```
 
@@ -74,13 +74,10 @@ const col = columnHelper.accessor('name', {
 **Function accessor:**
 
 ```typescript
-const col = columnHelper.accessor(
-  (row) => `${row.firstName} ${row.lastName}`,
-  {
-    id: 'fullName',
-    header: 'Full Name',
-  }
-)
+const col = columnHelper.accessor((row) => `${row.firstName} ${row.lastName}`, {
+  id: 'fullName',
+  header: 'Full Name',
+})
 ```
 
 ### `.display(options)`
@@ -118,162 +115,317 @@ The configuration object passed to `createTable()` or `useTable()`.
 
 ### Required
 
-| Option | Type | Description |
-|---|---|---|
-| `data` | `TData[]` | The data array to display |
-| `columns` | `ColumnDef<TData, any>[]` | Column definitions |
+| Option    | Type                      | Description               |
+| --------- | ------------------------- | ------------------------- |
+| `data`    | `TData[]`                 | The data array to display |
+| `columns` | `ColumnDef<TData, any>[]` | Column definitions        |
 
 ### State Management
 
-| Option | Type | Description |
-|---|---|---|
-| `state` | `Partial<TableState>` | Controlled state (merged with internal state) |
-| `onStateChange` | `OnChangeFn<TableState>` | Called when any state changes |
-| `initialState` | `Partial<TableState>` | Initial state values |
+| Option          | Type                     | Description                                   |
+| --------------- | ------------------------ | --------------------------------------------- |
+| `state`         | `Partial<TableState>`    | Controlled state (merged with internal state) |
+| `onStateChange` | `OnChangeFn<TableState>` | Called when any state changes                 |
+| `initialState`  | `Partial<TableState>`    | Initial state values                          |
 
 ### Row Identity
 
-| Option | Type | Default | Description |
-|---|---|---|---|
+| Option     | Type                              | Default         | Description             |
+| ---------- | --------------------------------- | --------------- | ----------------------- |
 | `getRowId` | `(row, index, parent?) => string` | `String(index)` | Custom row ID generator |
 
 ### Sorting Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableSorting` | `boolean` | `true` | Enable sorting globally |
-| `enableMultiSort` | `boolean` | `true` | Allow multi-column sorting |
-| `enableSortingRemoval` | `boolean` | `true` | Allow removing sort on third click |
-| `maxMultiSortColCount` | `number` | `Infinity` | Max simultaneous sort columns |
-| `manualSorting` | `boolean` | `false` | Disable client-side sorting (for server-side) |
-| `sortingFns` | `Record<string, SortingFn>` | -- | Additional named sorting functions |
-| `onSortingChange` | `OnChangeFn<SortingState>` | -- | Sorting state change callback |
-| `isMultiSortEvent` | `(e) => boolean` | Shift key | Multi-sort modifier key test |
+| Option                 | Type                        | Default    | Description                                   |
+| ---------------------- | --------------------------- | ---------- | --------------------------------------------- |
+| `enableSorting`        | `boolean`                   | `true`     | Enable sorting globally                       |
+| `enableMultiSort`      | `boolean`                   | `true`     | Allow multi-column sorting                    |
+| `enableSortingRemoval` | `boolean`                   | `true`     | Allow removing sort on third click            |
+| `maxMultiSortColCount` | `number`                    | `Infinity` | Max simultaneous sort columns                 |
+| `manualSorting`        | `boolean`                   | `false`    | Disable client-side sorting (for server-side) |
+| `sortingFns`           | `Record<string, SortingFn>` | --         | Additional named sorting functions            |
+| `onSortingChange`      | `OnChangeFn<SortingState>`  | --         | Sorting state change callback                 |
+| `isMultiSortEvent`     | `(e) => boolean`            | Shift key  | Multi-sort modifier key test                  |
 
 ### Filtering Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableFilters` | `boolean` | `true` | Enable all filtering |
-| `enableColumnFilters` | `boolean` | `true` | Enable per-column filters |
-| `enableGlobalFilter` | `boolean` | `true` | Enable global search |
-| `manualFiltering` | `boolean` | `false` | Disable client-side filtering |
-| `filterFns` | `Record<string, FilterFn>` | -- | Additional named filter functions |
-| `globalFilterFn` | `FilterFnOption` | -- | Custom global filter function |
-| `onColumnFiltersChange` | `OnChangeFn<ColumnFiltersState>` | -- | Column filters change callback |
-| `onGlobalFilterChange` | `OnChangeFn<string>` | -- | Global filter change callback |
-| `getColumnCanGlobalFilter` | `(column) => boolean` | -- | Per-column global filter opt-out |
+| Option                     | Type                             | Default | Description                       |
+| -------------------------- | -------------------------------- | ------- | --------------------------------- |
+| `enableFilters`            | `boolean`                        | `true`  | Enable all filtering              |
+| `enableColumnFilters`      | `boolean`                        | `true`  | Enable per-column filters         |
+| `enableGlobalFilter`       | `boolean`                        | `true`  | Enable global search              |
+| `manualFiltering`          | `boolean`                        | `false` | Disable client-side filtering     |
+| `filterFns`                | `Record<string, FilterFn>`       | --      | Additional named filter functions |
+| `globalFilterFn`           | `FilterFnOption`                 | --      | Custom global filter function     |
+| `onColumnFiltersChange`    | `OnChangeFn<ColumnFiltersState>` | --      | Column filters change callback    |
+| `onGlobalFilterChange`     | `OnChangeFn<string>`             | --      | Global filter change callback     |
+| `getColumnCanGlobalFilter` | `(column) => boolean`            | --      | Per-column global filter opt-out  |
 
 ### Pagination Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `manualPagination` | `boolean` | `false` | Disable client-side pagination |
-| `pageCount` | `number` | -- | Total page count (server-side) |
-| `rowCount` | `number` | -- | Total row count (server-side) |
-| `autoResetPageIndex` | `boolean` | `true` | Reset to page 0 on data change |
-| `onPaginationChange` | `OnChangeFn<PaginationState>` | -- | Pagination change callback |
+| Option               | Type                          | Default | Description                    |
+| -------------------- | ----------------------------- | ------- | ------------------------------ |
+| `manualPagination`   | `boolean`                     | `false` | Disable client-side pagination |
+| `pageCount`          | `number`                      | --      | Total page count (server-side) |
+| `rowCount`           | `number`                      | --      | Total row count (server-side)  |
+| `autoResetPageIndex` | `boolean`                     | `true`  | Reset to page 0 on data change |
+| `onPaginationChange` | `OnChangeFn<PaginationState>` | --      | Pagination change callback     |
+
+### Server State
+
+Yable treats server-backed tables as the same table model with controlled data state. Column
+definitions do not change. Instead, turn on the manual row-model flags and fetch rows when table
+state changes:
+
+```typescript
+const table = useTable({
+  data: rows,
+  columns,
+  state: { sorting, columnFilters, globalFilter, pagination },
+  onSortingChange: setSorting,
+  onColumnFiltersChange: setColumnFilters,
+  onGlobalFilterChange: setGlobalFilter,
+  onPaginationChange: setPagination,
+  manualSorting: true,
+  manualFiltering: true,
+  manualPagination: true,
+  rowCount,
+})
+```
+
+For React apps, `useServerTable` packages that controlled-state pattern into a reusable controller:
+
+```typescript
+const serverTable = useServerTable({
+  columns,
+  getRowId: (row) => row.id,
+  fetchData: async ({ sorting, globalFilter, cursor, signal }) => {
+    const response = await api.accounts.list({ sorting, q: globalFilter, cursor, signal })
+    return {
+      rows: response.rows,
+      cursor: response.nextCursor,
+      hasMore: response.hasMore,
+      rowCount: response.total,
+    }
+  },
+  updateRow: async ({ rowId, patch, signal }) => {
+    return api.accounts.update(rowId, patch, { signal })
+  },
+})
+
+return <Table table={serverTable.table} />
+```
+
+| API                            | Description                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `useServerTable().table`       | Normal Yable table instance configured for manual server state              |
+| `useServerTable().rows`        | Current loaded server window                                                |
+| `useServerTable().refresh()`   | Replace the loaded window using current sorting/filtering/pagination state  |
+| `useServerTable().loadMore()`  | Append the next cursor/page for infinite-scroll flows                       |
+| `useServerTable().updateRow()` | Optimistically patch a row, call the server, then merge or roll back result |
 
 ### Selection Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableRowSelection` | `boolean \| (row) => boolean` | `true` | Enable row selection |
-| `enableMultiRowSelection` | `boolean \| (row) => boolean` | `true` | Allow selecting multiple rows |
-| `enableSubRowSelection` | `boolean \| (row) => boolean` | `true` | Auto-select sub-rows |
-| `onRowSelectionChange` | `OnChangeFn<RowSelectionState>` | -- | Selection change callback |
+| Option                    | Type                            | Default | Description                   |
+| ------------------------- | ------------------------------- | ------- | ----------------------------- |
+| `enableRowSelection`      | `boolean \| (row) => boolean`   | `true`  | Enable row selection          |
+| `enableMultiRowSelection` | `boolean \| (row) => boolean`   | `true`  | Allow selecting multiple rows |
+| `enableSubRowSelection`   | `boolean \| (row) => boolean`   | `true`  | Auto-select sub-rows          |
+| `onRowSelectionChange`    | `OnChangeFn<RowSelectionState>` | --      | Selection change callback     |
 
 ### Visibility Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableHiding` | `boolean` | `true` | Enable column visibility toggling |
-| `onColumnVisibilityChange` | `OnChangeFn<VisibilityState>` | -- | Visibility change callback |
+| Option                     | Type                          | Default | Description                       |
+| -------------------------- | ----------------------------- | ------- | --------------------------------- |
+| `enableHiding`             | `boolean`                     | `true`  | Enable column visibility toggling |
+| `onColumnVisibilityChange` | `OnChangeFn<VisibilityState>` | --      | Visibility change callback        |
 
 ### Column Ordering
 
-| Option | Type | Description |
-|---|---|---|
+| Option                | Type                           | Description                  |
+| --------------------- | ------------------------------ | ---------------------------- |
 | `onColumnOrderChange` | `OnChangeFn<ColumnOrderState>` | Column order change callback |
 
 ### Column Pinning
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableColumnPinning` | `boolean` | -- | Enable column pinning |
-| `onColumnPinningChange` | `OnChangeFn<ColumnPinningState>` | -- | Pinning change callback |
+| Option                  | Type                             | Default | Description             |
+| ----------------------- | -------------------------------- | ------- | ----------------------- |
+| `enableColumnPinning`   | `boolean`                        | --      | Enable column pinning   |
+| `onColumnPinningChange` | `OnChangeFn<ColumnPinningState>` | --      | Pinning change callback |
 
 ### Column Sizing
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableColumnResizing` | `boolean` | `true` | Enable column drag-to-resize |
-| `columnResizeMode` | `'onChange' \| 'onEnd'` | `'onChange'` | When to update widths |
-| `columnResizeDirection` | `'ltr' \| 'rtl'` | `'ltr'` | Resize direction |
-| `onColumnSizingChange` | `OnChangeFn<ColumnSizingState>` | -- | Sizing change callback |
-| `onColumnSizingInfoChange` | `OnChangeFn<ColumnSizingInfoState>` | -- | Resize info change callback |
+| Option                     | Type                                | Default      | Description                  |
+| -------------------------- | ----------------------------------- | ------------ | ---------------------------- |
+| `enableColumnResizing`     | `boolean`                           | `true`       | Enable column drag-to-resize |
+| `columnResizeMode`         | `'onChange' \| 'onEnd'`             | `'onChange'` | When to update widths        |
+| `columnResizeDirection`    | `'ltr' \| 'rtl'`                    | `'ltr'`      | Resize direction             |
+| `onColumnSizingChange`     | `OnChangeFn<ColumnSizingState>`     | --           | Sizing change callback       |
+| `onColumnSizingInfoChange` | `OnChangeFn<ColumnSizingInfoState>` | --           | Resize info change callback  |
+
+Use column definition sizing options (`size`, `minSize`, `maxSize`,
+`enableResizing`) or `defaultColumnDef` to configure column widths. The React
+renderer keeps header and body widths synchronized internally, including during
+horizontal scroll, so consumers should not need custom CSS width overrides or
+manual `<colgroup>` synchronization.
+
+### Configuration Profiles
+
+React exports a layered config API for site-wide defaults, named table profiles,
+and reusable named cell configs.
+
+```tsx
+import { YableProvider, createYableConfig, useTable, Table } from '@zvndev/yable-react'
+
+const yableConfig = createYableConfig({
+  table: { theme: 'midnight', striped: true, stickyHeader: true },
+  columns: {
+    default: { size: 160, minSize: 80, maxSize: 420, enableResizing: true },
+  },
+  rows: { className: 'row-comfortable' },
+  cells: {
+    named: {
+      RichItem: {
+        cellStyle: { whiteSpace: 'normal', lineHeight: 1.35, fontWeight: 600 },
+      },
+    },
+  },
+  profiles: {
+    compactVariant: {
+      table: { theme: 'compact', compact: true, stickyHeader: false },
+      columns: { default: { size: 112, minSize: 56 } },
+      rows: { className: 'row-compact' },
+    },
+  },
+})
+
+function App() {
+  return (
+    <YableProvider config={yableConfig}>
+      <OrdersTable />
+    </YableProvider>
+  )
+}
+
+function OrdersTable() {
+  const table = useTable({
+    data,
+    columns: [columnHelper.accessor('name', { header: 'Name', cellConfig: 'RichItem' })],
+    configProfile: 'compactVariant',
+  })
+
+  return <Table table={table} configProfile="compactVariant" />
+}
+```
+
+Precedence is intentionally local-friendly: global defaults are lowest, named
+profiles sit above them, table `defaultColumnDef` sits above profile defaults,
+named `cellConfig` is applied per column, and explicit column definition fields
+or explicit `<Table>` props always win. Use a provider for site-wide consistency,
+named profiles for reusable variants, and inline column config for one-off cells.
+
+### Selection APIs
+
+Row selection lives in `table.getState().rowSelection`. Use
+`onRowSelectionChange` for controlled state, `table.events.on('selection:change',
+handler)` for event-style subscriptions, and `table.getSelectedRowModel()` when
+you need the current selected rows.
+
+```tsx
+const table = useTable({
+  data,
+  columns,
+  enableRowClickSelection: true,
+  enableCellSelection: true,
+  onRowSelectionChange: setRowSelection,
+  state: { rowSelection },
+})
+
+table.events.on('selection:change', ({ selection, selectedRows }) => {
+  console.log(selection, selectedRows)
+})
+```
+
+Checkbox columns are opt-in. Add one with `selectColumn()`; it renders a larger
+click target, supports selected-state sorting, and does not appear unless you add
+it to `columns`.
+
+```tsx
+const columns = [selectColumn<Order>(), columnHelper.accessor('name', { header: 'Name' })]
+```
+
+Cell range selection can be disabled globally or for specific columns:
+
+```tsx
+const table = useTable({ data, columns, enableCellSelection: false })
+
+columnHelper.accessor('actions', {
+  header: 'Actions',
+  enableCellSelection: false,
+})
+```
 
 ### Expanding Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableExpanding` | `boolean` | `true` | Enable row expanding |
-| `getSubRows` | `(row, index) => TData[] \| undefined` | -- | Return child rows for tree data |
-| `getRowCanExpand` | `(row) => boolean` | -- | Custom expand-ability check |
-| `manualExpanding` | `boolean` | `false` | Disable client-side expansion |
-| `paginateExpandedRows` | `boolean` | -- | Include expanded rows in pagination |
-| `renderDetailPanel` | `(row) => unknown` | -- | Detail panel renderer |
-| `onExpandedChange` | `OnChangeFn<ExpandedState>` | -- | Expanded state change callback |
+| Option                 | Type                                   | Default | Description                         |
+| ---------------------- | -------------------------------------- | ------- | ----------------------------------- |
+| `enableExpanding`      | `boolean`                              | `true`  | Enable row expanding                |
+| `getSubRows`           | `(row, index) => TData[] \| undefined` | --      | Return child rows for tree data     |
+| `getRowCanExpand`      | `(row) => boolean`                     | --      | Custom expand-ability check         |
+| `manualExpanding`      | `boolean`                              | `false` | Disable client-side expansion       |
+| `paginateExpandedRows` | `boolean`                              | --      | Include expanded rows in pagination |
+| `renderDetailPanel`    | `(row) => unknown`                     | --      | Detail panel renderer               |
+| `onExpandedChange`     | `OnChangeFn<ExpandedState>`            | --      | Expanded state change callback      |
 
 ### Row Pinning Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableRowPinning` | `boolean \| (row) => boolean` | `false` | Enable row pinning |
-| `keepPinnedRows` | `boolean` | -- | Keep pinned rows when filtering |
-| `onRowPinningChange` | `OnChangeFn<RowPinningState>` | -- | Row pinning change callback |
+| Option               | Type                          | Default | Description                     |
+| -------------------- | ----------------------------- | ------- | ------------------------------- |
+| `enableRowPinning`   | `boolean \| (row) => boolean` | `false` | Enable row pinning              |
+| `keepPinnedRows`     | `boolean`                     | --      | Keep pinned rows when filtering |
+| `onRowPinningChange` | `OnChangeFn<RowPinningState>` | --      | Row pinning change callback     |
 
 ### Grouping Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableGrouping` | `boolean` | `false` | Enable row grouping |
-| `manualGrouping` | `boolean` | `false` | Disable client-side grouping |
-| `onGroupingChange` | `OnChangeFn<GroupingState>` | -- | Grouping change callback |
+| Option             | Type                        | Default | Description                  |
+| ------------------ | --------------------------- | ------- | ---------------------------- |
+| `enableGrouping`   | `boolean`                   | `false` | Enable row grouping          |
+| `manualGrouping`   | `boolean`                   | `false` | Disable client-side grouping |
+| `onGroupingChange` | `OnChangeFn<GroupingState>` | --      | Grouping change callback     |
 
 ### Cell Editing Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableCellEditing` | `boolean` | -- | Enable cell editing globally |
-| `onEditingChange` | `OnChangeFn<EditingState>` | -- | Editing state change callback |
-| `onEditCommit` | `(changes: Record<string, Partial<TData>>) => void` | -- | Called when edits are committed |
+| Option              | Type                                                | Default | Description                     |
+| ------------------- | --------------------------------------------------- | ------- | ------------------------------- |
+| `enableCellEditing` | `boolean`                                           | --      | Enable cell editing globally    |
+| `onEditingChange`   | `OnChangeFn<EditingState>`                          | --      | Editing state change callback   |
+| `onEditCommit`      | `(changes: Record<string, Partial<TData>>) => void` | --      | Called when edits are committed |
 
 ### Event Handlers
 
-| Option | Type | Description |
-|---|---|---|
-| `onCellClick` | `(event: CellClickEvent) => void` | Cell click handler |
-| `onCellDoubleClick` | `(event: CellClickEvent) => void` | Cell double-click handler |
-| `onCellContextMenu` | `(event: CellClickEvent) => void` | Cell right-click handler |
-| `onRowClick` | `(event: RowClickEvent) => void` | Row click handler |
-| `onRowDoubleClick` | `(event: RowClickEvent) => void` | Row double-click handler |
-| `onRowContextMenu` | `(event: RowClickEvent) => void` | Row right-click handler |
-| `onHeaderClick` | `(event: HeaderClickEvent) => void` | Header click handler |
+| Option                | Type                                | Description                |
+| --------------------- | ----------------------------------- | -------------------------- |
+| `onCellClick`         | `(event: CellClickEvent) => void`   | Cell click handler         |
+| `onCellDoubleClick`   | `(event: CellClickEvent) => void`   | Cell double-click handler  |
+| `onCellContextMenu`   | `(event: CellClickEvent) => void`   | Cell right-click handler   |
+| `onRowClick`          | `(event: RowClickEvent) => void`    | Row click handler          |
+| `onRowDoubleClick`    | `(event: RowClickEvent) => void`    | Row double-click handler   |
+| `onRowContextMenu`    | `(event: RowClickEvent) => void`    | Row right-click handler    |
+| `onHeaderClick`       | `(event: HeaderClickEvent) => void` | Header click handler       |
 | `onHeaderContextMenu` | `(event: HeaderClickEvent) => void` | Header right-click handler |
 
 ### Export Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enableExport` | `boolean` | -- | Enable export functionality |
+| Option         | Type      | Default | Description                 |
+| -------------- | --------- | ------- | --------------------------- |
+| `enableExport` | `boolean` | --      | Enable export functionality |
 
 ### Styling
 
-| Option | Type | Description |
-|---|---|---|
-| `rowClassName` | `string \| (row) => string \| undefined` | CSS class for rows |
-| `rowStyle` | `CSSProperties \| (row) => CSSProperties` | Inline style for rows |
+| Option         | Type                                      | Description           |
+| -------------- | ----------------------------------------- | --------------------- |
+| `rowClassName` | `string \| (row) => string \| undefined`  | CSS class for rows    |
+| `rowStyle`     | `CSSProperties \| (row) => CSSProperties` | Inline style for rows |
 
 ---
 
@@ -283,222 +435,222 @@ The object returned by `createTable()` or `useTable()`. All methods are grouped 
 
 ### State
 
-| Method | Return | Description |
-|---|---|---|
-| `getState()` | `TableState` | Get the complete current state |
-| `setState(updater)` | `void` | Update the entire state |
-| `setOptions(updater)` | `void` | Update table options |
-| `reset()` | `void` | Reset all state to initial values |
+| Method                | Return       | Description                       |
+| --------------------- | ------------ | --------------------------------- |
+| `getState()`          | `TableState` | Get the complete current state    |
+| `setState(updater)`   | `void`       | Update the entire state           |
+| `setOptions(updater)` | `void`       | Update table options              |
+| `reset()`             | `void`       | Reset all state to initial values |
 
 ### Column API
 
-| Method | Return | Description |
-|---|---|---|
-| `getAllColumns()` | `Column[]` | All columns (including group parents) |
-| `getAllFlatColumns()` | `Column[]` | All leaf columns (flat) |
-| `getAllLeafColumns()` | `Column[]` | All leaf columns |
-| `getColumn(id)` | `Column \| undefined` | Get a column by ID |
-| `getVisibleFlatColumns()` | `Column[]` | Visible leaf columns (respecting order/visibility) |
-| `getVisibleLeafColumns()` | `Column[]` | Same as `getVisibleFlatColumns()` |
-| `getLeftVisibleLeafColumns()` | `Column[]` | Left-pinned visible columns |
-| `getRightVisibleLeafColumns()` | `Column[]` | Right-pinned visible columns |
-| `getCenterVisibleLeafColumns()` | `Column[]` | Unpinned visible columns |
+| Method                          | Return                | Description                                        |
+| ------------------------------- | --------------------- | -------------------------------------------------- |
+| `getAllColumns()`               | `Column[]`            | All columns (including group parents)              |
+| `getAllFlatColumns()`           | `Column[]`            | All leaf columns (flat)                            |
+| `getAllLeafColumns()`           | `Column[]`            | All leaf columns                                   |
+| `getColumn(id)`                 | `Column \| undefined` | Get a column by ID                                 |
+| `getVisibleFlatColumns()`       | `Column[]`            | Visible leaf columns (respecting order/visibility) |
+| `getVisibleLeafColumns()`       | `Column[]`            | Same as `getVisibleFlatColumns()`                  |
+| `getLeftVisibleLeafColumns()`   | `Column[]`            | Left-pinned visible columns                        |
+| `getRightVisibleLeafColumns()`  | `Column[]`            | Right-pinned visible columns                       |
+| `getCenterVisibleLeafColumns()` | `Column[]`            | Unpinned visible columns                           |
 
 ### Header API
 
-| Method | Return | Description |
-|---|---|---|
-| `getHeaderGroups()` | `HeaderGroup[]` | All header groups |
-| `getLeftHeaderGroups()` | `HeaderGroup[]` | Left-pinned header groups |
-| `getRightHeaderGroups()` | `HeaderGroup[]` | Right-pinned header groups |
-| `getCenterHeaderGroups()` | `HeaderGroup[]` | Unpinned header groups |
-| `getFooterGroups()` | `HeaderGroup[]` | Footer groups (reversed header groups) |
-| `getLeftFooterGroups()` | `HeaderGroup[]` | Left-pinned footer groups |
-| `getRightFooterGroups()` | `HeaderGroup[]` | Right-pinned footer groups |
-| `getCenterFooterGroups()` | `HeaderGroup[]` | Unpinned footer groups |
+| Method                    | Return          | Description                            |
+| ------------------------- | --------------- | -------------------------------------- |
+| `getHeaderGroups()`       | `HeaderGroup[]` | All header groups                      |
+| `getLeftHeaderGroups()`   | `HeaderGroup[]` | Left-pinned header groups              |
+| `getRightHeaderGroups()`  | `HeaderGroup[]` | Right-pinned header groups             |
+| `getCenterHeaderGroups()` | `HeaderGroup[]` | Unpinned header groups                 |
+| `getFooterGroups()`       | `HeaderGroup[]` | Footer groups (reversed header groups) |
+| `getLeftFooterGroups()`   | `HeaderGroup[]` | Left-pinned footer groups              |
+| `getRightFooterGroups()`  | `HeaderGroup[]` | Right-pinned footer groups             |
+| `getCenterFooterGroups()` | `HeaderGroup[]` | Unpinned footer groups                 |
 
 ### Row Model API
 
-| Method | Return | Description |
-|---|---|---|
-| `getCoreRowModel()` | `RowModel` | Raw data as rows (no filtering/sorting) |
-| `getRowModel()` | `RowModel` | Final row model (filtered, sorted, paginated) |
-| `getRow(id, searchAll?)` | `Row` | Get a specific row by ID |
-| `getFilteredRowModel()` | `RowModel` | Rows after filtering |
-| `getPreFilteredRowModel()` | `RowModel` | Rows before filtering (= core model) |
-| `getSortedRowModel()` | `RowModel` | Rows after sorting |
-| `getPreSortedRowModel()` | `RowModel` | Rows before sorting (= filtered model) |
-| `getPaginationRowModel()` | `RowModel` | Rows after pagination |
-| `getPrePaginationRowModel()` | `RowModel` | Rows before pagination (= sorted model) |
-| `getGroupedRowModel()` | `RowModel` | Rows after grouping |
-| `getPreGroupedRowModel()` | `RowModel` | Rows before grouping |
-| `getExpandedRowModel()` | `RowModel` | Rows after expansion |
-| `getPreExpandedRowModel()` | `RowModel` | Rows before expansion |
+| Method                       | Return     | Description                                   |
+| ---------------------------- | ---------- | --------------------------------------------- |
+| `getCoreRowModel()`          | `RowModel` | Raw data as rows (no filtering/sorting)       |
+| `getRowModel()`              | `RowModel` | Final row model (filtered, sorted, paginated) |
+| `getRow(id, searchAll?)`     | `Row`      | Get a specific row by ID                      |
+| `getFilteredRowModel()`      | `RowModel` | Rows after filtering                          |
+| `getPreFilteredRowModel()`   | `RowModel` | Rows before filtering (= core model)          |
+| `getSortedRowModel()`        | `RowModel` | Rows after sorting                            |
+| `getPreSortedRowModel()`     | `RowModel` | Rows before sorting (= filtered model)        |
+| `getPaginationRowModel()`    | `RowModel` | Rows after pagination                         |
+| `getPrePaginationRowModel()` | `RowModel` | Rows before pagination (= sorted model)       |
+| `getGroupedRowModel()`       | `RowModel` | Rows after grouping                           |
+| `getPreGroupedRowModel()`    | `RowModel` | Rows before grouping                          |
+| `getExpandedRowModel()`      | `RowModel` | Rows after expansion                          |
+| `getPreExpandedRowModel()`   | `RowModel` | Rows before expansion                         |
 
 ### Sorting API
 
-| Method | Return | Description |
-|---|---|---|
-| `setSorting(updater)` | `void` | Set the sorting state |
-| `resetSorting(defaultState?)` | `void` | Reset sorting |
+| Method                        | Return | Description           |
+| ----------------------------- | ------ | --------------------- |
+| `setSorting(updater)`         | `void` | Set the sorting state |
+| `resetSorting(defaultState?)` | `void` | Reset sorting         |
 
 ### Filtering API
 
-| Method | Return | Description |
-|---|---|---|
-| `setColumnFilters(updater)` | `void` | Set column filter state |
-| `resetColumnFilters(defaultState?)` | `void` | Reset column filters |
-| `setGlobalFilter(updater)` | `void` | Set global filter value |
-| `resetGlobalFilter(defaultState?)` | `void` | Reset global filter |
+| Method                              | Return | Description             |
+| ----------------------------------- | ------ | ----------------------- |
+| `setColumnFilters(updater)`         | `void` | Set column filter state |
+| `resetColumnFilters(defaultState?)` | `void` | Reset column filters    |
+| `setGlobalFilter(updater)`          | `void` | Set global filter value |
+| `resetGlobalFilter(defaultState?)`  | `void` | Reset global filter     |
 
 ### Pagination API
 
-| Method | Return | Description |
-|---|---|---|
-| `getPageCount()` | `number` | Total number of pages |
-| `getRowCount()` | `number` | Total number of rows |
-| `getCanPreviousPage()` | `boolean` | Can navigate to previous page |
-| `getCanNextPage()` | `boolean` | Can navigate to next page |
-| `previousPage()` | `void` | Go to previous page |
-| `nextPage()` | `void` | Go to next page |
-| `firstPage()` | `void` | Go to first page |
-| `lastPage()` | `void` | Go to last page |
-| `setPagination(updater)` | `void` | Set pagination state |
-| `setPageIndex(updater)` | `void` | Set page index |
-| `setPageSize(size)` | `void` | Set page size |
-| `resetPageIndex(defaultState?)` | `void` | Reset page index |
-| `resetPageSize(defaultState?)` | `void` | Reset page size |
-| `resetPagination(defaultState?)` | `void` | Reset all pagination |
+| Method                           | Return    | Description                   |
+| -------------------------------- | --------- | ----------------------------- |
+| `getPageCount()`                 | `number`  | Total number of pages         |
+| `getRowCount()`                  | `number`  | Total number of rows          |
+| `getCanPreviousPage()`           | `boolean` | Can navigate to previous page |
+| `getCanNextPage()`               | `boolean` | Can navigate to next page     |
+| `previousPage()`                 | `void`    | Go to previous page           |
+| `nextPage()`                     | `void`    | Go to next page               |
+| `firstPage()`                    | `void`    | Go to first page              |
+| `lastPage()`                     | `void`    | Go to last page               |
+| `setPagination(updater)`         | `void`    | Set pagination state          |
+| `setPageIndex(updater)`          | `void`    | Set page index                |
+| `setPageSize(size)`              | `void`    | Set page size                 |
+| `resetPageIndex(defaultState?)`  | `void`    | Reset page index              |
+| `resetPageSize(defaultState?)`   | `void`    | Reset page size               |
+| `resetPagination(defaultState?)` | `void`    | Reset all pagination          |
 
 ### Selection API
 
-| Method | Return | Description |
-|---|---|---|
-| `getSelectedRowModel()` | `RowModel` | Model of selected rows |
-| `getFilteredSelectedRowModel()` | `RowModel` | Selected rows (filtered) |
-| `getGroupedSelectedRowModel()` | `RowModel` | Selected rows (grouped) |
-| `getIsAllRowsSelected()` | `boolean` | All rows selected? |
-| `getIsSomeRowsSelected()` | `boolean` | Some (but not all) rows selected? |
-| `getIsAllPageRowsSelected()` | `boolean` | All current page rows selected? |
-| `getIsSomePageRowsSelected()` | `boolean` | Some current page rows selected? |
-| `toggleAllRowsSelected(value?)` | `void` | Select/deselect all rows |
-| `toggleAllPageRowsSelected(value?)` | `void` | Select/deselect current page rows |
-| `setRowSelection(updater)` | `void` | Set row selection state |
-| `resetRowSelection(defaultState?)` | `void` | Reset row selection |
+| Method                              | Return     | Description                       |
+| ----------------------------------- | ---------- | --------------------------------- |
+| `getSelectedRowModel()`             | `RowModel` | Model of selected rows            |
+| `getFilteredSelectedRowModel()`     | `RowModel` | Selected rows (filtered)          |
+| `getGroupedSelectedRowModel()`      | `RowModel` | Selected rows (grouped)           |
+| `getIsAllRowsSelected()`            | `boolean`  | All rows selected?                |
+| `getIsSomeRowsSelected()`           | `boolean`  | Some (but not all) rows selected? |
+| `getIsAllPageRowsSelected()`        | `boolean`  | All current page rows selected?   |
+| `getIsSomePageRowsSelected()`       | `boolean`  | Some current page rows selected?  |
+| `toggleAllRowsSelected(value?)`     | `void`     | Select/deselect all rows          |
+| `toggleAllPageRowsSelected(value?)` | `void`     | Select/deselect current page rows |
+| `setRowSelection(updater)`          | `void`     | Set row selection state           |
+| `resetRowSelection(defaultState?)`  | `void`     | Reset row selection               |
 
 ### Visibility API
 
-| Method | Return | Description |
-|---|---|---|
-| `setColumnVisibility(updater)` | `void` | Set column visibility state |
-| `resetColumnVisibility(defaultState?)` | `void` | Reset column visibility |
-| `toggleAllColumnsVisible(value?)` | `void` | Show/hide all columns |
-| `getIsAllColumnsVisible()` | `boolean` | All columns visible? |
-| `getIsSomeColumnsVisible()` | `boolean` | Some columns visible? |
+| Method                                 | Return    | Description                 |
+| -------------------------------------- | --------- | --------------------------- |
+| `setColumnVisibility(updater)`         | `void`    | Set column visibility state |
+| `resetColumnVisibility(defaultState?)` | `void`    | Reset column visibility     |
+| `toggleAllColumnsVisible(value?)`      | `void`    | Show/hide all columns       |
+| `getIsAllColumnsVisible()`             | `boolean` | All columns visible?        |
+| `getIsSomeColumnsVisible()`            | `boolean` | Some columns visible?       |
 
 ### Column Order API
 
-| Method | Return | Description |
-|---|---|---|
-| `setColumnOrder(updater)` | `void` | Set column order |
+| Method                            | Return | Description        |
+| --------------------------------- | ------ | ------------------ |
+| `setColumnOrder(updater)`         | `void` | Set column order   |
 | `resetColumnOrder(defaultState?)` | `void` | Reset column order |
 
 ### Column Pinning API
 
-| Method | Return | Description |
-|---|---|---|
-| `setColumnPinning(updater)` | `void` | Set column pinning state |
-| `resetColumnPinning(defaultState?)` | `void` | Reset column pinning |
-| `getIsSomeColumnsPinned(position?)` | `boolean` | Any columns pinned? |
+| Method                              | Return    | Description              |
+| ----------------------------------- | --------- | ------------------------ |
+| `setColumnPinning(updater)`         | `void`    | Set column pinning state |
+| `resetColumnPinning(defaultState?)` | `void`    | Reset column pinning     |
+| `getIsSomeColumnsPinned(position?)` | `boolean` | Any columns pinned?      |
 
 ### Column Sizing API
 
-| Method | Return | Description |
-|---|---|---|
-| `setColumnSizing(updater)` | `void` | Set column sizing state |
-| `setColumnSizingInfo(updater)` | `void` | Set sizing info (resize-in-progress data) |
-| `resetColumnSizing(defaultState?)` | `void` | Reset column sizing |
-| `getTotalSize()` | `number` | Total width of all visible columns |
-| `getLeftTotalSize()` | `number` | Total width of left-pinned columns |
-| `getRightTotalSize()` | `number` | Total width of right-pinned columns |
-| `getCenterTotalSize()` | `number` | Total width of unpinned columns |
+| Method                             | Return   | Description                               |
+| ---------------------------------- | -------- | ----------------------------------------- |
+| `setColumnSizing(updater)`         | `void`   | Set column sizing state                   |
+| `setColumnSizingInfo(updater)`     | `void`   | Set sizing info (resize-in-progress data) |
+| `resetColumnSizing(defaultState?)` | `void`   | Reset column sizing                       |
+| `getTotalSize()`                   | `number` | Total width of all visible columns        |
+| `getLeftTotalSize()`               | `number` | Total width of left-pinned columns        |
+| `getRightTotalSize()`              | `number` | Total width of right-pinned columns       |
+| `getCenterTotalSize()`             | `number` | Total width of unpinned columns           |
 
 ### Expanding API
 
-| Method | Return | Description |
-|---|---|---|
-| `setExpanded(updater)` | `void` | Set expanded state |
-| `toggleAllRowsExpanded(expanded?)` | `void` | Expand/collapse all |
-| `resetExpanded(defaultState?)` | `void` | Reset expanded state |
-| `getCanSomeRowsExpand()` | `boolean` | Any rows can expand? |
-| `getIsAllRowsExpanded()` | `boolean` | All expandable rows expanded? |
-| `getIsSomeRowsExpanded()` | `boolean` | Some rows expanded? |
-| `getExpandedDepth()` | `number` | Maximum expansion depth |
+| Method                             | Return    | Description                   |
+| ---------------------------------- | --------- | ----------------------------- |
+| `setExpanded(updater)`             | `void`    | Set expanded state            |
+| `toggleAllRowsExpanded(expanded?)` | `void`    | Expand/collapse all           |
+| `resetExpanded(defaultState?)`     | `void`    | Reset expanded state          |
+| `getCanSomeRowsExpand()`           | `boolean` | Any rows can expand?          |
+| `getIsAllRowsExpanded()`           | `boolean` | All expandable rows expanded? |
+| `getIsSomeRowsExpanded()`          | `boolean` | Some rows expanded?           |
+| `getExpandedDepth()`               | `number`  | Maximum expansion depth       |
 
 ### Row Pinning API
 
-| Method | Return | Description |
-|---|---|---|
-| `setRowPinning(updater)` | `void` | Set row pinning state |
-| `resetRowPinning(defaultState?)` | `void` | Reset row pinning |
-| `getTopRows()` | `Row[]` | Top-pinned rows |
-| `getBottomRows()` | `Row[]` | Bottom-pinned rows |
-| `getCenterRows()` | `Row[]` | Unpinned rows |
+| Method                           | Return  | Description           |
+| -------------------------------- | ------- | --------------------- |
+| `setRowPinning(updater)`         | `void`  | Set row pinning state |
+| `resetRowPinning(defaultState?)` | `void`  | Reset row pinning     |
+| `getTopRows()`                   | `Row[]` | Top-pinned rows       |
+| `getBottomRows()`                | `Row[]` | Bottom-pinned rows    |
+| `getCenterRows()`                | `Row[]` | Unpinned rows         |
 
 ### Grouping API
 
-| Method | Return | Description |
-|---|---|---|
-| `setGrouping(updater)` | `void` | Set grouping state |
-| `resetGrouping(defaultState?)` | `void` | Reset grouping |
+| Method                         | Return | Description        |
+| ------------------------------ | ------ | ------------------ |
+| `setGrouping(updater)`         | `void` | Set grouping state |
+| `resetGrouping(defaultState?)` | `void` | Reset grouping     |
 
 ### Editing API
 
-| Method | Return | Description |
-|---|---|---|
-| `startEditing(rowId, columnId)` | `void` | Enter edit mode on a cell |
-| `commitEdit()` | `void` | Commit the active edit |
-| `cancelEdit()` | `void` | Cancel the active edit |
-| `setPendingValue(rowId, columnId, value)` | `void` | Set a pending edit value |
-| `getPendingValue(rowId, columnId)` | `unknown \| undefined` | Get a pending edit value |
-| `getPendingRow(rowId)` | `Partial<TData> \| undefined` | Get all pending values for a row |
-| `getAllPendingChanges()` | `Record<string, Partial<TData>>` | Get all pending changes |
-| `hasPendingChanges()` | `boolean` | Any uncommitted changes? |
-| `commitAllPending()` | `void` | Commit all pending changes (triggers `onEditCommit`) |
-| `discardAllPending()` | `void` | Discard all pending changes |
-| `getValidationErrors()` | `Record<string, Record<string, string>>` | Get validation errors |
-| `isValid()` | `boolean` | All pending values valid? |
-| `setEditing(updater)` | `void` | Set editing state directly |
-| `resetEditing(defaultState?)` | `void` | Reset editing state |
+| Method                                    | Return                                   | Description                                          |
+| ----------------------------------------- | ---------------------------------------- | ---------------------------------------------------- |
+| `startEditing(rowId, columnId)`           | `void`                                   | Enter edit mode on a cell                            |
+| `commitEdit()`                            | `void`                                   | Commit the active edit                               |
+| `cancelEdit()`                            | `void`                                   | Cancel the active edit                               |
+| `setPendingValue(rowId, columnId, value)` | `void`                                   | Set a pending edit value                             |
+| `getPendingValue(rowId, columnId)`        | `unknown \| undefined`                   | Get a pending edit value                             |
+| `getPendingRow(rowId)`                    | `Partial<TData> \| undefined`            | Get all pending values for a row                     |
+| `getAllPendingChanges()`                  | `Record<string, Partial<TData>>`         | Get all pending changes                              |
+| `hasPendingChanges()`                     | `boolean`                                | Any uncommitted changes?                             |
+| `commitAllPending()`                      | `void`                                   | Commit all pending changes (triggers `onEditCommit`) |
+| `discardAllPending()`                     | `void`                                   | Discard all pending changes                          |
+| `getValidationErrors()`                   | `Record<string, Record<string, string>>` | Get validation errors                                |
+| `isValid()`                               | `boolean`                                | All pending values valid?                            |
+| `setEditing(updater)`                     | `void`                                   | Set editing state directly                           |
+| `resetEditing(defaultState?)`             | `void`                                   | Reset editing state                                  |
 
 ### Async Commit API
 
-| Method | Return | Description |
-|---|---|---|
-| `getCellRenderValue(rowId, columnId)` | `unknown` | Returns pending value if commit is in-flight, otherwise saved value |
-| `getCellStatus(rowId, columnId)` | `CellStatus` | Returns `'idle' \| 'pending' \| 'error' \| 'conflict'` |
-| `getCellErrorMessage(rowId, columnId)` | `string \| undefined` | Error message from failed commit |
-| `getCellConflictWith(rowId, columnId)` | `unknown` | The server value that conflicts with the pending value |
-| `commit()` | `Promise<void>` | Dispatch all pending edits (used when `autoCommit: false`) |
-| `retryCommit(rowId, columnId)` | `Promise<void>` | Retry a failed commit |
-| `dismissCommit(rowId, columnId)` | `void` | Dismiss an error/conflict and revert to saved value |
-| `dismissAllCommits()` | `void` | Dismiss all errors and conflicts |
+| Method                                 | Return                | Description                                                         |
+| -------------------------------------- | --------------------- | ------------------------------------------------------------------- |
+| `getCellRenderValue(rowId, columnId)`  | `unknown`             | Returns pending value if commit is in-flight, otherwise saved value |
+| `getCellStatus(rowId, columnId)`       | `CellStatus`          | Returns `'idle' \| 'pending' \| 'error' \| 'conflict'`              |
+| `getCellErrorMessage(rowId, columnId)` | `string \| undefined` | Error message from failed commit                                    |
+| `getCellConflictWith(rowId, columnId)` | `unknown`             | The server value that conflicts with the pending value              |
+| `commit()`                             | `Promise<void>`       | Dispatch all pending edits (used when `autoCommit: false`)          |
+| `retryCommit(rowId, columnId)`         | `Promise<void>`       | Retry a failed commit                                               |
+| `dismissCommit(rowId, columnId)`       | `void`                | Dismiss an error/conflict and revert to saved value                 |
+| `dismissAllCommits()`                  | `void`                | Dismiss all errors and conflicts                                    |
 
 ### Export API
 
-| Method | Return | Description |
-|---|---|---|
+| Method                 | Return   | Description                             |
+| ---------------------- | -------- | --------------------------------------- |
 | `exportData(options?)` | `string` | Export table data as CSV or JSON string |
 
 ### Event Emitter
 
-| Property | Type | Description |
-|---|---|---|
-| `events` | `EventEmitter<YableEventMap>` | Typed event emitter |
-| `events.on(event, handler)` | `() => void` | Subscribe (returns unsubscribe function) |
-| `events.off(event, handler)` | `void` | Unsubscribe |
-| `events.emit(event, payload)` | `void` | Emit an event |
-| `events.removeAllListeners(event?)` | `void` | Remove all listeners |
+| Property                            | Type                          | Description                              |
+| ----------------------------------- | ----------------------------- | ---------------------------------------- |
+| `events`                            | `EventEmitter<YableEventMap>` | Typed event emitter                      |
+| `events.on(event, handler)`         | `() => void`                  | Subscribe (returns unsubscribe function) |
+| `events.off(event, handler)`        | `void`                        | Unsubscribe                              |
+| `events.emit(event, payload)`       | `void`                        | Emit an event                            |
+| `events.removeAllListeners(event?)` | `void`                        | Remove all listeners                     |
 
 ---
 
@@ -508,94 +660,98 @@ Returned by `table.getColumn(id)` or accessed from `table.getAllColumns()`.
 
 ### Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `id` | `string` | Unique column identifier |
-| `depth` | `number` | Nesting depth (0 for top-level) |
-| `columnDef` | `ColumnDef` | The original column definition |
-| `columns` | `Column[]` | Child columns (for group columns) |
-| `parent` | `Column \| undefined` | Parent column (if nested) |
-| `accessorFn` | `(row, index) => TValue` | Value accessor function |
+| Property     | Type                     | Description                       |
+| ------------ | ------------------------ | --------------------------------- |
+| `id`         | `string`                 | Unique column identifier          |
+| `depth`      | `number`                 | Nesting depth (0 for top-level)   |
+| `columnDef`  | `ColumnDef`              | The original column definition    |
+| `columns`    | `Column[]`               | Child columns (for group columns) |
+| `parent`     | `Column \| undefined`    | Parent column (if nested)         |
+| `accessorFn` | `(row, index) => TValue` | Value accessor function           |
 
 ### Traversal
 
-| Method | Return | Description |
-|---|---|---|
+| Method             | Return     | Description                           |
+| ------------------ | ---------- | ------------------------------------- |
 | `getFlatColumns()` | `Column[]` | This column + all nested flat columns |
-| `getLeafColumns()` | `Column[]` | Leaf columns in this column's tree |
+| `getLeafColumns()` | `Column[]` | Leaf columns in this column's tree    |
 
 ### Sizing
 
-| Method | Return | Description |
-|---|---|---|
-| `getSize()` | `number` | Current width in px |
-| `getStart(position?)` | `number` | Start offset in px |
-| `getAfter(position?)` | `number` | Remaining space after this column |
-| `getCanResize()` | `boolean` | Can this column be resized? |
-| `getIsResizing()` | `boolean` | Is this column currently being resized? |
-| `resetSize()` | `void` | Reset to default size |
+| Method                | Return    | Description                             |
+| --------------------- | --------- | --------------------------------------- |
+| `getSize()`           | `number`  | Current width in px                     |
+| `getStart(position?)` | `number`  | Start offset in px                      |
+| `getAfter(position?)` | `number`  | Remaining space after this column       |
+| `getCanResize()`      | `boolean` | Can this column be resized?             |
+| `getIsResizing()`     | `boolean` | Is this column currently being resized? |
+| `resetSize()`         | `void`    | Reset to default size                   |
+
+The configured width comes from `state.columnSizing[columnId]`, then
+`columnDef.size`, then the default size. `minSize` and `maxSize` are enforced
+during drag resizing.
 
 ### Sorting
 
-| Method | Return | Description |
-|---|---|---|
-| `getCanSort()` | `boolean` | Can this column be sorted? |
-| `getCanMultiSort()` | `boolean` | Can participate in multi-sort? |
-| `getSortingFn()` | `SortingFn` | Get the active sorting function |
-| `getNextSortingOrder()` | `SortDirection \| false` | What the next click would do |
-| `getIsSorted()` | `false \| SortDirection` | Current sort direction |
-| `getSortIndex()` | `number` | Sort priority index (multi-sort) |
-| `clearSorting()` | `void` | Remove sort from this column |
-| `toggleSorting(desc?, isMulti?)` | `void` | Toggle or set sort direction |
-| `getToggleSortingHandler()` | `(event) => void` | Event handler for sort toggle |
+| Method                           | Return                   | Description                      |
+| -------------------------------- | ------------------------ | -------------------------------- |
+| `getCanSort()`                   | `boolean`                | Can this column be sorted?       |
+| `getCanMultiSort()`              | `boolean`                | Can participate in multi-sort?   |
+| `getSortingFn()`                 | `SortingFn`              | Get the active sorting function  |
+| `getNextSortingOrder()`          | `SortDirection \| false` | What the next click would do     |
+| `getIsSorted()`                  | `false \| SortDirection` | Current sort direction           |
+| `getSortIndex()`                 | `number`                 | Sort priority index (multi-sort) |
+| `clearSorting()`                 | `void`                   | Remove sort from this column     |
+| `toggleSorting(desc?, isMulti?)` | `void`                   | Toggle or set sort direction     |
+| `getToggleSortingHandler()`      | `(event) => void`        | Event handler for sort toggle    |
 
 ### Filtering
 
-| Method | Return | Description |
-|---|---|---|
-| `getCanFilter()` | `boolean` | Can this column be filtered? |
-| `getCanGlobalFilter()` | `boolean` | Included in global filter? |
-| `getIsFiltered()` | `boolean` | Is a filter active on this column? |
-| `getFilterValue()` | `unknown` | Current filter value |
-| `getFilterIndex()` | `number` | Index in the column filters array |
-| `setFilterValue(value)` | `void` | Set filter value for this column |
-| `getFilterFn()` | `FilterFn \| undefined` | Get the active filter function |
+| Method                  | Return                  | Description                        |
+| ----------------------- | ----------------------- | ---------------------------------- |
+| `getCanFilter()`        | `boolean`               | Can this column be filtered?       |
+| `getCanGlobalFilter()`  | `boolean`               | Included in global filter?         |
+| `getIsFiltered()`       | `boolean`               | Is a filter active on this column? |
+| `getFilterValue()`      | `unknown`               | Current filter value               |
+| `getFilterIndex()`      | `number`                | Index in the column filters array  |
+| `setFilterValue(value)` | `void`                  | Set filter value for this column   |
+| `getFilterFn()`         | `FilterFn \| undefined` | Get the active filter function     |
 
 ### Visibility
 
-| Method | Return | Description |
-|---|---|---|
-| `getCanHide()` | `boolean` | Can this column be hidden? |
-| `getIsVisible()` | `boolean` | Is this column visible? |
-| `toggleVisibility(value?)` | `void` | Show/hide this column |
+| Method                         | Return            | Description                         |
+| ------------------------------ | ----------------- | ----------------------------------- |
+| `getCanHide()`                 | `boolean`         | Can this column be hidden?          |
+| `getIsVisible()`               | `boolean`         | Is this column visible?             |
+| `toggleVisibility(value?)`     | `void`            | Show/hide this column               |
 | `getToggleVisibilityHandler()` | `(event) => void` | Event handler for visibility toggle |
 
 ### Pinning
 
-| Method | Return | Description |
-|---|---|---|
-| `getCanPin()` | `boolean` | Can this column be pinned? |
-| `getIsPinned()` | `ColumnPinningPosition \| false` | `'left'`, `'right'`, or `false` |
-| `pin(position)` | `void` | Pin to `'left'`, `'right'`, or `false` (unpin) |
-| `getPinnedIndex()` | `number` | Index among pinned columns |
+| Method             | Return                           | Description                                    |
+| ------------------ | -------------------------------- | ---------------------------------------------- |
+| `getCanPin()`      | `boolean`                        | Can this column be pinned?                     |
+| `getIsPinned()`    | `ColumnPinningPosition \| false` | `'left'`, `'right'`, or `false`                |
+| `pin(position)`    | `void`                           | Pin to `'left'`, `'right'`, or `false` (unpin) |
+| `getPinnedIndex()` | `number`                         | Index among pinned columns                     |
 
 ### Faceting
 
-| Method | Return | Description |
-|---|---|---|
-| `getFacetedRowModel()` | `RowModel` | Faceted row model for this column |
-| `getFacetedUniqueValues()` | `Map<unknown, number>` | Unique values and counts |
-| `getFacetedMinMaxValues()` | `[number, number] \| undefined` | Min/max for numeric columns |
+| Method                     | Return                          | Description                       |
+| -------------------------- | ------------------------------- | --------------------------------- |
+| `getFacetedRowModel()`     | `RowModel`                      | Faceted row model for this column |
+| `getFacetedUniqueValues()` | `Map<unknown, number>`          | Unique values and counts          |
+| `getFacetedMinMaxValues()` | `[number, number] \| undefined` | Min/max for numeric columns       |
 
 ### Grouping
 
-| Method | Return | Description |
-|---|---|---|
-| `getCanGroup()` | `boolean` | Can this column be grouped? |
-| `getIsGrouped()` | `boolean` | Is this column currently grouped? |
-| `getGroupedIndex()` | `number` | Index in grouping array |
-| `toggleGrouping()` | `void` | Toggle grouping on this column |
-| `getAggregationFn()` | `AggregationFn \| undefined` | Get the aggregation function |
+| Method               | Return                       | Description                       |
+| -------------------- | ---------------------------- | --------------------------------- |
+| `getCanGroup()`      | `boolean`                    | Can this column be grouped?       |
+| `getIsGrouped()`     | `boolean`                    | Is this column currently grouped? |
+| `getGroupedIndex()`  | `number`                     | Index in grouping array           |
+| `toggleGrouping()`   | `void`                       | Toggle grouping on this column    |
+| `getAggregationFn()` | `AggregationFn \| undefined` | Get the aggregation function      |
 
 ---
 
@@ -605,71 +761,71 @@ Accessed via `table.getRowModel().rows` or `table.getRow(id)`.
 
 ### Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `id` | `string` | Unique row identifier |
-| `index` | `number` | Row index in the current array |
-| `original` | `TData` | The original data object |
-| `depth` | `number` | Nesting depth (0 for top-level) |
-| `parentId` | `string \| undefined` | Parent row ID (tree data) |
-| `subRows` | `Row[]` | Child rows (tree data) |
-| `groupingColumnId` | `string \| undefined` | Column ID this row groups by |
-| `groupingValue` | `unknown` | Group key value |
+| Property           | Type                  | Description                     |
+| ------------------ | --------------------- | ------------------------------- |
+| `id`               | `string`              | Unique row identifier           |
+| `index`            | `number`              | Row index in the current array  |
+| `original`         | `TData`               | The original data object        |
+| `depth`            | `number`              | Nesting depth (0 for top-level) |
+| `parentId`         | `string \| undefined` | Parent row ID (tree data)       |
+| `subRows`          | `Row[]`               | Child rows (tree data)          |
+| `groupingColumnId` | `string \| undefined` | Column ID this row groups by    |
+| `groupingValue`    | `unknown`             | Group key value                 |
 
 ### Value Access
 
-| Method | Return | Description |
-|---|---|---|
-| `getValue<TValue>(columnId)` | `TValue` | Get the typed value for a column |
-| `renderValue<TValue>(columnId)` | `TValue` | Get render-ready value |
+| Method                          | Return   | Description                      |
+| ------------------------------- | -------- | -------------------------------- |
+| `getValue<TValue>(columnId)`    | `TValue` | Get the typed value for a column |
+| `renderValue<TValue>(columnId)` | `TValue` | Get render-ready value           |
 
 ### Cell Access
 
-| Method | Return | Description |
-|---|---|---|
-| `getAllCells()` | `Cell[]` | All cells in this row |
-| `getVisibleCells()` | `Cell[]` | Visible cells only |
-| `getLeftVisibleCells()` | `Cell[]` | Left-pinned visible cells |
-| `getRightVisibleCells()` | `Cell[]` | Right-pinned visible cells |
-| `getCenterVisibleCells()` | `Cell[]` | Unpinned visible cells |
+| Method                    | Return   | Description                |
+| ------------------------- | -------- | -------------------------- |
+| `getAllCells()`           | `Cell[]` | All cells in this row      |
+| `getVisibleCells()`       | `Cell[]` | Visible cells only         |
+| `getLeftVisibleCells()`   | `Cell[]` | Left-pinned visible cells  |
+| `getRightVisibleCells()`  | `Cell[]` | Right-pinned visible cells |
+| `getCenterVisibleCells()` | `Cell[]` | Unpinned visible cells     |
 
 ### Selection
 
-| Method | Return | Description |
-|---|---|---|
-| `getIsSelected()` | `boolean` | Is this row selected? |
-| `getIsSomeSelected()` | `boolean` | Some sub-rows selected? |
-| `getIsAllSubRowsSelected()` | `boolean` | All sub-rows selected? |
-| `getCanSelect()` | `boolean` | Can this row be selected? |
-| `getCanMultiSelect()` | `boolean` | Can participate in multi-select? |
-| `getCanSelectSubRows()` | `boolean` | Can sub-rows be auto-selected? |
-| `toggleSelected(value?, opts?)` | `void` | Select/deselect this row |
-| `getToggleSelectedHandler()` | `(event) => void` | Event handler for selection toggle |
+| Method                          | Return            | Description                        |
+| ------------------------------- | ----------------- | ---------------------------------- |
+| `getIsSelected()`               | `boolean`         | Is this row selected?              |
+| `getIsSomeSelected()`           | `boolean`         | Some sub-rows selected?            |
+| `getIsAllSubRowsSelected()`     | `boolean`         | All sub-rows selected?             |
+| `getCanSelect()`                | `boolean`         | Can this row be selected?          |
+| `getCanMultiSelect()`           | `boolean`         | Can participate in multi-select?   |
+| `getCanSelectSubRows()`         | `boolean`         | Can sub-rows be auto-selected?     |
+| `toggleSelected(value?, opts?)` | `void`            | Select/deselect this row           |
+| `getToggleSelectedHandler()`    | `(event) => void` | Event handler for selection toggle |
 
 ### Expanding
 
-| Method | Return | Description |
-|---|---|---|
-| `getIsExpanded()` | `boolean` | Is this row expanded? |
-| `getCanExpand()` | `boolean` | Can this row be expanded? |
-| `getIsGrouped()` | `boolean` | Is this a group row? |
-| `toggleExpanded(expanded?)` | `void` | Toggle expansion |
+| Method                       | Return            | Description                     |
+| ---------------------------- | ----------------- | ------------------------------- |
+| `getIsExpanded()`            | `boolean`         | Is this row expanded?           |
+| `getCanExpand()`             | `boolean`         | Can this row be expanded?       |
+| `getIsGrouped()`             | `boolean`         | Is this a group row?            |
+| `toggleExpanded(expanded?)`  | `void`            | Toggle expansion                |
 | `getToggleExpandedHandler()` | `(event) => void` | Event handler for expand toggle |
 
 ### Pinning
 
-| Method | Return | Description |
-|---|---|---|
-| `getIsPinned()` | `RowPinningPosition \| false` | `'top'`, `'bottom'`, or `false` |
-| `getCanPin()` | `boolean` | Can this row be pinned? |
-| `pin(position, includeLeaf?, includeParent?)` | `void` | Pin to `'top'`, `'bottom'`, or unpin |
+| Method                                        | Return                        | Description                          |
+| --------------------------------------------- | ----------------------------- | ------------------------------------ |
+| `getIsPinned()`                               | `RowPinningPosition \| false` | `'top'`, `'bottom'`, or `false`      |
+| `getCanPin()`                                 | `boolean`                     | Can this row be pinned?              |
+| `pin(position, includeLeaf?, includeParent?)` | `void`                        | Pin to `'top'`, `'bottom'`, or unpin |
 
 ### Grouping
 
-| Method | Return | Description |
-|---|---|---|
+| Method                       | Return    | Description                         |
+| ---------------------------- | --------- | ----------------------------------- |
 | `getGroupingValue(columnId)` | `unknown` | Get the grouping value for a column |
-| `getLeafRows()` | `Row[]` | Get all leaf rows under this group |
+| `getLeafRows()`              | `Row[]`   | Get all leaf rows under this group  |
 
 ---
 
@@ -679,21 +835,21 @@ Accessed via `row.getVisibleCells()` or `row.getAllCells()`.
 
 ### Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `id` | `string` | Unique cell identifier (`{rowId}_{columnId}`) |
-| `row` | `Row` | Parent row |
-| `column` | `Column` | Parent column |
+| Property | Type     | Description                                   |
+| -------- | -------- | --------------------------------------------- |
+| `id`     | `string` | Unique cell identifier (`{rowId}_{columnId}`) |
+| `row`    | `Row`    | Parent row                                    |
+| `column` | `Column` | Parent column                                 |
 
 ### Methods
 
-| Method | Return | Description |
-|---|---|---|
-| `getValue()` | `TValue` | Get the typed cell value |
-| `renderValue()` | `TValue` | Get render-ready value |
-| `getContext()` | `CellContext` | Get full render context (table, row, column, cell) |
-| `getIsEditing()` | `boolean` | Is this cell in edit mode? |
-| `getIsAlwaysEditable()` | `boolean` | Is this cell always editable? |
+| Method                  | Return        | Description                                        |
+| ----------------------- | ------------- | -------------------------------------------------- |
+| `getValue()`            | `TValue`      | Get the typed cell value                           |
+| `renderValue()`         | `TValue`      | Get render-ready value                             |
+| `getContext()`          | `CellContext` | Get full render context (table, row, column, cell) |
+| `getIsEditing()`        | `boolean`     | Is this cell in edit mode?                         |
+| `getIsAlwaysEditable()` | `boolean`     | Is this cell always editable?                      |
 
 ### CellContext
 
@@ -726,25 +882,25 @@ interface HeaderGroup<TData> {
 
 ### Header
 
-| Property | Type | Description |
-|---|---|---|
-| `id` | `string` | Header identifier |
-| `index` | `number` | Position within the header group |
-| `depth` | `number` | Header group depth |
-| `column` | `Column` | Associated column |
-| `headerGroup` | `HeaderGroup` | Parent header group |
-| `subHeaders` | `Header[]` | Sub-headers (for group columns) |
-| `colSpan` | `number` | Column span |
-| `rowSpan` | `number` | Row span |
-| `isPlaceholder` | `boolean` | True if this is a placeholder header |
+| Property        | Type          | Description                          |
+| --------------- | ------------- | ------------------------------------ |
+| `id`            | `string`      | Header identifier                    |
+| `index`         | `number`      | Position within the header group     |
+| `depth`         | `number`      | Header group depth                   |
+| `column`        | `Column`      | Associated column                    |
+| `headerGroup`   | `HeaderGroup` | Parent header group                  |
+| `subHeaders`    | `Header[]`    | Sub-headers (for group columns)      |
+| `colSpan`       | `number`      | Column span                          |
+| `rowSpan`       | `number`      | Row span                             |
+| `isPlaceholder` | `boolean`     | True if this is a placeholder header |
 
-| Method | Return | Description |
-|---|---|---|
-| `getLeafHeaders()` | `Header[]` | All leaf headers under this header |
-| `getSize()` | `number` | Width in px |
-| `getStart(position?)` | `number` | Start offset in px |
-| `getContext()` | `HeaderContext` | Full render context |
-| `getResizeHandler()` | `(event) => void \| undefined` | Resize drag handler |
+| Method                | Return                         | Description                        |
+| --------------------- | ------------------------------ | ---------------------------------- |
+| `getLeafHeaders()`    | `Header[]`                     | All leaf headers under this header |
+| `getSize()`           | `number`                       | Width in px                        |
+| `getStart(position?)` | `number`                       | Start offset in px                 |
+| `getContext()`        | `HeaderContext`                | Full render context                |
+| `getResizeHandler()`  | `(event) => void \| undefined` | Resize drag handler                |
 
 ---
 
@@ -776,15 +932,24 @@ interface TableState {
 ```typescript
 // Sorting
 type SortingState = ColumnSort[]
-interface ColumnSort { id: string; desc: boolean }
+interface ColumnSort {
+  id: string
+  desc: boolean
+}
 type SortDirection = 'asc' | 'desc'
 
 // Filtering
 type ColumnFiltersState = ColumnFilter[]
-interface ColumnFilter { id: string; value: unknown }
+interface ColumnFilter {
+  id: string
+  value: unknown
+}
 
 // Pagination
-interface PaginationState { pageIndex: number; pageSize: number }
+interface PaginationState {
+  pageIndex: number
+  pageSize: number
+}
 
 // Selection
 type RowSelectionState = Record<string, boolean>
@@ -796,7 +961,10 @@ type VisibilityState = Record<string, boolean>
 type ColumnOrderState = string[]
 
 // Column Pinning
-interface ColumnPinningState { left?: string[]; right?: string[] }
+interface ColumnPinningState {
+  left?: string[]
+  right?: string[]
+}
 
 // Column Sizing
 type ColumnSizingState = Record<string, number>
@@ -813,7 +981,10 @@ interface ColumnSizingInfoState {
 type ExpandedState = Record<string, boolean> | true
 
 // Row Pinning
-interface RowPinningState { top?: string[]; bottom?: string[] }
+interface RowPinningState {
+  top?: string[]
+  bottom?: string[]
+}
 
 // Grouping
 type GroupingState = string[]
@@ -845,14 +1016,14 @@ table.setSorting((prev) => [...prev, { id: 'age', desc: true }])
 
 Import: `import { sortingFns } from '@zvndev/yable-core'`
 
-| Name | Signature | Description |
-|---|---|---|
-| `sortingFns.alphanumeric` | `(rowA, rowB, columnId) => number` | Natural sort (case-insensitive). `"item2"` sorts before `"item10"`. |
-| `sortingFns.alphanumericCaseSensitive` | `(rowA, rowB, columnId) => number` | Natural sort (case-sensitive) |
-| `sortingFns.text` | `(rowA, rowB, columnId) => number` | Locale-aware string comparison (case-insensitive) |
-| `sortingFns.textCaseSensitive` | `(rowA, rowB, columnId) => number` | Locale-aware string comparison (case-sensitive) |
-| `sortingFns.datetime` | `(rowA, rowB, columnId) => number` | Sorts Date objects and parseable date strings |
-| `sortingFns.basic` | `(rowA, rowB, columnId) => number` | Simple `>` / `<` comparison |
+| Name                                   | Signature                          | Description                                                         |
+| -------------------------------------- | ---------------------------------- | ------------------------------------------------------------------- |
+| `sortingFns.alphanumeric`              | `(rowA, rowB, columnId) => number` | Natural sort (case-insensitive). `"item2"` sorts before `"item10"`. |
+| `sortingFns.alphanumericCaseSensitive` | `(rowA, rowB, columnId) => number` | Natural sort (case-sensitive)                                       |
+| `sortingFns.text`                      | `(rowA, rowB, columnId) => number` | Locale-aware string comparison (case-insensitive)                   |
+| `sortingFns.textCaseSensitive`         | `(rowA, rowB, columnId) => number` | Locale-aware string comparison (case-sensitive)                     |
+| `sortingFns.datetime`                  | `(rowA, rowB, columnId) => number` | Sorts Date objects and parseable date strings                       |
+| `sortingFns.basic`                     | `(rowA, rowB, columnId) => number` | Simple `>` / `<` comparison                                         |
 
 ---
 
@@ -860,19 +1031,19 @@ Import: `import { sortingFns } from '@zvndev/yable-core'`
 
 Import: `import { filterFns } from '@zvndev/yable-core'`
 
-| Name | Filter Value Type | Description |
-|---|---|---|
-| `filterFns.includesString` | `string` | Case-insensitive substring match |
-| `filterFns.includesStringSensitive` | `string` | Case-sensitive substring match |
-| `filterFns.equalsString` | `string` | Case-insensitive exact match |
-| `filterFns.equalsStringSensitive` | `string` | Case-sensitive exact match |
-| `filterFns.arrIncludes` | `unknown` | Array contains the filter value |
-| `filterFns.arrIncludesAll` | `unknown[]` | Array contains all filter values |
-| `filterFns.arrIncludesSome` | `unknown[]` | Array contains at least one filter value |
-| `filterFns.equals` | `unknown` | Strict equality (`===`) |
-| `filterFns.weakEquals` | `unknown` | Loose equality (`==`) |
-| `filterFns.inNumberRange` | `[number?, number?]` | Number within min/max range |
-| `filterFns.inDateRange` | `[Date?, Date?]` | Date within start/end range |
+| Name                                | Filter Value Type    | Description                              |
+| ----------------------------------- | -------------------- | ---------------------------------------- |
+| `filterFns.includesString`          | `string`             | Case-insensitive substring match         |
+| `filterFns.includesStringSensitive` | `string`             | Case-sensitive substring match           |
+| `filterFns.equalsString`            | `string`             | Case-insensitive exact match             |
+| `filterFns.equalsStringSensitive`   | `string`             | Case-sensitive exact match               |
+| `filterFns.arrIncludes`             | `unknown`            | Array contains the filter value          |
+| `filterFns.arrIncludesAll`          | `unknown[]`          | Array contains all filter values         |
+| `filterFns.arrIncludesSome`         | `unknown[]`          | Array contains at least one filter value |
+| `filterFns.equals`                  | `unknown`            | Strict equality (`===`)                  |
+| `filterFns.weakEquals`              | `unknown`            | Loose equality (`==`)                    |
+| `filterFns.inNumberRange`           | `[number?, number?]` | Number within min/max range              |
+| `filterFns.inDateRange`             | `[Date?, Date?]`     | Date within start/end range              |
 
 ---
 
@@ -880,17 +1051,17 @@ Import: `import { filterFns } from '@zvndev/yable-core'`
 
 Import: `import { aggregationFns } from '@zvndev/yable-core'`
 
-| Name | Return Type | Description |
-|---|---|---|
-| `aggregationFns.sum` | `number` | Sum of numeric leaf values |
-| `aggregationFns.min` | `number` | Minimum numeric leaf value |
-| `aggregationFns.max` | `number` | Maximum numeric leaf value |
-| `aggregationFns.extent` | `[number, number]` | `[min, max]` tuple |
-| `aggregationFns.mean` | `number` | Average of numeric leaf values |
-| `aggregationFns.median` | `number` | Median of numeric leaf values |
-| `aggregationFns.unique` | `unknown[]` | Array of unique leaf values |
-| `aggregationFns.uniqueCount` | `number` | Count of unique leaf values |
-| `aggregationFns.count` | `number` | Number of leaf rows |
+| Name                         | Return Type        | Description                    |
+| ---------------------------- | ------------------ | ------------------------------ |
+| `aggregationFns.sum`         | `number`           | Sum of numeric leaf values     |
+| `aggregationFns.min`         | `number`           | Minimum numeric leaf value     |
+| `aggregationFns.max`         | `number`           | Maximum numeric leaf value     |
+| `aggregationFns.extent`      | `[number, number]` | `[min, max]` tuple             |
+| `aggregationFns.mean`        | `number`           | Average of numeric leaf values |
+| `aggregationFns.median`      | `number`           | Median of numeric leaf values  |
+| `aggregationFns.unique`      | `unknown[]`        | Array of unique leaf values    |
+| `aggregationFns.uniqueCount` | `number`           | Count of unique leaf values    |
+| `aggregationFns.count`       | `number`           | Number of leaf rows            |
 
 ---
 
@@ -1008,9 +1179,7 @@ type CellStatus = 'idle' | 'pending' | 'error' | 'conflict'
 ### OnCommitFn
 
 ```typescript
-type OnCommitFn<TData> = (
-  patches: CellPatch<TData>[]
-) => Promise<CommitResult> | CommitResult
+type OnCommitFn<TData> = (patches: CellPatch<TData>[]) => Promise<CommitResult> | CommitResult
 ```
 
 ### CommitResult
@@ -1043,19 +1212,19 @@ interface CommitRecord {
   pendingValue: unknown
   previousValue: unknown
   opId: number
-  errorMessage?: string     // only when status === 'error'
-  conflictWith?: unknown    // only when status === 'conflict'
+  errorMessage?: string // only when status === 'error'
+  conflictWith?: unknown // only when status === 'conflict'
   abortController: AbortController
 }
 ```
 
 ### Table Options (Async Commits)
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `onCommit` | `OnCommitFn<TData>` | -- | Async handler for saving cell edits. Resolve = success, throw = failure. |
-| `autoCommit` | `boolean` | `true` | Fire `onCommit` after each cell edit. If `false`, batch edits until `table.commit()`. |
-| `rowCommitRetryMode` | `'failed' \| 'batch'` | `'failed'` | `'failed'`: retry only failed cells. `'batch'`: retry entire original batch. |
+| Option               | Type                  | Default    | Description                                                                           |
+| -------------------- | --------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `onCommit`           | `OnCommitFn<TData>`   | --         | Async handler for saving cell edits. Resolve = success, throw = failure.              |
+| `autoCommit`         | `boolean`             | `true`     | Fire `onCommit` after each cell edit. If `false`, batch edits until `table.commit()`. |
+| `rowCommitRetryMode` | `'failed' \| 'batch'` | `'failed'` | `'failed'`: retry only failed cells. `'batch'`: retry entire original batch.          |
 
 ### Per-Column Commit
 
@@ -1131,17 +1300,17 @@ interface StateChangeEvent {
 
 Import from `@zvndev/yable-core`:
 
-| Function | Signature | Description |
-|---|---|---|
+| Function           | Signature                            | Description                                              |
+| ------------------ | ------------------------------------ | -------------------------------------------------------- |
 | `functionalUpdate` | `(updater: Updater<T>, old: T) => T` | Apply an updater (value or function) to a previous value |
-| `memo` | `(deps, fn, opts) => () => T` | Create a memoized getter with dependency tracking |
-| `makeStateUpdater` | `(key, table) => (updater) => void` | Create a state slice updater |
-| `getDeepValue` | `(obj, path) => unknown` | Access nested object value by dot-separated path |
-| `shallowEqual` | `(a, b) => boolean` | Shallow comparison of two values |
-| `noop` | `() => void` | No-op function |
-| `identity` | `(x) => x` | Identity function |
-| `isFunction` | `(val) => boolean` | Type guard for functions |
-| `range` | `(start, end) => number[]` | Generate an array of numbers |
-| `flattenBy` | `(arr, fn) => T[]` | Recursively flatten an array by a child accessor |
-| `uniqueBy` | `(arr, fn) => T[]` | Deduplicate an array by a key accessor |
-| `clamp` | `(value, min, max) => number` | Clamp a number within a range |
+| `memo`             | `(deps, fn, opts) => () => T`        | Create a memoized getter with dependency tracking        |
+| `makeStateUpdater` | `(key, table) => (updater) => void`  | Create a state slice updater                             |
+| `getDeepValue`     | `(obj, path) => unknown`             | Access nested object value by dot-separated path         |
+| `shallowEqual`     | `(a, b) => boolean`                  | Shallow comparison of two values                         |
+| `noop`             | `() => void`                         | No-op function                                           |
+| `identity`         | `(x) => x`                           | Identity function                                        |
+| `isFunction`       | `(val) => boolean`                   | Type guard for functions                                 |
+| `range`            | `(start, end) => number[]`           | Generate an array of numbers                             |
+| `flattenBy`        | `(arr, fn) => T[]`                   | Recursively flatten an array by a child accessor         |
+| `uniqueBy`         | `(arr, fn) => T[]`                   | Deduplicate an array by a key accessor                   |
+| `clamp`            | `(value, min, max) => number`        | Clamp a number within a range                            |

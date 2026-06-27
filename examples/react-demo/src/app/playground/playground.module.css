@@ -25,7 +25,34 @@
   min-height: 100vh;
   background: var(--pg-bg);
   color: var(--pg-text);
-  font-family: var(--font-body), -apple-system, system-ui, sans-serif;
+  font-family:
+    var(--font-body),
+    -apple-system,
+    system-ui,
+    sans-serif;
+}
+
+.playground * {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--pg-border-strong) 70%, transparent) transparent;
+}
+
+.playground *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.playground *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.playground *::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--pg-border-strong) 70%, transparent);
+  border-radius: 999px;
+}
+
+.playground *::-webkit-scrollbar-thumb:hover {
+  background: var(--pg-text-muted);
 }
 
 /* ── Control Panel ─────────────────────────────────────────────────────── */
@@ -160,6 +187,62 @@
   color: var(--pg-text);
 }
 
+.profileStack {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.profileBtn {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 9px 10px;
+  border: 1px solid var(--pg-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pg-text-soft);
+  cursor: pointer;
+}
+
+.profileBtn span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.profileBtn small {
+  color: var(--pg-text-muted);
+  font-size: 11px;
+}
+
+.profileBtnActive {
+  border-color: var(--pg-accent);
+  background: var(--pg-accent-soft);
+  color: var(--pg-text);
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 116px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  color: var(--pg-text-soft);
+  font-size: 13px;
+}
+
+.fieldRow input,
+.fieldRow select {
+  min-width: 0;
+  height: 30px;
+  border: 1px solid var(--pg-border);
+  border-radius: 6px;
+  background: var(--pg-surface-2);
+  color: var(--pg-text);
+  padding: 0 8px;
+  font: inherit;
+}
+
 /* ── Switch ────────────────────────────────────────────────────────────── */
 
 .switchRow {
@@ -237,6 +320,21 @@
   background: var(--pg-accent-soft);
   border-color: var(--pg-accent);
   color: var(--pg-text);
+}
+
+.datasetBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.serverMini {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  color: var(--pg-text-muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
 }
 
 /* ── Stats ─────────────────────────────────────────────────────────────── */
@@ -351,7 +449,8 @@
 }
 
 .btnDiscard,
-.btnSave {
+.btnSave,
+.btnGhost {
   padding: 8px 14px;
   border-radius: 6px;
   font-family: var(--font-mono), monospace;
@@ -380,6 +479,22 @@
 
 .btnSave:hover {
   opacity: 0.88;
+}
+
+.btnGhost {
+  border: 1px solid var(--pg-border-strong);
+  background: var(--pg-surface-2);
+  color: var(--pg-text-soft);
+}
+
+.btnGhost:hover:not(:disabled) {
+  border-color: var(--pg-accent);
+  color: var(--pg-text);
+}
+
+.btnGhost:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* ── Search Bar ────────────────────────────────────────────────────────── */
@@ -441,6 +556,144 @@
 
 .tableContainer :global(.yable-pagination) {
   border-top: 1px solid var(--pg-border);
+}
+
+.serverBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--pg-border);
+  border-radius: 8px;
+  background: var(--pg-surface);
+}
+
+.serverBar strong,
+.serverBar span {
+  display: block;
+}
+
+.serverBar strong {
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+
+.serverBar span {
+  color: var(--pg-text-muted);
+  font-size: 12px;
+}
+
+.serverActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.serverLog {
+  margin-top: 12px;
+  border: 1px solid var(--pg-border);
+  border-radius: 8px;
+  background: var(--pg-surface);
+  overflow: hidden;
+}
+
+.serverLogHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--pg-border);
+  color: var(--pg-text-muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.serverLogItem {
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--pg-text-soft);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.outputGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.outputPanel {
+  min-width: 0;
+  border: 1px solid var(--pg-border);
+  border-radius: 8px;
+  background: var(--pg-surface);
+  overflow: hidden;
+}
+
+.previewPanel {
+  grid-row: span 2;
+}
+
+.previewStack {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.previewTable {
+  min-width: 0;
+}
+
+.previewTable > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--pg-text-soft);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.previewTable :global(.yable) {
+  max-height: 220px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.previewTable :global(.yable-main) {
+  max-height: 180px;
+}
+
+.outputHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.outputHeader h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pg-text-soft);
+}
+
+.outputPanel pre {
+  max-height: 360px;
+  overflow: auto;
+  margin: 0;
+  padding: 12px;
+  color: var(--pg-text-soft);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre;
 }
 
 /* ── Cell Styles ───────────────────────────────────────────────────────── */
@@ -518,7 +771,7 @@
 
 /* ── Light Mode ─────────────────────────────────────────────────────── */
 
-.playground[data-yable-theme="light"] {
+.playground[data-yable-theme='light'] {
   --pg-bg: #f5f5f7;
   --pg-surface: #ffffff;
   --pg-surface-2: #f0f0f3;
@@ -555,5 +808,13 @@
 
   .stage {
     min-height: auto;
+  }
+
+  .outputGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .previewPanel {
+    grid-row: auto;
   }
 }

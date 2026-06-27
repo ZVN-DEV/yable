@@ -58,7 +58,7 @@
     {
       "name": "@zvndev/yable-react (ESM)",
       "path": "packages/react/dist/index.js",
-      "limit": "44 KB",
+      "limit": "47 KB",
       "gzip": true,
       "ignore": [
         "react",
@@ -75,10 +75,5 @@
         "@zvndev/yable-core"
       ]
     }
-  ],
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  }
+  ]
 }

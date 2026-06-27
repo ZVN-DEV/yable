@@ -250,12 +250,28 @@ function HeaderCell<TData extends RowData>({
 
   const handleHeaderClick = useCallback(
     (e: React.MouseEvent<HTMLTableCellElement>) => {
+      table.events.emit('header:click', {
+        column,
+        header,
+        originalEvent: e,
+      } as any)
       if (!canSort) return
       if (Date.now() - lastResizeEndRef.current < 250) return
       const handler = column.getToggleSortingHandler()
       if (handler) handler(e)
     },
-    [canSort, column],
+    [canSort, column, header, table.events],
+  )
+
+  const handleHeaderContextMenu = useCallback(
+    (e: React.MouseEvent<HTMLTableCellElement>) => {
+      table.events.emit('header:contextmenu', {
+        column,
+        header,
+        originalEvent: e,
+      } as any)
+    },
+    [column, header, table.events],
   )
 
   return (
@@ -278,6 +294,7 @@ function HeaderCell<TData extends RowData>({
       role="columnheader"
       colSpan={header.colSpan}
       onClick={handleHeaderClick}
+      onContextMenu={handleHeaderContextMenu}
       onDragOver={canReorder ? handleDragOver : undefined}
       onDragLeave={canReorder ? handleDragLeave : undefined}
       onDrop={canReorder ? handleDrop : undefined}

@@ -622,15 +622,35 @@
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
+  vertical-align: middle;
   transition:
     background var(--yable-transition-fast),
     border-color var(--yable-transition-fast),
-    box-shadow var(--yable-transition-fast);
+    box-shadow var(--yable-transition-fast),
+    transform var(--yable-transition-fast);
+}
+
+.yable-checkbox-hitbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: -8px;
+  border-radius: 8px;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background-color var(--yable-transition-fast);
+}
+
+.yable-checkbox-hitbox:hover {
+  background: color-mix(in srgb, var(--yable-accent) 10%, transparent);
 }
 
 .yable-checkbox:checked {
   background: var(--yable-checkbox-bg-checked);
   border-color: var(--yable-checkbox-border-checked);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--yable-checkbox-bg-checked) 18%, transparent);
 }
 
 .yable-checkbox:checked::after {
@@ -663,10 +683,18 @@
 
 .yable-checkbox:hover {
   border-color: var(--yable-input-border-hover);
+  transform: scale(1.04);
 }
 
 .yable-checkbox:focus-visible {
+  outline: none;
   box-shadow: var(--yable-input-shadow-focus);
+}
+
+.yable-checkbox:disabled,
+.yable-checkbox:disabled + * {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 /* Toggle / Switch */

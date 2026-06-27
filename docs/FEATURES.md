@@ -445,6 +445,91 @@ columnHelper.accessor('name', {
 - `columnResizeMode: 'onChange'` updates widths as the user drags
 - `columnResizeMode: 'onEnd'` only updates when the user releases the mouse
 - The `table.getTotalSize()` method returns the total width of all visible columns
+- Header and body columns share the same internal `<colgroup>`, so wide tables and
+  horizontal scrolling do not require custom CSS or ResizeObserver width-sync code.
+- Prefer column definition options (`size`, `minSize`, `maxSize`, `enableResizing`)
+  or `defaultColumnDef` for sizing policy. Use CSS only for visual theming.
+
+### Sizing All Columns
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  defaultColumnDef: {
+    size: 160,
+    minSize: 80,
+    maxSize: 420,
+    enableResizing: true,
+  },
+})
+```
+
+### Persisting User-Resized Widths
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  state: { columnSizing },
+  onColumnSizingChange: setColumnSizing,
+})
+```
+
+---
+
+## Configuration Profiles
+
+Use configuration profiles when you want consistent site-wide tables without
+forcing every table into one global look. A global config can define defaults,
+named table profiles can define reusable variants, and named cell configs can
+define reusable cell styling such as `RichItem`.
+
+```tsx
+const yableConfig = createYableConfig({
+  table: { theme: 'midnight', striped: true, stickyHeader: true },
+  columns: {
+    default: { size: 160, minSize: 80, maxSize: 420, enableResizing: true },
+  },
+  rows: { className: 'row-comfortable' },
+  cells: {
+    named: {
+      RichItem: {
+        cellStyle: { whiteSpace: 'normal', lineHeight: 1.35, fontWeight: 600 },
+      },
+    },
+  },
+  profiles: {
+    compactVariant: {
+      table: { theme: 'compact', compact: true, stickyHeader: false },
+      columns: { default: { size: 112, minSize: 56 } },
+      rows: { className: 'row-compact' },
+    },
+  },
+})
+
+<YableProvider config={yableConfig}>
+  <EmployeeTable />
+</YableProvider>
+```
+
+```tsx
+const columns = [
+  columnHelper.accessor('name', {
+    header: 'Name',
+    cellConfig: 'RichItem',
+    cellStyle: { color: 'var(--yable-color-accent)' }, // local override
+  }),
+]
+
+const table = useTable({ data, columns, configProfile: 'compactVariant' })
+;<Table table={table} configProfile="compactVariant" />
+```
+
+Config precedence is: global defaults, named table profile, table
+`defaultColumnDef`, named cell config, profile column overrides, inline column
+definition, then explicit `<Table>` props. This keeps global config useful
+without locking teams out of per-table or per-cell exceptions.
 
 ---
 

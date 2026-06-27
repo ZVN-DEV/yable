@@ -162,7 +162,7 @@ export function useVirtualization({
         resizeObserver.disconnect()
       }
     }
-  }, [containerRef])
+  }, [containerRef, totalRows])
 
   // Clear height cache when totalRows changes significantly
   useEffect(() => {

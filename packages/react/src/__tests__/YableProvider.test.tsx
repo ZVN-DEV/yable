@@ -7,6 +7,7 @@ import { createColumnHelper } from '@zvndev/yable-core'
 import { useTable } from '../useTable'
 import { Table } from '../components/Table'
 import { YableProvider } from '../YableProvider'
+import { createYableConfig, applyYableConfigToColumns, resolveYableProfile } from '../config'
 
 // ---------------------------------------------------------------------------
 // Test data
@@ -178,6 +179,94 @@ describe('YableProvider', () => {
       expect(resolved.enableSorting).toBe(true)
       // Table-level enableResizing is present
       expect(resolved.enableResizing).toBe(true)
+    })
+  })
+
+  describe('config profiles', () => {
+    const config = createYableConfig<TestRow>({
+      table: { theme: 'midnight', striped: true, ariaLabel: 'Default profile table' },
+      columns: { default: { size: 180, enableResizing: true } },
+      rows: { className: 'row-default' },
+      cells: {
+        named: {
+          RichItem: { cellClassName: 'rich-item', cellStyle: { whiteSpace: 'normal' } },
+          MutedMeta: { cellClassName: 'muted-meta' },
+        },
+        byColumn: {
+          age: { cellClassName: 'age-by-column', cellType: 'numeric' },
+        },
+      },
+      profiles: {
+        compactVariant: {
+          table: { theme: 'compact', compact: true, ariaLabel: 'Compact profile table' },
+          columns: { default: { size: 96 }, byId: { name: { size: 128 } } },
+          cells: { byColumn: { name: { cellClassName: 'compact-name' } } },
+        },
+      },
+    })
+
+    it('resolves named profiles over default config', () => {
+      const profile = resolveYableProfile(config, 'compactVariant')
+
+      expect(profile.table?.theme).toBe('compact')
+      expect(profile.table?.striped).toBe(true)
+      expect(profile.columns?.default?.size).toBe(96)
+      expect(profile.columns?.default?.enableResizing).toBe(true)
+      expect(profile.rows?.className).toBe('row-default')
+    })
+
+    it('applies named cell configs, column configs, and inline column overrides in order', () => {
+      const profile = resolveYableProfile(config, 'compactVariant')
+      const configured = applyYableConfigToColumns(
+        [
+          col.accessor('name', {
+            header: 'Name',
+            cellConfig: 'RichItem',
+            cellStyle: { color: 'red' },
+          }),
+          col.accessor('age', { header: 'Age', cellConfig: 'MutedMeta' }),
+        ],
+        profile,
+      )
+
+      const name = configured[0] as any
+      const age = configured[1] as any
+      expect(name.cellClassName).toBe('compact-name')
+      expect(name.cellStyle).toEqual({ color: 'red' })
+      expect(name.size).toBe(128)
+      expect(age.cellClassName).toBe('age-by-column')
+      expect(age.cellType).toBe('numeric')
+    })
+
+    it('applies provider config profile to useTable and Table', () => {
+      render(
+        <YableProvider config={config} tableProfile="compactVariant">
+          <DefaultColumnDefInspector />
+          <TestTableWithProvider />
+        </YableProvider>,
+      )
+
+      const inspector = screen.getByTestId('inspector')
+      const resolved = JSON.parse(inspector.getAttribute('data-default-col-def')!)
+      expect(resolved.size).toBe(96)
+
+      const container = screen.getByRole('grid')
+      expect(container.className).toContain('yable-theme-compact')
+      expect(container.className).toContain('yable--compact')
+      expect(container).toHaveAttribute('aria-label', 'Compact profile table')
+      expect(container.querySelector('tbody tr')).toHaveClass('row-default')
+    })
+
+    it('explicit table props override config profile table props', () => {
+      render(
+        <YableProvider config={config} tableProfile="compactVariant">
+          <TestTableWithProvider tableSpecificProps={{ compact: false, theme: 'rose' }} />
+        </YableProvider>,
+      )
+
+      const container = screen.getByRole('grid')
+      expect(container.className).toContain('yable-theme-rose')
+      expect(container.className).not.toContain('yable--compact')
     })
   })
 

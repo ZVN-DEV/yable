@@ -91,6 +91,15 @@ export type {
 
 // Hooks
 export { useTable } from './useTable'
+export type { UseTableOptions } from './useTable'
+export { useServerTable } from './hooks/useServerTable'
+export type {
+  ServerTableController,
+  ServerTableFetchArgs,
+  ServerTableFetchResult,
+  ServerTableUpdateArgs,
+  UseServerTableOptions,
+} from './hooks/useServerTable'
 export { useTablePersistence } from './hooks/useTablePersistence'
 export type {
   UseTablePersistenceOptions,
@@ -126,6 +135,23 @@ export { useTableContext, TableProvider } from './context'
 // Project-wide defaults provider
 export { YableProvider, useYableDefaults } from './YableProvider'
 export type { YableDefaults } from './YableProvider'
+export {
+  createYableConfig,
+  resolveYableProfile,
+  getYableDefaultColumnDef,
+  applyYableConfigToColumns,
+} from './config'
+export type {
+  YableConfig,
+  YableTableProfile,
+  ResolvedYableProfile,
+  YableTableVisualConfig,
+  YableColumnConfig,
+  YableColumnConfigSet,
+  YableRowConfig,
+  YableCellConfig,
+  YableCellConfigSet,
+} from './config'
 
 // Components
 export { Table } from './components/Table'
