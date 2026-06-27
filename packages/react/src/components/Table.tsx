@@ -241,9 +241,6 @@ export function Table<TData extends RowData>({
   )
 
   const visibleLeafColumns = renderTable.getVisibleLeafColumns()
-  const visibleColumnSizeSignature = visibleLeafColumns
-    .map((column) => `${column.id}:${column.getSize()}`)
-    .join('|')
   const visibleColumnTotalSize = visibleLeafColumns.reduce(
     (sum, column) => sum + column.getSize(),
     0,
@@ -275,7 +272,6 @@ export function Table<TData extends RowData>({
     columnVirtualState.isVirtualized,
     columnVirtualState.visibleWidth,
     columnVirtualState.startOffset,
-    visibleColumnSizeSignature,
     visibleColumnTotalSize,
   ])
 

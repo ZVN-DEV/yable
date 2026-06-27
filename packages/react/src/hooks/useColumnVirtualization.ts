@@ -57,7 +57,12 @@ export function useColumnVirtualization<TData extends RowData>({
   })
   const rafRef = useRef<number | null>(null)
 
-  const sizes = useMemo(() => columns.map((column) => column.getSize()), [columns, sizingKey])
+  const sizes = useMemo(
+    () => columns.map((column) => column.getSize()),
+    // `sizingKey` is an explicit invalidation hook for stable Column objects whose getSize value changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columns, sizingKey],
+  )
 
   const offsets = useMemo(() => {
     const next = new Array<number>(columns.length + 1)

@@ -8,6 +8,7 @@ import type {
   Column as ColumnType,
   ColumnOrderState,
   HeaderContext,
+  HeaderClickEvent,
 } from '@zvndev/yable-core'
 import { SortIndicator } from './SortIndicator'
 import { FloatingFilter } from './FloatingFilter'
@@ -254,7 +255,7 @@ function HeaderCell<TData extends RowData>({
         column,
         header,
         originalEvent: e,
-      } as any)
+      } satisfies HeaderClickEvent<TData>)
       if (!canSort) return
       if (Date.now() - lastResizeEndRef.current < 250) return
       const handler = column.getToggleSortingHandler()
@@ -269,7 +270,7 @@ function HeaderCell<TData extends RowData>({
         column,
         header,
         originalEvent: e,
-      } as any)
+      } satisfies HeaderClickEvent<TData>)
     },
     [column, header, table.events],
   )
