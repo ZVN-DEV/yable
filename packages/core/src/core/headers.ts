@@ -2,6 +2,49 @@
 
 import type { RowData, Header, HeaderGroup, HeaderContext, Column, Table } from '../types'
 
+function clampColumnSize<TData extends RowData, TValue>(
+  column: Column<TData, TValue>,
+  size: number,
+): number {
+  const { minSize, maxSize } = column.columnDef
+  let next = Math.max(size, 30)
+
+  if (typeof minSize === 'number') next = Math.max(next, minSize)
+  if (typeof maxSize === 'number' && !(typeof minSize === 'number' && minSize > maxSize)) {
+    next = Math.min(next, maxSize)
+  }
+
+  return next
+}
+
+function resolveResizeSizes<TData extends RowData>(
+  leafColumns: Column<TData, unknown>[],
+  startSizes: Map<string, number>,
+  delta: number,
+): Record<string, number> {
+  if (leafColumns.length === 0) return {}
+  if (leafColumns.length === 1) {
+    const column = leafColumns[0]!
+    return {
+      [column.id]: clampColumnSize(column, (startSizes.get(column.id) ?? column.getSize()) + delta),
+    }
+  }
+
+  const totalStart = leafColumns.reduce(
+    (sum, column) => sum + (startSizes.get(column.id) ?? column.getSize()),
+    0,
+  )
+  const next: Record<string, number> = {}
+
+  for (const column of leafColumns) {
+    const startSize = startSizes.get(column.id) ?? column.getSize()
+    const share = totalStart > 0 ? startSize / totalStart : 1 / leafColumns.length
+    next[column.id] = clampColumnSize(column, startSize + delta * share)
+  }
+
+  return next
+}
+
 export function createHeader<TData extends RowData, TValue = unknown>(
   table: Table<TData>,
   column: Column<TData, TValue>,
@@ -70,25 +113,62 @@ export function createHeader<TData extends RowData, TValue = unknown>(
         const startX =
           'touches' in e ? (e as TouchEvent).touches[0]!.clientX : (e as MouseEvent).clientX
         const startSize = header.getSize()
+        const resizeMode = table.options.columnResizeMode ?? 'onChange'
+        const directionMultiplier = table.options.columnResizeDirection === 'rtl' ? -1 : 1
+        const leafColumns = header
+          .getLeafHeaders()
+          .map((leaf) => leaf.column)
+          .filter((leafColumn) => leafColumn.getCanResize())
+        const startSizes = new Map(
+          leafColumns.map((leafColumn) => [leafColumn.id, leafColumn.getSize()]),
+        )
+
+        const applySizing = (delta: number) => {
+          const nextSizes = resolveResizeSizes(leafColumns, startSizes, delta)
+          table.setColumnSizing((old) => ({
+            ...old,
+            ...nextSizes,
+          }))
+        }
 
         const onMove = (moveEvent: MouseEvent | TouchEvent) => {
+          moveEvent.preventDefault()
           const currentX =
             'touches' in moveEvent
               ? (moveEvent as TouchEvent).touches[0]!.clientX
               : (moveEvent as MouseEvent).clientX
-          const delta = currentX - startX
+          const delta = (currentX - startX) * directionMultiplier
 
-          table.setColumnSizing((old) => ({
+          table.setColumnSizingInfo((old) => ({
             ...old,
-            [column.id]: Math.max(startSize + delta, 30),
+            deltaOffset: delta,
+            deltaPercentage: startSize > 0 ? delta / startSize : 0,
           }))
+
+          if (resizeMode === 'onChange') {
+            applySizing(delta)
+          }
         }
 
-        const onEnd = () => {
+        const onEnd = (endEvent?: MouseEvent | TouchEvent) => {
           document.removeEventListener('mousemove', onMove)
           document.removeEventListener('mouseup', onEnd)
           document.removeEventListener('touchmove', onMove as EventListener)
           document.removeEventListener('touchend', onEnd)
+
+          if (resizeMode === 'onEnd') {
+            let delta = table.getState().columnSizingInfo.deltaOffset ?? 0
+            if (endEvent) {
+              const currentX =
+                'changedTouches' in endEvent
+                  ? (endEvent as TouchEvent).changedTouches[0]?.clientX
+                  : (endEvent as MouseEvent).clientX
+              if (typeof currentX === 'number') {
+                delta = (currentX - startX) * directionMultiplier
+              }
+            }
+            applySizing(delta)
+          }
 
           table.setColumnSizingInfo((old) => ({
             ...old,
@@ -103,7 +183,10 @@ export function createHeader<TData extends RowData, TValue = unknown>(
           startSize,
           deltaOffset: 0,
           deltaPercentage: 0,
-          columnSizingStart: [],
+          columnSizingStart: leafColumns.map((leafColumn) => [
+            leafColumn.id,
+            startSizes.get(leafColumn.id) ?? leafColumn.getSize(),
+          ]),
         }))
 
         document.addEventListener('mousemove', onMove)

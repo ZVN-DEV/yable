@@ -140,6 +140,8 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     enableRowSelection: true,
     enableMultiRowSelection: true,
     enableSubRowSelection: true,
+    enableRowClickSelection: false,
+    enableCellSelection: true,
     enableRowPinning: false,
     enableColumnResizing: true,
     enableColumnReorder: true,
@@ -945,7 +947,18 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
   table.setSorting = wireUpdater<SortingState>('sorting')
   table.setColumnFilters = wireUpdater<ColumnFiltersState>('columnFilters')
   table.setGlobalFilter = wireUpdater<string>('globalFilter')
-  table.setRowSelection = wireUpdater<RowSelectionState>('rowSelection')
+  const setRowSelectionBase = wireUpdater<RowSelectionState>('rowSelection')
+  table.setRowSelection = (updater: Updater<RowSelectionState>) => {
+    const previous = table.getState().rowSelection
+    const next = functionalUpdate(updater, previous)
+    setRowSelectionBase(next)
+    table.events.emit('selection:change', {
+      selection: next,
+      selectedRows: table
+        .getPrePaginationRowModel()
+        .flatRows.filter((row: Row<TData>) => next[row.id]),
+    })
+  }
   table.setColumnVisibility = wireUpdater<VisibilityState>('columnVisibility')
   table.setColumnOrder = wireUpdater<ColumnOrderState>('columnOrder')
   table.setColumnPinning = wireUpdater<ColumnPinningState>('columnPinning')

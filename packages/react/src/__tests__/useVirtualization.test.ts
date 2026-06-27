@@ -199,6 +199,27 @@ describe('useVirtualization', () => {
       expect(result.current.endIndex).toBe(0)
     })
 
+    it('measures the container when rows arrive after an empty initial render', () => {
+      const { result, rerender, ref } = renderVirtualization({
+        totalRows: 0,
+        rowHeight: 42,
+        clientHeight: 420,
+        overscan: 2,
+      })
+
+      expect(result.current.virtualRows).toEqual([])
+
+      rerender({
+        containerRef: ref,
+        totalRows: 100,
+        rowHeight: 42,
+        overscan: 2,
+      })
+
+      expect(result.current.virtualRows.length).toBeGreaterThan(0)
+      expect(result.current.virtualRows[0]!.index).toBe(0)
+    })
+
     it('handles 1 row', () => {
       const { result } = renderVirtualization({
         totalRows: 1,

@@ -33,6 +33,8 @@ export function TableCell<TData extends RowData>({
   const isAlwaysEditable = cell.getIsAlwaysEditable()
   const pinned = column.getIsPinned()
   const keyboardNavigationEnabled = table.options.enableKeyboardNavigation !== false
+  const cellSelectionEnabled =
+    table.options.enableCellSelection !== false && column.columnDef.enableCellSelection !== false
 
   const style: React.CSSProperties = {
     width: column.getSize(),
@@ -148,6 +150,7 @@ export function TableCell<TData extends RowData>({
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLTableCellElement>) => {
       if (e.button !== 0) return
+      if (!cellSelectionEnabled) return
 
       const clickTarget = e.target as HTMLElement | null
       if (isInteractiveClickTarget(clickTarget)) return
@@ -157,13 +160,14 @@ export function TableCell<TData extends RowData>({
       table.startCellRangeSelection({ rowIndex, columnIndex }, { extend: e.shiftKey })
       e.currentTarget.focus({ preventScroll: true })
     },
-    [columnIndex, rowIndex, table],
+    [cellSelectionEnabled, columnIndex, rowIndex, table],
   )
 
   const handleMouseEnter = useCallback(() => {
+    if (!cellSelectionEnabled) return
     if (!table.getState().cellSelection?.isDragging) return
     table.updateCellRangeSelection({ rowIndex, columnIndex })
-  }, [columnIndex, rowIndex, table])
+  }, [cellSelectionEnabled, columnIndex, rowIndex, table])
 
   const handleMouseUp = useCallback(() => {
     if (!table.getState().cellSelection?.isDragging) return

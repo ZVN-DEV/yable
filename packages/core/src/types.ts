@@ -149,6 +149,11 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
 
   // Selection (for checkbox column)
   enableMultiRowSelection?: boolean
+  /**
+   * Controls spreadsheet-style cell range selection for this column.
+   * Table-level `enableCellSelection` must also be enabled.
+   */
+  enableCellSelection?: boolean
 
   // Grouping
   enableGrouping?: boolean
@@ -176,6 +181,11 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   cellStyle?:
     | React.CSSProperties
     | ((ctx: CellContext<TData, TValue>) => React.CSSProperties | undefined)
+  /**
+   * Name of a reusable cell config supplied by framework adapters.
+   * React resolves this through `YableProvider` / `useTable` config profiles.
+   */
+  cellConfig?: string | string[]
   headerClassName?: string
   footerClassName?: string
 
@@ -323,6 +333,10 @@ export interface TableOptions<TData extends RowData> {
   enableRowSelection?: boolean | ((row: Row<TData>) => boolean)
   enableMultiRowSelection?: boolean | ((row: Row<TData>) => boolean)
   enableSubRowSelection?: boolean | ((row: Row<TData>) => boolean)
+  /** Toggle row selection when the user clicks a non-interactive part of the row. */
+  enableRowClickSelection?: boolean
+  /** Enable spreadsheet-style cell range selection. Can be disabled globally or per column. */
+  enableCellSelection?: boolean
   onRowSelectionChange?: OnChangeFn<RowSelectionState>
 
   // Visibility options

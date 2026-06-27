@@ -12,6 +12,15 @@ import {
   type Updater,
 } from '@zvndev/yable-core'
 import { useYableDefaults } from './YableProvider'
+import { applyYableConfigToColumns, getYableDefaultColumnDef, resolveYableProfile } from './config'
+import type { YableConfig, YableTableProfile } from './config'
+
+export type UseTableOptions<TData extends RowData> = TableOptions<TData> & {
+  /** Table-local config; overrides provider config for this table instance. */
+  config?: YableConfig<TData>
+  /** Named profile from `YableProvider config`; overrides provider `tableProfile`. */
+  configProfile?: string
+}
 
 /**
  * Shallow-compare two objects. Returns true if all own keys are strictly equal.
@@ -42,20 +51,36 @@ function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boolean {
  * function identity from the parent is always invoked — even if every other
  * option key is shallow-equal to the previous render.
  */
-export function useTable<TData extends RowData>(options: TableOptions<TData>): Table<TData> {
+export function useTable<TData extends RowData>(options: UseTableOptions<TData>): Table<TData> {
   // Merge provider-level defaultColumnDef under the table's own defaultColumnDef.
   // Table-level values always take precedence over provider defaults.
   const providerDefaults = useYableDefaults()
   const optionsWithDefaults = useMemo(() => {
-    if (!providerDefaults.defaultColumnDef) return options
+    const profile = resolveYableProfile(
+      options.config ?? providerDefaults.config,
+      options.configProfile ?? providerDefaults.tableProfile,
+    ) as YableTableProfile<TData>
+    const profileDefaultColumnDef = getYableDefaultColumnDef(profile)
+    const configuredColumns = applyYableConfigToColumns(options.columns, profile)
+    const defaultColumnDef = {
+      ...profileDefaultColumnDef,
+      ...providerDefaults.defaultColumnDef,
+      ...options.defaultColumnDef,
+    }
+
     return {
       ...options,
-      defaultColumnDef: {
-        ...providerDefaults.defaultColumnDef,
-        ...options.defaultColumnDef,
-      },
+      columns: configuredColumns,
+      rowClassName: options.rowClassName ?? profile.rows?.className,
+      rowStyle: options.rowStyle ?? profile.rows?.style,
+      defaultColumnDef: Object.keys(defaultColumnDef).length > 0 ? defaultColumnDef : undefined,
     }
-  }, [options, providerDefaults.defaultColumnDef])
+  }, [
+    options,
+    providerDefaults.config,
+    providerDefaults.defaultColumnDef,
+    providerDefaults.tableProfile,
+  ])
 
   // Internal state — only used if consumer doesn't provide controlled state
   const [state, setState] = useState<TableState>(() => ({
@@ -159,6 +184,36 @@ export function useTable<TData extends RowData>(options: TableOptions<TData>): T
         }) as TableOptionsResolved<TData>,
     )
   }
+
+  useEffect(() => {
+    const table = tableRef.current
+    if (!table) return
+
+    const unsubscribers = [
+      options.onCellClick && table.events.on('cell:click', options.onCellClick),
+      options.onCellDoubleClick && table.events.on('cell:dblclick', options.onCellDoubleClick),
+      options.onCellContextMenu && table.events.on('cell:contextmenu', options.onCellContextMenu),
+      options.onRowClick && table.events.on('row:click', options.onRowClick),
+      options.onRowDoubleClick && table.events.on('row:dblclick', options.onRowDoubleClick),
+      options.onRowContextMenu && table.events.on('row:contextmenu', options.onRowContextMenu),
+      options.onHeaderClick && table.events.on('header:click', options.onHeaderClick),
+      options.onHeaderContextMenu &&
+        table.events.on('header:contextmenu', options.onHeaderContextMenu),
+    ].filter((unsubscribe): unsubscribe is () => void => Boolean(unsubscribe))
+
+    return () => {
+      unsubscribers.forEach((unsubscribe) => unsubscribe())
+    }
+  }, [
+    options.onCellClick,
+    options.onCellContextMenu,
+    options.onCellDoubleClick,
+    options.onHeaderClick,
+    options.onHeaderContextMenu,
+    options.onRowClick,
+    options.onRowContextMenu,
+    options.onRowDoubleClick,
+  ])
 
   // Clean up event listeners on unmount to prevent memory leaks in SPAs
   useEffect(() => {

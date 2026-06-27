@@ -13,6 +13,7 @@ export interface UseColumnVirtualizationOptions<TData extends RowData> {
   columns: Column<TData, unknown>[]
   overscan?: number
   enabled?: boolean
+  sizingKey?: string
 }
 
 export interface UseColumnVirtualizationResult<TData extends RowData> {
@@ -48,6 +49,7 @@ export function useColumnVirtualization<TData extends RowData>({
   columns,
   overscan = 2,
   enabled = true,
+  sizingKey,
 }: UseColumnVirtualizationOptions<TData>): UseColumnVirtualizationResult<TData> {
   const [scrollState, setScrollState] = useState({
     scrollLeft: 0,
@@ -55,7 +57,12 @@ export function useColumnVirtualization<TData extends RowData>({
   })
   const rafRef = useRef<number | null>(null)
 
-  const sizes = useMemo(() => columns.map((column) => column.getSize()), [columns])
+  const sizes = useMemo(
+    () => columns.map((column) => column.getSize()),
+    // `sizingKey` is an explicit invalidation hook for stable Column objects whose getSize value changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columns, sizingKey],
+  )
 
   const offsets = useMemo(() => {
     const next = new Array<number>(columns.length + 1)

@@ -2,6 +2,7 @@
 
 import type { RowData, Table, Row, Cell, Header } from '@zvndev/yable-core'
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from 'react'
+import type { YableConfig } from './config'
 
 export interface TableProps<TData extends RowData> extends Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -18,6 +19,10 @@ export interface TableProps<TData extends RowData> extends Omit<
   compact?: boolean
   /** Theme variant */
   theme?: string
+  /** Named table profile from `YableProvider config` */
+  configProfile?: string
+  /** Table-local config; overrides provider config for this component */
+  config?: YableConfig<TData>
   /** Whether rows are clickable (adds cursor + hover) */
   clickableRows?: boolean
   /** Show footer */

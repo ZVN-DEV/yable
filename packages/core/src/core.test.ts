@@ -780,6 +780,27 @@ describe('Export', () => {
 // Column Resizing
 // ---------------------------------------------------------------------------
 describe('Column Resizing', () => {
+  function withMockDocument(run: (dispatch: (type: string, event?: unknown) => void) => void) {
+    const listeners = new Map<string, Set<(event?: unknown) => void>>()
+    const addEventListener = vi.fn((type: string, listener: (event?: unknown) => void) => {
+      const handlers = listeners.get(type) ?? new Set<(event?: unknown) => void>()
+      handlers.add(listener)
+      listeners.set(type, handlers)
+    })
+    const removeEventListener = vi.fn((type: string, listener: (event?: unknown) => void) => {
+      listeners.get(type)?.delete(listener)
+    })
+
+    vi.stubGlobal('document', { addEventListener, removeEventListener })
+    try {
+      run((type, event) => {
+        listeners.get(type)?.forEach((listener) => listener(event))
+      })
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  }
+
   it('getCanResize defaults to true', () => {
     const { table } = createTestTable()
     expect(table.getColumn('firstName')!.getCanResize()).toBe(true)
@@ -802,6 +823,69 @@ describe('Column Resizing', () => {
     })
     table.getColumn('firstName')!.resetSize()
     expect(getState().columnSizing.firstName).toBeUndefined()
+  })
+
+  it('drag resize clamps to column min/max bounds', () => {
+    const { table, getState } = createTestTable({
+      columns: [
+        columnHelper.accessor('firstName', {
+          header: 'First Name',
+          size: 120,
+          minSize: 100,
+          maxSize: 180,
+        }),
+      ],
+    })
+    const header = table.getHeaderGroups()[0]!.headers[0]!
+    const resize = header.getResizeHandler()!
+
+    withMockDocument((dispatch) => {
+      resize({ clientX: 0 })
+      dispatch('mousemove', { clientX: 200, preventDefault: vi.fn() })
+      dispatch('mouseup', { clientX: 200 })
+    })
+
+    expect(getState().columnSizing.firstName).toBe(180)
+    expect(getState().columnSizingInfo.isResizingColumn).toBe(false)
+  })
+
+  it('honors columnResizeMode="onEnd"', () => {
+    const { table, getState } = createTestTable({
+      columnResizeMode: 'onEnd',
+      columns: [columnHelper.accessor('firstName', { header: 'First Name', size: 120 })],
+    })
+    const header = table.getHeaderGroups()[0]!.headers[0]!
+    const resize = header.getResizeHandler()!
+
+    withMockDocument((dispatch) => {
+      resize({ clientX: 10 })
+      dispatch('mousemove', { clientX: 50, preventDefault: vi.fn() })
+
+      expect(getState().columnSizing.firstName).toBeUndefined()
+      expect(getState().columnSizingInfo.deltaOffset).toBe(40)
+
+      dispatch('mouseup', { clientX: 50 })
+    })
+
+    expect(getState().columnSizing.firstName).toBe(160)
+    expect(getState().columnSizingInfo.isResizingColumn).toBe(false)
+  })
+
+  it('inverts resize deltas for RTL tables', () => {
+    const { table, getState } = createTestTable({
+      columnResizeDirection: 'rtl',
+      columns: [columnHelper.accessor('firstName', { header: 'First Name', size: 120 })],
+    })
+    const header = table.getHeaderGroups()[0]!.headers[0]!
+    const resize = header.getResizeHandler()!
+
+    withMockDocument((dispatch) => {
+      resize({ clientX: 100 })
+      dispatch('mousemove', { clientX: 80, preventDefault: vi.fn() })
+      dispatch('mouseup', { clientX: 80 })
+    })
+
+    expect(getState().columnSizing.firstName).toBe(140)
   })
 })
 

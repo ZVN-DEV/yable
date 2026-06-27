@@ -26,6 +26,7 @@ export function TableBody<TData extends RowData>({
     anchor: null,
     isDragging: false,
   }
+  const pendingValues = table.getState().editing.pendingValues ?? {}
   const options = table.options
   const enableVirtualization = options.enableVirtualization ?? false
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -98,6 +99,7 @@ export function TableBody<TData extends RowData>({
             focusedColumnIndex={focusedCell?.rowIndex === rowIndex ? focusedCell.columnIndex : null}
             hasFocusedCell={focusedCell !== null}
             cellSelectionKey={cellSelectionKey}
+            pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
             clickable={clickableRows}
           />
         ))}
@@ -163,6 +165,7 @@ export function TableBody<TData extends RowData>({
                         }
                         hasFocusedCell={focusedCell !== null}
                         cellSelectionKey={cellSelectionKey}
+                        pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
                         clickable={clickableRows}
                         virtualStyle={{
                           position: 'absolute' as const,
@@ -200,6 +203,7 @@ interface TableRowProps<TData extends RowData> {
   focusedColumnIndex: number | null
   hasFocusedCell: boolean
   cellSelectionKey: string
+  pendingValuesKey: string
   clickable?: boolean
   virtualStyle?: React.CSSProperties
 }
@@ -215,6 +219,7 @@ function TableRowInner<TData extends RowData>({
   focusedColumnIndex,
   hasFocusedCell,
   cellSelectionKey: _cellSelectionKey,
+  pendingValuesKey: _pendingValuesKey,
   clickable,
   virtualStyle,
 }: TableRowProps<TData>) {
@@ -225,6 +230,14 @@ function TableRowInner<TData extends RowData>({
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      if (
+        table.options.enableRowClickSelection &&
+        row.getCanSelect() &&
+        !isInteractiveClickTarget(e.target)
+      ) {
+        row.toggleSelected()
+      }
+
       if (clickable) {
         table.events.emit('row:click', {
           row,
@@ -232,7 +245,7 @@ function TableRowInner<TData extends RowData>({
         } as any)
       }
     },
-    [clickable, table.events, row],
+    [clickable, table, row],
   )
 
   const handleDoubleClick = useCallback(
@@ -257,12 +270,19 @@ function TableRowInner<TData extends RowData>({
 
   const selectionEnabled = Boolean(table.options.enableRowSelection)
   const expansionEnabled = Boolean(table.options.enableExpanding)
+  const rowClassNameDef = table.options.rowClassName
+  const userRowClassName =
+    typeof rowClassNameDef === 'function' ? rowClassNameDef(row) : rowClassNameDef
+  const rowStyleDef = table.options.rowStyle
+  const userRowStyle = typeof rowStyleDef === 'function' ? rowStyleDef(row) : rowStyleDef
+  const mergedRowStyle = userRowStyle ? { ...virtualStyle, ...userRowStyle } : virtualStyle
+  const rowClassName = ['yable-tr', userRowClassName].filter(Boolean).join(' ')
 
   return (
     <>
       <tr
-        className="yable-tr"
-        style={virtualStyle}
+        className={rowClassName}
+        style={mergedRowStyle}
         data-selected={isSelected || undefined}
         data-expanded={isExpanded || undefined}
         data-clickable={clickable || undefined}
@@ -341,6 +361,7 @@ function areRowPropsEqual<TData extends RowData>(
   if (prev.focusedColumnIndex !== next.focusedColumnIndex) return false
   if (prev.hasFocusedCell !== next.hasFocusedCell) return false
   if (prev.cellSelectionKey !== next.cellSelectionKey) return false
+  if (prev.pendingValuesKey !== next.pendingValuesKey) return false
 
   // Virtual positioning
   if (prev.virtualStyle !== next.virtualStyle) {
@@ -357,3 +378,18 @@ function areRowPropsEqual<TData extends RowData>(
 }
 
 const MemoizedTableRow = React.memo(TableRowInner, areRowPropsEqual) as typeof TableRowInner
+
+function getPendingValuesKey(values: Record<string, unknown> | undefined): string {
+  if (!values) return ''
+  return Object.keys(values)
+    .sort()
+    .map((key) => `${key}:${String(values[key])}`)
+    .join('|')
+}
+
+function isInteractiveClickTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  return Boolean(
+    target.closest('input, textarea, select, button, a[href], [contenteditable="true"]'),
+  )
+}

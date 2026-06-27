@@ -4,6 +4,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import type { HeaderGroup, RowData, Table as TableInstance } from '@zvndev/yable-core'
 import { TableProvider } from '../context'
 import { useYableDefaults } from '../YableProvider'
+import { resolveYableProfile } from '../config'
 import type { TableProps } from '../types'
 import { TableHeader } from './TableHeader'
 import { TableBody } from './TableBody'
@@ -36,6 +37,8 @@ export function Table<TData extends RowData>({
   bordered: borderedProp,
   compact: compactProp,
   theme: themeProp,
+  config,
+  configProfile,
   clickableRows,
   footer,
   loading,
@@ -53,7 +56,7 @@ export function Table<TData extends RowData>({
   statusBar,
   statusBarPanels,
   sidebar,
-  sidebarPanels = ['columns', 'filters'],
+  sidebarPanels,
   defaultSidebarPanel,
   floatingFilters,
   columnVirtualization,
@@ -62,18 +65,36 @@ export function Table<TData extends RowData>({
   ...rest
 }: TableProps<TData>) {
   // Merge provider-level tableProps under explicit props (explicit wins)
-  const { tableProps: providerTableProps } = useYableDefaults()
-  const stickyHeader = stickyHeaderProp ?? providerTableProps?.stickyHeader
-  const striped = stripedProp ?? providerTableProps?.striped
-  const bordered = borderedProp ?? providerTableProps?.bordered
-  const compact = compactProp ?? providerTableProps?.compact
-  const theme = themeProp ?? providerTableProps?.theme
-  const direction = directionProp ?? providerTableProps?.direction
-  const ariaLabel = ariaLabelProp ?? providerTableProps?.ariaLabel
+  const providerDefaults = useYableDefaults()
+  const { tableProps: providerTableProps } = providerDefaults
+  const profile = resolveYableProfile(
+    config ?? providerDefaults.config,
+    configProfile ?? providerDefaults.tableProfile,
+  )
+  const profileTableProps = profile.table
+  const stickyHeader =
+    stickyHeaderProp ?? profileTableProps?.stickyHeader ?? providerTableProps?.stickyHeader
+  const striped = stripedProp ?? profileTableProps?.striped ?? providerTableProps?.striped
+  const bordered = borderedProp ?? profileTableProps?.bordered ?? providerTableProps?.bordered
+  const compact = compactProp ?? profileTableProps?.compact ?? providerTableProps?.compact
+  const theme = themeProp ?? profileTableProps?.theme ?? providerTableProps?.theme
+  const direction = directionProp ?? profileTableProps?.direction ?? providerTableProps?.direction
+  const ariaLabel = ariaLabelProp ?? profileTableProps?.ariaLabel ?? providerTableProps?.ariaLabel
+  const resolvedClickableRows = clickableRows ?? profileTableProps?.clickableRows
+  const resolvedStatusBar = statusBar ?? profileTableProps?.statusBar
+  const resolvedSidebar = sidebar ?? profileTableProps?.sidebar
+  const resolvedSidebarPanels = sidebarPanels ??
+    profileTableProps?.sidebarPanels ?? ['columns', 'filters']
+  const resolvedDefaultSidebarPanel = defaultSidebarPanel ?? profileTableProps?.defaultSidebarPanel
+  const resolvedFloatingFilters = floatingFilters ?? profileTableProps?.floatingFilters
+  const resolvedColumnVirtualization =
+    columnVirtualization ?? profileTableProps?.columnVirtualization
+  const resolvedColumnVirtualizationOverscan =
+    columnVirtualizationOverscan ?? profileTableProps?.columnVirtualizationOverscan
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarPanel, setSidebarPanel] = useState<'columns' | 'filters'>(
-    defaultSidebarPanel ?? 'columns',
+    resolvedDefaultSidebarPanel ?? 'columns',
   )
   const containerRef = useRef<HTMLDivElement>(null)
   const horizontalScrollRef = useRef<HTMLDivElement>(null)
@@ -103,16 +124,20 @@ export function Table<TData extends RowData>({
     table.getLeftVisibleLeafColumns().length > 0 || table.getRightVisibleLeafColumns().length > 0
   const hasGroupedHeaders = table.getHeaderGroups().length > 1
   const canVirtualizeColumns =
-    Boolean(columnVirtualization) &&
+    Boolean(resolvedColumnVirtualization) &&
     !hasPinnedColumns &&
     !hasGroupedHeaders &&
     allVisibleColumns.length > 0
+  const allVisibleColumnSizeSignature = allVisibleColumns
+    .map((column) => `${column.id}:${column.getSize()}`)
+    .join('|')
 
   const columnVirtualState = useColumnVirtualization({
     containerRef: horizontalScrollRef,
     columns: allVisibleColumns,
-    overscan: columnVirtualizationOverscan ?? 2,
+    overscan: resolvedColumnVirtualizationOverscan ?? 2,
     enabled: canVirtualizeColumns,
+    sizingKey: allVisibleColumnSizeSignature,
   })
 
   const renderTable = useMemo(() => {
@@ -215,21 +240,20 @@ export function Table<TData extends RowData>({
     [contextMenu, table],
   )
 
-  const enableRowVirtualization = renderTable.options.enableVirtualization ?? false
-
   const visibleLeafColumns = renderTable.getVisibleLeafColumns()
-  const columnSizing = renderTable.getState().columnSizing
+  const visibleColumnTotalSize = visibleLeafColumns.reduce(
+    (sum, column) => sum + column.getSize(),
+    0,
+  )
 
-  const colgroup = useMemo(() => {
-    if (visibleLeafColumns.length === 0) return null
-    return (
+  const colgroup =
+    visibleLeafColumns.length === 0 ? null : (
       <colgroup>
         {visibleLeafColumns.map((col) => (
           <col key={col.id} style={{ width: col.getSize() }} />
         ))}
       </colgroup>
     )
-  }, [visibleLeafColumns, columnSizing])
 
   const outerTableStyle = useMemo((): React.CSSProperties | undefined => {
     if (columnVirtualState.isVirtualized) {
@@ -240,15 +264,15 @@ export function Table<TData extends RowData>({
         tableLayout: 'fixed',
       }
     }
-    if (enableRowVirtualization) {
-      return { tableLayout: 'fixed' }
+    return {
+      minWidth: visibleColumnTotalSize || undefined,
+      tableLayout: 'fixed',
     }
-    return undefined
   }, [
     columnVirtualState.isVirtualized,
     columnVirtualState.visibleWidth,
     columnVirtualState.startOffset,
-    enableRowVirtualization,
+    visibleColumnTotalSize,
   ])
 
   const tableNode = (
@@ -257,9 +281,9 @@ export function Table<TData extends RowData>({
       style={outerTableStyle}
       data-column-virtualized={columnVirtualState.isVirtualized || undefined}
     >
-      {enableRowVirtualization && colgroup}
-      <TableHeader table={renderTable} floatingFilters={floatingFilters} />
-      <TableBody table={renderTable} clickableRows={clickableRows} colgroup={colgroup} />
+      {colgroup}
+      <TableHeader table={renderTable} floatingFilters={resolvedFloatingFilters} />
+      <TableBody table={renderTable} clickableRows={resolvedClickableRows} colgroup={colgroup} />
       {footer && <TableFooter table={renderTable} />}
     </table>
   )
@@ -328,18 +352,18 @@ export function Table<TData extends RowData>({
             ))}
         </div>
 
-        {sidebar && (
+        {resolvedSidebar && (
           <Sidebar
             table={table}
             open={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
-            panels={sidebarPanels}
+            panels={resolvedSidebarPanels}
             activePanel={sidebarPanel}
             onPanelChange={setSidebarPanel}
           />
         )}
 
-        {statusBar && <StatusBar table={table} panels={statusBarPanels} />}
+        {resolvedStatusBar && <StatusBar table={table} panels={statusBarPanels} />}
 
         {children}
 
