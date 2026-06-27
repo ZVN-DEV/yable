@@ -1,5 +1,17 @@
 # @zvndev/yable-react
 
+## 1.0.0
+
+### Minor Changes
+
+- d9a00bb: Add server-backed table state helpers, layered React configuration profiles, stronger column resizing behavior, and playground/docs coverage for reusable table profiles.
+
+### Patch Changes
+
+- Updated dependencies [d9a00bb]
+  - @zvndev/yable-core@1.0.0
+  - @zvndev/yable-themes@1.0.0
+
 ## 0.3.0
 
 ### Minor Changes
