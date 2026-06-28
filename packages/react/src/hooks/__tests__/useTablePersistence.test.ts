@@ -259,6 +259,42 @@ describe('useTablePersistence', () => {
     expect(written.state.columnOrder).toEqual(['a', 'b'])
   })
 
+  it('round-trips state: persist then re-hydrate into a fresh hook', () => {
+    const persistedKeys = ['sorting', 'columnFilters', 'columnOrder', 'columnVisibility'] as Array<
+      keyof TableState
+    >
+
+    const { result } = renderHook(() =>
+      useTablePersistence({ key: 'rt', storage, persistedKeys, debounce: 0 }),
+    )
+
+    act(() => {
+      result.current.onStateChange(
+        makeTableState({
+          sorting: [{ id: 'age', desc: true }],
+          columnFilters: [{ id: 'dept', value: 'Eng' }],
+          columnOrder: ['c', 'a', 'b'],
+          columnVisibility: { secret: false },
+        }),
+      )
+    })
+    act(() => {
+      vi.advanceTimersByTime(0)
+    })
+
+    // A fresh hook reading the same storage must restore the exact slices.
+    const { result: restored } = renderHook(() =>
+      useTablePersistence({ key: 'rt', storage, persistedKeys }),
+    )
+
+    expect(restored.current.initialState).toEqual({
+      sorting: [{ id: 'age', desc: true }],
+      columnFilters: [{ id: 'dept', value: 'Eng' }],
+      columnOrder: ['c', 'a', 'b'],
+      columnVisibility: { secret: false },
+    })
+  })
+
   it('uses custom version in persisted envelope', () => {
     const { result } = renderHook(() =>
       useTablePersistence({ key: 'test', storage, version: 5, debounce: 0 }),
