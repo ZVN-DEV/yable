@@ -1,5 +1,17 @@
 # @zvndev/yable-react
 
+## 0.4.0
+
+### Minor Changes
+
+- Add `useServerTable`, layered configuration profiles, selection defaults/events, and playground controls for reusable server-backed table workflows.
+
+### Patch Changes
+
+- Updated dependencies
+  - @zvndev/yable-core@0.4.0
+  - @zvndev/yable-themes@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes
@@ -27,8 +39,8 @@
 ### Patch Changes
 
 - Updated dependencies
-  - @zvndev/yable-core@1.0.0
-  - @zvndev/yable-themes@1.0.0
+  - @zvndev/yable-core@0.3.0
+  - @zvndev/yable-themes@0.3.0
 
 ## 0.2.1
 

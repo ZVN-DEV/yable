@@ -179,7 +179,7 @@ Click a column header to sort. Hold Shift to multi-sort. See the [Quickstart Gui
 
 ## Status
 
-Yable is at **v0.2.1** in this repo. Row virtualization, column virtualization, keyboard navigation, floating filters, set filters, and baseline range selection are shipping, and the current workspace passes build, test, typecheck, lint, coverage, size, and audit checks locally with **596 passing tests**. The API is still pre-1.0 and may change before a stable release. Near-term focus:
+Yable is still **pre-1.0**. The current npm line is `@zvndev/yable-core`, `@zvndev/yable-react`, and `@zvndev/yable-themes` at **0.4.0**, with `@zvndev/yable-vanilla` at **0.3.0**. Row virtualization, keyboard navigation, formula editing, pivot tables, clipboard/fill handle, async commits, and the themed React/vanilla adapters are shipping. The API may change before a stable release. Near-term focus:
 
 - Cell range selection
 - Column virtualization

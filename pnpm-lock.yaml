@@ -84,14 +84,14 @@ importers:
   apps/docs:
     dependencies:
       '@zvndev/yable-core':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: workspace:*
+        version: link:../../packages/core
       '@zvndev/yable-react':
-        specifier: ^0.3.0
-        version: 0.3.0(@chenglou/pretext@0.0.5)(@zvndev/yable-themes@0.3.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../../packages/react
       '@zvndev/yable-themes':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: workspace:*
+        version: link:../../packages/themes
       fumadocs-core:
         specifier: ^15.8.5
         version: 15.8.5(@types/react@19.2.14)(lucide-react@0.468.0(react@19.2.4))(next@15.5.18(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

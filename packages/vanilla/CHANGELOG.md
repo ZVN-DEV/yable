@@ -27,8 +27,8 @@
 ### Patch Changes
 
 - Updated dependencies
-  - @zvndev/yable-core@1.0.0
-  - @zvndev/yable-themes@1.0.0
+  - @zvndev/yable-core@0.3.0
+  - @zvndev/yable-themes@0.3.0
 
 ## 0.2.1
 

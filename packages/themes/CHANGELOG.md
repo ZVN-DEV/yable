@@ -1,5 +1,11 @@
 # @zvndev/yable-themes
 
+## 0.4.0
+
+### Patch Changes
+
+- Add theme coverage for the server/config playground workflows and updated table interaction states.
+
 ## 0.3.0
 
 ### Minor Changes
