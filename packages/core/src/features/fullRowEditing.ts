@@ -150,11 +150,13 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     // Clean up editing state
     editingRows.delete(rowId)
 
-    // Clear the active cell if it belongs to this row
-    const editing = table.getState().editing
-    if (editing?.activeCell?.rowId === rowId) {
-      table.commitEdit()
-    }
+    // NOTE: do NOT call table.commitEdit() here. commitEdit() dispatches the
+    // active cell on its own (through onCommit/onEditCommit), and the row-level
+    // dispatch below already includes that cell's pending value in `values`.
+    // Calling both fired the consumer's save handler twice for one row commit —
+    // once with a partial payload (just the active cell), once with the full
+    // row. The active cell's editing state is cleared by the setEditing() call
+    // at the end of this function instead.
 
     // Dispatch through CommitCoordinator if onCommit is defined; otherwise
     // fall back to the legacy onEditCommit hook.

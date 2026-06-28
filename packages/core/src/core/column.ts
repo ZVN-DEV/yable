@@ -145,7 +145,37 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       if (typeof max === 'number') resolved = Math.min(resolved, max)
       return resolved
     },
-    getStart: () => 0,
+    getStart: (position?: ColumnPinningPosition) => {
+      // Cumulative sticky offset for a pinned column. Resolve the side from the
+      // explicit argument, falling back to the column's own pinned position.
+      const pos = position ?? column.getIsPinned()
+
+      if (pos === 'left') {
+        // Sum the widths of all left-pinned visible leaf columns BEFORE this one.
+        let offset = 0
+        for (const col of table.getLeftVisibleLeafColumns()) {
+          if (col.id === id) break
+          offset += col.getSize()
+        }
+        return offset
+      }
+
+      if (pos === 'right') {
+        // Sum the widths of all right-pinned visible leaf columns AFTER this one.
+        let offset = 0
+        let seen = false
+        for (const col of table.getRightVisibleLeafColumns()) {
+          if (col.id === id) {
+            seen = true
+            continue
+          }
+          if (seen) offset += col.getSize()
+        }
+        return offset
+      }
+
+      return 0
+    },
     getAfter: () => 0,
 
     getFlatColumns: memo(
@@ -220,6 +250,24 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       table.setSorting((old) => old.filter((s) => s.id !== id))
     },
     toggleSorting: (desc?: boolean, isMulti?: boolean) => {
+      // Header-click path (no explicit direction, single-sort): cycle through
+      // the 3-state order none -> asc -> desc -> (removed | back to asc).
+      // Removal on the final step is gated by `enableSortingRemoval`; when it is
+      // falsy the column toggles between asc and desc only. Explicit-desc and
+      // multi-sort callers keep their existing set/append semantics below.
+      if (desc === undefined && !isMulti) {
+        table.setSorting((old) => {
+          const existing = old.find((s) => s.id === id)
+          if (!existing) return [{ id, desc: false }]
+          if (!existing.desc) return [{ id, desc: true }]
+          if (table.options.enableSortingRemoval) {
+            return old.filter((s) => s.id !== id)
+          }
+          return [{ id, desc: false }]
+        })
+        return
+      }
+
       table.setSorting((old) => {
         const existing = old.find((s) => s.id === id)
         const resolvedDesc = desc ?? (existing ? !existing.desc : false)

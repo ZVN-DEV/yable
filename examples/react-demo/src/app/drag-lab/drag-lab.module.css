@@ -1,0 +1,53 @@
+.page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  color: #e7e7f0;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a78bfa;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: clamp(24px, 3.4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+
+.subtitle {
+  max-width: 660px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #a6a6c0;
+  margin: 0;
+}
+
+.tableWrap {
+  border: 1px solid #2a2a3a;
+  border-radius: 14px;
+  /* No overflow:hidden — the Table renders its sidebar alongside the grid and
+     clipping the wrap would hide it. */
+  background: #14141d;
+  box-shadow: 0 4px 24px rgba(10, 10, 30, 0.25);
+}

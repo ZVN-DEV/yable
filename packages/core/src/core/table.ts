@@ -7,6 +7,7 @@ import type {
   TableOptionsResolved,
   TableState,
   ColumnDef,
+  ColumnDefExtensions,
   Column,
   Row,
   RowModel,
@@ -801,9 +802,54 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       }))
     },
     getValidationErrors: (): Record<string, Record<string, string>> => {
-      // Validation errors are not yet tracked in EditingState;
-      // return empty until a validation feature is wired up.
-      return {}
+      // Compute validation errors on the fly from the current pending edits by
+      // running each column's editConfig.validate against its pending value.
+      const result: Record<string, Record<string, string>> = {}
+      try {
+        const pendingValues = table.getState().editing?.pendingValues ?? {}
+
+        for (const rowId of Object.keys(pendingValues)) {
+          const rowPending = pendingValues[rowId]
+          if (!rowPending) continue
+
+          // Resolve the row once per pending row; validators receive it. If the
+          // row no longer exists, skip validation rather than throwing.
+          let row: Row<TData> | undefined
+          try {
+            row = table.getRow(rowId, true)
+          } catch {
+            row = undefined
+          }
+          if (!row) continue
+
+          for (const columnId of Object.keys(rowPending)) {
+            const column = table.getColumn(columnId)
+            if (!column) continue
+
+            const editConfig = (
+              column.columnDef as ColumnDef<TData> & Partial<ColumnDefExtensions<TData>>
+            ).editConfig
+            const validate = editConfig?.validate
+            if (!validate) continue
+
+            try {
+              const error = validate(rowPending[columnId], row)
+              if (error) {
+                if (!result[rowId]) result[rowId] = {}
+                result[rowId]![columnId] = error
+              }
+            } catch (err) {
+              console.error(
+                `[yable] editConfig.validate threw for column "${columnId}", row "${rowId}":`,
+                err,
+              )
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[yable] getValidationErrors failed:', err)
+      }
+      return result
     },
 
     // Async commit API (Task #10) — wired below after the literal
@@ -1324,7 +1370,13 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       if (resolvedOptions.manualPagination) return sortedModel
 
       const { pageIndex, pageSize } = table.getState().pagination
-      const start = pageIndex * pageSize
+      // Clamp the page at read time: when filtering/data changes shrink the row
+      // set below the current page, render the last valid page instead of an
+      // empty out-of-range slice (the stored pageIndex is left untouched).
+      const lastPage =
+        pageSize > 0 ? Math.max(0, Math.ceil(sortedModel.rows.length / pageSize) - 1) : 0
+      const safePageIndex = Math.min(Math.max(0, pageIndex), lastPage)
+      const start = safePageIndex * pageSize
       const end = start + pageSize
       const paginated = sortedModel.rows.slice(start, end)
 

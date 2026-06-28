@@ -235,7 +235,11 @@ export function Table<TData extends RowData>({
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
-      contextMenu.open(e.clientX, e.clientY, table)
+      // Resolve the right-clicked column from the nearest header/cell so the
+      // menu's sort actions operate on the column under the cursor.
+      const targetEl = (e.target as HTMLElement | null)?.closest?.('[data-column-id]')
+      const targetColumnId = targetEl?.getAttribute('data-column-id') ?? undefined
+      contextMenu.open(e.clientX, e.clientY, table, targetColumnId)
     },
     [contextMenu, table],
   )
@@ -352,6 +356,29 @@ export function Table<TData extends RowData>({
             ))}
         </div>
 
+        {resolvedSidebar && !sidebarOpen && (
+          <button
+            type="button"
+            className="yable-sidebar-trigger"
+            aria-label="Open tool panel"
+            title="Open tool panel"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="3"
+                y="4"
+                width="18"
+                height="16"
+                rx="2"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <line x1="14" y1="4" x2="14" y2="20" stroke="currentColor" strokeWidth="2" />
+            </svg>
+          </button>
+        )}
+
         {resolvedSidebar && (
           <Sidebar
             table={table}
@@ -373,6 +400,7 @@ export function Table<TData extends RowData>({
             y={contextMenu.y}
             onClose={contextMenu.close}
             table={table}
+            targetColumnId={contextMenu.targetColumnId}
           />
         )}
 

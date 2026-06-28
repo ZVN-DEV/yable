@@ -249,31 +249,47 @@
   cursor: pointer;
 }
 
-/* Drop indicator — a 2px accent bar on the leading or trailing edge of the
-   target column. Drawn by a child of the th so it doesn't shift layout. */
-.yable-th[data-drag-over]::before,
-.yable-th[data-drag-over]::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--yable-accent);
+/* While a reorder drag is live, the dragged header is lifted into a floating
+   ghost that tracks the cursor; its original slot is held open and the other
+   headers slide aside (transform set inline) to reveal where it will land. */
+
+/* Headers slide to make room while a reorder is live (transform set inline). */
+.yable-th[data-reordering] {
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* The dragged column is lifted into the ghost: its header cell goes fully
+   transparent but keeps its layout width, so the neighbour that slides into
+   this slot shows through and the real gap opens at the insertion point. */
+.yable-th[data-drag-source] {
+  opacity: 0;
+}
+
+/* The floating clone that follows the cursor (portaled to <body>). */
+.yable-col-drag-ghost {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: var(--yable-header-padding-y) var(--yable-header-padding-x);
+  font-size: var(--yable-font-size-header);
+  font-weight: var(--yable-font-weight-medium);
+  letter-spacing: 0.02em;
+  color: var(--yable-text-header);
+  background: var(--yable-bg-header);
+  border: 1px solid var(--yable-accent);
+  border-radius: 6px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.18);
   pointer-events: none;
-  z-index: calc(var(--yable-z-resize) + 1);
-}
-
-.yable-th[data-drag-over='left']::before {
-  left: -1px;
-}
-
-.yable-th[data-drag-over='right']::after {
-  right: -1px;
-}
-
-.yable-th[data-drag-over='left']::after,
-.yable-th[data-drag-over='right']::before {
-  display: none;
+  z-index: var(--yable-z-drag, 9999);
+  opacity: 0.96;
+  transform: scale(1.02);
+  transform-origin: center;
+  cursor: grabbing;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
@@ -1865,6 +1881,41 @@
 
 .yable--sidebar-open {
   display: flex;
+}
+
+/* Floating trigger that opens the tool panel. Without this the sidebar drawer
+   (which starts closed) has no affordance to open it. */
+.yable-sidebar-trigger {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: calc(var(--yable-z-overlay) + 4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--yable-border-color);
+  border-radius: var(--yable-border-radius-sm, 6px);
+  background: var(--yable-bg);
+  color: var(--yable-text-secondary, var(--yable-text-primary));
+  cursor: pointer;
+  transition:
+    background var(--yable-transition),
+    color var(--yable-transition),
+    border-color var(--yable-transition);
+}
+
+.yable-sidebar-trigger:hover {
+  color: var(--yable-text-primary);
+  border-color: var(--yable-border-color-strong, var(--yable-border-color));
+  background: var(--yable-row-hover-bg, var(--yable-bg));
+}
+
+.yable--rtl .yable-sidebar-trigger {
+  right: auto;
+  left: 8px;
 }
 
 .yable-sidebar {

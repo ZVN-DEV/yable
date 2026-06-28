@@ -1,5 +1,11 @@
 # @zvndev/yable-core
 
+## 0.4.0
+
+### Minor Changes
+
+- Add server-backed table state helpers, stronger column resizing behavior, and docs/playground coverage for reusable table profiles.
+
 ## 0.3.0
 
 ### Minor Changes

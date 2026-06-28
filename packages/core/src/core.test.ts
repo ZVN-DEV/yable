@@ -301,6 +301,50 @@ describe('Row Sorting', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Editing validation (getValidationErrors / isValid)
+// ---------------------------------------------------------------------------
+describe('Editing validation', () => {
+  function createValidatedTable() {
+    return createTestTable({
+      columns: [
+        columnHelper.accessor('firstName', { header: 'First Name' }),
+        columnHelper.accessor('age', {
+          header: 'Age',
+          editConfig: {
+            type: 'number',
+            validate: (value) =>
+              typeof value === 'number' && value >= 0 ? null : 'Age must be a non-negative number',
+          },
+        }),
+      ],
+    })
+  }
+
+  it('has no errors and is valid when there are no pending values', () => {
+    const { table } = createValidatedTable()
+    expect(table.getValidationErrors()).toEqual({})
+    expect(table.isValid()).toBe(true)
+  })
+
+  it('reports validation errors for invalid pending values and is not valid', () => {
+    const { table } = createValidatedTable()
+    table.setPendingValue('1', 'age', -5)
+
+    const errors = table.getValidationErrors()
+    expect(errors['1']?.['age']).toBe('Age must be a non-negative number')
+    expect(table.isValid()).toBe(false)
+  })
+
+  it('has no errors and is valid for valid pending values', () => {
+    const { table } = createValidatedTable()
+    table.setPendingValue('1', 'age', 40)
+
+    expect(table.getValidationErrors()).toEqual({})
+    expect(table.isValid()).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Column Filtering
 // ---------------------------------------------------------------------------
 describe('Column Filtering', () => {

@@ -1,175 +1,227 @@
 // @zvndev/yable-core — Full Row Editing Tests
-// Tests the createFullRowEditingIntegration function.
-// Since it requires a full table instance, we test the logic patterns
-// via a simplified mock approach.
+//
+// These tests exercise the SHIPPED module (createFullRowEditingIntegration and
+// handleRowEditKeyDown) against a real createTable() instance — not a
+// re-implemented state machine. If the public behaviour regresses, these fail.
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { createTable } from '../../core/table'
+import { createFullRowEditingIntegration, handleRowEditKeyDown } from '../fullRowEditing'
 
-// We test the pure state management patterns that fullRowEditing provides.
-// The integration function requires a full Table<TData> instance, so we
-// validate core concepts and state transitions.
+interface Person {
+  id: string
+  name: string
+  age: number
+  role: string
+}
 
-describe('Full Row Editing — State Machine Logic', () => {
-  /**
-   * Simulate the editing state machine that fullRowEditing implements.
-   */
-  function createEditingStateMachine() {
-    const editingRows = new Set<string>()
-    const pendingValues = new Map<string, Record<string, unknown>>()
+const baseData: Person[] = [
+  { id: '1', name: 'Alice', age: 30, role: 'admin' },
+  { id: '2', name: 'Bob', age: 25, role: 'user' },
+]
 
-    return {
-      isEditing: (rowId: string) => editingRows.has(rowId),
-      getEditingRows: () => new Set(editingRows),
-      startEditing: (rowId: string, initialValues: Record<string, unknown>) => {
-        editingRows.add(rowId)
-        pendingValues.set(rowId, { ...initialValues })
+function makeTable(overrides: Partial<Parameters<typeof createTable<Person>>[0]> = {}) {
+  return createTable<Person>({
+    data: baseData,
+    columns: [
+      {
+        accessorKey: 'name',
+        header: 'Name',
+        editable: true,
+        editConfig: {
+          type: 'text',
+          validate: (value) =>
+            typeof value === 'string' && value.length > 0 ? null : 'Name required',
+        },
       },
-      setPendingValue: (rowId: string, colId: string, value: unknown) => {
-        const row = pendingValues.get(rowId)
-        if (row) {
-          row[colId] = value
-        }
-      },
-      getPendingValues: (rowId: string) => pendingValues.get(rowId),
-      commit: (rowId: string) => {
-        const values = pendingValues.get(rowId)
-        editingRows.delete(rowId)
-        pendingValues.delete(rowId)
-        return values
-      },
-      cancel: (rowId: string) => {
-        editingRows.delete(rowId)
-        pendingValues.delete(rowId)
-      },
-    }
-  }
+      { accessorKey: 'age', header: 'Age', editable: true, editConfig: { type: 'number' } },
+      // `role` is intentionally non-editable (no `editable`, no `editConfig`).
+      { accessorKey: 'role', header: 'Role' },
+    ],
+    getRowId: (row) => row.id,
+    ...overrides,
+  })
+}
 
-  it('should start with no rows editing', () => {
-    const sm = createEditingStateMachine()
-    expect(sm.isEditing('row1')).toBe(false)
-    expect(sm.getEditingRows().size).toBe(0)
+// A minimal KeyboardEvent stand-in good enough for handleRowEditKeyDown.
+function keyEvent(key: string, shiftKey = false) {
+  return { key, shiftKey, preventDefault: vi.fn() } as unknown as KeyboardEvent
+}
+
+describe('createFullRowEditingIntegration — editable column detection', () => {
+  it('returns only columns that are editable or have an editConfig', () => {
+    const table = makeTable()
+    const integration = createFullRowEditingIntegration(table)
+    expect(integration.getEditableColumns('1')).toEqual(['name', 'age'])
   })
 
-  it('should mark row as editing after startEditing', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice', age: 30 })
-    expect(sm.isEditing('row1')).toBe(true)
+  it('returns an empty list for an unknown row id', () => {
+    const table = makeTable()
+    const integration = createFullRowEditingIntegration(table)
+    expect(integration.getEditableColumns('does-not-exist')).toEqual([])
   })
 
-  it('should initialize pending values from current data', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice', age: 30 })
-    const pending = sm.getPendingValues('row1')
-    expect(pending).toEqual({ name: 'Alice', age: 30 })
-  })
-
-  it('should update pending value for a specific column', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice', age: 30 })
-    sm.setPendingValue('row1', 'name', 'Bob')
-    expect(sm.getPendingValues('row1')!.name).toBe('Bob')
-    expect(sm.getPendingValues('row1')!.age).toBe(30) // Unchanged
-  })
-
-  it('should return committed values on commit', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice', age: 30 })
-    sm.setPendingValue('row1', 'name', 'Bob')
-    const committed = sm.commit('row1')
-    expect(committed).toEqual({ name: 'Bob', age: 30 })
-  })
-
-  it('should clear editing state on commit', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice', age: 30 })
-    sm.commit('row1')
-    expect(sm.isEditing('row1')).toBe(false)
-    expect(sm.getPendingValues('row1')).toBeUndefined()
-  })
-
-  it('should clear editing state on cancel', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice', age: 30 })
-    sm.setPendingValue('row1', 'name', 'Modified')
-    sm.cancel('row1')
-    expect(sm.isEditing('row1')).toBe(false)
-    expect(sm.getPendingValues('row1')).toBeUndefined()
-  })
-
-  it('should handle starting edit on already editing row (idempotent)', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice' })
-    sm.setPendingValue('row1', 'name', 'Modified')
-
-    // Start again — overwrites pending with fresh values
-    sm.startEditing('row1', { name: 'Alice' })
-    expect(sm.getPendingValues('row1')!.name).toBe('Alice')
-  })
-
-  it('should support multiple rows being edited simultaneously', () => {
-    const sm = createEditingStateMachine()
-    sm.startEditing('row1', { name: 'Alice' })
-    sm.startEditing('row2', { name: 'Bob' })
-
-    expect(sm.isEditing('row1')).toBe(true)
-    expect(sm.isEditing('row2')).toBe(true)
-    expect(sm.getEditingRows().size).toBe(2)
-
-    sm.commit('row1')
-    expect(sm.isEditing('row1')).toBe(false)
-    expect(sm.isEditing('row2')).toBe(true)
+  it('honours a function-valued `editable` predicate', () => {
+    const table = createTable<Person>({
+      data: baseData,
+      columns: [
+        { accessorKey: 'name', header: 'Name', editable: (row) => row.id === '1' },
+        { accessorKey: 'age', header: 'Age', editable: true },
+      ],
+      getRowId: (row) => row.id,
+    })
+    const integration = createFullRowEditingIntegration(table)
+    expect(integration.getEditableColumns('1')).toEqual(['name', 'age'])
+    expect(integration.getEditableColumns('2')).toEqual(['age'])
   })
 })
 
-describe('Full Row Editing — Validation Pattern', () => {
-  it('should reject commit when validation fails', () => {
-    type ValidationFn = (value: unknown) => string | undefined
+describe('createFullRowEditingIntegration — start / commit / cancel', () => {
+  it('startRowEditing marks the row, seeds pending values, and activates the first cell', () => {
+    const table = makeTable()
+    const integration = createFullRowEditingIntegration(table)
 
-    const validators: Record<string, ValidationFn> = {
-      name: (v) => (typeof v === 'string' && v.length > 0 ? undefined : 'Name required'),
-      age: (v) => (typeof v === 'number' && v > 0 ? undefined : 'Invalid age'),
-    }
+    integration.startRowEditing('1')
 
-    function validateRow(values: Record<string, unknown>): Record<string, string> {
-      const errors: Record<string, string> = {}
-      for (const [key, validate] of Object.entries(validators)) {
-        const error = validate(values[key])
-        if (error) errors[key] = error
-      }
-      return errors
-    }
+    expect(integration.isRowEditing('1')).toBe(true)
+    expect(integration.getEditingRows().has('1')).toBe(true)
+    // Pending values seeded from the live row.
+    expect(table.getPendingValue('1', 'name')).toBe('Alice')
+    expect(table.getPendingValue('1', 'age')).toBe(30)
+    // First editable cell is the active editing cell.
+    expect(table.getState().editing?.activeCell).toMatchObject({ rowId: '1', columnId: 'name' })
+  })
 
-    const validValues = { name: 'Alice', age: 30 }
-    expect(Object.keys(validateRow(validValues))).toHaveLength(0)
+  it('commitRowEdit forwards the gathered values to onEditCommit and clears editing', () => {
+    const onEditCommit = vi.fn()
+    const table = makeTable({ onEditCommit })
+    const integration = createFullRowEditingIntegration(table)
 
-    const invalidValues = { name: '', age: -1 }
-    const errors = validateRow(invalidValues)
-    expect(errors.name).toBe('Name required')
-    expect(errors.age).toBe('Invalid age')
+    integration.startRowEditing('1')
+    table.setPendingValue('1', 'name', 'Alicia')
+    integration.commitRowEdit('1')
+
+    expect(onEditCommit).toHaveBeenCalledTimes(1)
+    expect(onEditCommit.mock.calls[0]![0]).toEqual({ '1': { name: 'Alicia', age: 30 } })
+    expect(integration.isRowEditing('1')).toBe(false)
+    expect(table.getPendingRow('1')).toBeUndefined()
+  })
+
+  it('commitRowEdit is blocked while a validator fails and keeps the row in edit mode', () => {
+    const onEditCommit = vi.fn()
+    const table = makeTable({ onEditCommit })
+    const integration = createFullRowEditingIntegration(table)
+
+    integration.startRowEditing('1')
+    table.setPendingValue('1', 'name', '') // fails the "Name required" validator
+    integration.commitRowEdit('1')
+
+    expect(onEditCommit).not.toHaveBeenCalled()
+    expect(integration.isRowEditing('1')).toBe(true) // still editing — commit refused
+  })
+
+  it('cancelRowEdit discards pending values without committing', () => {
+    const onEditCommit = vi.fn()
+    const table = makeTable({ onEditCommit })
+    const integration = createFullRowEditingIntegration(table)
+
+    integration.startRowEditing('1')
+    table.setPendingValue('1', 'name', 'Throwaway')
+    integration.cancelRowEdit('1')
+
+    expect(onEditCommit).not.toHaveBeenCalled()
+    expect(integration.isRowEditing('1')).toBe(false)
+    expect(table.getPendingRow('1')).toBeUndefined()
+  })
+
+  it('supports multiple rows editing simultaneously', () => {
+    const table = makeTable()
+    const integration = createFullRowEditingIntegration(table)
+
+    integration.startRowEditing('1')
+    integration.startRowEditing('2')
+    expect(integration.getEditingRows().size).toBe(2)
+
+    integration.cancelRowEdit('1')
+    expect(integration.isRowEditing('1')).toBe(false)
+    expect(integration.isRowEditing('2')).toBe(true)
   })
 })
 
-describe('Full Row Editing — Tab Navigation Pattern', () => {
-  it('should cycle through editable columns with Tab', () => {
-    const editableColumns = ['name', 'age', 'email']
-    let currentIndex = 0
+describe('createFullRowEditingIntegration — events', () => {
+  it('emits row:edit:start, row:edit:commit, and row:edit:cancel', () => {
+    const table = makeTable({ onEditCommit: vi.fn() })
+    const integration = createFullRowEditingIntegration(table)
 
-    function tabForward() {
-      currentIndex = (currentIndex + 1) % editableColumns.length
-      return editableColumns[currentIndex]
-    }
+    const onStart = vi.fn()
+    const onCommit = vi.fn()
+    const onCancel = vi.fn()
+    table.events.on('row:edit:start', onStart)
+    table.events.on('row:edit:commit', onCommit)
+    table.events.on('row:edit:cancel', onCancel)
 
-    function tabBackward() {
-      currentIndex = currentIndex <= 0
-        ? editableColumns.length - 1
-        : currentIndex - 1
-      return editableColumns[currentIndex]
-    }
+    integration.startRowEditing('1')
+    expect(onStart).toHaveBeenCalledWith(expect.objectContaining({ rowId: '1' }))
 
-    expect(editableColumns[currentIndex]).toBe('name')
-    expect(tabForward()).toBe('age')
-    expect(tabForward()).toBe('email')
-    expect(tabForward()).toBe('name') // Wraps around
-    expect(tabBackward()).toBe('email') // Wraps backward
+    integration.commitRowEdit('1')
+    expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ rowId: '1' }))
+
+    integration.startRowEditing('2')
+    integration.cancelRowEdit('2')
+    expect(onCancel).toHaveBeenCalledWith(expect.objectContaining({ rowId: '2' }))
+  })
+})
+
+describe('handleRowEditKeyDown', () => {
+  it('does nothing when the row is not in edit mode', () => {
+    const table = makeTable({ onEditCommit: vi.fn() })
+    const integration = createFullRowEditingIntegration(table)
+    const e = keyEvent('Enter')
+
+    handleRowEditKeyDown(e, '1', table, integration)
+    expect(e.preventDefault).not.toHaveBeenCalled()
+  })
+
+  it('Tab cycles the active cell forward through editable columns and wraps', () => {
+    const table = makeTable()
+    const integration = createFullRowEditingIntegration(table)
+    integration.startRowEditing('1') // active = name
+
+    handleRowEditKeyDown(keyEvent('Tab'), '1', table, integration)
+    expect(table.getState().editing?.activeCell?.columnId).toBe('age')
+
+    handleRowEditKeyDown(keyEvent('Tab'), '1', table, integration)
+    expect(table.getState().editing?.activeCell?.columnId).toBe('name') // wrapped
+  })
+
+  it('Shift+Tab cycles the active cell backward', () => {
+    const table = makeTable()
+    const integration = createFullRowEditingIntegration(table)
+    integration.startRowEditing('1') // active = name
+
+    handleRowEditKeyDown(keyEvent('Tab', true), '1', table, integration)
+    expect(table.getState().editing?.activeCell?.columnId).toBe('age') // wrapped backward
+  })
+
+  it('Enter commits the row edit', () => {
+    const onEditCommit = vi.fn()
+    const table = makeTable({ onEditCommit })
+    const integration = createFullRowEditingIntegration(table)
+    integration.startRowEditing('1')
+
+    handleRowEditKeyDown(keyEvent('Enter'), '1', table, integration)
+    expect(onEditCommit).toHaveBeenCalledTimes(1)
+    expect(integration.isRowEditing('1')).toBe(false)
+  })
+
+  it('Escape cancels the row edit', () => {
+    const onEditCommit = vi.fn()
+    const table = makeTable({ onEditCommit })
+    const integration = createFullRowEditingIntegration(table)
+    integration.startRowEditing('1')
+
+    handleRowEditKeyDown(keyEvent('Escape'), '1', table, integration)
+    expect(onEditCommit).not.toHaveBeenCalled()
+    expect(integration.isRowEditing('1')).toBe(false)
   })
 })

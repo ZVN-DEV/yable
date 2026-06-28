@@ -12,6 +12,8 @@ interface ContextMenuProps<TData extends RowData> {
   y: number
   onClose: () => void
   table: Table<TData>
+  /** Column the menu was opened on (right-clicked header/cell). */
+  targetColumnId?: string
   customItems?: ContextMenuItemDef[]
 }
 
@@ -20,6 +22,7 @@ export function ContextMenu<TData extends RowData>({
   y,
   onClose,
   table,
+  targetColumnId,
   customItems,
 }: ContextMenuProps<TData>) {
   const menuRef = useRef<HTMLDivElement>(null)
@@ -71,6 +74,20 @@ export function ContextMenu<TData extends RowData>({
     },
     [onClose],
   )
+
+  // Resolve the column the sort actions should target. Prefer the column the
+  // user right-clicked; otherwise fall back to the currently focused cell.
+  const resolveSortColumn = () => {
+    if (targetColumnId) {
+      const column = table.getColumn(targetColumnId)
+      if (column) return column
+    }
+    const focused = table.getFocusedCell()
+    if (focused) {
+      return table.getVisibleLeafColumns()[focused.columnIndex]
+    }
+    return undefined
+  }
 
   // Build default menu items
   const defaultItems: ContextMenuItemDef[] = [
@@ -125,14 +142,14 @@ export function ContextMenu<TData extends RowData>({
           id: 'sort-asc',
           label: 'Sort Ascending',
           action: () => {
-            table.setSorting([])
+            resolveSortColumn()?.toggleSorting(false)
           },
         },
         {
           id: 'sort-desc',
           label: 'Sort Descending',
           action: () => {
-            table.setSorting([])
+            resolveSortColumn()?.toggleSorting(true)
           },
         },
         {

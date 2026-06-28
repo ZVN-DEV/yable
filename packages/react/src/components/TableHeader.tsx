@@ -1,6 +1,7 @@
 // @zvndev/yable-react — Table Header Component
 
 import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type {
   RowData,
   Table,
@@ -18,7 +19,36 @@ interface TableHeaderProps<TData extends RowData> {
   floatingFilters?: boolean
 }
 
-const DRAG_MIME = 'application/yable-column'
+interface ColumnDragState {
+  columnId: string
+  fromIndex: number
+  /** Insertion index among visible leaf columns (0..n). */
+  toIndex: number
+  /** Live pointer x in viewport coordinates. */
+  pointerX: number
+  /** pointerX − draggedColumnLeft at grab time, so the ghost tracks the grab point. */
+  grabOffsetX: number
+  /** Dragged column width (px) — the distance other columns slide to make room. */
+  width: number
+  /** Top/height of the header row (viewport coords) for the floating ghost. */
+  top: number
+  height: number
+  /** Snapshot of each visible leaf column's left/width at drag start. */
+  layout: { id: string; left: number; width: number }[]
+}
+
+const REORDER_TRANSITION = 'transform 180ms cubic-bezier(0.2, 0, 0, 1)'
+
+/**
+ * The slide offset (px) for the column at visible index `i` during a reorder:
+ * columns between the source and the insertion point shift by ±draggedWidth to
+ * open a gap; the source stays put (it rides in the floating ghost).
+ */
+function transformAt(i: number, d: ColumnDragState): number {
+  if (i === d.fromIndex) return 0
+  if (d.toIndex > d.fromIndex) return i > d.fromIndex && i < d.toIndex ? -d.width : 0
+  return i >= d.toIndex && i < d.fromIndex ? d.width : 0
+}
 
 export function TableHeader<TData extends RowData>({
   table,
@@ -26,13 +56,165 @@ export function TableHeader<TData extends RowData>({
 }: TableHeaderProps<TData>) {
   const headerGroups = table.getHeaderGroups()
   const visibleColumns = table.getVisibleLeafColumns()
+  const theadRef = useRef<HTMLTableSectionElement>(null)
+  // Set on every reorder end; used to suppress the click-to-sort that fires
+  // right after a pointer drag releases.
+  const reorderEndRef = useRef(0)
+
+  const [drag, setDrag] = useState<ColumnDragState | null>(null)
+
+  const commitReorder = useCallback(
+    (d: ColumnDragState) => {
+      // No visible movement → nothing to commit.
+      if (d.toIndex === d.fromIndex || d.toIndex === d.fromIndex + 1) return
+
+      const order = table.getState().columnOrder
+      const base = order && order.length > 0 ? [...order] : d.layout.map((l) => l.id)
+      const targetId = d.toIndex < d.layout.length ? d.layout[d.toIndex]!.id : null
+      const next = base.filter((id) => id !== d.columnId)
+      let insertAt = targetId ? next.indexOf(targetId) : next.length
+      if (insertAt === -1) insertAt = next.length
+      next.splice(insertAt, 0, d.columnId)
+      table.setColumnOrder(next as ColumnOrderState)
+    },
+    [table],
+  )
+
+  const beginReorder = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>, columnId: string) => {
+      // Left button / primary pointer only.
+      if (e.button !== 0) return
+      const thead = theadRef.current
+      if (!thead) return
+
+      const startX = e.clientX
+      const startY = e.clientY
+
+      // Snapshot the leaf-column layout from the live DOM.
+      const layout: { id: string; left: number; width: number }[] = []
+      let top = 0
+      let height = 0
+      for (const c of visibleColumns) {
+        const th = thead.querySelector<HTMLElement>(`th[data-column-id="${CSS.escape(c.id)}"]`)
+        if (!th) return
+        const r = th.getBoundingClientRect()
+        layout.push({ id: c.id, left: r.left, width: r.width })
+        if (c.id === columnId) {
+          top = r.top
+          height = r.height
+        }
+      }
+      const fromIndex = layout.findIndex((l) => l.id === columnId)
+      if (fromIndex < 0) return
+      const src = layout[fromIndex]!
+
+      // Body cells slide in lockstep with the header. We drive them imperatively
+      // (no per-frame React re-render of the virtualized body); TableCell never
+      // sets transform/transition/opacity, so these are safe to add and clear.
+      const bodyRoot = thead.closest('table')
+      const applyBody = (d: ColumnDragState) => {
+        if (!bodyRoot) return
+        visibleColumns.forEach((col, i) => {
+          if (col.getIsPinned()) return // sticky cells can't be transformed
+          const tx = transformAt(i, d)
+          bodyRoot
+            .querySelectorAll<HTMLElement>(`td[data-column-id="${CSS.escape(col.id)}"]`)
+            .forEach((td) => {
+              td.style.transition = REORDER_TRANSITION
+              td.style.opacity = i === d.fromIndex ? '0' : ''
+              td.style.transform = i !== d.fromIndex && tx ? `translateX(${tx}px)` : ''
+            })
+        })
+      }
+      const clearBody = () => {
+        bodyRoot?.querySelectorAll<HTMLElement>('td[data-column-id]').forEach((td) => {
+          td.style.transform = ''
+          td.style.transition = ''
+          td.style.opacity = ''
+        })
+      }
+
+      let started = false
+      let latest: ColumnDragState = {
+        columnId,
+        fromIndex,
+        toIndex: fromIndex,
+        pointerX: startX,
+        grabOffsetX: startX - src.left,
+        width: src.width,
+        top,
+        height,
+        layout,
+      }
+
+      const computeToIndex = (x: number) => {
+        let t = layout.findIndex((l) => x < l.left + l.width / 2)
+        if (t === -1) t = layout.length
+        return t
+      }
+
+      const onMove = (ev: PointerEvent) => {
+        if (!started) {
+          if (Math.abs(ev.clientX - startX) < 4 && Math.abs(ev.clientY - startY) < 4) return
+          started = true
+          table.setColumnDragActive(true)
+          document.body.style.userSelect = 'none'
+          document.body.style.cursor = 'grabbing'
+        }
+        latest = { ...latest, pointerX: ev.clientX, toIndex: computeToIndex(ev.clientX) }
+        setDrag(latest)
+        applyBody(latest)
+      }
+
+      const finish = () => {
+        window.removeEventListener('pointermove', onMove)
+        window.removeEventListener('pointerup', finish)
+        window.removeEventListener('pointercancel', finish)
+        if (started) {
+          commitReorder(latest)
+          reorderEndRef.current = Date.now()
+          table.setColumnDragActive(false)
+          document.body.style.userSelect = ''
+          document.body.style.cursor = ''
+          clearBody()
+        }
+        setDrag(null)
+      }
+
+      window.addEventListener('pointermove', onMove)
+      window.addEventListener('pointerup', finish)
+      window.addEventListener('pointercancel', finish)
+    },
+    [visibleColumns, table, commitReorder],
+  )
+
+  const transformFor = useCallback(
+    (columnId: string): number => {
+      if (!drag) return 0
+      const i = visibleColumns.findIndex((c) => c.id === columnId)
+      if (i < 0) return 0
+      return transformAt(i, drag)
+    },
+    [drag, visibleColumns],
+  )
+
+  const dragColumn = drag ? visibleColumns.find((c) => c.id === drag.columnId) : null
 
   return (
-    <thead className="yable-thead">
+    <thead className="yable-thead" ref={theadRef}>
       {headerGroups.map((headerGroup) => (
         <tr key={headerGroup.id} className="yable-header-row">
           {headerGroup.headers.map((header) => (
-            <HeaderCell key={header.id} header={header} table={table} />
+            <HeaderCell
+              key={header.id}
+              header={header}
+              table={table}
+              onReorderPointerDown={beginReorder}
+              dragTransform={transformFor(header.column.id)}
+              isDragSource={drag?.columnId === header.column.id}
+              dragActive={drag !== null}
+              reorderEndRef={reorderEndRef}
+            />
           ))}
         </tr>
       ))}
@@ -44,6 +226,28 @@ export function TableHeader<TData extends RowData>({
           ))}
         </tr>
       )}
+
+      {drag &&
+        dragColumn &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="yable-col-drag-ghost"
+            aria-hidden="true"
+            style={{
+              position: 'fixed',
+              top: drag.top,
+              left: drag.pointerX - drag.grabOffsetX,
+              width: drag.width,
+              height: drag.height,
+            }}
+          >
+            {typeof dragColumn.columnDef.header === 'string'
+              ? dragColumn.columnDef.header
+              : dragColumn.id}
+          </div>,
+          document.body,
+        )}
     </thead>
   )
 }
@@ -85,9 +289,19 @@ function FloatingFilterCell<TData extends RowData>({
 function HeaderCell<TData extends RowData>({
   header,
   table,
+  onReorderPointerDown,
+  dragTransform,
+  isDragSource,
+  dragActive,
+  reorderEndRef,
 }: {
   header: HeaderType<TData, unknown>
   table: Table<TData>
+  onReorderPointerDown: (e: React.PointerEvent<HTMLDivElement>, columnId: string) => void
+  dragTransform: number
+  isDragSource: boolean
+  dragActive: boolean
+  reorderEndRef: React.MutableRefObject<number>
 }) {
   const column = header.column
   const canSort = column.getCanSort()
@@ -95,6 +309,7 @@ function HeaderCell<TData extends RowData>({
   const sortIndex = column.getSortIndex()
   const canResize = column.getCanResize()
   const canReorder = column.getCanReorder() && !header.isPlaceholder
+  const pinned = column.getIsPinned()
   type HeaderRenderer = (ctx: HeaderContext<TData, unknown>) => React.ReactNode
 
   const headerContent = header.isPlaceholder
@@ -110,7 +325,6 @@ function HeaderCell<TData extends RowData>({
       maxWidth: column.columnDef.maxSize,
     }
 
-    const pinned = column.getIsPinned()
     if (pinned) {
       s.position = 'sticky'
       if (pinned === 'left') {
@@ -120,10 +334,16 @@ function HeaderCell<TData extends RowData>({
       }
     }
 
-    return s
-  }, [header, column])
+    // Live reorder animation. Pinned columns are excluded (they own `position`).
+    // The source slot is held open (styled via [data-drag-source]); its content
+    // rides in the floating ghost. Other columns slide to make room (the
+    // transition is applied via the [data-reordering] CSS rule).
+    if (!pinned && !isDragSource && dragTransform !== 0) {
+      s.transform = `translateX(${dragTransform}px)`
+    }
 
-  const pinned = column.getIsPinned()
+    return s
+  }, [header, column, pinned, isDragSource, dragTransform])
 
   const lastResizeEndRef = useRef(0)
 
@@ -149,104 +369,12 @@ function HeaderCell<TData extends RowData>({
     e.stopPropagation()
   }, [])
 
-  const [dragOver, setDragOver] = useState<'left' | 'right' | null>(null)
-
-  const handleDragStart = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      if (!canReorder) return
-      e.stopPropagation()
-      e.dataTransfer.effectAllowed = 'move'
-      try {
-        e.dataTransfer.setData(DRAG_MIME, column.id)
-        e.dataTransfer.setData('text/plain', column.id)
-      } catch {
-        // Ignore legacy dataTransfer issues.
-      }
-      table.setColumnDragActive(true)
+  const handleContentPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!canReorder || pinned) return
+      onReorderPointerDown(e, column.id)
     },
-    [canReorder, column.id, table],
-  )
-
-  const handleDragOver = useCallback(
-    (e: React.DragEvent<HTMLTableCellElement>) => {
-      if (!canReorder) return
-      const types = e.dataTransfer.types as unknown as ArrayLike<string>
-      let isYableDrag = false
-      for (let i = 0; i < types.length; i++) {
-        if (types[i] === DRAG_MIME) {
-          isYableDrag = true
-          break
-        }
-      }
-      if (!isYableDrag) return
-
-      e.preventDefault()
-      e.dataTransfer.dropEffect = 'move'
-      const rect = e.currentTarget.getBoundingClientRect()
-      const midpoint = rect.left + rect.width / 2
-      setDragOver(e.clientX < midpoint ? 'left' : 'right')
-    },
-    [canReorder],
-  )
-
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLTableCellElement>) => {
-    const next = e.relatedTarget as Node | null
-    if (next && e.currentTarget.contains(next)) return
-    setDragOver(null)
-  }, [])
-
-  const handleDragEnd = useCallback(() => {
-    setDragOver(null)
-    table.setColumnDragActive(false)
-  }, [table])
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLTableCellElement>) => {
-      if (!canReorder) return
-      e.preventDefault()
-      e.stopPropagation()
-      const sourceId = e.dataTransfer.getData(DRAG_MIME)
-      const rect = e.currentTarget.getBoundingClientRect()
-      const insertAfter = e.clientX >= rect.left + rect.width / 2
-      setDragOver(null)
-      table.setColumnDragActive(false)
-
-      if (!sourceId || sourceId === column.id) return
-
-      const state = table.getState()
-      const allLeafs = table.getAllLeafColumns()
-      const baseOrder: ColumnOrderState =
-        state.columnOrder && state.columnOrder.length > 0
-          ? state.columnOrder
-          : allLeafs.map((c) => c.id)
-
-      const next: string[] = []
-      const seen = new Set<string>()
-      for (const id of baseOrder) {
-        if (allLeafs.some((c) => c.id === id)) {
-          next.push(id)
-          seen.add(id)
-        }
-      }
-      for (const c of allLeafs) {
-        if (!seen.has(c.id)) {
-          next.push(c.id)
-          seen.add(c.id)
-        }
-      }
-
-      const fromIdx = next.indexOf(sourceId)
-      if (fromIdx === -1) return
-      next.splice(fromIdx, 1)
-
-      let toIdx = next.indexOf(column.id)
-      if (toIdx === -1) return
-      if (insertAfter) toIdx += 1
-      next.splice(toIdx, 0, sourceId)
-
-      table.setColumnOrder(next)
-    },
-    [canReorder, column.id, table],
+    [canReorder, pinned, onReorderPointerDown, column.id],
   )
 
   const handleHeaderClick = useCallback(
@@ -257,11 +385,13 @@ function HeaderCell<TData extends RowData>({
         originalEvent: e,
       } satisfies HeaderClickEvent<TData>)
       if (!canSort) return
+      // Swallow the click that ends a resize or a reorder drag.
       if (Date.now() - lastResizeEndRef.current < 250) return
+      if (Date.now() - reorderEndRef.current < 250) return
       const handler = column.getToggleSortingHandler()
       if (handler) handler(e)
     },
-    [canSort, column, header, table.events],
+    [canSort, column, header, table.events, reorderEndRef],
   )
 
   const handleHeaderContextMenu = useCallback(
@@ -279,10 +409,12 @@ function HeaderCell<TData extends RowData>({
     <th
       className="yable-th"
       style={style}
+      data-column-id={column.id}
       data-sortable={canSort || undefined}
       data-pinned={pinned || undefined}
-      data-reorderable={canReorder || undefined}
-      data-drag-over={dragOver || undefined}
+      data-reorderable={(canReorder && !pinned) || undefined}
+      data-reordering={(dragActive && !pinned) || undefined}
+      data-drag-source={isDragSource || undefined}
       aria-sort={
         sortDirection === 'asc'
           ? 'ascending'
@@ -296,15 +428,10 @@ function HeaderCell<TData extends RowData>({
       colSpan={header.colSpan}
       onClick={handleHeaderClick}
       onContextMenu={handleHeaderContextMenu}
-      onDragOver={canReorder ? handleDragOver : undefined}
-      onDragLeave={canReorder ? handleDragLeave : undefined}
-      onDrop={canReorder ? handleDrop : undefined}
     >
       <div
         className="yable-th-content"
-        draggable={canReorder || undefined}
-        onDragStart={canReorder ? handleDragStart : undefined}
-        onDragEnd={canReorder ? handleDragEnd : undefined}
+        onPointerDown={canReorder && !pinned ? handleContentPointerDown : undefined}
       >
         <span>{headerContent}</span>
         {canSort && (

@@ -192,4 +192,91 @@ describe('useServerTable', () => {
     expect(result.current.rows[0]?.name).toBe('Bob')
     expect(result.current.rowCount).toBe(2)
   })
+
+  it('aborts the in-flight request and ignores its stale result when a new fetch starts', async () => {
+    const signals: AbortSignal[] = []
+    let resolveFirst: ((r: ServerTableFetchResult<ServerRow>) => void) | null = null
+
+    const fetchData = vi.fn((args: ServerTableFetchArgs) => {
+      signals.push(args.signal)
+      if (signals.length === 1) {
+        return new Promise<ServerTableFetchResult<ServerRow>>((resolve) => {
+          resolveFirst = resolve
+        })
+      }
+      return Promise.resolve<ServerTableFetchResult<ServerRow>>({
+        rows: [{ id: '2', name: 'Bob', status: 'inactive' as const }],
+        hasMore: false,
+      })
+    })
+
+    const { result } = renderHook(() =>
+      useServerTable<ServerRow>({ columns, fetchData, getRowId: (row) => row.id }),
+    )
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(1))
+    expect(signals[0]!.aborted).toBe(false)
+
+    // A state change kicks off a second fetch; the first must be aborted.
+    act(() => {
+      result.current.table.setSorting([{ id: 'name', desc: true }])
+    })
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(2))
+    expect(signals[0]!.aborted).toBe(true)
+    await waitFor(() => expect(result.current.rows[0]?.name).toBe('Bob'))
+
+    // The aborted request resolving late must NOT clobber the current rows.
+    await act(async () => {
+      resolveFirst?.({
+        rows: [{ id: '99', name: 'STALE', status: 'active' as const }],
+        hasMore: true,
+      })
+      await Promise.resolve()
+    })
+    expect(result.current.rows.some((row) => row.name === 'STALE')).toBe(false)
+    expect(result.current.rows[0]?.name).toBe('Bob')
+  })
+
+  it('loadMore is a no-op once hasMore is false', async () => {
+    const fetchData = vi.fn(async () => ({
+      rows: [{ id: '1', name: 'Alice', status: 'active' as const }],
+      hasMore: false,
+    }))
+
+    const { result } = renderHook(() =>
+      useServerTable<ServerRow>({ columns, fetchData, getRowId: (row) => row.id }),
+    )
+
+    // Wait for the initial fetch to settle and flip hasMore to false.
+    await waitFor(() => expect(result.current.hasMore).toBe(false))
+    expect(fetchData).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      await result.current.loadMore()
+    })
+    expect(fetchData).toHaveBeenCalledTimes(1) // no append request fired
+  })
+
+  it('merges the canonical server result on a successful optimistic update', async () => {
+    const fetchData = vi.fn(async () => ({
+      rows: [{ id: '1', name: 'Alice', status: 'active' as const }],
+      hasMore: false,
+    }))
+    const updateRow = vi.fn(async () => ({ name: 'Grace', status: 'inactive' as const }))
+
+    const { result } = renderHook(() =>
+      useServerTable<ServerRow>({ columns, fetchData, updateRow, getRowId: (row) => row.id }),
+    )
+
+    await waitFor(() => expect(result.current.rows[0]?.name).toBe('Alice'))
+
+    await act(async () => {
+      await result.current.updateRow('1', { name: 'Grace' })
+    })
+
+    // The row reflects the server's canonical response, not just the local patch.
+    expect(result.current.rows[0]).toMatchObject({ name: 'Grace', status: 'inactive' })
+    expect(result.current.error).toBeNull()
+  })
 })

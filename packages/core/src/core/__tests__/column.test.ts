@@ -3,7 +3,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createTable } from '../table'
 import { functionalUpdate, MAX_ACCESSOR_DEPTH } from '../../utils'
-import type { TableState, ColumnDef } from '../../types'
+import type { TableState, ColumnDef, TableOptions } from '../../types'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -20,6 +20,7 @@ function makeTable(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TValue variance
   colDefs: ColumnDef<TestData, any>[],
   stateOverrides: Partial<TableState> = {},
+  extraOptions: Partial<TableOptions<TestData>> = {},
 ) {
   let state: TableState = {
     sorting: [],
@@ -65,6 +66,7 @@ function makeTable(
     ],
     columns: colDefs,
     getRowId: (_, i) => String(i),
+    ...extraOptions,
     state,
     onStateChange: (updater) => {
       state = functionalUpdate(updater, state)
@@ -389,5 +391,100 @@ describe('createColumn accessorKey depth guard', () => {
     const firstCall = errorSpy.mock.calls[0]!
     expect(String(firstCall[0])).toContain('[yable]')
     expect(String(firstCall[0])).toContain('too deep')
+  })
+})
+
+// ===========================================================================
+// Pinning — sticky start offset (getStart)
+// ===========================================================================
+
+describe('Column getStart sticky offsets', () => {
+  it('accumulates left-pinned widths for the left sticky offset', () => {
+    const { table } = makeTable(
+      [
+        { accessorKey: 'name', header: 'Name', size: 100 },
+        { accessorKey: 'age', header: 'Age', size: 120 },
+        { accessorKey: 'email', header: 'Email', size: 150 },
+      ],
+      { columnPinning: { left: ['name', 'age'], right: [] } },
+    )
+
+    // First left-pinned column sits flush against the edge.
+    expect(table.getColumn('name')!.getStart('left')).toBe(0)
+    // Second left-pinned column is offset by the first column's width.
+    expect(table.getColumn('age')!.getStart('left')).toBe(100)
+  })
+
+  it('accumulates right-pinned widths for the right sticky offset', () => {
+    const { table } = makeTable(
+      [
+        { accessorKey: 'name', header: 'Name', size: 100 },
+        { accessorKey: 'age', header: 'Age', size: 120 },
+        { accessorKey: 'email', header: 'Email', size: 150 },
+      ],
+      { columnPinning: { left: [], right: ['age', 'email'] } },
+    )
+
+    // Last right-pinned column sits flush against the right edge.
+    expect(table.getColumn('email')!.getStart('right')).toBe(0)
+    // The right offset is the sum of widths of right-pinned columns AFTER it.
+    expect(table.getColumn('age')!.getStart('right')).toBe(150)
+  })
+
+  it('returns 0 for non-pinned columns', () => {
+    const { table } = makeTable([{ accessorKey: 'name', header: 'Name', size: 100 }])
+    expect(table.getColumn('name')!.getStart('left')).toBe(0)
+  })
+})
+
+// ===========================================================================
+// Sorting — 3-state toggle cycle (toggleSorting)
+// ===========================================================================
+
+describe('Column toggleSorting 3-state cycle', () => {
+  it('cycles asc -> desc -> none -> asc when enableSortingRemoval is true', () => {
+    const { table, getState } = makeTable(
+      [{ accessorKey: 'age', header: 'Age' }],
+      {},
+      {
+        enableSortingRemoval: true,
+      },
+    )
+    const col = table.getColumn('age')!
+
+    col.toggleSorting()
+    expect(getState().sorting).toEqual([{ id: 'age', desc: false }])
+
+    col.toggleSorting()
+    expect(getState().sorting).toEqual([{ id: 'age', desc: true }])
+
+    // Third header click removes the sort entirely.
+    col.toggleSorting()
+    expect(getState().sorting).toEqual([])
+
+    // Fourth click starts the cycle over at ascending.
+    col.toggleSorting()
+    expect(getState().sorting).toEqual([{ id: 'age', desc: false }])
+  })
+
+  it('stays a 2-state asc <-> desc toggle when enableSortingRemoval is false', () => {
+    const { table, getState } = makeTable(
+      [{ accessorKey: 'age', header: 'Age' }],
+      {},
+      {
+        enableSortingRemoval: false,
+      },
+    )
+    const col = table.getColumn('age')!
+
+    col.toggleSorting()
+    expect(getState().sorting).toEqual([{ id: 'age', desc: false }])
+
+    col.toggleSorting()
+    expect(getState().sorting).toEqual([{ id: 'age', desc: true }])
+
+    // Third click returns to ascending instead of removing the sort.
+    col.toggleSorting()
+    expect(getState().sorting).toEqual([{ id: 'age', desc: false }])
   })
 })

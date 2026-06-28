@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/ensure-yable-package-builds.mjs && next build",
     "start": "next start",
-    "typecheck": "fumadocs-mdx && tsc --noEmit"
+    "typecheck": "fumadocs-mdx && next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@zvndev/yable-core": "^0.3.0",
-    "@zvndev/yable-react": "^0.3.0",
-    "@zvndev/yable-themes": "^0.3.0",
+    "@zvndev/yable-core": "workspace:*",
+    "@zvndev/yable-react": "workspace:*",
+    "@zvndev/yable-themes": "workspace:*",
     "fumadocs-core": "^15.8.5",
     "fumadocs-mdx": "^12.0.3",
     "fumadocs-ui": "^15.8.5",
