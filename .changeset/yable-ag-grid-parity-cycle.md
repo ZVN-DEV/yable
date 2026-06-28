@@ -1,7 +1,7 @@
 ---
 '@zvndev/yable-core': minor
 '@zvndev/yable-react': minor
-'@zvndev/yable-themes': minor
+'@zvndev/yable-themes': patch
 ---
 
 Premium column drag, AG Grid Community parity fixes, and a large test-coverage expansion.
