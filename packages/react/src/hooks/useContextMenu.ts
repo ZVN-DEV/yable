@@ -8,20 +8,28 @@ export function useContextMenu() {
   const [x, setX] = useState(0)
   const [y, setY] = useState(0)
   const [targetTable, setTargetTable] = useState<Table<any> | null>(null)
+  const [targetColumnId, setTargetColumnId] = useState<string | undefined>(undefined)
 
   const open = useCallback(
-    <TData extends RowData>(clientX: number, clientY: number, table: Table<TData>) => {
+    <TData extends RowData>(
+      clientX: number,
+      clientY: number,
+      table: Table<TData>,
+      columnId?: string,
+    ) => {
       setX(clientX)
       setY(clientY)
       setTargetTable(table as any)
+      setTargetColumnId(columnId)
       setIsOpen(true)
     },
-    []
+    [],
   )
 
   const close = useCallback(() => {
     setIsOpen(false)
     setTargetTable(null)
+    setTargetColumnId(undefined)
   }, [])
 
   // Close on escape key
@@ -43,5 +51,5 @@ export function useContextMenu() {
     }
   }, [isOpen, close])
 
-  return { isOpen, x, y, targetTable, open, close }
+  return { isOpen, x, y, targetTable, targetColumnId, open, close }
 }

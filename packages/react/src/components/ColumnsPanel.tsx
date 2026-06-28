@@ -12,7 +12,14 @@ interface ColumnsPanelProps<TData extends RowData> {
 /** Search icon for the column search field */
 function SearchIcon() {
   return (
-    <svg className="yable-sidebar-search-icon" width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <svg
+      className="yable-sidebar-search-icon"
+      width="13"
+      height="13"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden="true"
+    >
       <circle cx="6.25" cy="6.25" r="4.25" stroke="currentColor" strokeWidth="1.5" />
       <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
@@ -24,32 +31,62 @@ function VisibilityIcon({ visible }: { visible: boolean }) {
   if (visible) {
     return (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-        <path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+        <path
+          d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
         <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.2" />
       </svg>
     )
   }
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" opacity="0.3" />
-      <line x1="2" y1="2" x2="12" y2="12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
+      <path
+        d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+        opacity="0.3"
+      />
+      <line
+        x1="2"
+        y1="2"
+        x2="12"
+        y2="12"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
     </svg>
   )
 }
 
-export function ColumnsPanel<TData extends RowData>({
-  table,
-}: ColumnsPanelProps<TData>) {
+export function ColumnsPanel<TData extends RowData>({ table }: ColumnsPanelProps<TData>) {
   const [search, setSearch] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
 
-  const columns = table.getAllLeafColumns()
+  // Order the panel list by the live columnOrder state so it stays in sync with
+  // the table after a reorder (whether triggered here or by a header drag).
+  // getAllLeafColumns() returns definition order, which would otherwise desync.
+  const allColumns = table.getAllLeafColumns()
+  const columnOrder = table.getState().columnOrder
+  const columns =
+    columnOrder && columnOrder.length > 0
+      ? [...allColumns].sort((a, b) => {
+          const ia = columnOrder.indexOf(a.id)
+          const ib = columnOrder.indexOf(b.id)
+          return (
+            (ia === -1 ? Number.MAX_SAFE_INTEGER : ia) - (ib === -1 ? Number.MAX_SAFE_INTEGER : ib)
+          )
+        })
+      : allColumns
   const visibleCount = columns.filter((c) => c.getIsVisible()).length
   const filteredColumns = search
     ? columns.filter((col) => {
-        const header = typeof col.columnDef.header === 'string'
-          ? col.columnDef.header
-          : col.id
+        const header = typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id
         return header.toLowerCase().includes(search.toLowerCase())
       })
     : columns
@@ -58,7 +95,7 @@ export function ColumnsPanel<TData extends RowData>({
     (visible: boolean) => {
       table.toggleAllColumnsVisible(visible)
     },
-    [table]
+    [table],
   )
 
   const handleDragStart = useCallback((e: React.DragEvent, columnId: string) => {
@@ -81,9 +118,10 @@ export function ColumnsPanel<TData extends RowData>({
       e.preventDefault()
       if (!draggedId || draggedId === targetId) return
 
-      const currentOrder = table.getState().columnOrder.length > 0
-        ? table.getState().columnOrder
-        : columns.map((c) => c.id)
+      const currentOrder =
+        table.getState().columnOrder.length > 0
+          ? table.getState().columnOrder
+          : columns.map((c) => c.id)
 
       const fromIndex = currentOrder.indexOf(draggedId)
       const toIndex = currentOrder.indexOf(targetId)
@@ -97,7 +135,7 @@ export function ColumnsPanel<TData extends RowData>({
       table.setColumnOrder(newOrder)
       setDraggedId(null)
     },
-    [draggedId, table, columns]
+    [draggedId, table, columns],
   )
 
   return (
@@ -139,9 +177,8 @@ export function ColumnsPanel<TData extends RowData>({
       {/* Draggable column list */}
       <div className="yable-sidebar-column-list" role="listbox" aria-label="Columns">
         {filteredColumns.map((column) => {
-          const header = typeof column.columnDef.header === 'string'
-            ? column.columnDef.header
-            : column.id
+          const header =
+            typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id
           const isVisible = column.getIsVisible()
 
           return (

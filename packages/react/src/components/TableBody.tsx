@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { Column, RowData, Table, Row } from '@zvndev/yable-core'
 import { TableCell } from './TableCell'
 import { CellErrorBoundary } from './ErrorBoundary'
+import { MasterDetail } from './MasterDetail'
 import { useVirtualization } from '../hooks/useVirtualization'
 
 interface TableBodyProps<TData extends RowData> {
@@ -82,28 +83,49 @@ export function TableBody<TData extends RowData>({
     }
   }, [table])
 
+  const renderRow = (row: Row<TData>, rowIndex: number, pinnedPosition?: 'top' | 'bottom') => (
+    <MemoizedTableRow
+      key={row.id}
+      row={row}
+      table={table}
+      rowIndex={rowIndex}
+      visibleColumns={visibleColumns}
+      isSelected={row.getIsSelected()}
+      isExpanded={row.getIsExpanded()}
+      activeColumnId={activeCell?.rowId === row.id ? activeCell.columnId : undefined}
+      focusedColumnIndex={focusedCell?.rowIndex === rowIndex ? focusedCell.columnIndex : null}
+      hasFocusedCell={focusedCell !== null}
+      cellSelectionKey={cellSelectionKey}
+      pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
+      clickable={clickableRows}
+      pinnedPosition={pinnedPosition}
+    />
+  )
+
   if (!enableVirtualization) {
+    // When no rows are pinned, getCenterRows() === the full row set, so we keep
+    // the original full-row render to guarantee identical output. Only split
+    // into top/center/bottom sections once row pinning is actually in use.
+    const rowPinning = table.getState().rowPinning
+    const hasPinnedRows = (rowPinning.top?.length ?? 0) > 0 || (rowPinning.bottom?.length ?? 0) > 0
+
+    if (hasPinnedRows) {
+      const topRows = table.getTopRows()
+      const centerRows = table.getCenterRows()
+      const bottomRows = table.getBottomRows()
+      let visualIndex = 0
+      return (
+        <tbody className="yable-tbody">
+          {topRows.map((row) => renderRow(row, visualIndex++, 'top'))}
+          {centerRows.map((row) => renderRow(row, visualIndex++))}
+          {bottomRows.map((row) => renderRow(row, visualIndex++, 'bottom'))}
+        </tbody>
+      )
+    }
+
     // Non-virtualized: render all rows directly
     return (
-      <tbody className="yable-tbody">
-        {rows.map((row, rowIndex) => (
-          <MemoizedTableRow
-            key={row.id}
-            row={row}
-            table={table}
-            rowIndex={rowIndex}
-            visibleColumns={visibleColumns}
-            isSelected={row.getIsSelected()}
-            isExpanded={row.getIsExpanded()}
-            activeColumnId={activeCell?.rowId === row.id ? activeCell.columnId : undefined}
-            focusedColumnIndex={focusedCell?.rowIndex === rowIndex ? focusedCell.columnIndex : null}
-            hasFocusedCell={focusedCell !== null}
-            cellSelectionKey={cellSelectionKey}
-            pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
-            clickable={clickableRows}
-          />
-        ))}
-      </tbody>
+      <tbody className="yable-tbody">{rows.map((row, rowIndex) => renderRow(row, rowIndex))}</tbody>
     )
   }
 
@@ -205,6 +227,7 @@ interface TableRowProps<TData extends RowData> {
   cellSelectionKey: string
   pendingValuesKey: string
   clickable?: boolean
+  pinnedPosition?: 'top' | 'bottom'
   virtualStyle?: React.CSSProperties
 }
 
@@ -221,6 +244,7 @@ function TableRowInner<TData extends RowData>({
   cellSelectionKey: _cellSelectionKey,
   pendingValuesKey: _pendingValuesKey,
   clickable,
+  pinnedPosition,
   virtualStyle,
 }: TableRowProps<TData>) {
   const allCells = row.getAllCells()
@@ -276,7 +300,13 @@ function TableRowInner<TData extends RowData>({
   const rowStyleDef = table.options.rowStyle
   const userRowStyle = typeof rowStyleDef === 'function' ? rowStyleDef(row) : rowStyleDef
   const mergedRowStyle = userRowStyle ? { ...virtualStyle, ...userRowStyle } : virtualStyle
-  const rowClassName = ['yable-tr', userRowClassName].filter(Boolean).join(' ')
+  const rowClassName = [
+    'yable-tr',
+    pinnedPosition && `yable-tr--pinned-${pinnedPosition}`,
+    userRowClassName,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <>
@@ -286,6 +316,7 @@ function TableRowInner<TData extends RowData>({
         data-selected={isSelected || undefined}
         data-expanded={isExpanded || undefined}
         data-clickable={clickable || undefined}
+        data-pinned-row={pinnedPosition}
         data-row-id={row.id}
         data-row-index={rowIndex}
         aria-selected={selectionEnabled ? isSelected : undefined}
@@ -316,15 +347,7 @@ function TableRowInner<TData extends RowData>({
         })}
       </tr>
 
-      {isExpanded && (
-        <tr className="yable-expand-row">
-          <td className="yable-td" colSpan={visibleColumns.length}>
-            {typeof (row as any)._renderExpanded === 'function'
-              ? (row as any)._renderExpanded()
-              : null}
-          </td>
-        </tr>
-      )}
+      {isExpanded && <MasterDetail row={row} table={table} colSpan={visibleColumns.length} />}
     </>
   )
 }
@@ -355,6 +378,9 @@ function areRowPropsEqual<TData extends RowData>(
 
   // Clickable prop
   if (prev.clickable !== next.clickable) return false
+
+  // Row-pinning position
+  if (prev.pinnedPosition !== next.pinnedPosition) return false
 
   // Focus / edit state for this row
   if (prev.activeColumnId !== next.activeColumnId) return false
