@@ -70,34 +70,51 @@ vanilla 17). No coverage thresholds configured.
 - [x] Master/detail `renderDetailPanel` renders via `<Table>` (bug #4) — `react/__tests__/MasterDetail.test.tsx`
 - [x] Row pinning renders top/bottom (bug #3, **non-virtualized only** — virtualized pinned rows are a follow-up) — `react/__tests__/PinnedRows.test.tsx`
 
-### Tier 1 — Community-parity behaviors with NO tests today
+### Tier 1 — Community-parity behaviors (mostly DONE 2026-06-28)
 
-- [ ] **Column reorder via header drag** (the just-shipped feature has 0 automated tests): pointerdown→move→up commits new `columnOrder`; a drag does not trigger click-to-sort; body cells slide in lockstep — `react/__tests__/ColumnReorder.test.tsx` (new) + Playwright spec
-- [ ] Row drag reorder (`useRowDrag`) — new test
-- [ ] Column resize edge cases: min/max clamp, double-click autosize; `sizeColumnsToFit` + `flex` (don't exist — test documents gap #8)
-- [ ] Header/body width sync under resize + horizontal scroll (Bevrly #3) — Playwright e2e
-- [ ] Virtualization drift: scroll to ~50k, rendered rows match index; variable-height no mid-scroll jump (Bevrly #2) — Playwright e2e
-- [ ] State save/restore round-trip: `getState()` → remount → `initialState` identical — extend `useTablePersistence.test.ts`
-- [ ] Selection scope: header select-all = all vs filtered vs page; respects active filter; persists across sort/scroll — `react/__tests__/RowSelection.test.tsx` (new)
-- [ ] Keyboard nav integration: Tab wrap at row ends, Ctrl+Home/End, PageUp/Down, navigate across pinned columns — new integration test
-- [ ] Floating filter ↔ main filter sync; quick-filter token AND; filter + pagination page clamp — extend filter tests
-- [ ] Cell flash under virtualization (recycled cell flashes correct cell) — new
-- [ ] Untested renderers: `CellDate/Numeric/Progress/Rating/Status` + editors `CellInput/Checkbox/Toggle/DatePicker` — extend `CellTypes.test.tsx`
+- [x] **Column reorder via header drag** — `react/__tests__/ColumnReorder.test.tsx`: drives the pointer drag in jsdom (stubbed layout rects), asserts the committed order, and verifies a sub-threshold move is a click not a drag. (Visual slide already verified in-browser via Playwright this cycle.)
+- [x] State save/restore round-trip — `useTablePersistence.test.ts` (persist → re-hydrate fresh hook)
+- [x] Selection scope: select-all all vs page; respects active filter; persists across sort — `core/__tests__/selection-scope.test.ts`
+- [x] Untested display renderers: `CellDate/Numeric/Progress/Rating/Status` — `react/__tests__/CellRenderers.test.tsx`
+- [x] `lockVisible` + `suppressDragHidesColumns` (#7) — `core/__tests__/visibility-lock.test.ts`
+- [ ] Row drag reorder (`useRowDrag`) — still no test (not auto-wired into `<Table>`)
+- [ ] Form-editor cells `CellInput/Checkbox/Toggle/DatePicker` — only `CellSelect` covered
+- [ ] Keyboard-nav integration (Tab wrap, Ctrl+Home/End, PageUp/Down, across pinned cols) — core helpers tested; full grid integration still missing
+- [ ] Playwright e2e for the browser-only cases (drag slide, virtualization drift, header/body width sync under resize+scroll) — **biggest remaining gap**; mechanics verified manually this cycle, but no checked-in e2e suite. Needs `@playwright/test` + a `test:e2e` script (kept out of the default CI lane).
+- [ ] `sizeColumnsToFit` / `flex` columns (#8) — not implemented; real feature, deferred.
 
-### Tier 2 — deepen existing coverage (AG Grid edge cases)
+### Tier 2 — edge cases (mostly DONE 2026-06-28)
 
-- [ ] Sorting: stability, null/undefined ordering, accented/locale, custom comparator
-- [ ] Filtering: blank handling (`""` vs null vs 0), `inRange` inclusive boundaries, AND/OR re-eval
-- [ ] Editing: type-to-edit, Esc restores original, Tab commits+moves, commit-on-blur config
-- [ ] Pagination: current page clamps when filter reduces total rows
-- [ ] Data transactions: add/update/remove by `getRowId` re-sorts/re-filters the row
+- [x] Sorting: stability, null/undefined ordering, custom comparator, natural numeric order, multi-sort — `core/__tests__/sorting-edge.test.ts`
+- [x] Filtering: case-insensitive contains, inclusive `inNumberRange`, empty/null handling, filter+sort — `core/__tests__/filtering-edge.test.ts`
+- [x] Pagination: page/row-count recompute, page-size change, **out-of-range clamp (bug fixed)** — `core/__tests__/pagination-edge.test.ts`
+- [ ] Editing: type-to-edit, Esc restores, Tab commits+moves, commit-on-blur — still thin
+- [ ] Accented/locale sort; AND/OR two-condition filters — not covered
+- [ ] Data transactions: add/update/remove by `getRowId` re-sorts/re-filters — not covered
 
-### Tier 3 — NOT the bar (AG Grid Enterprise) — document as intentional
+### Tier 3 — AG Grid **Enterprise** tier (intentionally out of scope for parity)
 
-Range-select+fill, clipboard, set/multi/advanced filter, Excel export, row grouping,
-aggregation, pivot, tree, server-side row model, charts, sparklines, column menu,
-context menu. Yable has partial versions of several — either finish+test, or mark
-experimental; they're beyond the free-tier bar.
+These are paid features in AG Grid, so they are NOT the bar for a free MIT library;
+no parity tests are owed. Decision for Yable:
+
+- **Don't build for parity:** set/multi/advanced filter, Excel export, server-side row
+  model, integrated charts, sparklines.
+- **Already shipped as turnkey (bonus vs Community):** clipboard copy/paste, context
+  menu, sidebar/tool panels, status bar, range (cell) selection.
+- **Shipped as engines but NOT wired into `<Table>` — treat as EXPERIMENTAL and label
+  them so the public API doesn't silently no-op:** fill handle (`fillRange`), undo/redo,
+  formulas, pivot, tree data, row grouping, row spanning, full-row editing. Each has a
+  working core engine + tests but no turnkey adapter wiring (`core/table.ts` stub block).
+  **Follow-up:** either wire + test per feature, or annotate the stub methods as
+  experimental in the public types so consumers aren't misled.
+
+### Still open after this cycle (next pickups)
+
+1. Playwright e2e suite (drag slide / virtualization drift / width-sync) + `data-testid` hook.
+2. Wire-or-label the experimental engines (fill handle, undo/redo, formulas, pivot, tree, grouping).
+3. `sizeColumnsToFit` / `flex` column sizing.
+4. Virtualized pinned rows (this cycle covered the non-virtualized path).
+5. Row-drag + form-editor + keyboard-nav-integration tests.
 
 ---
 
