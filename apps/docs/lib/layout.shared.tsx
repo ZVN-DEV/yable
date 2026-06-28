@@ -5,6 +5,6 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: 'Yable',
     },
-    githubUrl: 'https://github.com/ZVN-DEV/YableTable',
+    githubUrl: 'https://github.com/ZVN-DEV/yable',
   }
 }

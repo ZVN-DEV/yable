@@ -3,25 +3,40 @@ title: Pivot Tables
 description: Transform flat data into cross-tabulated views with row groups, column groups, and value aggregations.
 ---
 
-Transform flat data into cross-tabulated views. Pivoting ships in Yable's MIT-licensed core.
+Transform flat data into cross-tabulated views. Pivoting ships in Yable's MIT-licensed core as a programmatic row-model accessor.
 
-### How to Enable
+<Callout type="info">
+  Pivot ships as a programmatic row-model accessor (`table.getPivotRowModel()`).
+  Rendering a pivot directly through `<Table>` is on the roadmap.
+</Callout>
 
-Pivot tables are built on top of grouping and aggregation. Configure row groups, column groups, and value aggregations:
+### How to Use
+
+Declare a `pivotConfig` (row fields, optional column fields, and value aggregations), then read the aggregated rows off the model returned by `table.getPivotRowModel()`:
 
 ```typescript
 const table = useTable({
   data,
   columns,
-  enableGrouping: true,
-  initialState: {
-    grouping: ['region', 'category'], // Row grouping
+  pivotConfig: {
+    rowFields: [{ field: 'region' }, { field: 'category' }],
+    columnFields: [],
+    valueFields: [{ field: 'sales', aggregation: 'sum' }],
   },
 })
+
+// Returns a real aggregated RowModel — read the rows directly.
+const pivot = table.getPivotRowModel()
+
+for (const row of pivot.rows) {
+  // Aggregated values and pivot metadata live on `row.original`.
+  console.log(row.original)
+}
 ```
 
 ### Notes
 
-- Pivot tables build on the [grouping](/docs/features/column-grouping) + [aggregation](/docs/features/aggregation) features
+- `table.getPivotRowModel()` returns a `RowModel` (`rows`, `flatRows`, `rowsById`); each row carries its aggregates and pivot metadata (`_pivotLabel`, `_pivotPath`, `_pivotDepth`, …) on `row.original`
 - A full `PivotEngine` with row fields, column fields, value fields, subtotals, and grand totals is exported from `@zvndev/yable-core` (`PivotEngine`, `getPivotRowModel`, `generatePivotColumnDefs`, `getInitialPivotState`, `PivotConfig`)
-- You can also fall back to plain grouping + aggregation for lighter-weight pivot-style views
+- Value aggregations reuse the built-in [aggregation functions](/docs/features/aggregation) (`sum`, `mean`, `count`, …)
+- Wiring the generated pivot columns into `<Table>` for turnkey rendering is on the roadmap

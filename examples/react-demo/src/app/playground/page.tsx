@@ -35,7 +35,7 @@ interface Employee {
   completion: number
 }
 
-const CURRENT_VERSION = '0.2.1'
+const CURRENT_VERSION = '0.5.0'
 
 const departments = ['Engineering', 'Design', 'Product', 'Marketing', 'Sales']
 const roles = [
@@ -449,7 +449,9 @@ function buildColumns(
     columnHelper.accessor('rating', {
       header: 'Rating',
       cellType: 'rating',
-      size: 90,
+      // Five stars + letter-spacing need more room than the default — 90px
+      // clipped the last star with an ellipsis.
+      size: 124,
     }),
     columnHelper.accessor('completion', {
       header: 'Progress',

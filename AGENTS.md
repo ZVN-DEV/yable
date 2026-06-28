@@ -62,38 +62,32 @@ packages/themes/src/
 
 ## What Needs Building (priority order)
 
-Read `TODO.md` for the full roadmap. Top priorities:
+The engine and React adapter now cover most production grid needs: sorting, filtering
+(incl. floating + set filters), pagination, cell editing with async commits, column
+pinning/resizing/visibility, animated drag-to-reorder, row + column virtualization,
+range selection, formulas, pivot accessor, fill handle, undo/redo, tree data, clipboard,
+and export. Current focus:
 
-### 1. Cell Range Selection (P0)
+### 1. Turnkey row grouping + aggregation render (P0)
 
-- Click+drag to select rectangular cell ranges
-- Shift+click to extend selection from anchor
-- Shift+Arrow to extend one cell at a time
-- Ctrl+click to toggle individual cells
-- Ctrl+drag for multi-range (non-contiguous) selection
-- Visual: blue highlight on selected cells, blue border on range
-- New state type needed: `CellRangeSelectionState`
-- Integrates with clipboard (Ctrl+C copies selected range)
+- Group-row construction from `state.grouping` plus a `TableBody` pass that walks
+  `subRows`, so grouped/aggregated rows render through `<Table>` (the aggregation fns
+  and column API exist; the body renderer only walks top-level rows today)
 
-### 2. Column Virtualization (P1)
+### 2. Pivot rendered through `<Table>` (P1)
 
-- Only render visible columns for wide tables (50+ cols)
-- Extend `useVirtualization` or create `useColumnVirtualization`
-- Calculate visible column window from horizontal scroll position
-- Add spacer columns for total width
+- `table.getPivotRowModel()` returns the pivot row model; swap in the dynamic pivot
+  column defs from `generatePivotColumnDefs` so a pivot renders via `<Table>`, not just
+  programmatically
 
-### 3. Floating Filters (P1)
+### 3. Tree data with concurrent filter/sort (P1)
 
-- Per-column filter inputs rendered in a row below headers
-- Text input for string columns, number range for numeric, date picker for dates
-- New component: `packages/react/src/components/FloatingFilter.tsx`
-- Wired to `columnFilters` state
+- Tree flattening runs before filter/sort today; make filter/sort preserve parent chains
 
-### 4. Set Filter (P1)
+### 4. 1.0 API stabilization + e2e (P1)
 
-- Dropdown of unique values per column (checkbox list)
-- Data already available via `column.getFacetedUniqueValues()`
-- New component: `packages/react/src/components/SetFilter.tsx`
+- Lock the public API; add a checked-in Playwright e2e suite (drag slide, virtualization,
+  header/body width sync) and expand keyboard-navigation integration tests
 
 ## Code Patterns to Follow
 

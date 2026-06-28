@@ -17,6 +17,7 @@ import { ContextMenu } from './ContextMenu'
 import { useContextMenu } from '../hooks/useContextMenu'
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation'
 import { useColumnVirtualization } from '../hooks/useColumnVirtualization'
+import { useFillHandle } from '../hooks/useFillHandle'
 
 function filterHeaderGroups<TData extends RowData>(
   groups: HeaderGroup<TData>[],
@@ -174,6 +175,12 @@ export function Table<TData extends RowData>({
   const contextMenu = useContextMenu()
   useKeyboardNavigation(table, { containerRef })
 
+  // Fill handle drag tracking — provides the mousedown handler the focused
+  // cell's FillHandle corner attaches to. Inert unless `enableFillHandle` is set.
+  const { onFillHandleMouseDown } = useFillHandle(table, {
+    enabled: Boolean(table.options.enableFillHandle),
+  })
+
   // ---- aria-live announcements for sort, filter, and pagination changes ----
   const [announcement, setAnnouncement] = useState('')
   const prevSortingRef = useRef(table.getState().sorting)
@@ -287,7 +294,12 @@ export function Table<TData extends RowData>({
     >
       {colgroup}
       <TableHeader table={renderTable} floatingFilters={resolvedFloatingFilters} />
-      <TableBody table={renderTable} clickableRows={resolvedClickableRows} colgroup={colgroup} />
+      <TableBody
+        table={renderTable}
+        clickableRows={resolvedClickableRows}
+        colgroup={colgroup}
+        onFillHandleMouseDown={onFillHandleMouseDown}
+      />
       {footer && <TableFooter table={renderTable} />}
     </table>
   )

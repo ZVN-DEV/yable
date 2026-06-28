@@ -185,6 +185,67 @@
   color: #9595ac;
 }
 
+/* Loading skeleton — mirrors the table's column layout while rows generate. */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.skelRow {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 44px;
+  border-bottom: 1px solid #f0f0f6;
+}
+
+.skelHeader {
+  height: 48px;
+  background: #f7f7fb;
+  border-bottom: 1px solid #ececf4;
+}
+
+.skelCell {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 0 12px;
+}
+
+.skelBar,
+.skelBarHead {
+  display: block;
+  width: 70%;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef0f6 25%, #e2e5ef 37%, #eef0f6 63%);
+  background-size: 400% 100%;
+  animation: benchShimmer 1.4s ease infinite;
+}
+
+.skelBarHead {
+  width: 55%;
+  height: 9px;
+  background: linear-gradient(90deg, #e2e4ee 25%, #d4d8e6 37%, #e2e4ee 63%);
+  background-size: 400% 100%;
+}
+
+@keyframes benchShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skelBar,
+  .skelBarHead {
+    animation: none;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .page {
     color: #e7e7f0;
@@ -217,5 +278,23 @@
   }
   .statLabel {
     color: #b9b9d0;
+  }
+  .skeleton {
+    background: #16161f;
+  }
+  .skelRow {
+    border-bottom-color: #232333;
+  }
+  .skelHeader {
+    background: #1c1c2b;
+    border-bottom-color: #2a2a3a;
+  }
+  .skelBar {
+    background: linear-gradient(90deg, #20202e 25%, #2a2a3c 37%, #20202e 63%);
+    background-size: 400% 100%;
+  }
+  .skelBarHead {
+    background: linear-gradient(90deg, #262636 25%, #313146 37%, #262636 63%);
+    background-size: 400% 100%;
   }
 }

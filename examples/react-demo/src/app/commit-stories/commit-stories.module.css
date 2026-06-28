@@ -1,0 +1,152 @@
+/* ---------------------------------------------------------------------------
+ * Commit stories index — matches the landing page's warm amber dark theme.
+ * ------------------------------------------------------------------------- */
+
+.page {
+  --bg-0: #0a0706;
+  --bg-1: #161110;
+  --bg-2: #201916;
+  --fg-0: #f3eadb;
+  --fg-1: #c9bfae;
+  --fg-2: #807365;
+  --accent: #d8a86a;
+  --accent-bright: #ecc287;
+  --line: rgba(243, 234, 219, 0.08);
+  --line-strong: rgba(243, 234, 219, 0.14);
+
+  min-height: 100vh;
+  background: var(--bg-0);
+  color: var(--fg-0);
+  padding: 56px 22px 96px;
+  font-family: var(--font-body), sans-serif;
+}
+
+.inner {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 60ch;
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  color: var(--fg-0);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--fg-1);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 26px 24px 24px;
+  background: var(--bg-1);
+  text-decoration: none;
+  transition:
+    background 200ms ease,
+    transform 200ms ease;
+}
+
+.card:hover {
+  background: var(--bg-2);
+}
+
+.card:focus-visible {
+  outline: 2px solid rgba(216, 168, 106, 0.7);
+  outline-offset: -2px;
+}
+
+.cardIndex {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
+.cardTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg-0);
+}
+
+.cardDetail {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--fg-1);
+}
+
+.cardArrow {
+  position: absolute;
+  top: 24px;
+  right: 22px;
+  font-size: 1rem;
+  color: var(--fg-2);
+  transition:
+    color 200ms ease,
+    transform 200ms ease;
+}
+
+.card:hover .cardArrow {
+  color: var(--accent-bright);
+  transform: translateX(3px);
+}
+
+.backNav {
+  margin-top: 28px;
+}
+
+.backNav a {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.8125rem;
+  color: var(--fg-2);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.backNav a:hover {
+  color: var(--fg-0);
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    padding: 40px 14px 72px;
+  }
+}
