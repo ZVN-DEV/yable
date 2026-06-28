@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm --filter @zvndev/yable-core --filter @zvndev/yable-react --filter @zvndev/yable-themes build && next build",
     "start": "next start",
     "typecheck": "fumadocs-mdx && next typegen && tsc --noEmit"
   },
