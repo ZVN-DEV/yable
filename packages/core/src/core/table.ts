@@ -1370,7 +1370,13 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       if (resolvedOptions.manualPagination) return sortedModel
 
       const { pageIndex, pageSize } = table.getState().pagination
-      const start = pageIndex * pageSize
+      // Clamp the page at read time: when filtering/data changes shrink the row
+      // set below the current page, render the last valid page instead of an
+      // empty out-of-range slice (the stored pageIndex is left untouched).
+      const lastPage =
+        pageSize > 0 ? Math.max(0, Math.ceil(sortedModel.rows.length / pageSize) - 1) : 0
+      const safePageIndex = Math.min(Math.max(0, pageIndex), lastPage)
+      const start = safePageIndex * pageSize
       const end = start + pageSize
       const paginated = sortedModel.rows.slice(start, end)
 
