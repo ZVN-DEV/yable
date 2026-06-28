@@ -7,42 +7,38 @@ Display hierarchical/nested data with expand/collapse controls. Rows can have su
 
 ### How to Enable
 
-Provide a `getSubRows` function that returns child rows:
+Tree data is built from flat rows. Set `treeData: true` and provide a `getDataPath` callback that returns each row's path array — Yable assembles the hierarchy (filling in any missing intermediate nodes) from those paths:
 
 ```typescript
 interface FileNode {
+  path: string[]
   name: string
   size: number
-  children?: FileNode[]
 }
 
 const data: FileNode[] = [
-  {
-    name: 'src',
-    size: 0,
-    children: [
-      { name: 'index.ts', size: 1200 },
-      { name: 'utils.ts', size: 850 },
-      {
-        name: 'components',
-        size: 0,
-        children: [
-          { name: 'Table.tsx', size: 2400 },
-          { name: 'Cell.tsx', size: 1100 },
-        ],
-      },
-    ],
-  },
-  { name: 'package.json', size: 500 },
+  { path: ['src'], name: 'src', size: 0 },
+  { path: ['src', 'index.ts'], name: 'index.ts', size: 1200 },
+  { path: ['src', 'utils.ts'], name: 'utils.ts', size: 850 },
+  { path: ['src', 'components'], name: 'components', size: 0 },
+  { path: ['src', 'components', 'Table.tsx'], name: 'Table.tsx', size: 2400 },
+  { path: ['src', 'components', 'Cell.tsx'], name: 'Cell.tsx', size: 1100 },
+  { path: ['package.json'], name: 'package.json', size: 500 },
 ]
 
 const table = useTable({
   data,
   columns,
-  getSubRows: (row) => row.children,
-  enableExpanding: true,
+  treeData: true,
+  getDataPath: (row) => row.path,
 })
 ```
+
+<Callout type="info">
+  Tree rows are built before filtering and sorting run, so combining filter or sort
+  with tree data is not supported yet — they won't reorder or prune rows within the
+  tree. Tracked for a follow-up.
+</Callout>
 
 ### Row Properties
 

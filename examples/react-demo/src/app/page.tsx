@@ -79,7 +79,7 @@ export default async function Home() {
       priceCurrency: 'USD',
     },
     license: 'https://opensource.org/licenses/MIT',
-    softwareVersion: '0.2.1',
+    softwareVersion: '0.5.0',
     description: metadata.description,
     url: 'https://github.com/ZVN-DEV/yable',
   }

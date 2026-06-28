@@ -69,7 +69,7 @@ const allThemes = [
 type ThemeId = (typeof allThemes)[number]['id']
 type DemoTab = 'data' | 'editable' | 'themes'
 
-const CURRENT_VERSION = '0.2.1'
+const CURRENT_VERSION = '0.5.0'
 const PASSING_TESTS = '596'
 const REACT_GZIPPED_SIZE = '35.5kB'
 
@@ -110,7 +110,14 @@ const compareRows: CompareRow[] = [
     agCommunity: 'yes',
     agEnterprise: 'yes',
   },
-  { label: 'Pivot tables', yable: 'yes', tanstack: 'no', agCommunity: 'no', agEnterprise: 'paid' },
+  {
+    label: 'Pivot tables',
+    yable: 'partial',
+    tanstack: 'no',
+    agCommunity: 'no',
+    agEnterprise: 'paid',
+    note: 'Yable: programmatic row model — render is DIY',
+  },
   {
     label: 'Formula engine',
     yable: 'yes',
@@ -174,7 +181,76 @@ const compareRows: CompareRow[] = [
     agCommunity: 'yes',
     agEnterprise: 'yes',
   },
+  {
+    label: 'Column drag-to-reorder',
+    yable: 'yes',
+    tanstack: 'partial',
+    agCommunity: 'partial',
+    agEnterprise: 'partial',
+    note: 'animated drop indicator in Yable',
+  },
   { label: 'License', yable: 'yes', tanstack: 'yes', agCommunity: 'yes', agEnterprise: 'paid' },
+]
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Yable vs AG Grid — headline two-column comparison
+ * ─────────────────────────────────────────────────────────────────────── */
+
+type AgRow = {
+  label: string
+  yable: CompareCell
+  ag: CompareCell
+  yableNote?: string
+  agNote?: string
+}
+
+const agGridRows: AgRow[] = [
+  {
+    label: 'Clipboard copy / paste / TSV',
+    yable: 'yes',
+    yableNote: 'MIT',
+    ag: 'paid',
+    agNote: 'Enterprise',
+  },
+  {
+    label: 'Excel-style fill handle',
+    yable: 'yes',
+    yableNote: 'MIT',
+    ag: 'paid',
+    agNote: 'Enterprise',
+  },
+  {
+    label: 'Tree data / hierarchical rows',
+    yable: 'yes',
+    yableNote: 'MIT',
+    ag: 'paid',
+    agNote: 'Enterprise',
+  },
+  {
+    label: 'Row grouping render',
+    yable: 'partial',
+    yableNote: 'roadmap',
+    ag: 'paid',
+    agNote: 'Enterprise',
+  },
+  {
+    label: 'Pivot tables',
+    yable: 'partial',
+    yableNote: 'programmatic',
+    ag: 'paid',
+    agNote: 'Enterprise',
+  },
+  {
+    label: 'Animated column drag-to-reorder',
+    yable: 'yes',
+    yableNote: 'premium',
+    ag: 'partial',
+    agNote: 'basic, no animation',
+  },
+  { label: 'Column pinning', yable: 'yes', ag: 'yes', agNote: 'Community' },
+  { label: 'Column resizing', yable: 'yes', ag: 'yes', agNote: 'Community' },
+  { label: 'Headless core', yable: 'yes', ag: 'no' },
+  { label: 'Zero-dependency core', yable: 'yes', ag: 'no' },
 ]
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -194,15 +270,16 @@ const showcaseFeatures = [
     code: '=SUM(B2:B12) * IF(D2 > 100, 1.1, 1)',
   },
   {
-    eyebrow: 'PivotEngine',
-    title: 'Pivot tables, built in.',
+    eyebrow: 'getPivotRowModel',
+    title: 'Pivot row model.',
     copy: (
       <>
-        Row groups, column groups, aggregation, subtotals, grand totals, dynamic columns. One config
-        object.
+        <code>getPivotRowModel()</code> returns real aggregated rows — row groups, column groups,
+        subtotals, grand totals — from one config. Render it with your own grid; turnkey pivot
+        rendering is on the roadmap.
       </>
     ),
-    code: 'rowFields: ["region"]\ncolumnFields: ["quarter"]\nvalueFields: [{ field: "revenue", aggregation: "sum" }]',
+    code: 'const pivot = table.getPivotRowModel({\n  rows: ["region"],\n  values: [{ field: "revenue", aggregation: "sum" }],\n})',
   },
   {
     eyebrow: 'onCommit',
@@ -639,20 +716,20 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
             </div>
 
             <h1 className={s.heroTitle}>
-              <span className={s.heroLine}>Pivot tables. Formulas.</span>
-              <span className={s.heroLine}>Clipboard. Fill handle.</span>
-              <span className={`${s.heroLine} ${s.heroLineAccent}`}>
-                All MIT. Core stays zero-dep.
-              </span>
+              <span className={s.heroLine}>The only table package</span>
+              <span className={`${s.heroLine} ${s.heroLineAccent}`}>you&apos;ll ever need.</span>
               <span className="sr-only">
-                Open-source React data table with spreadsheet-style features and a headless core.
+                Open-source React data table with AG Grid-class features — clipboard, pivot, row
+                grouping, formulas, and animated column drag — MIT-licensed with a zero-dependency
+                headless core.
               </span>
             </h1>
 
             <p className={s.heroLead}>
-              TypeScript-first data table with formulas, pivoting, async commits, theming, and
-              shipped row virtualization. Use the headless core, the React components, or the
-              vanilla renderer.
+              Headless core, batteries-included React. AG Grid-class features &mdash; clipboard,
+              pivot, row grouping, Excel-style fills, and premium{' '}
+              <strong>animated column drag-to-reorder</strong> &mdash; MIT-licensed, no paywall,
+              zero-dependency core.
             </p>
 
             <div className={s.installStrip}>
@@ -669,6 +746,10 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
             <div className={s.heroCtas}>
               <Link href="/docs/quickstart" className={s.heroCtaPrimary}>
                 Read the docs<span aria-hidden="true">→</span>
+              </Link>
+              <Link href="/drag-lab" className={s.heroCtaSecondary}>
+                <span className={s.heroCtaBadge}>New</span>
+                Try column drag<span aria-hidden="true">→</span>
               </Link>
               <a
                 href="https://github.com/ZVN-DEV/yable"
@@ -715,11 +796,14 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
           </div>
         </header>
 
-        {/* ── Section 2: COMPARISON TABLE ──────────────────────────── */}
+        {/* ── Section 2: YABLE vs AG GRID (headline framing) ───────── */}
+        <AgGridCompare />
+
+        {/* ── Section 3: FULL FEATURE MATRIX ───────────────────────── */}
         <section className={s.compareSection} aria-label="Feature comparison">
           <div className={s.compareHeader}>
-            <span className={s.sectionEyebrow}>Comparison</span>
-            <h2 className={s.compareTitle}>Feature matrix.</h2>
+            <span className={s.sectionEyebrow}>Full matrix</span>
+            <h2 className={s.compareTitle}>The rest of the field.</h2>
             <p className={s.compareSub}>
               Every Yable checkmark is verifiable in this repo. Competitor columns focus on built-in
               behavior rather than custom code or extra packages.
@@ -798,7 +882,7 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
               <Link href="/docs/features" className={s.heroCtaSecondary}>
                 Features
               </Link>
-              <Link href="/docs/async-commits" className={s.heroCtaSecondary}>
+              <Link href="/docs/features/async-commits" className={s.heroCtaSecondary}>
                 Async Commits
               </Link>
             </div>
@@ -810,6 +894,8 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
             <Link href="/docs">Docs</Link>
             <Link href="/docs/api">API Reference</Link>
             <Link href="/playground">Playground</Link>
+            <Link href="/drag-lab">Drag Lab</Link>
+            <Link href="/benchmark">Benchmark</Link>
             <Link href="/tailwind-demo">Tailwind Demo</Link>
             <Link href="/pretext-demo">Pretext Demo</Link>
             <Link href="/commit-stories">Commit Stories</Link>
@@ -920,23 +1006,120 @@ function SpeedShowcase() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
- * CompareTable — preserved
+ * Shared comparison cell symbol (●/—/◐/$)
+ * ─────────────────────────────────────────────────────────────────────── */
+
+function compareSymbol(cell: CompareCell) {
+  switch (cell) {
+    case 'yes':
+      return <span className={`${s.compareCell} ${s.compareYes}`}>●</span>
+    case 'no':
+      return <span className={`${s.compareCell} ${s.compareNo}`}>—</span>
+    case 'partial':
+      return <span className={`${s.compareCell} ${s.comparePartial}`}>◐</span>
+    case 'paid':
+      return <span className={`${s.compareCell} ${s.comparePaid}`}>$</span>
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * AgGridCompare — flagship "Yable vs AG Grid" two-column section
+ * ─────────────────────────────────────────────────────────────────────── */
+
+function AgGridCompare() {
+  return (
+    <section className={s.agSection} aria-label="Yable versus AG Grid">
+      <div className={s.compareHeader}>
+        <span className={s.sectionEyebrow}>Yable vs AG Grid</span>
+        <h2 className={s.compareTitle}>The Enterprise features, MIT-free.</h2>
+        <p className={s.compareSub}>
+          Clipboard, Excel-style fills, and tree data sit behind AG Grid Enterprise at{' '}
+          <strong>$999 / dev / year</strong> &mdash; Yable ships them MIT, alongside premium
+          animated column drag-to-reorder. Pivot and row grouping already run as real row models in
+          the core; turnkey rendering is on the roadmap.
+        </p>
+      </div>
+
+      <div className={s.agContrast}>
+        <div className={`${s.agContrastCard} ${s.agContrastCardYable}`}>
+          <span className={s.agContrastName}>Yable</span>
+          <span className={s.agContrastPrice}>$0</span>
+          <span className={s.agContrastMeta}>MIT · {REACT_GZIPPED_SIZE} gzip · 0 deps</span>
+        </div>
+        <div className={s.agContrastVs} aria-hidden="true">
+          vs
+        </div>
+        <div className={s.agContrastCard}>
+          <span className={s.agContrastName}>AG Grid Enterprise</span>
+          <span className={`${s.agContrastPrice} ${s.agContrastPricePaid}`}>$999</span>
+          <span className={s.agContrastMeta}>per developer / year</span>
+        </div>
+      </div>
+
+      <div className={s.compareTableWrap}>
+        <table className={`${s.compareTable} ${s.agTable}`}>
+          <thead>
+            <tr>
+              <th scope="col" className={s.compareHeadFeature}>
+                Capability
+              </th>
+              <th scope="col" className={s.compareHeadYable}>
+                Yable
+                <span>MIT · free</span>
+              </th>
+              <th scope="col">
+                AG Grid
+                <span>MIT core · $999/dev Enterprise</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {agGridRows.map((row) => (
+              <tr key={row.label}>
+                <th scope="row" className={s.compareRowLabel}>
+                  {row.label}
+                </th>
+                <td className={s.compareCellYable}>
+                  <span className={s.agCellInner}>
+                    {compareSymbol(row.yable)}
+                    {row.yableNote && <span className={s.agTag}>{row.yableNote}</span>}
+                  </span>
+                </td>
+                <td>
+                  <span className={s.agCellInner}>
+                    {compareSymbol(row.ag)}
+                    {row.agNote && <span className={s.agTag}>{row.agNote}</span>}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className={s.compareLegend}>
+          <span>
+            <span className={`${s.compareCell} ${s.compareYes}`}>●</span> shipping
+          </span>
+          <span>
+            <span className={`${s.compareCell} ${s.comparePartial}`}>◐</span> partial / programmatic
+          </span>
+          <span>
+            <span className={`${s.compareCell} ${s.comparePaid}`}>$</span> paid tier only
+          </span>
+          <span>
+            <span className={`${s.compareCell} ${s.compareNo}`}>—</span> not available
+          </span>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * CompareTable — full feature matrix
  * ─────────────────────────────────────────────────────────────────────── */
 
 function CompareTable() {
-  const symbol = (cell: CompareCell) => {
-    switch (cell) {
-      case 'yes':
-        return <span className={`${s.compareCell} ${s.compareYes}`}>●</span>
-      case 'no':
-        return <span className={`${s.compareCell} ${s.compareNo}`}>—</span>
-      case 'partial':
-        return <span className={`${s.compareCell} ${s.comparePartial}`}>◐</span>
-      case 'paid':
-        return <span className={`${s.compareCell} ${s.comparePaid}`}>$</span>
-    }
-  }
-
   return (
     <div className={s.compareTableWrap}>
       <table className={s.compareTable}>
@@ -970,10 +1153,10 @@ function CompareTable() {
                 {row.label}
                 {row.note && <span className={s.compareNote}>{row.note}</span>}
               </th>
-              <td className={s.compareCellYable}>{symbol(row.yable)}</td>
-              <td>{symbol(row.tanstack)}</td>
-              <td>{symbol(row.agCommunity)}</td>
-              <td>{symbol(row.agEnterprise)}</td>
+              <td className={s.compareCellYable}>{compareSymbol(row.yable)}</td>
+              <td>{compareSymbol(row.tanstack)}</td>
+              <td>{compareSymbol(row.agCommunity)}</td>
+              <td>{compareSymbol(row.agEnterprise)}</td>
             </tr>
           ))}
         </tbody>

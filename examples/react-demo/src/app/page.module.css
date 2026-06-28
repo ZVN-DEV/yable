@@ -94,6 +94,9 @@
   flex-direction: column;
   gap: 28px;
   min-height: 100%;
+  /* Allow this grid/flex child to shrink below its content width so long
+   * code/headlines wrap or scroll internally instead of clipping the page. */
+  min-width: 0;
 }
 
 .kickerRow {
@@ -177,6 +180,11 @@
   line-height: 1.6;
   color: var(--fg-1);
   font-weight: 400;
+}
+
+.heroLead strong {
+  color: var(--accent-bright);
+  font-weight: 600;
 }
 
 /* Install strip — copy-to-clipboard */
@@ -277,6 +285,22 @@
   border-color: var(--line-strong);
 }
 
+/* "New" badge on the flagship column-drag CTA */
+.heroCtaBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  margin-right: -2px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+  border: 1px solid rgba(216, 168, 106, 0.32);
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
 /* Trust strip — 3 metrics */
 
 .trustStrip {
@@ -327,6 +351,9 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  /* Let the panel shrink so the code scrolls inside instead of pushing the
+   * page wider than the viewport on narrow screens. */
+  min-width: 0;
 }
 
 .codeTabBar {
@@ -610,6 +637,124 @@
   width: 20px;
   height: 20px;
   font-size: 0.6875rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * YABLE vs AG GRID — flagship two-column comparison
+ * ------------------------------------------------------------------------- */
+
+.agSection {
+  margin-bottom: 28px;
+}
+
+.compareSub strong {
+  color: var(--accent-bright);
+  font-weight: 600;
+}
+
+/* Price contrast cards above the table */
+.agContrast {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.agContrastCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 24px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+}
+
+.agContrastCardYable {
+  background: rgba(216, 168, 106, 0.06);
+  border-color: rgba(216, 168, 106, 0.28);
+}
+
+.agContrastName {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+.agContrastCardYable .agContrastName {
+  color: var(--accent);
+}
+
+.agContrastPrice {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--mint);
+  font-variant-numeric: tabular-nums;
+}
+
+.agContrastPricePaid {
+  color: var(--rose);
+}
+
+.agContrastMeta {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--fg-2);
+}
+
+.agContrastVs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+/* The two value columns split the remaining width evenly */
+.agTable .compareHeadYable,
+.agTable thead th:last-child {
+  width: 32%;
+}
+
+.agCellInner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.agTag {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+.compareCellYable .agTag {
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .agContrast {
+    grid-template-columns: 1fr;
+  }
+
+  .agContrastVs {
+    padding: 2px 0;
+  }
+
+  .agTag {
+    display: none;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1584,5 +1729,34 @@
 
   .speedControlBtn {
     padding: 8px 12px;
+  }
+}
+
+/* Small phones (≤420px): keep the hero from clipping under the page's
+ * overflow-x: hidden. Headline wraps, install strip goes full-width, and the
+ * code panel scrolls internally rather than pushing the layout sideways. */
+@media (max-width: 420px) {
+  .heroTitle {
+    font-size: clamp(1.7rem, 9vw, 2.4rem);
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .installStrip {
+    max-width: 100%;
+  }
+
+  .heroCtas {
+    width: 100%;
+  }
+
+  .heroCtaPrimary,
+  .heroCtaSecondary {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .heroCtaBadge {
+    display: none;
   }
 }

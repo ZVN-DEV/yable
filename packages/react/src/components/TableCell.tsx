@@ -10,6 +10,7 @@ import {
 } from '@zvndev/yable-core'
 import { resolveCellType } from '../cells/resolver'
 import { CellStatusBadge } from './CellStatusBadge'
+import { FillHandle } from './FillHandle'
 
 interface TableCellProps<TData extends RowData> {
   cell: Cell<TData, unknown>
@@ -18,6 +19,9 @@ interface TableCellProps<TData extends RowData> {
   columnIndex: number
   isFocused: boolean
   isTabStop: boolean
+  /** Mousedown handler for the fill handle; when present and the table has
+   * `enableFillHandle`, the focused cell renders a drag-to-fill corner. */
+  onFillHandleMouseDown?: (rowIndex: number, columnIndex: number, e: React.MouseEvent) => void
 }
 
 export function TableCell<TData extends RowData>({
@@ -27,6 +31,7 @@ export function TableCell<TData extends RowData>({
   columnIndex,
   isFocused,
   isTabStop,
+  onFillHandleMouseDown,
 }: TableCellProps<TData>) {
   const column = cell.column
   const isEditing = cell.getIsEditing()
@@ -184,6 +189,10 @@ export function TableCell<TData extends RowData>({
 
   const mergedStyle = userStyle ? { ...style, ...userStyle } : style
 
+  // Fill handle renders on the focused cell when the feature is enabled.
+  const showFillHandle =
+    isFocused && Boolean(table.options.enableFillHandle) && onFillHandleMouseDown != null
+
   const classNames = [
     'yable-td',
     isFocused && 'yable-cell--focused',
@@ -236,6 +245,13 @@ export function TableCell<TData extends RowData>({
           conflictWith={cellConflictWith}
           onRetry={() => void table.retryCommit(cell.row.id, column.id)}
           onDismiss={() => table.dismissCommit(cell.row.id, column.id)}
+        />
+      )}
+      {showFillHandle && onFillHandleMouseDown && (
+        <FillHandle
+          rowIndex={rowIndex}
+          columnIndex={columnIndex}
+          onMouseDown={onFillHandleMouseDown}
         />
       )}
     </td>

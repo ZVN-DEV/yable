@@ -28,7 +28,7 @@ export default function HomePage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <a
-            href="https://github.com/ZVN-DEV/YableTable"
+            href="https://github.com/ZVN-DEV/yable"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold transition-colors hover:bg-fd-accent"
@@ -43,7 +43,7 @@ export default function HomePage() {
         <FeatureCard
           icon={<Zap className="h-6 w-6" />}
           title="Formula Engine"
-          description="Spreadsheet-grade formula evaluation with dependency tracking, circular reference detection, and 50+ built-in functions."
+          description="Spreadsheet-grade formula evaluation with dependency tracking, circular reference detection, and 17 built-in functions."
         />
         <FeatureCard
           icon={<GitCommit className="h-6 w-6" />}

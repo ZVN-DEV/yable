@@ -56,6 +56,14 @@ import {
 import { createCommitCoordinator } from '../features/commits/coordinator'
 import type { CommitCoordinator, CoordinatorOptions } from '../features/commits/coordinator'
 import type { CellPatch, CommitsSlice } from '../features/commits/types'
+import { createFullRowEditingIntegration } from '../features/fullRowEditing'
+import { createRowDragIntegration } from '../features/rowDragging'
+import { createUndoRedoIntegration } from '../features/undoRedo'
+import { detectAndFill } from '../features/fillHandle'
+import { getPivotRowModel } from '../features/pivot'
+import type { PivotConfig as PivotEngineConfig } from '../features/pivot'
+import { getTreeRowModel } from '../features/treeData'
+import { FormulaEngine } from '../features/formulas/engine'
 
 // ---------------------------------------------------------------------------
 // Private commit coordinator storage — avoids `(table as any).__commitCoordinator`
@@ -1191,10 +1199,23 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
 
   // 1. Core Row Model — raw data -> Row[]
   table.getCoreRowModel = memo(
-    () => [resolvedOptions.data],
+    // Tree data re-flattens whenever the expanded set changes, so its memo key
+    // includes `expanded`. The flat path keeps the original `[data]` key to
+    // avoid re-running on unrelated expansion state.
+    () =>
+      resolvedOptions.treeData && resolvedOptions.getDataPath
+        ? [resolvedOptions.data, table.getState().expanded]
+        : [resolvedOptions.data],
     (data: TData[]) => {
       // T1-05: guard against null/undefined data
       const safeData = data ?? []
+
+      // Tree data: build a hierarchical row model from `getDataPath`. This runs
+      // before sort/filter/pagination; concurrent filter/sort over tree rows is
+      // not yet supported (tracked for a follow-up).
+      if (resolvedOptions.treeData && resolvedOptions.getDataPath) {
+        return getTreeRowModel(table, safeData, resolvedOptions.getDataPath)
+      }
 
       // T1-10: Large dataset warning
       if (
@@ -1678,6 +1699,84 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
 
     return text
   }
+
+  // ---------------------------------------------------------------------------
+  // Feature Engine Integrations (0.5.1)
+  //
+  // The methods below were declared as literal no-op stubs in the table object
+  // literal so the instance satisfies the Table type. Here we override them with
+  // their real engines — mirroring the commit-coordinator overrides above.
+  // ---------------------------------------------------------------------------
+
+  // Undo/redo wraps table.setPendingValue, so it MUST be installed before the
+  // formula and fill engines (which write through setPendingValue) so their
+  // writes are tracked. Only wired when explicitly enabled — otherwise the
+  // no-op stubs remain (undo/redo stays inert).
+  if (resolvedOptions.enableUndoRedo) {
+    const undoRedo = createUndoRedoIntegration(table, {
+      undoStackSize: resolvedOptions.undoStackSize,
+    })
+    table.undo = undoRedo.undo
+    table.redo = undoRedo.redo
+    table.canUndo = undoRedo.canUndo
+    table.canRedo = undoRedo.canRedo
+    table.clearUndoHistory = undoRedo.clearUndoHistory
+  }
+
+  // Full-row editing — coordinates per-cell editing through the commit
+  // coordinator (single dispatch per row commit).
+  const rowEditing = createFullRowEditingIntegration(table)
+  table.startRowEditing = rowEditing.startRowEditing
+  table.commitRowEdit = rowEditing.commitRowEdit
+  table.cancelRowEdit = rowEditing.cancelRowEdit
+
+  // Row drag / reorder. `resolvedOptions` is mutated in place by setOptions, so
+  // getData reads the live data array and setData swaps it (invalidating the
+  // core row-model memo). onRowReorder is forwarded off the `row:reorder` event
+  // (emitted by both `moveRow` and drag-end) so every reorder path notifies the
+  // consumer exactly once.
+  const rowDrag = createRowDragIntegration(table, {
+    getData: () => resolvedOptions.data,
+    setData: (data) => table.setOptions((prev) => ({ ...prev, data })),
+  })
+  table.moveRow = rowDrag.moveRow
+  table.events.on('row:reorder', (event) => resolvedOptions.onRowReorder?.(event))
+
+  // Pivot row model accessor (core only). The returned rows carry their
+  // aggregates on `.original`; registering generated pivot column defs for
+  // `<Table>` render is out of scope for 0.5.1.
+  table.getPivotRowModel = () =>
+    getPivotRowModel(
+      table,
+      resolvedOptions.data,
+      // The public PivotConfig widens `aggregation` to `string`; the engine
+      // narrows to known fn names and treats unknown names as no-op (null).
+      (resolvedOptions.pivotConfig ?? {
+        rowFields: [],
+        columnFields: [],
+        valueFields: [],
+      }) as PivotEngineConfig,
+    ).rowModel
+
+  // Fill handle — detect a pattern from the source range and fill the target.
+  table.fillRange = (sourceRange, targetRange) => {
+    detectAndFill(
+      table,
+      sourceRange,
+      targetRange,
+      table.getRowModel().rows,
+      table.getVisibleLeafColumns(),
+    )
+  }
+
+  // Formula engine. Bound AFTER undo/redo wraps setPendingValue so computed
+  // writes are undoable. cell.getValue() surfaces the computed value for any
+  // raw cell whose value starts with '='.
+  const formulaEngine = new FormulaEngine(table)
+  table.setFormula = (rowId, columnId, formula) =>
+    formulaEngine.setFormula(rowId, columnId, formula)
+  table.getFormula = (rowId, columnId) => formulaEngine.getFormula(rowId, columnId)
+  table.evaluateFormulas = () => formulaEngine.evaluateAll()
 
   return table
 }

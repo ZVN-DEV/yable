@@ -5,6 +5,12 @@ description: Calculate summary values for grouped rows with built-in and custom 
 
 Calculate summary values for grouped rows. Aggregation functions run on each group's leaf rows.
 
+<Callout type="warn">
+  Turnkey grouped/aggregated row rendering is on the roadmap. The aggregation functions
+  below ship today (and power pivot value fields via `getPivotRowModel()`), but rendering
+  grouped rows and their aggregated cells through `<Table>` is not yet wired.
+</Callout>
+
 ### Built-in Aggregation Functions
 
 | Name          | Description               |

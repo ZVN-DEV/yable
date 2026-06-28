@@ -11,12 +11,15 @@ interface TableBodyProps<TData extends RowData> {
   table: Table<TData>
   clickableRows?: boolean
   colgroup?: React.ReactNode
+  /** Stable mousedown handler for the fill handle, lifted from `useFillHandle`. */
+  onFillHandleMouseDown?: (rowIndex: number, columnIndex: number, e: React.MouseEvent) => void
 }
 
 export function TableBody<TData extends RowData>({
   table,
   clickableRows,
   colgroup,
+  onFillHandleMouseDown,
 }: TableBodyProps<TData>) {
   const rows = table.getRowModel().rows
   const visibleColumns = table.getVisibleLeafColumns()
@@ -99,6 +102,7 @@ export function TableBody<TData extends RowData>({
       pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
       clickable={clickableRows}
       pinnedPosition={pinnedPosition}
+      onFillHandleMouseDown={onFillHandleMouseDown}
     />
   )
 
@@ -189,6 +193,7 @@ export function TableBody<TData extends RowData>({
                         cellSelectionKey={cellSelectionKey}
                         pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
                         clickable={clickableRows}
+                        onFillHandleMouseDown={onFillHandleMouseDown}
                         virtualStyle={{
                           position: 'absolute' as const,
                           top: 0,
@@ -229,6 +234,7 @@ interface TableRowProps<TData extends RowData> {
   clickable?: boolean
   pinnedPosition?: 'top' | 'bottom'
   virtualStyle?: React.CSSProperties
+  onFillHandleMouseDown?: (rowIndex: number, columnIndex: number, e: React.MouseEvent) => void
 }
 
 function TableRowInner<TData extends RowData>({
@@ -246,6 +252,7 @@ function TableRowInner<TData extends RowData>({
   clickable,
   pinnedPosition,
   virtualStyle,
+  onFillHandleMouseDown,
 }: TableRowProps<TData>) {
   const allCells = row.getAllCells()
   const visibleCells = visibleColumns
@@ -341,6 +348,7 @@ function TableRowInner<TData extends RowData>({
                 columnIndex={columnIndex}
                 isFocused={isFocused}
                 isTabStop={isTabStop}
+                onFillHandleMouseDown={onFillHandleMouseDown}
               />
             </CellErrorBoundary>
           )

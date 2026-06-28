@@ -4,7 +4,7 @@
 // Row virtualization keeps the DOM tiny (~visible rows) while sort/scroll stay
 // fast. All timings are measured live in the browser with performance.now().
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTable, Table, createColumnHelper } from '@zvndev/yable-react'
 import s from './benchmark.module.css'
 
@@ -123,17 +123,35 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 
 export default function BenchmarkPage() {
   const [rowCount, setRowCount] = useState(100_000)
-  const [genMs, setGenMs] = useState(0)
+  const [data, setData] = useState<Row[]>([])
+  const [genMs, setGenMs] = useState<number | null>(null)
+  const [generating, setGenerating] = useState(true)
   const [domRows, setDomRows] = useState(0)
   const [lastSortMs, setLastSortMs] = useState<number | null>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
 
-  const data = useMemo(() => {
-    const t0 = performance.now()
-    const d = generateData(rowCount)
-    // Defer the state write out of render.
-    queueMicrotask(() => setGenMs(performance.now() - t0))
-    return d
+  // Generate the dataset off the render path. Doing this in render (or in a
+  // microtask scheduled from render) tries to set state before the component
+  // has mounted — React warns about exactly that. An effect + rAF also lets the
+  // loading skeleton paint a frame before the blocking generation runs, so the
+  // table never flashes empty at the 100k default.
+  useEffect(() => {
+    let cancelled = false
+    setGenerating(true)
+    setGenMs(null)
+    setDomRows(0)
+    const raf = requestAnimationFrame(() => {
+      const t0 = performance.now()
+      const rows = generateData(rowCount)
+      if (cancelled) return
+      setData(rows)
+      setGenMs(performance.now() - t0)
+      setGenerating(false)
+    })
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(raf)
+    }
   }, [rowCount])
 
   const table = useTable<Row>({
@@ -160,7 +178,11 @@ export default function BenchmarkPage() {
     setDomRows(n)
   }, [])
 
+  // Re-measure and (re)bind the scroll listener once the real table has
+  // rendered. Keyed on `data` so it runs after each dataset finishes generating
+  // (the table only mounts once the skeleton is replaced).
   useEffect(() => {
+    if (generating || data.length === 0) return
     const id = requestAnimationFrame(measureDomRows)
     const scroller = wrapRef.current?.querySelector('.yable-virtual-scroll-container')
     scroller?.addEventListener('scroll', measureDomRows, { passive: true })
@@ -168,7 +190,7 @@ export default function BenchmarkPage() {
       cancelAnimationFrame(id)
       scroller?.removeEventListener('scroll', measureDomRows)
     }
-  }, [measureDomRows, rowCount])
+  }, [measureDomRows, generating, data])
 
   const sortBy = useCallback(
     (columnId: string) => {
@@ -235,7 +257,11 @@ export default function BenchmarkPage() {
           value={domRows ? domRows.toString() : '—'}
           hint={`of ${rowCount.toLocaleString()} — windowed`}
         />
-        <Stat label="Data generated" value={`${genMs.toFixed(1)} ms`} hint="client-side" />
+        <Stat
+          label="Data generated"
+          value={genMs == null ? '—' : `${genMs.toFixed(1)} ms`}
+          hint="client-side"
+        />
         <Stat
           label="Last sort"
           value={lastSortMs == null ? '—' : `${lastSortMs.toFixed(1)} ms`}
@@ -243,8 +269,12 @@ export default function BenchmarkPage() {
         />
       </div>
 
-      <div className={s.tableWrap} ref={wrapRef}>
-        <Table table={table} striped stickyHeader compact ariaLabel="Benchmark data table" />
+      <div className={s.tableWrap} ref={wrapRef} aria-busy={generating}>
+        {generating ? (
+          <BenchmarkSkeleton />
+        ) : (
+          <Table table={table} striped stickyHeader compact ariaLabel="Benchmark data table" />
+        )}
       </div>
 
       <p className={s.footnote}>
@@ -253,5 +283,32 @@ export default function BenchmarkPage() {
         dataset, not just the visible window.
       </p>
     </main>
+  )
+}
+
+const SKELETON_ROWS = 12
+
+// Loading placeholder that mirrors the column layout so the table area never
+// flashes empty while several hundred thousand rows are generated.
+function BenchmarkSkeleton() {
+  return (
+    <div className={s.skeleton} role="status" aria-label="Generating rows">
+      <div className={`${s.skelRow} ${s.skelHeader}`}>
+        {columns.map((col, i) => (
+          <span key={i} className={s.skelCell} style={{ width: col.size ?? 120 }}>
+            <span className={s.skelBarHead} />
+          </span>
+        ))}
+      </div>
+      {Array.from({ length: SKELETON_ROWS }).map((_, r) => (
+        <div className={s.skelRow} key={r}>
+          {columns.map((col, i) => (
+            <span key={i} className={s.skelCell} style={{ width: col.size ?? 120 }}>
+              <span className={s.skelBar} />
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
   )
 }
