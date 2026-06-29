@@ -5,10 +5,11 @@ description: Calculate summary values for grouped rows with built-in and custom 
 
 Calculate summary values for grouped rows. Aggregation functions run on each group's leaf rows.
 
-<Callout type="warn">
-  Turnkey grouped/aggregated row rendering is on the roadmap. The aggregation functions
-  below ship today (and power pivot value fields via `getPivotRowModel()`), but rendering
-  grouped rows and their aggregated cells through `<Table>` is not yet wired.
+<Callout type="info">
+  Grouped/aggregated row rendering is turnkey. Set `initialState.grouping` (or call
+  `table.setGrouping([...])`) and give a column an `aggregationFn` — `<Table>` renders
+  collapsible group headers with the rolled-up aggregate in each column automatically. See
+  [Column Grouping](./column-grouping) for the grouping setup.
 </Callout>
 
 ### Built-in Aggregation Functions
@@ -34,6 +35,24 @@ columnHelper.accessor('salary', {
   aggregatedCell: ({ getValue }) => `Total: $${getValue().toLocaleString()}`,
 })
 ```
+
+### Rendering Through `<Table>`
+
+Group the table and the aggregate appears on each group header row — no manual wiring:
+
+```tsx
+const table = useTable({
+  data,
+  columns, // `salary` column carries `aggregationFn: 'sum'`
+  initialState: { grouping: ['department'] },
+})
+
+return <Table table={table} />
+// → one collapsible header per department; the Salary cell shows the group's sum.
+```
+
+When a column has no `aggregatedCell`, the raw aggregate value is rendered. The grouping
+column itself shows the group value, an expand/collapse toggle, and the leaf-row count.
 
 ### Custom Aggregation
 
