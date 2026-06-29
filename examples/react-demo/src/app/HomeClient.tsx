@@ -744,7 +744,10 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
             </div>
 
             <div className={s.heroCtas}>
-              <Link href="/docs/quickstart" className={s.heroCtaPrimary}>
+              <Link href="/gallery" className={s.heroCtaPrimary}>
+                Explore the gallery<span aria-hidden="true">→</span>
+              </Link>
+              <Link href="/docs/quickstart" className={s.heroCtaSecondary}>
                 Read the docs<span aria-hidden="true">→</span>
               </Link>
               <Link href="/drag-lab" className={s.heroCtaSecondary}>
@@ -891,6 +894,7 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
           <p className={s.footerPackages}>Ships as 4 packages: core, react, vanilla, themes.</p>
 
           <nav className={s.footerLinks} aria-label="More resources">
+            <Link href="/gallery">Gallery</Link>
             <Link href="/docs">Docs</Link>
             <Link href="/docs/api">API Reference</Link>
             <Link href="/playground">Playground</Link>

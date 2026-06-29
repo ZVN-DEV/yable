@@ -1,11 +1,14 @@
 import type { MetadataRoute } from 'next'
 import { DOCS } from '@/lib/docs'
+import { DEMOS } from './gallery/_registry'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/` },
+    { url: `${baseUrl}/gallery` },
+    ...DEMOS.map((d) => ({ url: `${baseUrl}/gallery/${d.slug}` })),
     { url: `${baseUrl}/docs` },
     { url: `${baseUrl}/playground` },
     { url: `${baseUrl}/tailwind-demo` },
