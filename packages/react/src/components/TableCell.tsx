@@ -98,8 +98,42 @@ export function TableCell<TData extends RowData>({
     content = (overrideValue !== undefined ? overrideValue : cell.renderValue()) as React.ReactNode
   }
 
+  // Group header rows: render an expand/collapse toggle + group value + leaf
+  // count in the grouping column, and the per-column aggregate elsewhere.
+  const isGroupRow = cell.row.getIsGrouped()
+  if (isGroupRow) {
+    if (column.id === cell.row.groupingColumnId) {
+      const expanded = cell.row.getIsExpanded()
+      content = (
+        <span className="yable-group-cell" style={{ paddingLeft: cell.row.depth * 16 }}>
+          <button
+            type="button"
+            className="yable-group-toggle"
+            aria-label={expanded ? 'Collapse group' : 'Expand group'}
+            aria-expanded={expanded}
+            onClick={cell.row.getToggleExpandedHandler()}
+          >
+            {expanded ? '▾' : '▸'}
+          </button>
+          <span className="yable-group-value">{String(cell.row.groupingValue ?? '')}</span>
+          <span className="yable-group-count">({cell.row.getLeafRows().length})</span>
+        </span>
+      )
+    } else {
+      const aggDef = column.columnDef.aggregatedCell
+      if (typeof aggDef === 'function') {
+        content = (aggDef as CellRenderer)(cell.getContext())
+      } else {
+        const aggVal = cell.getValue()
+        content = aggVal == null ? null : (aggVal as React.ReactNode)
+      }
+    }
+  }
+
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      // Group header rows aren't editable; the toggle button handles expansion.
+      if (cell.row.getIsGrouped()) return
       table.events.emit('cell:click', {
         cell,
         row: cell.row,
@@ -191,7 +225,10 @@ export function TableCell<TData extends RowData>({
 
   // Fill handle renders on the focused cell when the feature is enabled.
   const showFillHandle =
-    isFocused && Boolean(table.options.enableFillHandle) && onFillHandleMouseDown != null
+    isFocused &&
+    Boolean(table.options.enableFillHandle) &&
+    onFillHandleMouseDown != null &&
+    !isGroupRow
 
   const classNames = [
     'yable-td',
@@ -215,6 +252,7 @@ export function TableCell<TData extends RowData>({
       data-pinned={pinned || undefined}
       data-cell-status={cellStatus !== 'idle' ? cellStatus : undefined}
       data-column-id={column.id}
+      data-grouped={isGroupRow || undefined}
       data-row-index={rowIndex}
       data-column-index={columnIndex}
       data-cell-selected={isCellSelected || undefined}

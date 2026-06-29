@@ -63,6 +63,7 @@ import { detectAndFill } from '../features/fillHandle'
 import { getPivotRowModel } from '../features/pivot'
 import type { PivotConfig as PivotEngineConfig } from '../features/pivot'
 import { getTreeRowModel } from '../features/treeData'
+import { getGroupedRowModel as buildGroupedRowModel } from '../features/grouping'
 import { FormulaEngine } from '../features/formulas/engine'
 
 // ---------------------------------------------------------------------------
@@ -337,10 +338,9 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     getIsAllRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
-      return (
-        rowModel.flatRows.length > 0 &&
-        rowModel.flatRows.every((row: Row<TData>) => selection[row.id])
-      )
+      // Only selectable rows count — synthetic group headers are never selected.
+      const selectable = rowModel.flatRows.filter((row: Row<TData>) => row.getCanSelect())
+      return selectable.length > 0 && selectable.every((row: Row<TData>) => selection[row.id])
     },
     getIsSomeRowsSelected: (): boolean => {
       const selection = table.getState().rowSelection
@@ -349,7 +349,8 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     getIsAllPageRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
       const selection = table.getState().rowSelection
-      return rowModel.rows.length > 0 && rowModel.rows.every((row: Row<TData>) => selection[row.id])
+      const selectable = rowModel.rows.filter((row: Row<TData>) => row.getCanSelect())
+      return selectable.length > 0 && selectable.every((row: Row<TData>) => selection[row.id])
     },
     getIsSomePageRowsSelected: (): boolean => {
       const rowModel = table.getRowModel()
@@ -365,6 +366,9 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
         const next = { ...old }
         const shouldSelect = value ?? !table.getIsAllRowsSelected()
         for (const row of rowModel.flatRows) {
+          // Skip rows that aren't selectable (e.g. synthetic group headers) so
+          // select-all never writes unselectable ids into the selection state.
+          if (!row.getCanSelect()) continue
           if (shouldSelect) {
             next[row.id] = true
           } else {
@@ -380,6 +384,7 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
         const next = { ...old }
         const shouldSelect = value ?? !table.getIsAllPageRowsSelected()
         for (const row of rowModel.rows) {
+          if (!row.getCanSelect()) continue
           if (shouldSelect) {
             next[row.id] = true
           } else {
@@ -1381,25 +1386,44 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     { key: 'getSortedRowModel' },
   )
 
-  // 6. Pre-pagination = sorted
-  table.getPrePaginationRowModel = table.getSortedRowModel
+  // 5b. Grouped Row Model — when `state.grouping` is non-empty, produce a
+  // flattened model of synthetic group header rows (with per-column aggregates)
+  // interleaved with their expanded descendant rows.
+  table.getPreGroupedRowModel = table.getSortedRowModel
+  table.getGroupedRowModel = memo(
+    () => [table.getSortedRowModel(), table.getState().grouping, table.getState().expanded],
+    (sortedModel: RowModel<TData>) =>
+      buildGroupedRowModel(
+        table,
+        sortedModel.rows,
+        table.getState().grouping ?? [],
+        table.getState().expanded as Record<string, boolean>,
+      ),
+    { key: 'getGroupedRowModel' },
+  )
+
+  // 6. Pre-pagination = grouped (when grouping active) else sorted
+  table.getPrePaginationRowModel = () =>
+    (table.getState().grouping?.length ?? 0) > 0
+      ? table.getGroupedRowModel()
+      : table.getSortedRowModel()
 
   // 7. Paginated Row Model
   table.getPaginationRowModel = memo(
-    () => [table.getSortedRowModel(), table.getState().pagination],
-    (sortedModel: RowModel<TData>) => {
-      if (resolvedOptions.manualPagination) return sortedModel
+    () => [table.getPrePaginationRowModel(), table.getState().pagination],
+    (preModel: RowModel<TData>) => {
+      if (resolvedOptions.manualPagination) return preModel
 
       const { pageIndex, pageSize } = table.getState().pagination
       // Clamp the page at read time: when filtering/data changes shrink the row
       // set below the current page, render the last valid page instead of an
       // empty out-of-range slice (the stored pageIndex is left untouched).
       const lastPage =
-        pageSize > 0 ? Math.max(0, Math.ceil(sortedModel.rows.length / pageSize) - 1) : 0
+        pageSize > 0 ? Math.max(0, Math.ceil(preModel.rows.length / pageSize) - 1) : 0
       const safePageIndex = Math.min(Math.max(0, pageIndex), lastPage)
       const start = safePageIndex * pageSize
       const end = start + pageSize
-      const paginated = sortedModel.rows.slice(start, end)
+      const paginated = preModel.rows.slice(start, end)
 
       const rowsById: Record<string, Row<TData>> = {}
       for (const row of paginated) {
@@ -1424,9 +1448,10 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     return row
   }
 
-  // Pre-expanded and pre-grouped models
+  // Pre-expanded and pre-grouped models. Pre-grouped = the sorted model
+  // (grouping runs after sorting), matching the `getGroupedRowModel` pipeline.
   table.getPreExpandedRowModel = table.getSortedRowModel
-  table.getPreGroupedRowModel = table.getFilteredRowModel
+  table.getPreGroupedRowModel = table.getSortedRowModel
 
   // ---------------------------------------------------------------------------
   // Commit Coordinator (Task #10)

@@ -5,6 +5,8 @@ description: Group rows by column values with multi-level grouping support.
 
 Group rows by column values. When grouping is active, rows with the same value in the grouped column are collapsed under a group header row.
 
+`<Table>` renders grouping turnkey: each group becomes a header row with an expand/collapse toggle, the group value, and a leaf-row count, and any column with an [`aggregationFn`](./aggregation) shows its rolled-up value on the header. Groups are collapsed by default; expand state lives in `state.expanded`.
+
 ### How to Enable
 
 ```typescript

@@ -429,6 +429,9 @@ function buildColumns(
       cellConfig: columnCellConfigs.salary === 'default' ? undefined : columnCellConfigs.salary,
       cellType: 'currency',
       size: 120,
+      // Rolled up on group header rows when grouping is active.
+      aggregationFn: 'sum',
+      aggregatedCell: ({ getValue }) => `$${Number(getValue() ?? 0).toLocaleString()}`,
     }),
     columnHelper.accessor('startDate', {
       header: 'Start Date',
@@ -487,6 +490,7 @@ export default function PlaygroundPage() {
   const [rowClickSelection, setRowClickSelection] = useState(false)
   const [cellSelection, setCellSelection] = useState(true)
   const [editMode, setEditMode] = useState(false)
+  const [showGrouping, setShowGrouping] = useState(false)
   const [defaultColumnSize, setDefaultColumnSize] = useState(150)
   const [rowHeight, setRowHeight] = useState<'comfortable' | 'compact'>('comfortable')
   const [specialNameOverride, setSpecialNameOverride] = useState(false)
@@ -574,7 +578,9 @@ export default function PlaygroundPage() {
             sorting: serverSorting,
             globalFilter: serverGlobalFilter,
           }
-        : undefined,
+        : showGrouping
+          ? { grouping: ['department'] }
+          : undefined,
     onSortingChange:
       dataMode === 'server'
         ? (updater) => {
@@ -901,6 +907,11 @@ export default function PlaygroundPage() {
             onChange={setCellSelection}
           />
           <Switch label="Inline Editing" checked={editMode} onChange={setEditMode} />
+          <Switch
+            label="Row Grouping (by Dept)"
+            checked={dataMode === 'server' ? false : showGrouping}
+            onChange={setShowGrouping}
+          />
         </Section>
 
         {/* Dataset */}

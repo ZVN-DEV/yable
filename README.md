@@ -32,7 +32,7 @@ Yable is a TypeScript-first, framework-agnostic data grid. The `@zvndev/yable-co
 
 ## Comparison
 
-Built-in feature snapshot. `DIY` means the library ships the engine/accessor, but you assemble the UI yourself. `Roadmap` means it is in active development (see [AGENTS.md](./AGENTS.md)).
+Built-in feature snapshot. `DIY` means the library ships the engine/accessor, but you assemble the UI yourself.
 
 | Feature                     |  Yable   | TanStack Table | AG Grid Community | AG Grid Enterprise |
 | --------------------------- | :------: | :------------: | :---------------: | :----------------: |
@@ -44,8 +44,8 @@ Built-in feature snapshot. `DIY` means the library ships the engine/accessor, bu
 | Column resizing             |   Yes    |      Yes       |        Yes        |        Yes         |
 | Column drag-to-reorder      | Animated |      DIY       |       Basic       |       Basic        |
 | Row selection               |   Yes    |      Yes       |        Yes        |        Yes         |
-| Row grouping                | Roadmap  |     Plugin     |        No         |        Yes         |
-| Aggregation                 | Roadmap  |     Plugin     |        No         |        Yes         |
+| Row grouping                |   Yes    |     Plugin     |        No         |        Yes         |
+| Aggregation                 |   Yes    |     Plugin     |        No         |        Yes         |
 | Pivot tables                |   DIY    |       No       |        No         |        Yes         |
 | Formula engine              |   Yes    |       No       |        No         |        Yes         |
 | Fill handle                 |   Yes    |       No       |        No         |        Yes         |
@@ -145,7 +145,8 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 - Filtering -- column filters, global search, 11 built-in filter functions, custom predicates
 - Pagination -- client-side and server-side, configurable page sizes
 - Server state -- same columns/table surface with manual sorting, filtering, pagination, cursor loading, and optimistic row updates via `useServerTable`
-- Aggregation -- 9 built-in aggregation functions (turnkey grouped-row rendering is on the roadmap)
+- Row grouping -- group rows by one or more columns with collapsible group headers and leaf counts, rendered turnkey through `<Table>`
+- Aggregation -- 9 built-in aggregation functions (sum, min, max, mean, count, and more) that roll up automatically on group rows
 - Tree data -- nested/hierarchical row support with expand/collapse
 
 ### Spreadsheet Features
@@ -184,7 +185,7 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 
 ## Status
 
-Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` and `@zvndev/yable-react` at **0.5.0**, `@zvndev/yable-themes` at **0.4.1**, and `@zvndev/yable-vanilla` at **0.3.1**. Animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, grouping, pivots, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
+Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` and `@zvndev/yable-react` at **0.6.0**, `@zvndev/yable-themes` at **0.4.1**, and `@zvndev/yable-vanilla` at **0.3.3**. Turnkey row grouping with aggregated headers, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, pivots, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
 
 - 1.0 API stabilization
 - Expanded keyboard-navigation coverage

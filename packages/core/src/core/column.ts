@@ -11,11 +11,13 @@ import type {
   ColumnPinningPosition,
   SortingFn,
   FilterFn,
+  AggregationFn,
 } from '../types'
 import { resolveColumnId, memo, MAX_ACCESSOR_DEPTH } from '../utils'
 import { resolveSortingFn, resolveFilterFn } from './resolvers'
 import { sortingFns } from '../sortingFns'
 import { filterFns } from '../filterFns'
+import { aggregationFns } from '../aggregationFns'
 
 // ---------------------------------------------------------------------------
 // Helper: safely access ColumnDefExtensions properties from a ColumnDef union
@@ -476,7 +478,13 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       })
     },
     getAutoAggregationFn: () => undefined,
-    getAggregationFn: () => undefined,
+    getAggregationFn: (): AggregationFn<TData> | undefined => {
+      const agg = columnDef.aggregationFn
+      if (!agg) return undefined
+      if (typeof agg === 'function') return agg as AggregationFn<TData>
+      const fn = (aggregationFns as Record<string, AggregationFn<RowData>>)[agg as string]
+      return fn as AggregationFn<TData> | undefined
+    },
   }
 
   // Set up accessor function

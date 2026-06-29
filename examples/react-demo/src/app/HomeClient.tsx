@@ -228,8 +228,8 @@ const agGridRows: AgRow[] = [
   },
   {
     label: 'Row grouping render',
-    yable: 'partial',
-    yableNote: 'roadmap',
+    yable: 'yes',
+    yableNote: 'MIT',
     ag: 'paid',
     agNote: 'Enterprise',
   },
@@ -1033,10 +1033,11 @@ function AgGridCompare() {
         <span className={s.sectionEyebrow}>Yable vs AG Grid</span>
         <h2 className={s.compareTitle}>The Enterprise features, MIT-free.</h2>
         <p className={s.compareSub}>
-          Clipboard, Excel-style fills, and tree data sit behind AG Grid Enterprise at{' '}
+          Clipboard, Excel-style fills, tree data, and row grouping sit behind AG Grid Enterprise at{' '}
           <strong>$999 / dev / year</strong> &mdash; Yable ships them MIT, alongside premium
-          animated column drag-to-reorder. Pivot and row grouping already run as real row models in
-          the core; turnkey rendering is on the roadmap.
+          animated column drag-to-reorder. Row grouping renders turnkey through{' '}
+          <code>&lt;Table&gt;</code>
+          with collapsible headers and rolled-up aggregates; pivots run as a programmatic row model.
         </p>
       </div>
 
