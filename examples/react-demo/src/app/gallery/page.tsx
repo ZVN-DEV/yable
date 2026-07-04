@@ -25,7 +25,7 @@ export default function GalleryIndex() {
       <header className={s.hero}>
         <p className={s.heroEyebrow}>The showcase</p>
         <h1 className={s.heroTitle}>
-          One engine. <em>Twelve very different tables.</em>
+          One engine. <em>Thirteen very different tables.</em>
         </h1>
         <p className={s.heroSub}>
           The same <code style={{ fontFamily: 'var(--font-mono)' }}>@zvndev/yable-react</code>{' '}

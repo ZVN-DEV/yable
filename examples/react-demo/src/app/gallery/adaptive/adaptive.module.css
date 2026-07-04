@@ -1,0 +1,259 @@
+.toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.modeCopy {
+  display: grid;
+  gap: 4px;
+  color: #244154;
+}
+
+.modeCopy strong {
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.modeCopy span {
+  color: #5d7380;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.button,
+.selectionCount {
+  min-height: 34px;
+  border-radius: 8px;
+  border: 1px solid #c8d8df;
+  background: #ffffff;
+  color: #244154;
+  font-size: 13px;
+  font-weight: 650;
+  padding: 7px 11px;
+}
+
+.button {
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    color 0.16s ease,
+    background 0.16s ease;
+}
+
+.button:hover {
+  border-color: #57c6d8;
+  color: #0f6f82;
+  background: #f4fbfd;
+}
+
+.selectionCount {
+  display: inline-flex;
+  align-items: center;
+  color: #5d7380;
+  background: #eef7fa;
+}
+
+.adaptiveTable {
+  --yable-adaptive-card-intrinsic-height: 238px;
+}
+
+.adaptiveTable :global(.yable-main) {
+  min-height: 360px;
+}
+
+.adaptiveTable:global(.yable--adaptive-cards-active) :global(.yable-main) {
+  max-height: none;
+}
+
+.adaptiveTable:global(.yable--adaptive-cards-active) :global(.yable-adaptive-cards) {
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  padding: 12px;
+}
+
+.adaptiveTable:global(.yable--adaptive-cards-active) :global(.yable-adaptive-card) {
+  border-color: #cfe2e9;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgb(31 64 82 / 10%);
+}
+
+.adaptiveTable:global(.yable--adaptive-cards-active) :global(.yable-adaptive-card:hover) {
+  background: #f8fcfd;
+}
+
+.adaptiveTable:global(.yable--adaptive-cards-active)
+  :global(.yable-adaptive-card[data-selected='true']) {
+  border-color: #1f8da3;
+  background: #f7fcfd;
+  box-shadow:
+    inset 3px 0 0 #1f8da3,
+    0 12px 26px rgb(31 141 163 / 16%);
+}
+
+.accountCard {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 15px;
+}
+
+.cardTopline,
+.cardMeta,
+.cardMetrics {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardTopline {
+  align-items: flex-start;
+}
+
+.health {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
+  min-height: 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.healthExpansion {
+  border-color: #9bdac7;
+  background: #e4f8f1;
+  color: #097653;
+}
+
+.healthStable {
+  border-color: #a9d7ea;
+  background: #e8f6fb;
+  color: #176a82;
+}
+
+.healthWatch {
+  border-color: #ecd08c;
+  background: #fff7db;
+  color: #8a5a05;
+}
+
+.healthRisk {
+  border-color: #f3b4ad;
+  background: #fff0ee;
+  color: #a2382a;
+}
+
+.segment {
+  min-width: 0;
+  color: #6a7f8a;
+  font-size: 12px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardTitle {
+  min-width: 0;
+  color: #17384a;
+  font-size: 19px;
+  font-weight: 760;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.cardMeta {
+  justify-content: flex-start;
+  color: #5d7380;
+  font-size: 13px;
+}
+
+.cardMeta span + span::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin: 0 8px 2px 0;
+  border-radius: 999px;
+  background: #9bb2bd;
+}
+
+.cardMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cardMetrics span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  border: 1px solid #d8e6eb;
+  border-radius: 8px;
+  background: #f7fbfc;
+  color: #19394a;
+  padding: 9px 10px;
+  font-size: 14px;
+  font-weight: 720;
+}
+
+.cardMetrics small {
+  color: #708792;
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+}
+
+.activity {
+  min-width: 0;
+  border-top: 1px solid #dce9ee;
+  color: #526a76;
+  font-size: 13px;
+  padding-top: 12px;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin: 16px 0 0;
+  color: #5d7380;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    display: grid;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .button,
+  .selectionCount {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cardMetrics {
+    grid-template-columns: 1fr;
+  }
+}
