@@ -62,7 +62,7 @@ import { createUndoRedoIntegration } from '../features/undoRedo'
 import { detectAndFill } from '../features/fillHandle'
 import { getPivotRowModel } from '../features/pivot'
 import type { PivotConfig as PivotEngineConfig } from '../features/pivot'
-import { getTreeRowModel } from '../features/treeData'
+import { getTreeRowModel, type TreeNode } from '../features/treeData'
 import { getGroupedRowModel as buildGroupedRowModel } from '../features/grouping'
 import { FormulaEngine } from '../features/formulas/engine'
 
@@ -1215,9 +1215,9 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       // T1-05: guard against null/undefined data
       const safeData = data ?? []
 
-      // Tree data: build a hierarchical row model from `getDataPath`. This runs
-      // before sort/filter/pagination; concurrent filter/sort over tree rows is
-      // not yet supported (tracked for a follow-up).
+      // Tree data: build a hierarchical row model from `getDataPath`. Filter
+      // and sort stages below re-enter the tree pipeline so hierarchy is
+      // preserved instead of operating over already-flattened visible rows.
       if (resolvedOptions.treeData && resolvedOptions.getDataPath) {
         return getTreeRowModel(table, safeData, resolvedOptions.getDataPath)
       }
@@ -1276,54 +1276,24 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
 
       if (columnFilters.length === 0 && !globalFilter) return coreModel
 
+      if (resolvedOptions.treeData && resolvedOptions.getDataPath) {
+        return getTreeRowModel(table, resolvedOptions.data ?? [], resolvedOptions.getDataPath, {
+          filterNode: (node) =>
+            rowPassesFilters(table, createTreeNodeRow(table, node), columnFilters, globalFilter),
+        })
+      }
+
       let filtered = coreModel.rows
 
       // Apply column filters
-      for (const filter of columnFilters) {
-        // T1-05: Skip invalid column IDs silently
-        const column = table.getColumn(filter.id)
-        if (!column) continue
-
-        filtered = filtered.filter((row: Row<TData>) => {
-          const filterFn = column.getFilterFn()
-
-          if (filterFn) {
-            // T1-09: Wrap user-provided filterFn in try-catch
-            try {
-              return filterFn(row, filter.id, filter.value, () => {})
-            } catch (err) {
-              console.error(
-                `[yable E010] filterFn threw for column "${filter.id}", row "${row.id}":`,
-                err,
-              )
-              return true // safe default: include the row
-            }
-          }
-
-          const value = row.getValue(filter.id)
-          if (Array.isArray(filter.value)) {
-            return filter.value.some((candidate: unknown) => value === candidate)
-          }
-
-          // Default string include filter
-          return String(value ?? '')
-            .toLowerCase()
-            .includes(String(filter.value ?? '').toLowerCase())
-        })
-      }
+      filtered = filtered.filter((row: Row<TData>) =>
+        rowPassesColumnFilters(table, row, columnFilters),
+      )
 
       // Apply global filter
-      if (globalFilter) {
-        const searchStr = String(globalFilter).toLowerCase()
-        filtered = filtered.filter((row: Row<TData>) => {
-          return table.getAllLeafColumns().some((col: Column<TData, unknown>) => {
-            const value = row.getValue(col.id)
-            return String(value ?? '')
-              .toLowerCase()
-              .includes(searchStr)
-          })
-        })
-      }
+      filtered = filtered.filter((row: Row<TData>) =>
+        rowPassesGlobalFilter(table, row, globalFilter),
+      )
 
       const rowsById: Record<string, Row<TData>> = {}
       for (const row of filtered) {
@@ -1347,34 +1317,23 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
       const sorting = table.getState().sorting
       if (!sorting.length) return filteredModel
 
-      const sorted = [...filteredModel.rows].sort((a, b) => {
-        for (const sort of sorting) {
-          // T1-05: Skip invalid column IDs silently
-          const column = table.getColumn(sort.id)
-          if (!column) continue
+      if (resolvedOptions.treeData && resolvedOptions.getDataPath) {
+        const columnFilters = table.getState().columnFilters
+        const globalFilter = table.getState().globalFilter
+        const hasFilters = columnFilters.length > 0 || Boolean(globalFilter)
 
-          // Custom sort function
-          const sortFn = column.getSortingFn()
-          if (sortFn) {
-            // T1-09: Wrap user-provided sortFn in try-catch
-            try {
-              const result = sortFn(a, b, sort.id)
-              if (result !== 0) return sort.desc ? -result : result
-              continue
-            } catch (err) {
-              console.error(`[yable E011] sortingFn threw for column "${sort.id}":`, err)
-              continue // safe default: treat as equal
-            }
-          }
+        return getTreeRowModel(table, resolvedOptions.data ?? [], resolvedOptions.getDataPath, {
+          filterNode: hasFilters
+            ? (node) =>
+                rowPassesFilters(table, createTreeNodeRow(table, node), columnFilters, globalFilter)
+            : undefined,
+          compareNodes: createTreeNodeComparator(table, sorting),
+        })
+      }
 
-          // Default comparison
-          const aVal = a.getValue(sort.id)
-          const bVal = b.getValue(sort.id)
-          const result = defaultCompare(aVal, bVal)
-          if (result !== 0) return sort.desc ? -result : result
-        }
-        return 0
-      })
+      const sorted = [...filteredModel.rows].sort((a, b) =>
+        compareRowsBySorting(table, a, b, sorting),
+      )
 
       const rowsById: Record<string, Row<TData>> = {}
       for (const row of sorted) {
@@ -1825,6 +1784,141 @@ function defaultCompare(a: unknown, b: unknown): number {
   if (typeof a === 'boolean' && typeof b === 'boolean') return a === b ? 0 : a ? 1 : -1
 
   return String(a).localeCompare(String(b))
+}
+
+function rowPassesFilters<TData extends RowData>(
+  table: Table<TData>,
+  row: Row<TData>,
+  columnFilters: ColumnFiltersState,
+  globalFilter: unknown,
+): boolean {
+  return (
+    rowPassesColumnFilters(table, row, columnFilters) &&
+    rowPassesGlobalFilter(table, row, globalFilter)
+  )
+}
+
+function rowPassesColumnFilters<TData extends RowData>(
+  table: Table<TData>,
+  row: Row<TData>,
+  columnFilters: ColumnFiltersState,
+): boolean {
+  for (const filter of columnFilters) {
+    // T1-05: Skip invalid column IDs silently
+    const column = table.getColumn(filter.id)
+    if (!column) continue
+
+    const filterFn = column.getFilterFn()
+
+    if (filterFn) {
+      // T1-09: Wrap user-provided filterFn in try-catch
+      try {
+        if (!filterFn(row, filter.id, filter.value, () => {})) {
+          return false
+        }
+        continue
+      } catch (err) {
+        console.error(
+          `[yable E010] filterFn threw for column "${filter.id}", row "${row.id}":`,
+          err,
+        )
+        continue // safe default: include the row for this filter
+      }
+    }
+
+    const value = row.getValue(filter.id)
+    if (Array.isArray(filter.value)) {
+      if (!filter.value.some((candidate: unknown) => value === candidate)) {
+        return false
+      }
+      continue
+    }
+
+    // Default string include filter
+    if (
+      !String(value ?? '')
+        .toLowerCase()
+        .includes(String(filter.value ?? '').toLowerCase())
+    ) {
+      return false
+    }
+  }
+
+  return true
+}
+
+function rowPassesGlobalFilter<TData extends RowData>(
+  table: Table<TData>,
+  row: Row<TData>,
+  globalFilter: unknown,
+): boolean {
+  if (!globalFilter) return true
+
+  const searchStr = String(globalFilter).toLowerCase()
+  return table.getAllLeafColumns().some((col: Column<TData, unknown>) => {
+    const value = row.getValue(col.id)
+    return String(value ?? '')
+      .toLowerCase()
+      .includes(searchStr)
+  })
+}
+
+function createTreeNodeRow<TData extends RowData>(
+  table: Table<TData>,
+  node: TreeNode<TData>,
+): Row<TData> {
+  return createRow(table, node.key, node.data, 0, node.depth, [], undefined)
+}
+
+function createTreeNodeComparator<TData extends RowData>(
+  table: Table<TData>,
+  sorting: SortingState,
+): (a: TreeNode<TData>, b: TreeNode<TData>) => number {
+  const rows = new Map<string, Row<TData>>()
+  const getRow = (node: TreeNode<TData>) => {
+    let row = rows.get(node.key)
+    if (!row) {
+      row = createTreeNodeRow(table, node)
+      rows.set(node.key, row)
+    }
+    return row
+  }
+
+  return (a, b) => compareRowsBySorting(table, getRow(a), getRow(b), sorting)
+}
+
+function compareRowsBySorting<TData extends RowData>(
+  table: Table<TData>,
+  a: Row<TData>,
+  b: Row<TData>,
+  sorting: SortingState,
+): number {
+  for (const sort of sorting) {
+    // T1-05: Skip invalid column IDs silently
+    const column = table.getColumn(sort.id)
+    if (!column) continue
+
+    // Custom sort function
+    const sortFn = column.getSortingFn()
+    if (sortFn) {
+      // T1-09: Wrap user-provided sortFn in try-catch
+      try {
+        const result = sortFn(a, b, sort.id)
+        if (result !== 0) return sort.desc ? -result : result
+        continue
+      } catch (err) {
+        console.error(`[yable E011] sortingFn threw for column "${sort.id}":`, err)
+        continue // safe default: treat as equal
+      }
+    }
+
+    // Default comparison
+    const aVal = a.getValue(sort.id)
+    const bVal = b.getValue(sort.id)
+    const result = defaultCompare(aVal, bVal)
+    if (result !== 0) return sort.desc ? -result : result
+  }
+  return 0
 }
 
 function escapeCSV(value: string): string {

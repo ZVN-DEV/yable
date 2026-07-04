@@ -46,7 +46,7 @@ Built-in feature snapshot. `DIY` means the library ships the engine/accessor, bu
 | Row selection               |   Yes    |      Yes       |        Yes        |        Yes         |
 | Row grouping                |   Yes    |     Plugin     |        No         |        Yes         |
 | Aggregation                 |   Yes    |     Plugin     |        No         |        Yes         |
-| Pivot tables                |   DIY    |       No       |        No         |        Yes         |
+| Pivot tables                |   Yes    |       No       |        No         |        Yes         |
 | Formula engine              |   Yes    |       No       |        No         |        Yes         |
 | Fill handle                 |   Yes    |       No       |        No         |        Yes         |
 | Clipboard                   |   Yes    |       No       |        No         |        Yes         |
@@ -147,7 +147,7 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 - Server state -- same columns/table surface with manual sorting, filtering, pagination, cursor loading, and optimistic row updates via `useServerTable`
 - Row grouping -- group rows by one or more columns with collapsible group headers and leaf counts, rendered turnkey through `<Table>`
 - Aggregation -- 9 built-in aggregation functions (sum, min, max, mean, count, and more) that roll up automatically on group rows
-- Tree data -- nested/hierarchical row support with expand/collapse
+- Tree data -- nested/hierarchical row support with expand/collapse, filtering, and sibling sorting
 
 ### Spreadsheet Features
 
@@ -185,7 +185,7 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 
 ## Status
 
-Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` at **0.6.0**, `@zvndev/yable-react` at **0.6.1**, `@zvndev/yable-themes` at **0.4.2**, and `@zvndev/yable-vanilla` at **0.3.4**. Turnkey row grouping with aggregated headers, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, pivots, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
+Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` at **0.6.1**, `@zvndev/yable-react` at **0.6.2**, `@zvndev/yable-themes` at **0.4.2**, and `@zvndev/yable-vanilla` at **0.3.5**. Turnkey row grouping with aggregated headers, rendered pivots, tree data with parent-chain filter/sort, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
 
 - 1.0 API stabilization
 - Expanded keyboard-navigation coverage

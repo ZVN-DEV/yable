@@ -845,46 +845,42 @@ table.getCenterRows() // Row[] (unpinned rows)
 
 ## Tree Data
 
-Display hierarchical/nested data with expand/collapse controls. Rows can have sub-rows, forming a tree structure.
+Display hierarchical/nested data with expand/collapse controls. Rows are built from path arrays, then filtered and sorted as a tree so matching descendants keep their parent chain and sibling sorting never moves children outside their parent.
 
 ### How to Enable
 
-Provide a `getSubRows` function that returns child rows:
+Set `treeData: true` and provide a `getDataPath` function for each row:
 
-```typescript
+```tsx
 interface FileNode {
+  id: string
   name: string
   size: number
-  children?: FileNode[]
+  path: string[]
 }
 
 const data: FileNode[] = [
-  {
-    name: 'src',
-    size: 0,
-    children: [
-      { name: 'index.ts', size: 1200 },
-      { name: 'utils.ts', size: 850 },
-      {
-        name: 'components',
-        size: 0,
-        children: [
-          { name: 'Table.tsx', size: 2400 },
-          { name: 'Cell.tsx', size: 1100 },
-        ],
-      },
-    ],
-  },
-  { name: 'package.json', size: 500 },
+  { id: 'src', name: 'src', size: 0, path: ['src'] },
+  { id: 'index', name: 'index.ts', size: 1200, path: ['src', 'index.ts'] },
+  { id: 'utils', name: 'utils.ts', size: 850, path: ['src', 'utils.ts'] },
+  { id: 'components', name: 'components', size: 0, path: ['src', 'components'] },
+  { id: 'table', name: 'Table.tsx', size: 2400, path: ['src', 'components', 'Table.tsx'] },
+  { id: 'cell', name: 'Cell.tsx', size: 1100, path: ['src', 'components', 'Cell.tsx'] },
+  { id: 'package', name: 'package.json', size: 500, path: ['package.json'] },
 ]
 
 const table = useTable({
   data,
   columns,
-  getSubRows: (row) => row.children,
-  enableExpanding: true,
+  treeData: true,
+  getDataPath: (row) => row.path,
+  initialState: {
+    expanded: { src: true, 'src/components': true },
+  },
 })
 ```
+
+Column and global filters run against the full tree, not just currently expanded rows. When `Table.tsx` matches a collapsed descendant, the row model includes `src -> components -> Table.tsx`. Sorting runs recursively at each sibling level, so a child row never escapes its parent group.
 
 ### Row Properties
 

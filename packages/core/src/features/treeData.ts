@@ -44,6 +44,17 @@ export interface TreeDataOptions<TData extends RowData> {
   autoExpandDepth?: number
 }
 
+export interface TreeRowModelOptions<TData extends RowData> {
+  /** Filter a tree before flattening; ancestors of matching nodes are retained. */
+  filterNode?: (node: TreeNode<TData>) => boolean
+  /** Sort sibling nodes recursively before flattening. */
+  compareNodes?: (a: TreeNode<TData>, b: TreeNode<TData>) => number
+  /** Expanded state used for flattening. */
+  expanded?: Record<string, boolean> | true
+  /** Force retained filter paths open so matching descendants are visible. */
+  expandFilteredPaths?: boolean
+}
+
 // ---------------------------------------------------------------------------
 // buildTreeFromPaths
 // ---------------------------------------------------------------------------
@@ -256,17 +267,34 @@ export function getTreeRowModel<TData extends RowData>(
   table: Table<TData>,
   data: TData[],
   getDataPath: (item: TData) => string[],
+  options: TreeRowModelOptions<TData> = {},
 ): RowModel<TData> {
   // 1. Build tree from flat data
-  const tree = buildTreeFromPaths(data, getDataPath)
+  let tree = buildTreeFromPaths(data, getDataPath)
 
-  // 2. Get expanded state
-  const expanded = table.getState().expanded
+  // 2. Filter over the tree, not the flattened visible rows. This preserves
+  // parent chains when a descendant matches.
+  if (options.filterNode) {
+    tree = filterTreeData(tree, options.filterNode)
+  }
 
-  // 3. Flatten for rendering, respecting expanded state
-  const rows = flattenTree(table, tree, expanded as Record<string, boolean>)
+  // 3. Sort siblings recursively so hierarchy is retained.
+  if (options.compareNodes) {
+    tree = sortTreeData(tree, options.compareNodes)
+  }
 
-  // 4. Build lookup maps
+  // 4. Get expanded state. Filtered trees default to opened retained paths so
+  // matched descendants are visible with their ancestors.
+  const expanded =
+    options.expanded ??
+    (options.filterNode && options.expandFilteredPaths !== false
+      ? true
+      : (table.getState().expanded as Record<string, boolean>))
+
+  // 5. Flatten for rendering, respecting expanded state
+  const rows = flattenTree(table, tree, expanded)
+
+  // 6. Build lookup maps
   const flatRows = rows
   const rowsById: Record<string, Row<TData>> = {}
   for (const row of flatRows) {
