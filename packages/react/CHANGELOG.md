@@ -1,5 +1,12 @@
 # @zvndev/yable-react
 
+## 0.6.3
+
+### Patch Changes
+
+- Updated dependencies [be37e08]
+  - @zvndev/yable-core@0.6.2
+
 ## 0.6.2
 
 ### Patch Changes

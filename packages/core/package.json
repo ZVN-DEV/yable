@@ -1,6 +1,6 @@
 {
   "name": "@zvndev/yable-core",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Headless, zero-dependency data table engine with sorting, filtering, editing, formulas, pivot tables, and more",
   "keywords": [
     "table",
