@@ -137,6 +137,17 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 | [`@zvndev/yable-vanilla`](./packages/vanilla) | Vanilla JS/DOM renderer -- `renderTable()` and `renderPagination()` for non-framework use.                                                                                     |
 | [`@zvndev/yable-themes`](./packages/themes)   | CSS design token system -- 8 built-in themes (default, stripe, compact, forest, midnight, rose, ocean, mono) with 100+ customizable CSS custom properties. Dark mode included. |
 
+## Development
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+pnpm test:e2e
+```
+
+`pnpm test:e2e` starts the React demo and runs the checked-in Playwright suite for drag, virtualization, width sync, and keyboard interaction coverage. It is intentionally outside the default test lane.
+
 ## Features
 
 ### Data Management
@@ -185,11 +196,11 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 
 ## Status
 
-Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` at **0.6.1**, `@zvndev/yable-react` at **0.6.2**, `@zvndev/yable-themes` at **0.4.2**, and `@zvndev/yable-vanilla` at **0.3.5**. Turnkey row grouping with aggregated headers, rendered pivots, tree data with parent-chain filter/sort, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
+Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` at **0.6.2**, `@zvndev/yable-react` at **0.6.3**, `@zvndev/yable-themes` at **0.4.2**, and `@zvndev/yable-vanilla` at **0.3.6**. Turnkey row grouping with aggregated headers, rendered pivots, tree data with parent-chain filter/sort, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
 
 - 1.0 API stabilization
-- Expanded keyboard-navigation coverage
-- A checked-in Playwright end-to-end suite
+- Broader keyboard-navigation coverage
+- Expanded Playwright coverage for adaptive mobile/tablet layouts and server-data flows
 
 ## License
 

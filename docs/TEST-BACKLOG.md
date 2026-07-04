@@ -55,8 +55,8 @@ See `core/table.ts` stub block (~919-932).
 ## Test backlog (AG Grid areas → Yable test cases)
 
 AG Grid tests _behaviors of the whole grid as a black box_ (Vitest+jsdom) plus
-Playwright e2e for scroll/drag/focus. **Yable has zero e2e and zero interaction
-tests** for DnD / panels / menus today (manual screenshots only).
+Playwright e2e for scroll/drag/focus. Yable now has a small checked-in Playwright
+suite for browser-only table mechanics; remaining interaction gaps are listed below.
 
 Current baseline: 46 test files, ~792 cases (core ~504, react ~238, themes 33,
 vanilla 17). No coverage thresholds configured.
@@ -80,7 +80,7 @@ vanilla 17). No coverage thresholds configured.
 - [ ] Row drag reorder (`useRowDrag`) — still no test (not auto-wired into `<Table>`)
 - [ ] Form-editor cells `CellInput/Checkbox/Toggle/DatePicker` — only `CellSelect` covered
 - [ ] Keyboard-nav integration (Tab wrap, Ctrl+Home/End, PageUp/Down, across pinned cols) — core helpers tested; full grid integration still missing
-- [ ] Playwright e2e for the browser-only cases (drag slide, virtualization drift, header/body width sync under resize+scroll) — **biggest remaining gap**; mechanics verified manually this cycle, but no checked-in e2e suite. Needs `@playwright/test` + a `test:e2e` script (kept out of the default CI lane).
+- [x] Playwright e2e for browser-only cases — `e2e/table-interactions.spec.ts` covers drag slide + committed reorder, virtualization drift, header/body width sync after resize+scroll, and keyboard focus movement. `pnpm test:e2e` is kept out of the default CI lane.
 - [ ] `sizeColumnsToFit` / `flex` columns (#8) — not implemented; real feature, deferred.
 
 ### Tier 2 — edge cases (mostly DONE 2026-06-28)
@@ -110,7 +110,7 @@ no parity tests are owed. Decision for Yable:
 
 ### Still open after this cycle (next pickups)
 
-1. Playwright e2e suite (drag slide / virtualization drift / width-sync) + `data-testid` hook.
+1. Public `data-testid` hook + expanded Playwright coverage for adaptive mobile/tablet layouts and app-owned e2e selectors.
 2. Wire-or-label the experimental engines (fill handle, undo/redo, formulas, pivot, tree, grouping).
 3. `sizeColumnsToFit` / `flex` column sizing.
 4. Virtualized pinned rows (this cycle covered the non-virtualized path).
@@ -122,8 +122,8 @@ no parity tests are owed. Decision for Yable:
 
 1. **Behavioral jsdom tests** that mount the whole `<Table>` and assert outcomes
    (extend the `Table.test.tsx` / `Sorting.test.tsx` pattern).
-2. **A small checked-in Playwright e2e suite** for the four things jsdom can't prove
-   and that bit production: drag-reorder slide, virtualization drift, header/body
-   width sync, focus/keyboard.
+2. **Keep expanding the checked-in Playwright e2e suite** for the things jsdom can't
+   prove: adaptive/mobile layout, server-data flows, drag panels, virtualization drift,
+   header/body width sync, and focus/keyboard.
 3. **Ship a `data-testid` hook** (like AG Grid's `setupAgTestIds`) so downstream apps
    (Bevrly) can write their own e2e against Yable.
