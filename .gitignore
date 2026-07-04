@@ -10,6 +10,8 @@ dist/
 *.png
 *.jpg
 coverage/
+playwright-report/
+test-results/
 
 # Playwright MCP artifacts
 .playwright-mcp/
