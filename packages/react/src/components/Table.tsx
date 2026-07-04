@@ -8,6 +8,7 @@ import { resolveYableProfile } from '../config'
 import type { TableProps } from '../types'
 import { TableHeader } from './TableHeader'
 import { TableBody } from './TableBody'
+import { AdaptiveTableCards, type RequiredAdaptiveLayout } from './AdaptiveTableCards'
 import { TableFooter } from './TableFooter'
 import { LoadingOverlay } from './LoadingOverlay'
 import { NoRowsOverlay } from './NoRowsOverlay'
@@ -62,6 +63,7 @@ export function Table<TData extends RowData>({
   floatingFilters,
   columnVirtualization,
   columnVirtualizationOverscan,
+  adaptiveLayout: adaptiveLayoutProp,
   ariaLabel: ariaLabelProp,
   ...rest
 }: TableProps<TData>) {
@@ -92,6 +94,8 @@ export function Table<TData extends RowData>({
     columnVirtualization ?? profileTableProps?.columnVirtualization
   const resolvedColumnVirtualizationOverscan =
     columnVirtualizationOverscan ?? profileTableProps?.columnVirtualizationOverscan
+  const resolvedAdaptiveLayout =
+    adaptiveLayoutProp ?? profileTableProps?.adaptiveLayout ?? providerTableProps?.adaptiveLayout
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarPanel, setSidebarPanel] = useState<'columns' | 'filters'>(
@@ -100,6 +104,11 @@ export function Table<TData extends RowData>({
   const containerRef = useRef<HTMLDivElement>(null)
   const horizontalScrollRef = useRef<HTMLDivElement>(null)
   const isRtl = direction === 'rtl'
+  const adaptiveLayout = useMemo(
+    () => normalizeAdaptiveLayout(resolvedAdaptiveLayout),
+    [resolvedAdaptiveLayout],
+  )
+  const adaptiveLayoutActive = useAdaptiveLayoutActive(containerRef, adaptiveLayout)
 
   const classNames = [
     'yable',
@@ -111,6 +120,8 @@ export function Table<TData extends RowData>({
     loading && 'yable-loading',
     isRtl && 'yable--rtl',
     sidebarOpen && 'yable--sidebar-open',
+    adaptiveLayout && adaptiveLayout.mode !== 'table' && 'yable--adaptive-layout',
+    adaptiveLayoutActive && 'yable--adaptive-cards-active',
     className,
   ]
     .filter(Boolean)
@@ -125,6 +136,7 @@ export function Table<TData extends RowData>({
     table.getLeftVisibleLeafColumns().length > 0 || table.getRightVisibleLeafColumns().length > 0
   const hasGroupedHeaders = table.getHeaderGroups().length > 1
   const canVirtualizeColumns =
+    !adaptiveLayoutActive &&
     Boolean(resolvedColumnVirtualization) &&
     !hasPinnedColumns &&
     !hasGroupedHeaders &&
@@ -286,7 +298,7 @@ export function Table<TData extends RowData>({
     visibleColumnTotalSize,
   ])
 
-  const tableNode = (
+  const desktopTableNode = (
     <table
       className="yable-table"
       style={outerTableStyle}
@@ -304,6 +316,17 @@ export function Table<TData extends RowData>({
     </table>
   )
 
+  const tableNode =
+    adaptiveLayoutActive && adaptiveLayout ? (
+      <AdaptiveTableCards
+        table={table}
+        layout={adaptiveLayout}
+        clickableRows={resolvedClickableRows}
+      />
+    ) : (
+      desktopTableNode
+    )
+
   return (
     <TableProvider value={table}>
       <div
@@ -319,7 +342,7 @@ export function Table<TData extends RowData>({
         {...rest}
       >
         <div className="yable-main">
-          {showColumnVirtualizationShell ? (
+          {showColumnVirtualizationShell && !adaptiveLayoutActive ? (
             <div
               ref={horizontalScrollRef}
               className="yable-horizontal-scroll-container"
@@ -435,4 +458,75 @@ export function Table<TData extends RowData>({
       </div>
     </TableProvider>
   )
+}
+
+const DEFAULT_ADAPTIVE_BREAKPOINT = 720
+const DEFAULT_ADAPTIVE_SECONDARY_COLUMNS = 8
+
+function normalizeAdaptiveLayout<TData extends RowData>(
+  layout: TableProps<TData>['adaptiveLayout'],
+): RequiredAdaptiveLayout<TData> | null {
+  if (!layout) return null
+
+  if (layout === true) {
+    return {
+      mode: 'auto',
+      breakpoint: DEFAULT_ADAPTIVE_BREAKPOINT,
+      maxSecondaryColumns: DEFAULT_ADAPTIVE_SECONDARY_COLUMNS,
+    }
+  }
+
+  return {
+    mode: layout.mode ?? 'auto',
+    breakpoint: layout.breakpoint ?? DEFAULT_ADAPTIVE_BREAKPOINT,
+    primaryColumnId: layout.primaryColumnId,
+    secondaryColumnIds: layout.secondaryColumnIds,
+    hiddenColumnIds: layout.hiddenColumnIds,
+    maxSecondaryColumns: layout.maxSecondaryColumns ?? DEFAULT_ADAPTIVE_SECONDARY_COLUMNS,
+    renderCard: layout.renderCard,
+  }
+}
+
+function useAdaptiveLayoutActive<TData extends RowData>(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  layout: RequiredAdaptiveLayout<TData> | null,
+): boolean {
+  const [active, setActive] = useState(() => layout?.mode === 'cards')
+
+  useEffect(() => {
+    if (!layout) {
+      setActive(false)
+      return
+    }
+
+    if (layout.mode === 'cards' || layout.mode === 'table') {
+      setActive(layout.mode === 'cards')
+      return
+    }
+
+    const node = containerRef.current
+    if (!node) return
+
+    const update = (width: number) => {
+      setActive(width <= layout.breakpoint)
+    }
+
+    update(node.getBoundingClientRect().width || node.clientWidth)
+
+    if (typeof ResizeObserver === 'undefined') {
+      const handleResize = () => update(node.getBoundingClientRect().width || node.clientWidth)
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width ?? node.getBoundingClientRect().width
+      update(width)
+    })
+    observer.observe(node)
+
+    return () => observer.disconnect()
+  }, [containerRef, layout])
+
+  return active
 }

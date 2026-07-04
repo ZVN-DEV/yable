@@ -87,6 +87,9 @@ export type {
   TableHeaderCellProps,
   StatusBarPanelConfig,
   StatusBarPanelProps,
+  AdaptiveTableLayoutMode,
+  AdaptiveTableLayoutOptions,
+  AdaptiveTableCardContext,
 } from './types'
 
 // Hooks

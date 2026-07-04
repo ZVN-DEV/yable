@@ -25,7 +25,14 @@ export interface YableDefaults {
     Pick<
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- provider defaults must work for every table row shape.
       TableProps<any>,
-      'striped' | 'bordered' | 'compact' | 'stickyHeader' | 'theme' | 'direction' | 'ariaLabel'
+      | 'striped'
+      | 'bordered'
+      | 'compact'
+      | 'stickyHeader'
+      | 'theme'
+      | 'direction'
+      | 'ariaLabel'
+      | 'adaptiveLayout'
     >
   >
   /** Default column definition merged under every table's own `defaultColumnDef` */

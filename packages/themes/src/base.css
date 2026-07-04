@@ -426,6 +426,125 @@
   z-index: calc(var(--yable-z-pinned) + 1);
 }
 
+/* ── Adaptive Card Layout ───────────────────────────────────────────────── */
+
+.yable--adaptive-layout {
+  container-type: inline-size;
+}
+
+.yable--adaptive-cards-active .yable-main {
+  overflow: auto;
+}
+
+.yable-adaptive-cards {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+}
+
+.yable-adaptive-card {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: var(--yable-border-width) solid var(--yable-border-color);
+  border-radius: 8px;
+  background: var(--yable-bg-row);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  content-visibility: auto;
+  contain-intrinsic-size: 0 var(--yable-adaptive-card-intrinsic-height, 148px);
+  transition:
+    background var(--yable-transition-fast),
+    border-color var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
+}
+
+.yable-adaptive-card:hover {
+  background: var(--yable-bg-row-hover);
+}
+
+.yable-adaptive-card[data-selected='true'] {
+  border-color: var(--yable-accent);
+  background: var(--yable-bg-row-selected);
+  box-shadow: inset 2px 0 0 0 var(--yable-accent);
+}
+
+.yable-adaptive-card[data-clickable='true'] {
+  cursor: pointer;
+}
+
+.yable-adaptive-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 12px 10px;
+  border-bottom: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable-adaptive-card-title {
+  min-width: 0;
+  font-size: calc(var(--yable-font-size) + 1px);
+  font-weight: var(--yable-font-weight-semibold);
+  color: var(--yable-text-primary);
+}
+
+.yable-adaptive-card-primary {
+  min-width: 0;
+}
+
+.yable-adaptive-card-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  min-width: 0;
+}
+
+.yable-adaptive-card-cell {
+  display: grid;
+  grid-template-columns: minmax(82px, 0.42fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  padding: 9px 12px;
+  border-top: var(--yable-border-width) solid var(--yable-border-color);
+}
+
+.yable-adaptive-card-cell:nth-child(-n + 2) {
+  border-top: 0;
+}
+
+.yable-adaptive-card-label {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--yable-text-tertiary);
+  font-size: calc(var(--yable-font-size) - 1px);
+  font-weight: var(--yable-font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yable-adaptive-card-value {
+  min-width: 0;
+  color: var(--yable-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.yable-adaptive-card-primary .yable-adaptive-card-value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yable-adaptive-card [data-cell-status='pending'] .yable-adaptive-card-value {
+  opacity: var(--yable-cell-pending-opacity);
+  cursor: var(--yable-cell-pending-cursor);
+}
+
+.yable-adaptive-card [data-cell-status='error'],
+.yable-adaptive-card [data-cell-status='conflict'] {
+  position: relative;
+}
+
 /* ── Column Pinning ──────────────────────────────────────────────────────── */
 
 .yable-th[data-pinned='left'],

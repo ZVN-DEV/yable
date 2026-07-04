@@ -73,37 +73,37 @@ const table = useTable({
 
 ### Layout Components
 
-| Component | Description |
-|---|---|
-| `Table` | Root container -- wraps everything in a `<div>` with a `<table>` inside. Accepts `table`, `striped`, `bordered`, `compact`, `stickyHeader`, `theme`, `loading`, `emptyMessage`, `footer`, and `children` props. |
-| `TableHeader` | Renders `<thead>` with header groups and sort indicators. |
-| `TableBody` | Renders `<tbody>` with rows and cells. |
-| `TableCell` | Renders a single `<td>` with editing support. |
-| `TableFooter` | Renders `<tfoot>` with footer content. |
+| Component     | Description                                                                                                                                                                                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Table`       | Root container -- wraps everything in a `<div>` with a desktop table or adaptive card layout inside. Accepts `table`, `striped`, `bordered`, `compact`, `stickyHeader`, `theme`, `loading`, `emptyMessage`, `footer`, `adaptiveLayout`, and `children` props. |
+| `TableHeader` | Renders `<thead>` with header groups and sort indicators.                                                                                                                                                                                                     |
+| `TableBody`   | Renders `<tbody>` with rows and cells.                                                                                                                                                                                                                        |
+| `TableCell`   | Renders a single `<td>` with editing support.                                                                                                                                                                                                                 |
+| `TableFooter` | Renders `<tfoot>` with footer content.                                                                                                                                                                                                                        |
 
 ### Interactive Components
 
-| Component | Description |
-|---|---|
-| `Pagination` | Page navigation with first/last/prev/next buttons, page numbers, and page size selector. Props: `table`, `showPageSize`, `pageSizes`, `showInfo`, `showFirstLast`. |
-| `GlobalFilter` | Debounced search input for the global filter. Props: `table`, `placeholder`, `debounce`, `className`. |
-| `SortIndicator` | Sort direction arrow icon. Props: `direction`, `index` (for multi-sort badge). |
+| Component       | Description                                                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Pagination`    | Page navigation with first/last/prev/next buttons, page numbers, and page size selector. Props: `table`, `showPageSize`, `pageSizes`, `showInfo`, `showFirstLast`. |
+| `GlobalFilter`  | Debounced search input for the global filter. Props: `table`, `placeholder`, `debounce`, `className`.                                                              |
+| `SortIndicator` | Sort direction arrow icon. Props: `direction`, `index` (for multi-sort badge).                                                                                     |
 
 ### Form Components (In-Cell Editing)
 
-| Component | Description |
-|---|---|
-| `CellInput` | Text/number input for cell editing. Props: `context`, `type`, `placeholder`, `inline`, `autoFocus`. |
-| `CellSelect` | Dropdown select for cell editing. |
-| `CellCheckbox` | Checkbox for boolean cell values. |
-| `CellToggle` | Toggle switch for boolean cell values. |
-| `CellDatePicker` | Date input for cell editing. |
+| Component        | Description                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `CellInput`      | Text/number input for cell editing. Props: `context`, `type`, `placeholder`, `inline`, `autoFocus`. |
+| `CellSelect`     | Dropdown select for cell editing.                                                                   |
+| `CellCheckbox`   | Checkbox for boolean cell values.                                                                   |
+| `CellToggle`     | Toggle switch for boolean cell values.                                                              |
+| `CellDatePicker` | Date input for cell editing.                                                                        |
 
 ### Context
 
-| Export | Description |
-|---|---|
-| `TableProvider` | React context provider for the table instance. |
+| Export              | Description                                                 |
+| ------------------- | ----------------------------------------------------------- |
+| `TableProvider`     | React context provider for the table instance.              |
 | `useTableContext()` | Hook to access the table instance from any child component. |
 
 ## Re-exports from @zvndev/yable-core
@@ -123,22 +123,40 @@ The `<Table>` component accepts these props:
 
 ```typescript
 interface TableProps<TData> {
-  table: Table<TData>       // Required -- the table instance from useTable
-  stickyHeader?: boolean     // Pin header to top on scroll
-  striped?: boolean          // Alternate row backgrounds
-  bordered?: boolean         // Add cell borders
-  compact?: boolean          // Reduce padding
-  theme?: string             // Theme variant name
-  clickableRows?: boolean    // Add pointer cursor + hover to rows
-  footer?: boolean           // Show table footer
-  loading?: boolean          // Show loading overlay
-  emptyMessage?: string      // Text when no rows (default: "No data")
-  renderEmpty?: () => ReactNode   // Custom empty state
+  table: Table<TData> // Required -- the table instance from useTable
+  stickyHeader?: boolean // Pin header to top on scroll
+  striped?: boolean // Alternate row backgrounds
+  bordered?: boolean // Add cell borders
+  compact?: boolean // Reduce padding
+  theme?: string // Theme variant name
+  clickableRows?: boolean // Add pointer cursor + hover to rows
+  footer?: boolean // Show table footer
+  loading?: boolean // Show loading overlay
+  emptyMessage?: string // Text when no rows (default: "No data")
+  renderEmpty?: () => ReactNode // Custom empty state
   renderLoading?: () => ReactNode // Custom loading state
-  children?: ReactNode       // Extra content (e.g. Pagination)
-  className?: string         // Additional CSS class
+  adaptiveLayout?: boolean | AdaptiveTableLayoutOptions<TData>
+  children?: ReactNode // Extra content (e.g. Pagination)
+  className?: string // Additional CSS class
 }
 ```
+
+### Adaptive tablet and mobile layouts
+
+Use `adaptiveLayout` when the same table instance should become a structural card layout on narrower containers instead of only scrolling horizontally.
+
+```tsx
+<Table
+  table={table}
+  adaptiveLayout={{
+    breakpoint: 720,
+    primaryColumnId: 'name',
+    secondaryColumnIds: ['status', 'owner', 'updatedAt'],
+  }}
+/>
+```
+
+Set `mode: 'cards'` or `mode: 'table'` to force a surface, or provide `renderCard` for a product-specific mobile layout while still receiving the row, cells, and table instance.
 
 ## License
 
