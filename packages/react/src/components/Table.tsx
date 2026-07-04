@@ -1,7 +1,18 @@
 // @zvndev/yable-react — Main Table Component
 
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
-import type { HeaderGroup, RowData, Table as TableInstance } from '@zvndev/yable-core'
+import {
+  createTable,
+  generatePivotColumnDefs,
+  getPivotRowModel as buildPivotRowModel,
+  type ColumnDef,
+  type HeaderGroup,
+  type PivotConfig,
+  type PivotColumn,
+  type RowData,
+  type Table as TableInstance,
+  type TableState,
+} from '@zvndev/yable-core'
 import { TableProvider } from '../context'
 import { useYableDefaults } from '../YableProvider'
 import { resolveYableProfile } from '../config'
@@ -103,6 +114,10 @@ export function Table<TData extends RowData>({
   )
   const containerRef = useRef<HTMLDivElement>(null)
   const horizontalScrollRef = useRef<HTMLDivElement>(null)
+  const tableState = table.getState()
+  const sourceData = table.options.data
+  const pivotTable = usePivotRenderTable(table, tableState, sourceData)
+  const baseTable = pivotTable ?? table
   const isRtl = direction === 'rtl'
   const adaptiveLayout = useMemo(
     () => normalizeAdaptiveLayout(resolvedAdaptiveLayout),
@@ -120,6 +135,7 @@ export function Table<TData extends RowData>({
     loading && 'yable-loading',
     isRtl && 'yable--rtl',
     sidebarOpen && 'yable--sidebar-open',
+    pivotTable && 'yable--pivot-mode',
     adaptiveLayout && adaptiveLayout.mode !== 'table' && 'yable--adaptive-layout',
     adaptiveLayoutActive && 'yable--adaptive-cards-active',
     className,
@@ -127,14 +143,16 @@ export function Table<TData extends RowData>({
     .filter(Boolean)
     .join(' ')
 
-  const rows = table.getRowModel().rows
-  const hasGlobalFilter = Boolean(table.getState().globalFilter)
-  const hasColumnFilters = table.getState().columnFilters.length > 0
+  const baseState = baseTable.getState()
+  const rows = baseTable.getRowModel().rows
+  const hasGlobalFilter = Boolean(baseState.globalFilter)
+  const hasColumnFilters = baseState.columnFilters.length > 0
   const isFiltered = hasGlobalFilter || hasColumnFilters
-  const allVisibleColumns = table.getVisibleLeafColumns()
+  const allVisibleColumns = baseTable.getVisibleLeafColumns()
   const hasPinnedColumns =
-    table.getLeftVisibleLeafColumns().length > 0 || table.getRightVisibleLeafColumns().length > 0
-  const hasGroupedHeaders = table.getHeaderGroups().length > 1
+    baseTable.getLeftVisibleLeafColumns().length > 0 ||
+    baseTable.getRightVisibleLeafColumns().length > 0
+  const hasGroupedHeaders = baseTable.getHeaderGroups().length > 1
   const canVirtualizeColumns =
     !adaptiveLayoutActive &&
     Boolean(resolvedColumnVirtualization) &&
@@ -155,50 +173,50 @@ export function Table<TData extends RowData>({
 
   const renderTable = useMemo(() => {
     if (!canVirtualizeColumns || !columnVirtualState.isVirtualized) {
-      return table
+      return baseTable
     }
 
     const virtualColumns = columnVirtualState.virtualColumns.map((entry) => entry.column)
     const visibleColumnIds = new Set(virtualColumns.map((column) => column.id))
-    const next = Object.create(table) as TableInstance<TData>
+    const next = Object.create(baseTable) as TableInstance<TData>
 
     next.getVisibleFlatColumns = () => virtualColumns
     next.getVisibleLeafColumns = () => virtualColumns
     next.getCenterVisibleLeafColumns = () => virtualColumns
     next.getLeftVisibleLeafColumns = () => []
     next.getRightVisibleLeafColumns = () => []
-    next.getHeaderGroups = () => filterHeaderGroups(table.getHeaderGroups(), visibleColumnIds)
+    next.getHeaderGroups = () => filterHeaderGroups(baseTable.getHeaderGroups(), visibleColumnIds)
     next.getCenterHeaderGroups = () =>
-      filterHeaderGroups(table.getCenterHeaderGroups(), visibleColumnIds)
-    next.getFooterGroups = () => filterHeaderGroups(table.getFooterGroups(), visibleColumnIds)
+      filterHeaderGroups(baseTable.getCenterHeaderGroups(), visibleColumnIds)
+    next.getFooterGroups = () => filterHeaderGroups(baseTable.getFooterGroups(), visibleColumnIds)
     next.getCenterFooterGroups = () =>
-      filterHeaderGroups(table.getCenterFooterGroups(), visibleColumnIds)
+      filterHeaderGroups(baseTable.getCenterFooterGroups(), visibleColumnIds)
 
     return next
   }, [
     canVirtualizeColumns,
     columnVirtualState.isVirtualized,
     columnVirtualState.virtualColumns,
-    table,
+    baseTable,
   ])
 
   const showColumnVirtualizationShell = canVirtualizeColumns
 
   const contextMenu = useContextMenu()
-  useKeyboardNavigation(table, { containerRef })
+  useKeyboardNavigation(baseTable, { containerRef })
 
   // Fill handle drag tracking — provides the mousedown handler the focused
   // cell's FillHandle corner attaches to. Inert unless `enableFillHandle` is set.
-  const { onFillHandleMouseDown } = useFillHandle(table, {
-    enabled: Boolean(table.options.enableFillHandle),
+  const { onFillHandleMouseDown } = useFillHandle(baseTable, {
+    enabled: !pivotTable && Boolean(baseTable.options.enableFillHandle),
   })
 
   // ---- aria-live announcements for sort, filter, and pagination changes ----
   const [announcement, setAnnouncement] = useState('')
-  const prevSortingRef = useRef(table.getState().sorting)
+  const prevSortingRef = useRef(baseState.sorting)
   const prevFilterCountRef = useRef(rows.length)
   const prevHasFiltersRef = useRef(isFiltered)
-  const prevPaginationRef = useRef(table.getState().pagination)
+  const prevPaginationRef = useRef(baseState.pagination)
   const isFirstRenderRef = useRef(true)
 
   useEffect(() => {
@@ -208,8 +226,8 @@ export function Table<TData extends RowData>({
       return
     }
 
-    const currentSorting = table.getState().sorting
-    const currentPagination = table.getState().pagination
+    const currentSorting = baseState.sorting
+    const currentPagination = baseState.pagination
     const currentRowCount = rows.length
     const currentIsFiltered = isFiltered
 
@@ -218,7 +236,7 @@ export function Table<TData extends RowData>({
       prevSortingRef.current = currentSorting
       const firstSort = currentSorting[0]
       if (firstSort) {
-        const column = table.getColumn(firstSort.id)
+        const column = baseTable.getColumn(firstSort.id)
         const headerDef = column?.columnDef.header
         const columnName = typeof headerDef === 'string' ? headerDef : firstSort.id
         const direction = firstSort.desc ? 'descending' : 'ascending'
@@ -243,13 +261,13 @@ export function Table<TData extends RowData>({
     // Check for pagination changes
     if (JSON.stringify(currentPagination) !== JSON.stringify(prevPaginationRef.current)) {
       prevPaginationRef.current = currentPagination
-      const pageCount = table.getPageCount()
+      const pageCount = baseTable.getPageCount()
       if (pageCount > 0) {
         setAnnouncement(`Page ${currentPagination.pageIndex + 1} of ${pageCount}`)
         return
       }
     }
-  })
+  }, [baseState.pagination, baseState.sorting, baseTable, isFiltered, rows.length])
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -258,9 +276,9 @@ export function Table<TData extends RowData>({
       // menu's sort actions operate on the column under the cursor.
       const targetEl = (e.target as HTMLElement | null)?.closest?.('[data-column-id]')
       const targetColumnId = targetEl?.getAttribute('data-column-id') ?? undefined
-      contextMenu.open(e.clientX, e.clientY, table, targetColumnId)
+      contextMenu.open(e.clientX, e.clientY, baseTable, targetColumnId)
     },
-    [contextMenu, table],
+    [baseTable, contextMenu],
   )
 
   const visibleLeafColumns = renderTable.getVisibleLeafColumns()
@@ -319,7 +337,7 @@ export function Table<TData extends RowData>({
   const tableNode =
     adaptiveLayoutActive && adaptiveLayout ? (
       <AdaptiveTableCards
-        table={table}
+        table={baseTable}
         layout={adaptiveLayout}
         clickableRows={resolvedClickableRows}
       />
@@ -328,7 +346,7 @@ export function Table<TData extends RowData>({
     )
 
   return (
-    <TableProvider value={table}>
+    <TableProvider value={baseTable}>
       <div
         ref={containerRef}
         className={classNames}
@@ -336,8 +354,8 @@ export function Table<TData extends RowData>({
         dir={direction}
         role="grid"
         aria-label={ariaLabel ?? 'Data table'}
-        aria-rowcount={table.getRowModel().rows.length}
-        aria-colcount={table.getVisibleLeafColumns().length}
+        aria-rowcount={baseTable.getRowModel().rows.length}
+        aria-colcount={baseTable.getVisibleLeafColumns().length}
         onContextMenu={handleContextMenu}
         {...rest}
       >
@@ -416,7 +434,7 @@ export function Table<TData extends RowData>({
 
         {resolvedSidebar && (
           <Sidebar
-            table={table}
+            table={baseTable}
             open={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             panels={resolvedSidebarPanels}
@@ -425,7 +443,7 @@ export function Table<TData extends RowData>({
           />
         )}
 
-        {resolvedStatusBar && <StatusBar table={table} panels={statusBarPanels} />}
+        {resolvedStatusBar && <StatusBar table={baseTable} panels={statusBarPanels} />}
 
         {children}
 
@@ -434,7 +452,7 @@ export function Table<TData extends RowData>({
             x={contextMenu.x}
             y={contextMenu.y}
             onClose={contextMenu.close}
-            table={table}
+            table={baseTable}
             targetColumnId={contextMenu.targetColumnId}
           />
         )}
@@ -458,6 +476,81 @@ export function Table<TData extends RowData>({
       </div>
     </TableProvider>
   )
+}
+
+type PivotEngineConfig = Parameters<typeof buildPivotRowModel<RowData>>[2]
+
+function usePivotRenderTable<TData extends RowData>(
+  table: TableInstance<TData>,
+  tableState: TableState,
+  sourceData: TData[],
+): TableInstance<TData> | null {
+  const activeConfig = getActivePivotConfig(table, tableState)
+
+  return useMemo(() => {
+    if (!activeConfig) return null
+
+    const engineConfig = activeConfig as unknown as PivotEngineConfig
+    const { rowModel, columns } = buildPivotRowModel(table, sourceData, engineConfig)
+    const rowIds = rowModel.rows.map((row) => row.id)
+    const pivotData = rowModel.rows.map((row) => row.original)
+    const columnDefs = getPivotRenderColumnDefs<TData>(engineConfig, columns)
+
+    const renderTable = createTable<TData>({
+      ...table.options,
+      data: pivotData,
+      columns: columnDefs,
+      state: {
+        ...tableState,
+        grouping: [],
+      },
+      onStateChange: table.options.onStateChange,
+      getRowId: (_row, index) => rowIds[index] ?? `pivot_${index}`,
+      enableFillHandle: false,
+      enablePivot: false,
+      enableGrouping: false,
+      enableRowDragging: false,
+    })
+
+    renderTable.events = table.events
+
+    return renderTable
+  }, [activeConfig, sourceData, table, tableState])
+}
+
+function getActivePivotConfig<TData extends RowData>(
+  table: TableInstance<TData>,
+  state: TableState,
+): PivotConfig | null {
+  const stateConfig = state.pivot?.config
+  const optionConfig = table.options.pivotConfig
+  const isEnabled = Boolean(table.options.enablePivot || state.pivot?.enabled)
+  const config = hasPivotConfig(stateConfig) ? stateConfig : optionConfig
+
+  if (!isEnabled || !hasPivotConfig(config)) {
+    return null
+  }
+
+  return config
+}
+
+function hasPivotConfig(config: PivotConfig | undefined): config is PivotConfig {
+  return Boolean(config?.valueFields?.length)
+}
+
+function getPivotRenderColumnDefs<TData extends RowData>(
+  config: PivotEngineConfig,
+  columns: PivotColumn[],
+): ColumnDef<TData, unknown>[] {
+  return generatePivotColumnDefs<TData>(config, columns).map((columnDef) => ({
+    ...columnDef,
+    editable: false,
+    enableGrouping: false,
+    enableReorder: false,
+    enableCellSelection: false,
+    lockVisible: columnDef.id === '_pivotLabel' ? true : columnDef.lockVisible,
+    size: columnDef.id === '_pivotLabel' ? (columnDef.size ?? 220) : columnDef.size,
+  }))
 }
 
 const DEFAULT_ADAPTIVE_BREAKPOINT = 720

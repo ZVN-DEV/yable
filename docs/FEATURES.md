@@ -903,23 +903,50 @@ Transform flat data into cross-tabulated views. Pivoting ships in Yable's MIT-li
 
 ### How to Enable
 
-Pivot tables are built on top of grouping and aggregation. Configure row groups, column groups, and value aggregations:
+Configure row fields, generated column fields, and value aggregations. In React, `<Table>` renders the generated pivot row model and dynamic pivot columns directly when pivot mode is enabled:
 
-```typescript
+```tsx
 const table = useTable({
   data,
   columns,
-  enableGrouping: true,
+  enablePivot: true,
+  pivotConfig: {
+    rowFields: [{ field: 'category', label: 'Category' }],
+    columnFields: [{ field: 'region', label: 'Region' }],
+    valueFields: [{ field: 'revenue', aggregation: 'sum', label: 'Revenue' }],
+    showGrandTotal: true,
+  },
+})
+
+return <Table table={table} />
+```
+
+You can also drive pivot mode from state, which is useful for a pivot config panel:
+
+```tsx
+const table = useTable({
+  data,
+  columns,
   initialState: {
-    grouping: ['region', 'category'], // Row grouping
+    pivot: {
+      enabled: true,
+      config: {
+        rowFields: [{ field: 'category' }],
+        columnFields: [{ field: 'region' }],
+        valueFields: [{ field: 'revenue', aggregation: 'sum' }],
+      },
+      expandedRowGroups: {},
+      expandedColumnGroups: {},
+    },
   },
 })
 ```
 
 ### Notes
 
-- Pivot tables build on the grouping + aggregation features
+- Pivot tables build on the aggregation engine and can be rendered through React `<Table>` or read programmatically through `getPivotRowModel()`
 - A full `PivotEngine` with row fields, column fields, value fields, subtotals, and grand totals is exported from `@zvndev/yable-core` (`PivotEngine`, `getPivotRowModel`, `generatePivotColumnDefs`, `getInitialPivotState`, `PivotConfig`)
+- Generated pivot columns participate in the normal React table surface, including sorting, pagination, column visibility, and adaptive card layout
 - You can also fall back to plain grouping + aggregation for lighter-weight pivot-style views
 
 ---

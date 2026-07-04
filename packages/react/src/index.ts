@@ -133,7 +133,7 @@ export type { UseTableRowHeightsOptions } from './hooks/useTableRowHeights'
 export { getMeasureRecipeForCellType, getRegisteredCellTypes } from './cells/resolver'
 
 // Context
-export { useTableContext, TableProvider } from './context'
+export { useTableContext, useOptionalTableContext, TableProvider } from './context'
 
 // Project-wide defaults provider
 export { YableProvider, useYableDefaults } from './YableProvider'

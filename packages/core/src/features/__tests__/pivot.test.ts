@@ -162,6 +162,20 @@ describe('PivotEngine — generateRows', () => {
     expect(grandTotal!.values[valKey]).toBe(1200)
   })
 
+  it('should filter grand total values by generated pivot column path', () => {
+    const engine = createEngine({
+      rowFields: [{ field: 'product' }],
+      columnFields: [{ field: 'quarter' }],
+      valueFields: [{ field: 'revenue', aggregation: 'sum' }],
+      showGrandTotal: true,
+    })
+    const rows = engine.generateRows()
+    const grandTotal = rows.find((r) => r.isGrandTotal)!
+
+    expect(grandTotal.values.pivot_Q1_revenue).toBe(510)
+    expect(grandTotal.values.pivot_Q2_revenue).toBe(690)
+  })
+
   it('should add row subtotals when showRowSubtotals is true', () => {
     const engine = createEngine({
       rowFields: [{ field: 'region' }, { field: 'product' }],
@@ -183,6 +197,18 @@ describe('PivotEngine — generateRows', () => {
     const rows = engine.generateRows()
     expect(rows).toHaveLength(1)
     expect(rows[0]!.label).toBe('All')
+  })
+
+  it('should filter all-row values by generated pivot column path', () => {
+    const engine = createEngine({
+      rowFields: [],
+      columnFields: [{ field: 'quarter' }],
+      valueFields: [{ field: 'revenue', aggregation: 'sum' }],
+    })
+    const rows = engine.generateRows()
+
+    expect(rows[0]!.values.pivot_Q1_revenue).toBe(510)
+    expect(rows[0]!.values.pivot_Q2_revenue).toBe(690)
   })
 
   it('should handle cross-tab: row fields x column fields', () => {

@@ -9,6 +9,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createTable } from '../../core/table'
 import type { TableOptions } from '../../types'
+import { makeTableState } from '../../__tests__/helpers/makeTableState'
 
 // ---------------------------------------------------------------------------
 // Test data
@@ -124,6 +125,38 @@ describe('pivot row model wiring', () => {
     // row.getValue('pivot_val_amount') cannot reach them — the aggregate lives
     // on the synthetic row's `original` data. Full pivot-through-<Table> render
     // (registering generated column defs) is out of scope for 0.5.1.
+    const original = first.original as unknown as Record<string, unknown>
+    expect(original._pivotLabel).toBe('A')
+    expect(original.pivot_val_amount).toBe(30)
+  })
+
+  it('getPivotRowModel can read pivot config from state', () => {
+    const table = createTable<Sale>({
+      data: [
+        { id: '1', category: 'A', amount: 10 },
+        { id: '2', category: 'A', amount: 20 },
+        { id: '3', category: 'B', amount: 5 },
+      ],
+      columns: [
+        { accessorKey: 'category', header: 'Category' },
+        { accessorKey: 'amount', header: 'Amount' },
+      ],
+      getRowId: (r) => r.id,
+      state: makeTableState({
+        pivot: {
+          enabled: true,
+          config: {
+            rowFields: [{ field: 'category' }],
+            columnFields: [],
+            valueFields: [{ field: 'amount', aggregation: 'sum' }],
+          },
+          expandedRowGroups: {},
+          expandedColumnGroups: {},
+        },
+      }),
+    })
+
+    const first = table.getPivotRowModel().rows[0]!
     const original = first.original as unknown as Record<string, unknown>
     expect(original._pivotLabel).toBe('A')
     expect(original.pivot_val_amount).toBe(30)
