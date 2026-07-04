@@ -181,7 +181,7 @@ export class PivotEngine<TData extends RowData> {
       // No row fields — single row with all data
       const values: Record<string, unknown> = {}
       for (const col of pivotColumns) {
-        values[col.id] = this.aggregate(this.data, col)
+        values[col.id] = this.aggregate(this.filterByColumnPath(this.data, col.path), col)
       }
 
       return [
@@ -204,7 +204,7 @@ export class PivotEngine<TData extends RowData> {
     if (this.config.showGrandTotal) {
       const values: Record<string, unknown> = {}
       for (const col of pivotColumns) {
-        values[col.id] = this.aggregate(this.data, col)
+        values[col.id] = this.aggregate(this.filterByColumnPath(this.data, col.path), col)
       }
 
       rows.push({

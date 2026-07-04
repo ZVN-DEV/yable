@@ -26,7 +26,7 @@ Yable is a TypeScript-first, framework-agnostic data grid. The `@zvndev/yable-co
 - **No paywall on the good stuff** -- clipboard copy/paste, the Excel-style fill handle, a formula engine, plus column pinning and resizing, all ship in the MIT-licensed core. AG Grid puts clipboard and the fill handle behind a $999/dev Enterprise license; MUI X puts pinning and resizing behind Pro. Yable charges $0.
 - **Interactions that ship done** -- animated column drag-to-reorder (a floating ghost with the header and body sliding into place in lockstep), 3-state header sort, and inline editing with **async cell commits** (per-cell pending / error / conflict states, plus retry and dismiss) -- built in, not left as an app-level exercise.
 - **Headless core + batteries-included UI** -- `@zvndev/yable-core` stays headless and zero-dependency, while `@zvndev/yable-react`, `@zvndev/yable-vanilla`, and `@zvndev/yable-themes` give you a finished, themed grid. You don't choose between control and convenience.
-- **Spreadsheet-grade engine** -- a formula engine (17 built-in functions, extensible) with parser, evaluator, and dependency tracking, plus the Excel-style fill handle and a programmatic pivot row model -- all in the MIT core.
+- **Spreadsheet-grade engine** -- a formula engine (17 built-in functions, extensible) with parser, evaluator, and dependency tracking, plus the Excel-style fill handle and rendered pivot tables -- all in the MIT core.
 - **TypeScript from the ground up** -- deep key inference on accessors, fully typed state slices, and generic-safe column helpers.
 - **Framework-agnostic** -- `@zvndev/yable-core` has zero (0) dependencies. `@zvndev/yable-react` and `@zvndev/yable-vanilla` are thin adapters.
 
@@ -167,7 +167,7 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 - Row selection -- single, multi, and sub-row selection
 - Row pinning -- pin rows to top or bottom
 - Row expanding -- master/detail pattern with custom detail panels
-- Pivot -- programmatic cross-tabulated row model via `getPivotRowModel()`
+- Pivot -- cross-tabulated row model via `getPivotRowModel()` and direct React `<Table>` rendering
 
 ### Export & Presentation
 
@@ -185,7 +185,7 @@ Click a column header to cycle sort (ascending -> descending -> unsorted); hold 
 
 ## Status
 
-Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` and `@zvndev/yable-react` at **0.6.0**, `@zvndev/yable-themes` at **0.4.1**, and `@zvndev/yable-vanilla` at **0.3.3**. Turnkey row grouping with aggregated headers, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, pivots, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
+Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` at **0.6.0**, `@zvndev/yable-react` at **0.6.1**, `@zvndev/yable-themes` at **0.4.2**, and `@zvndev/yable-vanilla` at **0.3.4**. Turnkey row grouping with aggregated headers, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, pivots, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
 
 - 1.0 API stabilization
 - Expanded keyboard-navigation coverage

@@ -1767,21 +1767,25 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
   table.moveRow = rowDrag.moveRow
   table.events.on('row:reorder', (event) => resolvedOptions.onRowReorder?.(event))
 
-  // Pivot row model accessor (core only). The returned rows carry their
-  // aggregates on `.original`; registering generated pivot column defs for
-  // `<Table>` render is out of scope for 0.5.1.
-  table.getPivotRowModel = () =>
-    getPivotRowModel(
+  // Pivot row model accessor. The returned rows carry their aggregates on
+  // `.original`; framework adapters can register generated pivot column defs
+  // when they need to render the row model directly.
+  table.getPivotRowModel = () => {
+    const stateConfig = table.getState().pivot.config
+    const config = stateConfig.valueFields.length > 0 ? stateConfig : resolvedOptions.pivotConfig
+
+    return getPivotRowModel(
       table,
       resolvedOptions.data,
       // The public PivotConfig widens `aggregation` to `string`; the engine
       // narrows to known fn names and treats unknown names as no-op (null).
-      (resolvedOptions.pivotConfig ?? {
+      (config ?? {
         rowFields: [],
         columnFields: [],
         valueFields: [],
       }) as PivotEngineConfig,
     ).rowModel
+  }
 
   // Fill handle — detect a pattern from the source range and fill the target.
   table.fillRange = (sourceRange, targetRange) => {

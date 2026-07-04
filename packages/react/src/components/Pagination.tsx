@@ -3,9 +3,10 @@
 
 import type { RowData, Table } from '@zvndev/yable-core'
 import { getDefaultLocale } from '@zvndev/yable-core'
+import { useOptionalTableContext } from '../context'
 
 interface PaginationProps<TData extends RowData> {
-  table: Table<TData>
+  table?: Table<TData>
   /** Show page size selector */
   showPageSize?: boolean
   /** Available page sizes */
@@ -20,7 +21,13 @@ interface PaginationProps<TData extends RowData> {
 function ChevronLeftIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M8.5 3L4.5 7L8.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M8.5 3L4.5 7L8.5 11"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
@@ -29,7 +36,13 @@ function ChevronLeftIcon() {
 function ChevronRightIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M5.5 3L9.5 7L5.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M5.5 3L9.5 7L5.5 11"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
@@ -38,7 +51,13 @@ function ChevronRightIcon() {
 function ChevronFirstIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M9.5 3L5.5 7L9.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9.5 3L5.5 7L9.5 11"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <path d="M4.5 3V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
@@ -48,7 +67,13 @@ function ChevronFirstIcon() {
 function ChevronLastIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M4.5 3L8.5 7L4.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M4.5 3L8.5 7L4.5 11"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <path d="M9.5 3V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
@@ -57,8 +82,21 @@ function ChevronLastIcon() {
 /** Small chevron for the page size select dropdown */
 function SelectChevronIcon() {
   return (
-    <svg className="yable-pagination-select-icon" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-      <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      className="yable-pagination-select-icon"
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M2.5 4L5 6.5L7.5 4"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
@@ -70,13 +108,20 @@ export function Pagination<TData extends RowData>({
   showInfo = true,
   showFirstLast = true,
 }: PaginationProps<TData>) {
-  const { pageIndex, pageSize } = table.getState().pagination
-  const pageCount = table.getPageCount()
-  const totalRows = table.getPrePaginationRowModel().rows.length
+  const contextTable = useOptionalTableContext<TData>()
+  const resolvedTable = table ?? contextTable
+
+  if (!resolvedTable) {
+    throw new Error('[yable E001] <Pagination> requires a table prop or a parent <Table> provider.')
+  }
+
+  const { pageIndex, pageSize } = resolvedTable.getState().pagination
+  const pageCount = resolvedTable.getPageCount()
+  const totalRows = resolvedTable.getPrePaginationRowModel().rows.length
   const from = pageIndex * pageSize + 1
   const to = Math.min((pageIndex + 1) * pageSize, totalRows)
-  const canPrev = table.getCanPreviousPage()
-  const canNext = table.getCanNextPage()
+  const canPrev = resolvedTable.getCanPreviousPage()
+  const canNext = resolvedTable.getCanNextPage()
   const locale = getDefaultLocale()
 
   return (
@@ -95,7 +140,7 @@ export function Pagination<TData extends RowData>({
                 className="yable-pagination-select"
                 value={pageSize}
                 onChange={(e) => {
-                  table.setPageSize(Number(e.target.value))
+                  resolvedTable.setPageSize(Number(e.target.value))
                 }}
                 aria-label="Rows per page"
               >
@@ -117,7 +162,7 @@ export function Pagination<TData extends RowData>({
           <button
             type="button"
             className="yable-pagination-btn yable-pagination-btn--nav"
-            onClick={() => table.setPageIndex(0)}
+            onClick={() => resolvedTable.setPageIndex(0)}
             disabled={!canPrev}
             aria-label={locale.paginationFirstPage}
             title={locale.paginationFirstPage}
@@ -129,7 +174,7 @@ export function Pagination<TData extends RowData>({
         <button
           type="button"
           className="yable-pagination-btn yable-pagination-btn--nav"
-          onClick={() => table.previousPage()}
+          onClick={() => resolvedTable.previousPage()}
           disabled={!canPrev}
           aria-label={locale.paginationPreviousPage}
           title={locale.paginationPreviousPage}
@@ -140,11 +185,7 @@ export function Pagination<TData extends RowData>({
         {/* Page number buttons with ellipsis */}
         {getPageNumbers(pageIndex, pageCount).map((page, i) =>
           page === -1 ? (
-            <span
-              key={`ellipsis-${i}`}
-              className="yable-pagination-ellipsis"
-              aria-hidden="true"
-            >
+            <span key={`ellipsis-${i}`} className="yable-pagination-ellipsis" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <circle cx="3" cy="7" r="1" fill="currentColor" />
                 <circle cx="7" cy="7" r="1" fill="currentColor" />
@@ -157,19 +198,19 @@ export function Pagination<TData extends RowData>({
               key={page}
               className={`yable-pagination-btn yable-pagination-btn--page${page === pageIndex ? ' yable-pagination-btn--active' : ''}`}
               data-active={page === pageIndex ? 'true' : undefined}
-              onClick={() => table.setPageIndex(page)}
+              onClick={() => resolvedTable.setPageIndex(page)}
               aria-label={`${locale.paginationPage} ${page + 1}`}
               aria-current={page === pageIndex ? 'page' : undefined}
             >
               {page + 1}
             </button>
-          )
+          ),
         )}
 
         <button
           type="button"
           className="yable-pagination-btn yable-pagination-btn--nav"
-          onClick={() => table.nextPage()}
+          onClick={() => resolvedTable.nextPage()}
           disabled={!canNext}
           aria-label={locale.paginationNextPage}
           title={locale.paginationNextPage}
@@ -181,7 +222,7 @@ export function Pagination<TData extends RowData>({
           <button
             type="button"
             className="yable-pagination-btn yable-pagination-btn--nav"
-            onClick={() => table.setPageIndex(pageCount - 1)}
+            onClick={() => resolvedTable.setPageIndex(pageCount - 1)}
             disabled={!canNext}
             aria-label={locale.paginationLastPage}
             title={locale.paginationLastPage}

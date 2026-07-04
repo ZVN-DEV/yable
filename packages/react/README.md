@@ -43,7 +43,7 @@ function TaskTable() {
 
   return (
     <Table table={table} striped>
-      <Pagination table={table} />
+      <Pagination />
     </Table>
   )
 }
@@ -83,11 +83,11 @@ const table = useTable({
 
 ### Interactive Components
 
-| Component       | Description                                                                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Pagination`    | Page navigation with first/last/prev/next buttons, page numbers, and page size selector. Props: `table`, `showPageSize`, `pageSizes`, `showInfo`, `showFirstLast`. |
-| `GlobalFilter`  | Debounced search input for the global filter. Props: `table`, `placeholder`, `debounce`, `className`.                                                              |
-| `SortIndicator` | Sort direction arrow icon. Props: `direction`, `index` (for multi-sort badge).                                                                                     |
+| Component       | Description                                                                                                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Pagination`    | Page navigation with first/last/prev/next buttons, page numbers, and page size selector. Props: optional `table`, `showPageSize`, `pageSizes`, `showInfo`, `showFirstLast`. |
+| `GlobalFilter`  | Debounced search input for the global filter. Props: `table`, `placeholder`, `debounce`, `className`.                                                                       |
+| `SortIndicator` | Sort direction arrow icon. Props: `direction`, `index` (for multi-sort badge).                                                                                              |
 
 ### Form Components (In-Cell Editing)
 
@@ -157,6 +157,30 @@ Use `adaptiveLayout` when the same table instance should become a structural car
 ```
 
 Set `mode: 'cards'` or `mode: 'table'` to force a surface, or provide `renderCard` for a product-specific mobile layout while still receiving the row, cells, and table instance.
+
+### Rendered pivot tables
+
+Enable pivot mode on the same `useTable` instance and render it through `<Table>`. The React adapter swaps in generated pivot columns and synthetic aggregate rows while preserving normal table interactions such as sorting, pagination, column visibility, and adaptive card layouts.
+
+```tsx
+const table = useTable({
+  data,
+  columns,
+  enablePivot: true,
+  pivotConfig: {
+    rowFields: [{ field: 'category', label: 'Category' }],
+    columnFields: [{ field: 'region', label: 'Region' }],
+    valueFields: [{ field: 'revenue', aggregation: 'sum', label: 'Revenue' }],
+    showGrandTotal: true,
+  },
+})
+
+return (
+  <Table table={table} adaptiveLayout={{ breakpoint: 720 }}>
+    <Pagination />
+  </Table>
+)
+```
 
 ## License
 
