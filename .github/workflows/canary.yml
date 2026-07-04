@@ -16,8 +16,8 @@ jobs:
   canary:
     name: Publish canary
     runs-on: ubuntu-latest
-    # Skip canary on release commits (the version-packages PR merge)
-    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
+    # Skip canary on release commits (the version-packages PR merge).
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):') && !startsWith(github.event.head_commit.message, 'Release ')"
     steps:
       - uses: actions/checkout@v4
         with:
