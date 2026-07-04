@@ -367,15 +367,17 @@ columnHelper.accessor('actions', {
 
 ### Expanding Options
 
-| Option                 | Type                                   | Default | Description                         |
-| ---------------------- | -------------------------------------- | ------- | ----------------------------------- |
-| `enableExpanding`      | `boolean`                              | `true`  | Enable row expanding                |
-| `getSubRows`           | `(row, index) => TData[] \| undefined` | --      | Return child rows for tree data     |
-| `getRowCanExpand`      | `(row) => boolean`                     | --      | Custom expand-ability check         |
-| `manualExpanding`      | `boolean`                              | `false` | Disable client-side expansion       |
-| `paginateExpandedRows` | `boolean`                              | --      | Include expanded rows in pagination |
-| `renderDetailPanel`    | `(row) => unknown`                     | --      | Detail panel renderer               |
-| `onExpandedChange`     | `OnChangeFn<ExpandedState>`            | --      | Expanded state change callback      |
+| Option                 | Type                                   | Default | Description                                                  |
+| ---------------------- | -------------------------------------- | ------- | ------------------------------------------------------------ |
+| `enableExpanding`      | `boolean`                              | `true`  | Enable row expanding                                         |
+| `getSubRows`           | `(row, index) => TData[] \| undefined` | --      | Return nested sub-rows for expansion                         |
+| `treeData`             | `boolean`                              | `false` | Build rows from hierarchical data paths                      |
+| `getDataPath`          | `(row) => string[]`                    | --      | Return the tree path for each row when `treeData` is enabled |
+| `getRowCanExpand`      | `(row) => boolean`                     | --      | Custom expand-ability check                                  |
+| `manualExpanding`      | `boolean`                              | `false` | Disable client-side expansion                                |
+| `paginateExpandedRows` | `boolean`                              | --      | Include expanded rows in pagination                          |
+| `renderDetailPanel`    | `(row) => unknown`                     | --      | Detail panel renderer                                        |
+| `onExpandedChange`     | `OnChangeFn<ExpandedState>`            | --      | Expanded state change callback                               |
 
 ### Row Pinning Options
 
