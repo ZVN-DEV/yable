@@ -1,16 +1,10 @@
 // @zvndev/yable-react — Table Cell Component
 
 import React, { useCallback } from 'react'
-import {
-  canCellEnterEditMode,
-  type CellContext,
-  type RowData,
-  type Table,
-  type Cell,
-} from '@zvndev/yable-core'
-import { resolveCellType } from '../cells/resolver'
+import { canCellEnterEditMode, type RowData, type Table, type Cell } from '@zvndev/yable-core'
 import { CellStatusBadge } from './CellStatusBadge'
 import { FillHandle } from './FillHandle'
+import { renderCellContent } from './renderCellContent'
 
 interface TableCellProps<TData extends RowData> {
   cell: Cell<TData, unknown>
@@ -56,7 +50,6 @@ export function TableCell<TData extends RowData>({
     }
   }
 
-  // Read coordinator state — cell status + merged render value
   const cellStatus = table.getCellStatus(cell.row.id, column.id)
   const cellErrorMessage = table.getCellErrorMessage(cell.row.id, column.id)
   const cellConflictWith = table.getCellConflictWith(cell.row.id, column.id)
@@ -68,67 +61,8 @@ export function TableCell<TData extends RowData>({
     (selectionRange.start.rowIndex !== selectionRange.end.rowIndex ||
       selectionRange.start.columnIndex !== selectionRange.end.columnIndex)
 
-  // When pending/error/conflict, the rendered value is the user's typed value,
-  // not the saved value
-  const overrideValue =
-    cellStatus !== 'idle' ? table.getCellRenderValue(cell.row.id, column.id) : undefined
-
-  // Determine cell content
-  let content: React.ReactNode
-  const cellDef = column.columnDef.cell
-  const cellType = column.columnDef.cellType
-  type CellRenderer = (ctx: CellContext<TData, unknown>) => React.ReactNode
-
-  if (typeof cellDef === 'function') {
-    const ctx = cell.getContext()
-    if (overrideValue !== undefined) {
-      // Override getValue() / renderValue() for this render
-      const overriddenCtx = {
-        ...ctx,
-        getValue: () => overrideValue,
-        renderValue: () => overrideValue,
-      }
-      content = (cellDef as CellRenderer)(overriddenCtx)
-    } else {
-      content = (cellDef as CellRenderer)(ctx)
-    }
-  } else if (cellType && !(isEditing || isAlwaysEditable)) {
-    content = resolveCellType(cellType, cell.getContext(), column.columnDef.cellTypeProps)
-  } else {
-    content = (overrideValue !== undefined ? overrideValue : cell.renderValue()) as React.ReactNode
-  }
-
-  // Group header rows: render an expand/collapse toggle + group value + leaf
-  // count in the grouping column, and the per-column aggregate elsewhere.
   const isGroupRow = cell.row.getIsGrouped()
-  if (isGroupRow) {
-    if (column.id === cell.row.groupingColumnId) {
-      const expanded = cell.row.getIsExpanded()
-      content = (
-        <span className="yable-group-cell" style={{ paddingLeft: cell.row.depth * 16 }}>
-          <button
-            type="button"
-            className="yable-group-toggle"
-            aria-label={expanded ? 'Collapse group' : 'Expand group'}
-            aria-expanded={expanded}
-            onClick={cell.row.getToggleExpandedHandler()}
-          >
-            {expanded ? '▾' : '▸'}
-          </button>
-          <span className="yable-group-value">{String(cell.row.groupingValue ?? '')}</span>
-          <span className="yable-group-count">({cell.row.getLeafRows().length})</span>
-        </span>
-      )
-    } else {
-      const aggDef = column.columnDef.aggregatedCell
-      if (typeof aggDef === 'function') {
-        content = (aggDef as CellRenderer)(cell.getContext())
-      } else {
-        const aggVal = cell.getValue()
-        content = aggVal == null ? null : (aggVal as React.ReactNode)
-      }
-    }
-  }
+  const content = renderCellContent(cell, table)
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {

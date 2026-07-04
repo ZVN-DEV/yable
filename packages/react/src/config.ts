@@ -24,6 +24,7 @@ export type YableTableVisualConfig = Partial<
     | 'floatingFilters'
     | 'columnVirtualization'
     | 'columnVirtualizationOverscan'
+    | 'adaptiveLayout'
     | 'statusBar'
     | 'sidebar'
     | 'sidebarPanels'

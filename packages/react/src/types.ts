@@ -1,8 +1,40 @@
 // @zvndev/yable-react — React-specific types
 
-import type { RowData, Table, Row, Cell, Header } from '@zvndev/yable-core'
+import type { RowData, Table, Row, Cell, Header, Column } from '@zvndev/yable-core'
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from 'react'
 import type { YableConfig } from './config'
+
+export type AdaptiveTableLayoutMode = 'auto' | 'table' | 'cards'
+
+export interface AdaptiveTableCardContext<TData extends RowData> {
+  table: Table<TData>
+  row: Row<TData>
+  rowIndex: number
+  cells: Cell<TData, unknown>[]
+  primaryCell?: Cell<TData, unknown>
+  secondaryCells: Cell<TData, unknown>[]
+  visibleColumns: Column<TData, unknown>[]
+}
+
+export interface AdaptiveTableLayoutOptions<TData extends RowData> {
+  /**
+   * `auto` switches at the configured container breakpoint, `cards` forces the
+   * adaptive card surface, and `table` keeps the desktop grid surface.
+   */
+  mode?: AdaptiveTableLayoutMode
+  /** Container width in px where `auto` switches to cards. Default: 720. */
+  breakpoint?: number
+  /** Column shown as the card title. Defaults to the first visible column. */
+  primaryColumnId?: string
+  /** Ordered secondary columns. Defaults to all remaining visible columns. */
+  secondaryColumnIds?: string[]
+  /** Columns omitted from the adaptive card surface. */
+  hiddenColumnIds?: string[]
+  /** Caps secondary fields when no explicit `secondaryColumnIds` are provided. Default: 8. */
+  maxSecondaryColumns?: number
+  /** Fully custom card renderer for product-specific mobile/tablet layouts. */
+  renderCard?: (context: AdaptiveTableCardContext<TData>) => React.ReactNode
+}
 
 export interface TableProps<TData extends RowData> extends Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -65,6 +97,8 @@ export interface TableProps<TData extends RowData> extends Omit<
   columnVirtualization?: boolean
   /** Additional columns rendered beyond the viewport when column virtualization is enabled */
   columnVirtualizationOverscan?: number
+  /** Render a structural card layout for tablet/mobile while reusing this table instance */
+  adaptiveLayout?: boolean | AdaptiveTableLayoutOptions<TData>
   /** Accessible label for the grid container. Default: "Data table" */
   ariaLabel?: string
 }
