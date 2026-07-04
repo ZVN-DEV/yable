@@ -41,6 +41,15 @@ export const DEMOS: DemoMeta[] = [
     accent: '#f08d92',
     kind: 'simple',
   },
+  {
+    slug: 'adaptive',
+    title: 'Adaptive account desk',
+    blurb: 'One table instance becomes a desktop grid, tablet card board, and mobile card feed.',
+    tags: ['Adaptive layout', 'Responsive', 'Selection'],
+    theme: 'ocean',
+    accent: '#57c6d8',
+    kind: 'simple',
+  },
   // ── complex ─────────────────────────────────────────────────────────────────
   {
     slug: 'spreadsheet',

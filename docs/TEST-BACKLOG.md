@@ -110,11 +110,11 @@ no parity tests are owed. Decision for Yable:
 
 ### Still open after this cycle (next pickups)
 
-1. Public `data-testid` hook + expanded Playwright coverage for adaptive mobile/tablet layouts and app-owned e2e selectors.
-2. Wire-or-label the experimental engines (fill handle, undo/redo, formulas, pivot, tree, grouping).
-3. `sizeColumnsToFit` / `flex` column sizing.
-4. Virtualized pinned rows (this cycle covered the non-virtualized path).
-5. Row-drag + form-editor + keyboard-nav-integration tests.
+1. Server-data fixtures and integration specs (`useServerTable`, optimistic commits, stale response race handling).
+2. Broader adaptive-layout Playwright coverage for filter, edit, row expansion, and custom card renderer edge cases.
+3. Wire-or-label the experimental engines (fill handle, undo/redo, formulas, pivot, tree, grouping).
+4. `sizeColumnsToFit` / `flex` column sizing.
+5. Virtualized pinned rows (this cycle covered the non-virtualized path).
 
 ---
 

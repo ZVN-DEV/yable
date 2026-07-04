@@ -200,7 +200,7 @@ Yable is **pre-1.0** but already covers most production grid needs. Current npm 
 
 - 1.0 API stabilization
 - Broader keyboard-navigation coverage
-- Expanded Playwright coverage for adaptive mobile/tablet layouts and server-data flows
+- Public responsive showcases beyond `/gallery/adaptive`, plus server-data Playwright coverage
 
 ## License
 
