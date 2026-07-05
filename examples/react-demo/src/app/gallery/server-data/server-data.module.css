@@ -1,0 +1,142 @@
+.shell {
+  display: grid;
+  gap: 14px;
+  color: #173322;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+.search {
+  display: grid;
+  gap: 6px;
+  color: #42604c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.search input {
+  min-height: 38px;
+  min-width: 0;
+  border: 1px solid #bfd4c6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #173322;
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 11px;
+}
+
+.actions,
+.updateRail,
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions {
+  justify-content: flex-end;
+}
+
+.actions button,
+.updateRail button {
+  min-height: 38px;
+  border: 1px solid #9dbca9;
+  border-radius: 8px;
+  background: #f7fbf8;
+  color: #234a31;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 11px;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.actions button:hover,
+.updateRail button:hover {
+  border-color: #5f9d74;
+  background: #eaf6ee;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+.metrics span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border: 1px solid #c9ddcf;
+  border-radius: 999px;
+  background: #f7fbf8;
+  color: #42604c;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 10px;
+}
+
+.error {
+  border: 1px solid #e6a6a6;
+  border-radius: 8px;
+  background: #fff3f3;
+  color: #8a1f1f;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
+.updateRail {
+  justify-content: space-between;
+}
+
+.log {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #c9ddcf;
+  border-radius: 8px;
+  background: #f6faf7;
+  padding: 12px;
+}
+
+.logHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #244b31;
+  font-size: 13px;
+}
+
+.logHeader span,
+.logItem {
+  color: #557061;
+  font-size: 12px;
+}
+
+.logItem {
+  border-top: 1px solid #dbe8de;
+  padding-top: 6px;
+}
+
+@media (max-width: 760px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .actions button,
+  .updateRail button {
+    flex: 1 1 190px;
+  }
+}

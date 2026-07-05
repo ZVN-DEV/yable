@@ -25,13 +25,13 @@ export default function GalleryIndex() {
       <header className={s.hero}>
         <p className={s.heroEyebrow}>The showcase</p>
         <h1 className={s.heroTitle}>
-          One engine. <em>Thirteen very different tables.</em>
+          One engine. <em>Fourteen very different tables.</em>
         </h1>
         <p className={s.heroSub}>
           The same <code style={{ fontFamily: 'var(--font-mono)' }}>@zvndev/yable-react</code>{' '}
           powering a 30-second contact list, a 50,000-row virtualized grid, a real formula
-          spreadsheet, pivots, row grouping, and a live-ticking trading terminal — each in a
-          different shipped theme.
+          spreadsheet, server data, pivots, row grouping, and a live-ticking trading terminal — each
+          in a different shipped theme.
         </p>
       </header>
 
