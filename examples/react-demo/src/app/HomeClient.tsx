@@ -275,8 +275,8 @@ const showcaseFeatures = [
     copy: (
       <>
         <code>getPivotRowModel()</code> returns real aggregated rows — row groups, column groups,
-        subtotals, grand totals — from one config. Render it with your own grid; turnkey pivot
-        rendering is on the roadmap.
+        subtotals, grand totals — from one config. React <code>&lt;Table&gt;</code> can render the
+        generated pivot rows and dynamic columns directly.
       </>
     ),
     code: 'const pivot = table.getPivotRowModel({\n  rows: ["region"],\n  values: [{ field: "revenue", aggregation: "sum" }],\n})',
@@ -1039,9 +1039,9 @@ function AgGridCompare() {
         <p className={s.compareSub}>
           Clipboard, Excel-style fills, tree data, and row grouping sit behind AG Grid Enterprise at{' '}
           <strong>$999 / dev / year</strong> &mdash; Yable ships them MIT, alongside premium
-          animated column drag-to-reorder. Row grouping renders turnkey through{' '}
+          animated column drag-to-reorder. Row grouping and pivots render through{' '}
           <code>&lt;Table&gt;</code>
-          with collapsible headers and rolled-up aggregates; pivots run as a programmatic row model.
+          with collapsible headers, dynamic columns, and rolled-up aggregates.
         </p>
       </div>
 

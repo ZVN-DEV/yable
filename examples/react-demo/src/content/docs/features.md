@@ -930,7 +930,11 @@ Track edit history and allow users to undo/redo changes.
 
 ### How It Works
 
-Yable ships a real `UndoStack` that records `cell-edit` actions and supports push/undo/redo with a configurable stack size. It is exported from `@zvndev/yable-core` alongside `createUndoRedoIntegration` for wiring it into a table instance.
+Yable ships a real `UndoStack` that records `cell-edit` actions and supports
+push/undo/redo with a configurable stack size. `createTable()` wires undo/redo
+into the table API when `enableUndoRedo: true`; `UndoStack` and
+`createUndoRedoIntegration` are also exported from `@zvndev/yable-core` for
+custom UI such as toolbar buttons or keyboard shortcuts.
 
 ```typescript
 import { UndoStack } from '@zvndev/yable-core'
@@ -1038,7 +1042,8 @@ A spreadsheet-grade formula engine with 17 built-in functions (extensible), an e
 
 ### Notes
 
-- The formula engine is included in `@zvndev/yable-core` and works with any adapter
+- The formula engine is included in `@zvndev/yable-core`; React `<Table>` renders
+  computed cell values once `setFormula()` / `evaluateFormulas()` populate them
 - Built-in functions: `SUM`, `AVG`, `COUNT`, `COUNTA`, `MIN`, `MAX`, `IF`, `CONCAT`, `ROUND`, `ABS`, `FLOOR`, `CEILING`, `POWER`, `SQRT`, `LEN`, `UPPER`, `LOWER` (plus aliases `AVERAGE`, `CONCATENATE`, `CEIL`, `POW`)
 - Register custom functions via the formula engine API
 - This feature ships in Yable's MIT-licensed core
