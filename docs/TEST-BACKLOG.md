@@ -96,18 +96,22 @@ no parity tests are owed. Decision for Yable:
 
 - **Don't build for parity:** set/multi/advanced filter, Excel export, server-side row
   model, integrated charts, sparklines.
-- **Already shipped as turnkey (bonus vs Community):** clipboard copy/paste, context
-  menu, sidebar/tool panels, status bar, range (cell) selection.
-- **Shipped as engines but NOT wired into `<Table>` — treat as EXPERIMENTAL and label
-  them so the public API doesn't silently no-op:** fill handle (`fillRange`), undo/redo,
-  formulas, pivot, tree data, row grouping, row spanning, full-row editing. Each has a
-  working core engine + tests but no turnkey adapter wiring (`core/table.ts` stub block).
-  **Follow-up:** either wire + test per feature, or annotate the stub methods as
-  experimental in the public types so consumers aren't misled.
+- **Already shipped as turnkey or adapter-rendered (bonus vs Community):** clipboard
+  copy/paste, context menu, sidebar/tool panels, status bar, range (cell) selection,
+  row grouping + aggregation, pivot rendering through React `<Table>`, tree data with
+  parent-chain filter/sort, fill handle drag UI, formula computed values, and
+  master/detail rows.
+- **API-first, not finished React UI yet:** undo/redo (real table API behind
+  `enableUndoRedo`, but no bundled toolbar/hotkeys), full-row editing (core row edit
+  methods, no turnkey React row-editor controls), and row spanning (core `rowSpan`
+  callback, not rendered as `<td rowSpan>`). Label these as API-first or
+  experimental wherever public docs imply a finished adapter surface.
 
 ### Next pickups
 
-1. Audit any remaining experimental-engine claims from current code, then wire or label only the real gaps.
+1. Add turnkey UI or explicit API-first labels for undo/redo toolbar/hotkeys, full-row
+   editing controls, and row-span rendering.
+2. Broaden keyboard-navigation and editor integration coverage.
 
 Covered this cycle: adaptive Playwright coverage for filter, edit, row expansion, and
 custom card renderer edge cases now lives in `e2e/adaptive-layout.spec.ts`; adaptive

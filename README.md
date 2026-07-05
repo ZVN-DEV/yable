@@ -32,7 +32,9 @@ Yable is a TypeScript-first, framework-agnostic data grid. The `@zvndev/yable-co
 
 ## Comparison
 
-Built-in feature snapshot. `DIY` means the library ships the engine/accessor, but you assemble the UI yourself.
+Built-in feature snapshot. `DIY` means the library ships the engine/accessor, but
+you assemble the UI yourself. `API` means Yable wires the table behavior, but you
+provide the visible controls.
 
 | Feature                     |  Yable   | TanStack Table | AG Grid Community | AG Grid Enterprise |
 | --------------------------- | :------: | :------------: | :---------------: | :----------------: |
@@ -50,7 +52,7 @@ Built-in feature snapshot. `DIY` means the library ships the engine/accessor, bu
 | Formula engine              |   Yes    |       No       |        No         |        Yes         |
 | Fill handle                 |   Yes    |       No       |        No         |        Yes         |
 | Clipboard                   |   Yes    |       No       |        No         |        Yes         |
-| Undo / Redo                 |   Yes    |       No       |        Yes        |        Yes         |
+| Undo / Redo                 |   API    |       No       |        Yes        |        Yes         |
 | Row virtualization          |   Yes    |      DIY       |        Yes        |        Yes         |
 | Keyboard navigation         |   Yes    |       No       |        Yes        |        Yes         |
 | Async cell commits          |   Yes    |       No       |        No         |         No         |
@@ -200,7 +202,7 @@ Yable is **pre-1.0** but already covers most production grid needs. Current npm 
 
 - 1.0 API stabilization
 - Broader keyboard-navigation coverage
-- Server-data Playwright coverage and public responsive showcases beyond `/gallery/adaptive`
+- Public responsive showcases beyond `/gallery/adaptive` and remaining API-first feature labeling
 
 ## License
 
