@@ -42,6 +42,32 @@ function AdaptiveProjectsTable({
   return <Table table={table} adaptiveLayout={adaptiveLayout} />
 }
 
+function AdaptiveProjectsDetailTable() {
+  const table = useTable<ProjectRow>({
+    data,
+    columns,
+    getRowId: (row) => row.id,
+    enableExpanding: true,
+    renderDetailPanel: (row) => <div>detail-{row.id}</div>,
+    initialState: { expanded: { p1: true } },
+  })
+
+  return (
+    <Table
+      table={table}
+      adaptiveLayout={{
+        mode: 'cards',
+        primaryColumnId: 'name',
+        renderCard: (context) => (
+          <div data-testid={`custom-card-${context.row.id}`}>
+            {String(context.primaryCell?.renderValue())}
+          </div>
+        ),
+      }}
+    />
+  )
+}
+
 describe('adaptive table layout', () => {
   it('renders structural card rows when card mode is forced', () => {
     const { container } = render(
@@ -111,5 +137,17 @@ describe('adaptive table layout', () => {
         ]),
       }),
     )
+  })
+
+  it('renders detail panels inside expanded adaptive cards', () => {
+    const { container } = render(<AdaptiveProjectsDetailTable />)
+
+    expect(screen.getByTestId('custom-card-p1')).toHaveTextContent('Atlas')
+    expect(screen.getByText('detail-p1')).toBeInTheDocument()
+    expect(container.querySelector('.yable-adaptive-card-detail')).toHaveAttribute(
+      'data-detail-for',
+      'p1',
+    )
+    expect(container.querySelector('.yable-detail-row')).not.toBeInTheDocument()
   })
 })

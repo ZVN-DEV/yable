@@ -31,6 +31,7 @@
 }
 
 .button,
+.searchInput,
 .selectionCount {
   min-height: 34px;
   border-radius: 8px;
@@ -40,6 +41,11 @@
   font-size: 13px;
   font-weight: 650;
   padding: 7px 11px;
+}
+
+.searchInput {
+  width: min(220px, 100%);
+  font-weight: 500;
 }
 
 .button {
@@ -54,6 +60,35 @@
   border-color: #57c6d8;
   color: #0f6f82;
   background: #f4fbfd;
+}
+
+.segmented {
+  display: inline-flex;
+  min-height: 34px;
+  overflow: hidden;
+  border: 1px solid #c8d8df;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.segmented button {
+  border: 0;
+  border-left: 1px solid #d9e7ec;
+  background: transparent;
+  color: #526a76;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 10px;
+}
+
+.segmented button:first-child {
+  border-left: 0;
+}
+
+.segmented button[data-active='true'] {
+  background: #e8f6fb;
+  color: #0f6f82;
 }
 
 .selectionCount {
@@ -117,6 +152,41 @@
 
 .cardTopline {
   align-items: flex-start;
+}
+
+.cardBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.expandButton {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border: 1px solid #c8d8df;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1f8da3;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.expandButton:hover {
+  border-color: #57c6d8;
+  background: #f4fbfd;
+}
+
+.expandButton[aria-expanded='true'] {
+  transform: rotate(90deg);
 }
 
 .health {
@@ -229,6 +299,20 @@
   overflow-wrap: anywhere;
 }
 
+.detailPanel {
+  display: grid;
+  gap: 5px;
+  padding: 13px 15px;
+  color: #526a76;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.detailPanel strong {
+  color: #17384a;
+  font-size: 14px;
+}
+
 .note {
   margin: 16px 0 0;
   color: #5d7380;
@@ -248,9 +332,19 @@
 
 @media (max-width: 480px) {
   .button,
+  .searchInput,
+  .segmented,
   .selectionCount {
     width: 100%;
+  }
+
+  .button,
+  .selectionCount {
     justify-content: center;
+  }
+
+  .segmented button {
+    flex: 1 1 0;
   }
 
   .cardMetrics {

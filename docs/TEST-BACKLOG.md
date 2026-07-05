@@ -105,11 +105,14 @@ no parity tests are owed. Decision for Yable:
   **Follow-up:** either wire + test per feature, or annotate the stub methods as
   experimental in the public types so consumers aren't misled.
 
-### Still open after this cycle (next pickups)
+### Next pickups
 
 1. Server-data fixtures and integration specs (`useServerTable`, optimistic commits, stale response race handling).
-2. Broader adaptive-layout Playwright coverage for filter, edit, row expansion, and custom card renderer edge cases.
-3. Audit any remaining experimental-engine claims from current code, then wire or label only the real gaps.
+2. Audit any remaining experimental-engine claims from current code, then wire or label only the real gaps.
+
+Covered this cycle: adaptive Playwright coverage for filter, edit, row expansion, and
+custom card renderer edge cases now lives in `e2e/adaptive-layout.spec.ts`; adaptive
+cards also render `renderDetailPanel` content when expanded.
 
 ---
 

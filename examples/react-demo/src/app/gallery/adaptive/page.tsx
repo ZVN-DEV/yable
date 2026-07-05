@@ -1,11 +1,14 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   useTable,
   Table,
   createColumnHelper,
+  CellInput,
   type AdaptiveTableCardContext,
+  type CellContext,
+  type Row,
 } from '@zvndev/yable-react'
 import { DemoFrame } from '../_chrome'
 import s from './adaptive.module.css'
@@ -92,6 +95,7 @@ const accounts: Account[] = [
 ]
 
 const col = createColumnHelper<Account>()
+type CardRendererMode = 'custom' | 'default'
 
 const healthClass: Record<Account['health'], string> = {
   Expansion: s.healthExpansion,
@@ -101,8 +105,17 @@ const healthClass: Record<Account['health'], string> = {
 }
 
 export default function AdaptiveDemo() {
+  const [rows, setRows] = useState<Account[]>(() => accounts)
+  const [cardRendererMode, setCardRendererMode] = useState<CardRendererMode>('custom')
+
   const columns = useMemo(
     () => [
+      col.display({
+        id: 'details',
+        header: 'Details',
+        size: 72,
+        cell: expandCell,
+      }),
       col.accessor('account', { header: 'Account', size: 210, enableSorting: true }),
       col.accessor('owner', { header: 'Owner', size: 150, enableSorting: true }),
       col.accessor('segment', { header: 'Segment', size: 140, enableSorting: true }),
@@ -132,20 +145,37 @@ export default function AdaptiveDemo() {
             new Date(ctx.getValue() as string),
           ),
       }),
-      col.accessor('activity', { header: 'Latest activity', size: 220 }),
+      col.accessor('activity', {
+        header: 'Latest activity',
+        size: 220,
+        editable: true,
+        cell: (ctx: CellContext<Account, string>) =>
+          ctx.cell.getIsEditing() ? <CellInput context={ctx} inline /> : ctx.getValue(),
+      }),
     ],
     [],
   )
 
   const table = useTable<Account>({
-    data: accounts,
+    data: rows,
     columns,
     getRowId: (row) => row.id,
     enableRowClickSelection: true,
+    enableExpanding: true,
+    renderDetailPanel,
+    onEditCommit: (changes) => {
+      setRows((current) =>
+        current.map((account) => {
+          const patch = changes[account.id]
+          return patch ? { ...account, ...(patch as Partial<Account>) } : account
+        }),
+      )
+    },
     initialState: { pagination: { pageIndex: 0, pageSize: accounts.length } },
   })
 
   const selectedCount = Object.keys(table.getState().rowSelection).length
+  const globalFilter = table.getState().globalFilter ?? ''
 
   return (
     <DemoFrame slug="adaptive">
@@ -155,6 +185,29 @@ export default function AdaptiveDemo() {
           <span>Resize the viewport: desktop grid, tablet card board, phone card feed.</span>
         </div>
         <div className={s.actions}>
+          <input
+            className={s.searchInput}
+            aria-label="Filter accounts"
+            value={globalFilter}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
+            placeholder="Filter accounts"
+          />
+          <div className={s.segmented} role="group" aria-label="Adaptive card renderer">
+            <button
+              type="button"
+              data-active={cardRendererMode === 'custom' || undefined}
+              onClick={() => setCardRendererMode('custom')}
+            >
+              Custom cards
+            </button>
+            <button
+              type="button"
+              data-active={cardRendererMode === 'default' || undefined}
+              onClick={() => setCardRendererMode('default')}
+            >
+              Default cards
+            </button>
+          </div>
           <button
             type="button"
             className={s.button}
@@ -181,8 +234,8 @@ export default function AdaptiveDemo() {
         adaptiveLayout={{
           breakpoint: 860,
           primaryColumnId: 'account',
-          secondaryColumnIds: ['health', 'arr', 'owner', 'renewal', 'users', 'activity'],
-          renderCard: renderAccountCard,
+          secondaryColumnIds: ['details', 'health', 'arr', 'owner', 'renewal', 'users', 'activity'],
+          renderCard: cardRendererMode === 'custom' ? renderAccountCard : undefined,
         }}
         ariaLabel="Adaptive account health table"
         data-testid="adaptive-table"
@@ -197,13 +250,47 @@ export default function AdaptiveDemo() {
   )
 }
 
+function expandCell(ctx: CellContext<Account, unknown>) {
+  const expanded = ctx.row.getIsExpanded()
+
+  return (
+    <button
+      type="button"
+      className={s.expandButton}
+      aria-label={`${expanded ? 'Collapse' : 'Expand'} ${ctx.row.original.account} details`}
+      aria-expanded={expanded}
+      onClick={(event) => {
+        event.stopPropagation()
+        ctx.row.toggleExpanded()
+      }}
+    >
+      ▸
+    </button>
+  )
+}
+
 function renderAccountCard({ row }: AdaptiveTableCardContext<Account>) {
   const account = row.original
+  const expanded = row.getIsExpanded()
 
   return (
     <div className={s.accountCard} data-testid="adaptive-account-card-content">
       <div className={s.cardTopline}>
-        <span className={`${s.health} ${healthClass[account.health]}`}>{account.health}</span>
+        <div className={s.cardBadges}>
+          <button
+            type="button"
+            className={s.expandButton}
+            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${account.account} details`}
+            aria-expanded={expanded}
+            onClick={(event) => {
+              event.stopPropagation()
+              row.toggleExpanded()
+            }}
+          >
+            ▸
+          </button>
+          <span className={`${s.health} ${healthClass[account.health]}`}>{account.health}</span>
+        </div>
         <span className={s.segment}>{account.segment}</span>
       </div>
       <div className={s.cardTitle}>{account.account}</div>
@@ -225,6 +312,23 @@ function renderAccountCard({ row }: AdaptiveTableCardContext<Account>) {
         </span>
       </div>
       <div className={s.activity}>{account.activity}</div>
+    </div>
+  )
+}
+
+function renderDetailPanel(row: Row<Account>) {
+  const account = row.original
+
+  return (
+    <div className={s.detailPanel} data-testid={`adaptive-detail-${row.id}`}>
+      <span>{account.owner}</span>
+      <strong>{account.activity}</strong>
+      <span>
+        Renewal{' '}
+        {new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(
+          new Date(account.renewal),
+        )}
+      </span>
     </div>
   )
 }
