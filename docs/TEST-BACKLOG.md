@@ -26,22 +26,21 @@ Two consequences:
 
 ## Where Yable falls short of AG Grid Community (priority targets)
 
-> **Status 2026-06-28:** rows #1–#6 below are **FIXED** (Tier 0, test-first, verified).
-> Remaining: #7 (`lockVisible` + drag-leave-hides behavior) and #8 (`sizeColumnsToFit`/`flex`),
-> plus the **virtualized** pinned-row case (#3 was fixed for the non-virtualized path only).
+> **Status 2026-07-04:** rows #1–#8 below are **FIXED** (Tier 0, test-first, verified).
+> Remaining: the **virtualized** pinned-row case (#3 was fixed for the non-virtualized path only).
 
 These are parity gaps that are _also_ stubbed/buggy in the code — highest value.
 
-| #   | Area                                    | AG Grid Community                  | Yable today                                                                      | Type         | Evidence                                                              |
-| --- | --------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
-| 1   | Multiple pinned columns                 | stack correctly                    | 2+ pinned columns **overlap**                                                    | 🐞 Bug       | `core/column.ts` `getStart()` hard-coded `0` (~148)                   |
-| 2   | Sort 3-state                            | asc→desc→**none**                  | header click only asc↔desc, never clears                                         | 🐞 Partial   | `core/column.ts` `toggleSorting` (~222), `getNextSortingOrder` unused |
-| 3   | Row pinning render                      | pinned top/bottom rows render      | core state only; `TableBody` never renders `getTopRows/getBottomRows`            | ⚠️ Not wired | `core/table.ts` 629-653                                               |
-| 4   | Row expansion / detail                  | full-width detail rows (Community) | `renderDetailPanel` disconnected — `TableBody` calls undefined `_renderExpanded` | ⚠️ Not wired | `react/components/TableBody.tsx` ~322 vs `MasterDetail.tsx`           |
-| 5   | Edit validation                         | `valueSetter` rejects              | `getValidationErrors()` always `{}`, `isValid()` always true                     | ⚠️ Stubbed   | `core/table.ts` 803-807                                               |
-| 6   | Context-menu sort                       | sorts                              | "Sort Ascending"/"Descending" both call `setSorting([])` (clears)                | 🐞 Bug       | `react/components/ContextMenu.tsx` ~127,134                           |
-| 7   | Drag-leave-hides-column + `lockVisible` | both supported                     | guard exists; no `lockVisible`; untested                                         | ⚠️ Gap       | Bevrly migration issue #1                                             |
-| 8   | `sizeColumnsToFit` / `flex` columns     | yes                                | not present (manual resize only)                                                 | ❌ Missing   | —                                                                     |
+| #   | Area                                    | AG Grid Community                  | Yable today                                                             | Type     | Evidence                                   |
+| --- | --------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------- | -------- | ------------------------------------------ |
+| 1   | Multiple pinned columns                 | stack correctly                    | pinned offsets accumulate by side                                       | ✅ Fixed | `core/__tests__/column.test.ts`            |
+| 2   | Sort 3-state                            | asc→desc→**none**                  | sorting can cycle asc → desc → none                                     | ✅ Fixed | `core/__tests__/column.test.ts`            |
+| 3   | Row pinning render                      | pinned top/bottom rows render      | top/bottom pinned rows render in the non-virtualized path               | ✅ Fixed | `react/__tests__/PinnedRows.test.tsx`      |
+| 4   | Row expansion / detail                  | full-width detail rows (Community) | `renderDetailPanel` renders through `<Table>`                           | ✅ Fixed | `react/__tests__/MasterDetail.test.tsx`    |
+| 5   | Edit validation                         | `valueSetter` rejects              | `getValidationErrors()` and `isValid()` reflect pending edit validation | ✅ Fixed | `core/src/core.test.ts`                    |
+| 6   | Context-menu sort                       | sorts                              | context menu sort actions target and sort the right-clicked column      | ✅ Fixed | `react/__tests__/ContextMenuSort.test.tsx` |
+| 7   | Drag-leave-hides-column + `lockVisible` | both supported                     | locked columns stay visible and drag hides can be suppressed            | ✅ Fixed | `core/__tests__/visibility-lock.test.ts`   |
+| 8   | `sizeColumnsToFit` / `flex` columns     | yes                                | core fit API plus flex sizing now writes visible-column widths          | ✅ Fixed | `core/__tests__/column.test.ts`            |
 
 **Advertised-but-unwired/broken** (these are _Enterprise_ in AG Grid so not parity
 gaps, but they are shipped APIs that silently do nothing — fix or mark experimental):
@@ -81,7 +80,7 @@ vanilla 17). No coverage thresholds configured.
 - [ ] Form-editor cells `CellInput/Checkbox/Toggle/DatePicker` — only `CellSelect` covered
 - [ ] Keyboard-nav integration (Tab wrap, Ctrl+Home/End, PageUp/Down, across pinned cols) — core helpers tested; full grid integration still missing
 - [x] Playwright e2e for browser-only cases — `e2e/table-interactions.spec.ts` covers drag slide + committed reorder, virtualization drift, header/body width sync after resize+scroll, and keyboard focus movement. `pnpm test:e2e` is kept out of the default CI lane.
-- [ ] `sizeColumnsToFit` / `flex` columns (#8) — not implemented; real feature, deferred.
+- [x] `sizeColumnsToFit` / `flex` columns (#8) — core fit API covers flex allocation, proportional fit, hidden columns, and min/max constraints.
 
 ### Tier 2 — edge cases (mostly DONE 2026-06-28)
 
@@ -113,8 +112,7 @@ no parity tests are owed. Decision for Yable:
 1. Server-data fixtures and integration specs (`useServerTable`, optimistic commits, stale response race handling).
 2. Broader adaptive-layout Playwright coverage for filter, edit, row expansion, and custom card renderer edge cases.
 3. Wire-or-label the experimental engines (fill handle, undo/redo, formulas, pivot, tree, grouping).
-4. `sizeColumnsToFit` / `flex` column sizing.
-5. Virtualized pinned rows (this cycle covered the non-virtualized path).
+4. Virtualized pinned rows (this cycle covered the non-virtualized path).
 
 ---
 

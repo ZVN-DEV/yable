@@ -445,9 +445,11 @@ columnHelper.accessor('name', {
 - `columnResizeMode: 'onChange'` updates widths as the user drags
 - `columnResizeMode: 'onEnd'` only updates when the user releases the mouse
 - The `table.getTotalSize()` method returns the total width of all visible columns
+- `table.sizeColumnsToFit(width)` fits visible columns to a target width. Flex columns
+  divide remaining space by `flex` weight; non-flex columns scale proportionally.
 - Header and body columns share the same internal `<colgroup>`, so wide tables and
   horizontal scrolling do not require custom CSS or ResizeObserver width-sync code.
-- Prefer column definition options (`size`, `minSize`, `maxSize`, `enableResizing`)
+- Prefer column definition options (`size`, `minSize`, `maxSize`, `flex`, `enableResizing`)
   or `defaultColumnDef` for sizing policy. Use CSS only for visual theming.
 
 ### Sizing All Columns
@@ -460,9 +462,12 @@ const table = useTable({
     size: 160,
     minSize: 80,
     maxSize: 420,
+    flex: 1,
     enableResizing: true,
   },
 })
+
+table.sizeColumnsToFit(960)
 ```
 
 ### Persisting User-Resized Widths
