@@ -20,12 +20,9 @@ export interface UseKeyboardNavigationOptions {
 
 export function useKeyboardNavigation<TData extends RowData>(
   table: Table<TData>,
-  options: UseKeyboardNavigationOptions = {}
+  options: UseKeyboardNavigationOptions = {},
 ): void {
-  const {
-    enabled = true,
-    containerRef,
-  } = options
+  const { enabled = true, containerRef } = options
 
   const focusedCell = table.getFocusedCell()
   const activeCell = table.getState().editing.activeCell
@@ -48,7 +45,7 @@ export function useKeyboardNavigation<TData extends RowData>(
 
       return true
     },
-    []
+    [],
   )
 
   const handleKeyDown = useCallback(
@@ -59,6 +56,8 @@ export function useKeyboardNavigation<TData extends RowData>(
       if (isEditableTarget(target)) return
 
       const ctrlKey = event.ctrlKey || event.metaKey
+      if (handleUndoRedoShortcut(event, table, ctrlKey)) return
+
       const currentFocusedCell = table.getFocusedCell() ?? getFirstKeyboardCell(table)
 
       switch (event.key) {
@@ -138,7 +137,7 @@ export function useKeyboardNavigation<TData extends RowData>(
           return
       }
     },
-    [activeCell, containerRef, enabled, table]
+    [activeCell, containerRef, enabled, table],
   )
 
   useEffect(() => {
@@ -194,10 +193,10 @@ export function useKeyboardNavigation<TData extends RowData>(
 
 function getCellElement(
   container: HTMLElement,
-  cell: KeyboardNavigationCell
+  cell: KeyboardNavigationCell,
 ): HTMLTableCellElement | null {
   return container.querySelector<HTMLTableCellElement>(
-    `[data-row-index="${cell.rowIndex}"][data-column-index="${cell.columnIndex}"]`
+    `[data-row-index="${cell.rowIndex}"][data-column-index="${cell.columnIndex}"]`,
   )
 }
 
@@ -207,7 +206,7 @@ function getVirtualScrollContainer(container: HTMLElement): HTMLElement | null {
 
 function getEstimatedRowHeight<TData extends RowData>(
   table: Table<TData>,
-  rowIndex: number
+  rowIndex: number,
 ): number {
   const rowHeight = table.options.rowHeight
 
@@ -224,7 +223,7 @@ function getEstimatedRowHeight<TData extends RowData>(
 
 function getEstimatedRowOffset<TData extends RowData>(
   table: Table<TData>,
-  rowIndex: number
+  rowIndex: number,
 ): number {
   const rowHeight = table.options.rowHeight
 
@@ -243,7 +242,7 @@ function getEstimatedRowOffset<TData extends RowData>(
 function scrollVirtualRowIntoView<TData extends RowData>(
   container: HTMLElement,
   table: Table<TData>,
-  rowIndex: number
+  rowIndex: number,
 ): void {
   const rowTop = getEstimatedRowOffset(table, rowIndex)
   const rowHeight = getEstimatedRowHeight(table, rowIndex)
@@ -262,19 +261,42 @@ function scrollVirtualRowIntoView<TData extends RowData>(
 
 function getVisiblePageSize<TData extends RowData>(
   container: HTMLElement | null | undefined,
-  table: Table<TData>
+  table: Table<TData>,
 ): number {
   if (!container) return 10
 
   const scrollContainer = getVirtualScrollContainer(container) ?? container
-  const estimatedRowHeight = getEstimatedRowHeight(
-    table,
-    table.getFocusedCell()?.rowIndex ?? 0
-  )
+  const estimatedRowHeight = getEstimatedRowHeight(table, table.getFocusedCell()?.rowIndex ?? 0)
 
   if (estimatedRowHeight <= 0) return 10
 
   return Math.max(1, Math.floor(scrollContainer.clientHeight / estimatedRowHeight))
+}
+
+function handleUndoRedoShortcut<TData extends RowData>(
+  event: KeyboardEvent,
+  table: Table<TData>,
+  ctrlKey: boolean,
+): boolean {
+  if (!ctrlKey || event.altKey || table.options.enableUndoRedo !== true) {
+    return false
+  }
+
+  const key = event.key.toLowerCase()
+  if (key === 'z') {
+    event.preventDefault()
+    if (event.shiftKey) {
+      if (table.canRedo()) table.redo()
+      return true
+    }
+    if (table.canUndo()) table.undo()
+    return true
+  }
+
+  if (key !== 'y') return false
+  event.preventDefault()
+  if (table.canRedo()) table.redo()
+  return true
 }
 
 function isEditableTarget(element: HTMLElement | null): boolean {

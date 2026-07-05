@@ -216,6 +216,8 @@ export type {
 // Feature components
 export { FillHandle } from './components/FillHandle'
 export type { FillHandleProps } from './components/FillHandle'
+export { UndoRedoControls } from './components/UndoRedoControls'
+export type { UndoRedoControlsProps } from './components/UndoRedoControls'
 
 // Row Dragging
 export { DragHandle } from './components/DragHandle'

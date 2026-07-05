@@ -964,6 +964,24 @@ into the table API when `enableUndoRedo: true`; `UndoStack` and
 `createUndoRedoIntegration` are also exported from `@zvndev/yable-core` for
 custom UI such as toolbar buttons or keyboard shortcuts.
 
+React `<Table>` handles `Ctrl/Cmd+Z`, `Ctrl+Y`, and `Ctrl/Cmd+Shift+Z` when
+`enableUndoRedo` is on and focus is in the grid. For visible controls, render
+`<UndoRedoControls />` inside `<Table>` or pass it the table instance directly:
+
+```tsx
+const table = useTable({
+  data,
+  columns,
+  enableUndoRedo: true,
+})
+
+return (
+  <Table table={table}>
+    <UndoRedoControls />
+  </Table>
+)
+```
+
 ```typescript
 import { UndoStack } from '@zvndev/yable-core'
 

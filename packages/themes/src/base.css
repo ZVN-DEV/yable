@@ -951,6 +951,18 @@
   cursor: not-allowed;
 }
 
+.yable-undo-redo-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yable-pagination-gap);
+}
+
+.yable-undo-redo-controls .yable-pagination-btn {
+  gap: 6px;
+  font-size: 16px;
+  line-height: 1;
+}
+
 .yable-pagination-select {
   appearance: none;
   height: var(--yable-pagination-button-size);

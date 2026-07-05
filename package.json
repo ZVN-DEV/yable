@@ -61,7 +61,7 @@
     {
       "name": "@zvndev/yable-react (ESM)",
       "path": "packages/react/dist/index.js",
-      "limit": "50 KB",
+      "limit": "51 KB",
       "gzip": true,
       "ignore": [
         "react",
