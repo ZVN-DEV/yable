@@ -107,12 +107,15 @@ no parity tests are owed. Decision for Yable:
 
 ### Next pickups
 
-1. Server-data fixtures and integration specs (`useServerTable`, optimistic commits, stale response race handling).
-2. Audit any remaining experimental-engine claims from current code, then wire or label only the real gaps.
+1. Audit any remaining experimental-engine claims from current code, then wire or label only the real gaps.
 
 Covered this cycle: adaptive Playwright coverage for filter, edit, row expansion, and
 custom card renderer edge cases now lives in `e2e/adaptive-layout.spec.ts`; adaptive
 cards also render `renderDetailPanel` content when expanded.
+
+Covered this cycle: server-data integration coverage now lives in `e2e/server-data.spec.ts`
+against the `/gallery/server-data` demo, including cursor loading, server sorting/filtering,
+stale-response handling, optimistic success, and rollback after rejection.
 
 ---
 

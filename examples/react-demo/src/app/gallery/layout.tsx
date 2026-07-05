@@ -10,9 +10,9 @@ import '@zvndev/yable-themes/rose.css'
 import '@zvndev/yable-themes/mono.css'
 
 export const metadata: Metadata = {
-  title: 'Gallery — Yable in 13 tables',
+  title: 'Gallery — Yable in 14 tables',
   description:
-    'Thirteen live Yable tables, from a 30-second contact list to adaptive mobile cards, a 50,000-row virtualized grid, a real formula spreadsheet, pivots, row grouping, and a live trading terminal.',
+    'Fourteen live Yable tables, from a 30-second contact list to adaptive mobile cards, server data, a 50,000-row virtualized grid, a real formula spreadsheet, pivots, row grouping, and a live trading terminal.',
 }
 
 export default function GalleryLayout({ children }: { children: React.ReactNode }) {

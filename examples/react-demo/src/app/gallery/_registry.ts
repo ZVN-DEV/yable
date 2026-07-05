@@ -70,6 +70,15 @@ export const DEMOS: DemoMeta[] = [
     kind: 'complex',
   },
   {
+    slug: 'server-data',
+    title: 'Server data console',
+    blurb: 'Cursor loading, server filtering/sorting, stale response guards, and optimistic rows.',
+    tags: ['Server state', 'Race-safe fetch', 'Optimistic UI'],
+    theme: 'forest',
+    accent: '#8fc7a0',
+    kind: 'complex',
+  },
+  {
     slug: 'grouping',
     title: 'Sales by region',
     blurb: 'The 0.6.0 feature: group by region → category, collapsible headers, rolled-up totals.',
