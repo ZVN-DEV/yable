@@ -1,5 +1,16 @@
 # @zvndev/yable-react
 
+## 0.8.0
+
+### Minor Changes
+
+- fa568ba: Add React undo/redo shortcuts and an exported `UndoRedoControls` component.
+
+### Patch Changes
+
+- Updated dependencies [fa568ba]
+  - @zvndev/yable-themes@0.4.4
+
 ## 0.7.2
 
 ### Patch Changes
