@@ -297,6 +297,101 @@ describe('Column sizing', () => {
 
     expect(table.getColumn('name')!.getSize()).toBe(300)
   })
+
+  it('sizes flex columns into remaining visible width', () => {
+    const { table, getState } = makeTable([
+      { accessorKey: 'name', header: 'Name', size: 100 },
+      { accessorKey: 'age', header: 'Age', flex: 1, minSize: 100 },
+      { accessorKey: 'email', header: 'Email', flex: 2, minSize: 100 },
+    ])
+
+    table.sizeColumnsToFit(700)
+
+    expect(getState().columnSizing).toEqual({
+      name: 100,
+      age: 200,
+      email: 400,
+    })
+    expect(table.getTotalSize()).toBe(700)
+  })
+
+  it('respects maxSize on flex columns and redistributes the remainder', () => {
+    const { table, getState } = makeTable([
+      { accessorKey: 'name', header: 'Name', size: 100 },
+      { accessorKey: 'age', header: 'Age', flex: 1, maxSize: 150 },
+      { accessorKey: 'email', header: 'Email', flex: 1 },
+    ])
+
+    table.sizeColumnsToFit(500)
+
+    expect(getState().columnSizing).toEqual({
+      name: 100,
+      age: 150,
+      email: 250,
+    })
+    expect(table.getTotalSize()).toBe(500)
+  })
+
+  it('scales all visible columns proportionally when no columns use flex', () => {
+    const { table, getState } = makeTable([
+      { accessorKey: 'name', header: 'Name', size: 100 },
+      { accessorKey: 'email', header: 'Email', size: 300 },
+    ])
+
+    table.sizeColumnsToFit(800)
+
+    expect(getState().columnSizing).toEqual({
+      name: 200,
+      email: 600,
+    })
+    expect(table.getTotalSize()).toBe(800)
+  })
+
+  it('ignores hidden columns and preserves their existing sizing state', () => {
+    const { table, getState } = makeTable(
+      [
+        { accessorKey: 'name', header: 'Name', size: 100 },
+        { accessorKey: 'age', header: 'Age', flex: 1 },
+        { accessorKey: 'email', header: 'Email', flex: 1 },
+      ],
+      {
+        columnVisibility: { email: false },
+        columnSizing: { email: 444 },
+      },
+    )
+
+    table.sizeColumnsToFit(500)
+
+    expect(getState().columnSizing).toEqual({
+      email: 444,
+      name: 100,
+      age: 400,
+    })
+    expect(table.getTotalSize()).toBe(500)
+  })
+
+  it('lets minSize win when requested fit width is too small', () => {
+    const { table, getState } = makeTable([
+      { accessorKey: 'name', header: 'Name', flex: 1, minSize: 200 },
+      { accessorKey: 'age', header: 'Age', flex: 1, minSize: 200 },
+    ])
+
+    table.sizeColumnsToFit(300)
+
+    expect(getState().columnSizing).toEqual({
+      name: 200,
+      age: 200,
+    })
+    expect(table.getTotalSize()).toBe(400)
+  })
+
+  it('ignores non-finite fit widths', () => {
+    const { table, getState } = makeTable([{ accessorKey: 'name', header: 'Name' }])
+
+    table.sizeColumnsToFit(Number.NaN)
+
+    expect(getState().columnSizing).toEqual({})
+  })
 })
 
 // ===========================================================================

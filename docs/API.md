@@ -263,11 +263,17 @@ return <Table table={serverTable.table} />
 | `onColumnSizingChange`     | `OnChangeFn<ColumnSizingState>`     | --           | Sizing change callback       |
 | `onColumnSizingInfoChange` | `OnChangeFn<ColumnSizingInfoState>` | --           | Resize info change callback  |
 
-Use column definition sizing options (`size`, `minSize`, `maxSize`,
-`enableResizing`) or `defaultColumnDef` to configure column widths. The React
-renderer keeps header and body widths synchronized internally, including during
-horizontal scroll, so consumers should not need custom CSS width overrides or
-manual `<colgroup>` synchronization.
+Use column definition sizing options (`size`, `minSize`, `maxSize`, `flex`,
+`enableResizing`) or `defaultColumnDef` to configure column widths. Call
+`table.sizeColumnsToFit(width)` to write fitted widths into `columnSizing`.
+When any visible column has `flex`, non-flex columns keep their current width
+and flex columns divide the remaining width by flex weight. Without flex,
+visible columns scale proportionally. Hidden columns are ignored, and
+`minSize`/`maxSize` are always enforced.
+
+The React renderer keeps header and body widths synchronized internally,
+including during horizontal scroll, so consumers should not need custom CSS
+width overrides or manual `<colgroup>` synchronization.
 
 ### Configuration Profiles
 
@@ -572,6 +578,7 @@ The object returned by `createTable()` or `useTable()`. All methods are grouped 
 | `setColumnSizing(updater)`         | `void`   | Set column sizing state                   |
 | `setColumnSizingInfo(updater)`     | `void`   | Set sizing info (resize-in-progress data) |
 | `resetColumnSizing(defaultState?)` | `void`   | Reset column sizing                       |
+| `sizeColumnsToFit(width)`          | `void`   | Fit visible columns to a target width     |
 | `getTotalSize()`                   | `number` | Total width of all visible columns        |
 | `getLeftTotalSize()`               | `number` | Total width of left-pinned columns        |
 | `getRightTotalSize()`              | `number` | Total width of right-pinned columns       |
@@ -691,7 +698,7 @@ Returned by `table.getColumn(id)` or accessed from `table.getAllColumns()`.
 
 The configured width comes from `state.columnSizing[columnId]`, then
 `columnDef.size`, then the default size. `minSize` and `maxSize` are enforced
-during drag resizing.
+during drag resizing and `table.sizeColumnsToFit(width)`.
 
 ### Sorting
 
@@ -1093,6 +1100,7 @@ interface ColumnDefExtensions<TData, TValue> {
   size?: number
   minSize?: number
   maxSize?: number
+  flex?: number
 
   // Sorting
   enableSorting?: boolean

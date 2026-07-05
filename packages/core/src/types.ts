@@ -116,6 +116,7 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   size?: number
   minSize?: number
   maxSize?: number
+  flex?: number
 
   // Sorting
   enableSorting?: boolean
@@ -905,6 +906,7 @@ export interface Table<TData extends RowData> {
   setColumnSizing: (updater: Updater<ColumnSizingState>) => void
   setColumnSizingInfo: (updater: Updater<ColumnSizingInfoState>) => void
   resetColumnSizing: (defaultState?: boolean) => void
+  sizeColumnsToFit: (width: number) => void
   getTotalSize: () => number
   getLeftTotalSize: () => number
   getRightTotalSize: () => number

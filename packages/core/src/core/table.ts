@@ -80,6 +80,84 @@ export function getCommitCoordinator(table: Table<RowData>): CommitCoordinator |
   return commitCoordinatorMap.get(table)
 }
 
+interface ColumnSizingItem {
+  id: string
+  min: number
+  max: number | undefined
+  weight: number
+}
+
+function getColumnSizingBounds<TData extends RowData>(
+  column: Column<TData, unknown>,
+): { min: number; max: number | undefined } {
+  const def = column.columnDef as Partial<ColumnDefExtensions<TData, unknown>>
+  const min = typeof def.minSize === 'number' && Number.isFinite(def.minSize) ? def.minSize : 0
+  const max =
+    typeof def.maxSize === 'number' && Number.isFinite(def.maxSize) ? def.maxSize : undefined
+  const normalizedMin = Math.max(0, min)
+
+  return {
+    min: normalizedMin,
+    max: typeof max === 'number' && max >= normalizedMin ? max : undefined,
+  }
+}
+
+function getColumnFlex<TData extends RowData>(column: Column<TData, unknown>): number {
+  const def = column.columnDef as Partial<ColumnDefExtensions<TData, unknown>>
+  const flex = def.flex
+  return typeof flex === 'number' && Number.isFinite(flex) && flex > 0 ? flex : 0
+}
+
+function distributeColumnSizes(
+  items: ColumnSizingItem[],
+  targetWidth: number,
+): Map<string, number> {
+  const sizes = new Map<string, number>()
+  let active = [...items]
+  let remaining = Math.max(0, targetWidth)
+
+  while (active.length > 0) {
+    const totalWeight = active.reduce((sum, item) => sum + item.weight, 0)
+    const useEqualWeights = totalWeight <= 0
+    const proposed: { item: ColumnSizingItem; size: number }[] = []
+    let clampedSizeTotal = 0
+    let didClamp = false
+
+    for (const item of active) {
+      const ratio = useEqualWeights ? 1 / active.length : item.weight / totalWeight
+      const rawSize = remaining * ratio
+
+      if (rawSize < item.min) {
+        sizes.set(item.id, item.min)
+        clampedSizeTotal += item.min
+        didClamp = true
+        continue
+      }
+
+      if (typeof item.max === 'number' && rawSize > item.max) {
+        sizes.set(item.id, item.max)
+        clampedSizeTotal += item.max
+        didClamp = true
+        continue
+      }
+
+      proposed.push({ item, size: rawSize })
+    }
+
+    if (!didClamp) {
+      for (const { item, size } of proposed) {
+        sizes.set(item.id, size)
+      }
+      break
+    }
+
+    remaining -= clampedSizeTotal
+    active = proposed.map(({ item }) => item)
+  }
+
+  return sizes
+}
+
 // ---------------------------------------------------------------------------
 // Initial State
 // ---------------------------------------------------------------------------
@@ -566,6 +644,62 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     setColumnSizingInfo: (_updater: Updater<ColumnSizingInfoState>) => {},
     resetColumnSizing: (defaultState?: boolean) => {
       table.setColumnSizing(defaultState ? {} : table.getState().columnSizing)
+    },
+    sizeColumnsToFit: (width: number) => {
+      if (!Number.isFinite(width)) return
+
+      const targetWidth = Math.max(0, width)
+      const visibleColumns = table.getVisibleLeafColumns()
+      if (visibleColumns.length === 0) return
+
+      const nextSizing: ColumnSizingState = {}
+      const flexItems: ColumnSizingItem[] = []
+      let fixedTotal = 0
+
+      for (const column of visibleColumns) {
+        const flex = getColumnFlex(column)
+        const currentSize = column.getSize()
+        const bounds = getColumnSizingBounds(column)
+
+        if (flex > 0) {
+          flexItems.push({
+            id: column.id,
+            min: bounds.min,
+            max: bounds.max,
+            weight: flex,
+          })
+        } else {
+          nextSizing[column.id] = currentSize
+          fixedTotal += currentSize
+        }
+      }
+
+      if (flexItems.length > 0) {
+        const distributed = distributeColumnSizes(flexItems, targetWidth - fixedTotal)
+        for (const [id, size] of distributed) {
+          nextSizing[id] = size
+        }
+      } else {
+        const scaledItems = visibleColumns.map((column): ColumnSizingItem => {
+          const currentSize = column.getSize()
+          const bounds = getColumnSizingBounds(column)
+          return {
+            id: column.id,
+            min: bounds.min,
+            max: bounds.max,
+            weight: currentSize > 0 ? currentSize : 1,
+          }
+        })
+        const distributed = distributeColumnSizes(scaledItems, targetWidth)
+        for (const [id, size] of distributed) {
+          nextSizing[id] = size
+        }
+      }
+
+      table.setColumnSizing((old) => ({
+        ...old,
+        ...nextSizing,
+      }))
     },
     getTotalSize: (): number => {
       return table
