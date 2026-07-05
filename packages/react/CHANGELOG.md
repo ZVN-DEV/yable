@@ -1,5 +1,13 @@
 # @zvndev/yable-react
 
+## 0.7.2
+
+### Patch Changes
+
+- 8b5769b: Render master/detail content inside expanded adaptive card rows and extend the adaptive demo/e2e coverage for filtering, custom cards, and inline editing on mobile layouts.
+- Updated dependencies [8b5769b]
+  - @zvndev/yable-themes@0.4.3
+
 ## 0.7.1
 
 ### Patch Changes
