@@ -26,8 +26,8 @@ Two consequences:
 
 ## Where Yable falls short of AG Grid Community (priority targets)
 
-> **Status 2026-07-04:** rows #1–#8 below are **FIXED** (Tier 0, test-first, verified).
-> Remaining: the **virtualized** pinned-row case (#3 was fixed for the non-virtualized path only).
+> **Status 2026-07-05:** rows #1–#8 below are **FIXED** (Tier 0, test-first, verified),
+> including virtualized pinned rows for #3.
 
 These are parity gaps that are _also_ stubbed/buggy in the code — highest value.
 
@@ -35,19 +35,17 @@ These are parity gaps that are _also_ stubbed/buggy in the code — highest valu
 | --- | --------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------- | -------- | ------------------------------------------ |
 | 1   | Multiple pinned columns                 | stack correctly                    | pinned offsets accumulate by side                                       | ✅ Fixed | `core/__tests__/column.test.ts`            |
 | 2   | Sort 3-state                            | asc→desc→**none**                  | sorting can cycle asc → desc → none                                     | ✅ Fixed | `core/__tests__/column.test.ts`            |
-| 3   | Row pinning render                      | pinned top/bottom rows render      | top/bottom pinned rows render in the non-virtualized path               | ✅ Fixed | `react/__tests__/PinnedRows.test.tsx`      |
+| 3   | Row pinning render                      | pinned top/bottom rows render      | top/bottom pinned rows render in non-virtualized and virtualized bodies | ✅ Fixed | `react/__tests__/PinnedRows.test.tsx`      |
 | 4   | Row expansion / detail                  | full-width detail rows (Community) | `renderDetailPanel` renders through `<Table>`                           | ✅ Fixed | `react/__tests__/MasterDetail.test.tsx`    |
 | 5   | Edit validation                         | `valueSetter` rejects              | `getValidationErrors()` and `isValid()` reflect pending edit validation | ✅ Fixed | `core/src/core.test.ts`                    |
 | 6   | Context-menu sort                       | sorts                              | context menu sort actions target and sort the right-clicked column      | ✅ Fixed | `react/__tests__/ContextMenuSort.test.tsx` |
 | 7   | Drag-leave-hides-column + `lockVisible` | both supported                     | locked columns stay visible and drag hides can be suppressed            | ✅ Fixed | `core/__tests__/visibility-lock.test.ts`   |
 | 8   | `sizeColumnsToFit` / `flex` columns     | yes                                | core fit API plus flex sizing now writes visible-column widths          | ✅ Fixed | `core/__tests__/column.test.ts`            |
 
-**Advertised-but-unwired/broken** (these are _Enterprise_ in AG Grid so not parity
-gaps, but they are shipped APIs that silently do nothing — fix or mark experimental):
-fill handle (`fillRange` no-op), undo/redo, formulas, full-row editing, pivot,
-tree data, row grouping, row spanning, aggregation render — all engines exist but
-are not connected to `createTable`/`<Table>` (only invoked in tests).
-See `core/table.ts` stub block (~919-932).
+**Previously advertised-but-unwired/broken:** this section is stale for row grouping,
+pivot rendering, and tree data; those are now wired and tested through `createTable`
+and `<Table>`. Remaining audit candidates should be checked from current code before
+being treated as gaps.
 
 ---
 
@@ -67,7 +65,7 @@ vanilla 17). No coverage thresholds configured.
 - [x] Context-menu sort actually sorts the right-clicked column (bug #6) — `react/__tests__/ContextMenuSort.test.tsx` (+ `useContextMenu.ts`/`Table.tsx` plumb the target column)
 - [x] Edit validation `getValidationErrors` computed from `editConfig.validate` + `isValid()` (bug #5) — `core/src/core.test.ts`
 - [x] Master/detail `renderDetailPanel` renders via `<Table>` (bug #4) — `react/__tests__/MasterDetail.test.tsx`
-- [x] Row pinning renders top/bottom (bug #3, **non-virtualized only** — virtualized pinned rows are a follow-up) — `react/__tests__/PinnedRows.test.tsx`
+- [x] Row pinning renders top/bottom in non-virtualized and virtualized bodies (bug #3) — `react/__tests__/PinnedRows.test.tsx`
 
 ### Tier 1 — Community-parity behaviors (mostly DONE 2026-06-28)
 
@@ -111,8 +109,7 @@ no parity tests are owed. Decision for Yable:
 
 1. Server-data fixtures and integration specs (`useServerTable`, optimistic commits, stale response race handling).
 2. Broader adaptive-layout Playwright coverage for filter, edit, row expansion, and custom card renderer edge cases.
-3. Wire-or-label the experimental engines (fill handle, undo/redo, formulas, pivot, tree, grouping).
-4. Virtualized pinned rows (this cycle covered the non-virtualized path).
+3. Audit any remaining experimental-engine claims from current code, then wire or label only the real gaps.
 
 ---
 

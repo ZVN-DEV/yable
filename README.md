@@ -196,7 +196,7 @@ pnpm test:e2e
 
 ## Status
 
-Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` at **0.6.2**, `@zvndev/yable-react` at **0.6.3**, `@zvndev/yable-themes` at **0.4.2**, and `@zvndev/yable-vanilla` at **0.3.6**. Turnkey row grouping with aggregated headers, rendered pivots, tree data with parent-chain filter/sort, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
+Yable is **pre-1.0** but already covers most production grid needs. Current npm line: `@zvndev/yable-core` at **0.7.0**, `@zvndev/yable-react` at **0.7.0**, `@zvndev/yable-themes` at **0.4.2**, and `@zvndev/yable-vanilla` at **0.3.7**. Turnkey row grouping with aggregated headers, rendered pivots, tree data with parent-chain filter/sort, animated column drag-to-reorder, 3-state sorting, row/column pinning, master/detail, formulas, fill handle, clipboard, async commits, row and column virtualization, set/floating filters, and the themed React/vanilla adapters are all shipping. The API may still change before a stable 1.0. Near-term focus:
 
 - 1.0 API stabilization
 - Broader keyboard-navigation coverage
