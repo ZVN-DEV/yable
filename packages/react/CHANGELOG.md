@@ -1,5 +1,16 @@
 # @zvndev/yable-react
 
+## 0.7.0
+
+### Minor Changes
+
+- 1fb16cf: Add flex column sizing and `table.sizeColumnsToFit(width)` so visible columns can fit a target table width while respecting hidden columns and min/max bounds.
+
+### Patch Changes
+
+- Updated dependencies [1fb16cf]
+  - @zvndev/yable-core@0.7.0
+
 ## 0.6.3
 
 ### Patch Changes

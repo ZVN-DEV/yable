@@ -1,5 +1,13 @@
 # @zvndev/yable-vanilla
 
+## 0.3.7
+
+### Patch Changes
+
+- 1fb16cf: Add flex column sizing and `table.sizeColumnsToFit(width)` so visible columns can fit a target table width while respecting hidden columns and min/max bounds.
+- Updated dependencies [1fb16cf]
+  - @zvndev/yable-core@0.7.0
+
 ## 0.3.6
 
 ### Patch Changes
