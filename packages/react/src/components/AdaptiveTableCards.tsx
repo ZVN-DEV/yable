@@ -6,6 +6,7 @@ import {
   type RowData,
   type Table,
 } from '@zvndev/yable-core'
+import type { ReactNode } from 'react'
 import type { AdaptiveTableLayoutOptions } from '../types'
 import { CellErrorBoundary } from './ErrorBoundary'
 import { CellStatusBadge } from './CellStatusBadge'
@@ -69,6 +70,7 @@ function AdaptiveTableCard<TData extends RowData>({
   clickable,
 }: AdaptiveTableCardProps<TData>) {
   const { cells, primaryCell, secondaryCells } = getAdaptiveCells(row, visibleColumns, layout)
+  const detailPanel = getAdaptiveDetailPanel(row, table)
 
   return (
     <article
@@ -134,7 +136,35 @@ function AdaptiveTableCard<TData extends RowData>({
           )}
         </>
       )}
+
+      {detailPanel}
     </article>
+  )
+}
+
+function getAdaptiveDetailPanel<TData extends RowData>(
+  row: Row<TData>,
+  table: Table<TData>,
+): ReactNode {
+  if (!row.getIsExpanded()) return null
+
+  const renderer = table.options.renderDetailPanel
+  if (!renderer) return null
+
+  const content = renderer(row) as ReactNode
+  if (content == null) return null
+
+  return (
+    <section
+      className="yable-adaptive-card-detail"
+      data-detail-for={row.id}
+      role="region"
+      aria-label={`Details for row ${row.id}`}
+    >
+      <div className="yable-detail-panel">
+        <div className="yable-detail-panel-inner">{content}</div>
+      </div>
+    </section>
   )
 }
 

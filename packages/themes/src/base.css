@@ -545,6 +545,17 @@
   position: relative;
 }
 
+.yable-adaptive-card-detail {
+  min-width: 0;
+  border-top: var(--yable-border-width) solid var(--yable-border-color);
+  background: var(--yable-bg-row-expanded);
+}
+
+.yable-adaptive-card-detail .yable-detail-panel {
+  border: 0;
+  background: transparent;
+}
+
 /* ── Column Pinning ──────────────────────────────────────────────────────── */
 
 .yable-th[data-pinned='left'],
