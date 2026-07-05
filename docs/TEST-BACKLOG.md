@@ -99,18 +99,17 @@ no parity tests are owed. Decision for Yable:
 - **Already shipped as turnkey or adapter-rendered (bonus vs Community):** clipboard
   copy/paste, context menu, sidebar/tool panels, status bar, range (cell) selection,
   row grouping + aggregation, pivot rendering through React `<Table>`, tree data with
-  parent-chain filter/sort, fill handle drag UI, formula computed values, and
-  master/detail rows.
-- **API-first, not finished React UI yet:** undo/redo (real table API behind
-  `enableUndoRedo`, but no bundled toolbar/hotkeys), full-row editing (core row edit
-  methods, no turnkey React row-editor controls), and row spanning (core `rowSpan`
-  callback, not rendered as `<td rowSpan>`). Label these as API-first or
-  experimental wherever public docs imply a finished adapter surface.
+  parent-chain filter/sort, fill handle drag UI, formula computed values,
+  undo/redo controls + shortcuts, and master/detail rows.
+- **API-first, not finished React UI yet:** full-row editing (core row edit methods,
+  no turnkey React row-editor controls), and row spanning (core `rowSpan` callback,
+  not rendered as `<td rowSpan>`). Label these as API-first or experimental wherever
+  public docs imply a finished adapter surface.
 
 ### Next pickups
 
-1. Add turnkey UI or explicit API-first labels for undo/redo toolbar/hotkeys, full-row
-   editing controls, and row-span rendering.
+1. Add turnkey UI or explicit API-first labels for full-row editing controls and row-span
+   rendering.
 2. Broaden keyboard-navigation and editor integration coverage.
 
 Covered this cycle: adaptive Playwright coverage for filter, edit, row expansion, and
