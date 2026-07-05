@@ -25,6 +25,12 @@ export function TableBody<TData extends RowData>({
   const visibleColumns = table.getVisibleLeafColumns()
   const activeCell = table.getState().editing.activeCell
   const focusedCell = table.getFocusedCell()
+  const rowPinning = table.getState().rowPinning
+  const hasPinnedRows = (rowPinning.top?.length ?? 0) > 0 || (rowPinning.bottom?.length ?? 0) > 0
+  const topRows = hasPinnedRows ? table.getTopRows() : []
+  const centerRows = hasPinnedRows ? table.getCenterRows() : rows
+  const bottomRows = hasPinnedRows ? table.getBottomRows() : []
+  const virtualizedRows = hasPinnedRows ? centerRows : rows
   const cellSelection = table.getState().cellSelection ?? {
     range: null,
     anchor: null,
@@ -40,6 +46,41 @@ export function TableBody<TData extends RowData>({
   const estimateRowHeight = options.estimateRowHeight
   const pretextHeights = options.pretextHeights ?? null
   const pretextPrefixSums = options.pretextPrefixSums ?? null
+
+  const virtualRowHeight = useMemo(() => {
+    if (!hasPinnedRows || typeof rowHeight !== 'function') return rowHeight
+    return (index: number) => rowHeight(topRows.length + index)
+  }, [hasPinnedRows, rowHeight, topRows.length])
+
+  const virtualPretext = useMemo(() => {
+    if (!hasPinnedRows || !pretextHeights || !pretextPrefixSums) {
+      return {
+        heights: pretextHeights,
+        prefixSums: pretextPrefixSums,
+      }
+    }
+
+    const rowIndexById = new Map(rows.map((row, index) => [row.id, index]))
+    const heights = new Float64Array(virtualizedRows.length)
+    const prefixSums = new Float64Array(virtualizedRows.length + 1)
+    const fallbackHeight =
+      typeof rowHeight === 'number' && Number.isFinite(rowHeight) ? rowHeight : 0
+
+    for (let index = 0; index < virtualizedRows.length; index++) {
+      const row = virtualizedRows[index]!
+      const sourceIndex = rowIndexById.get(row.id)
+      const sourceHeight = sourceIndex === undefined ? undefined : pretextHeights[sourceIndex]
+      const height =
+        typeof sourceHeight === 'number' && Number.isFinite(sourceHeight) && sourceHeight > 0
+          ? sourceHeight
+          : fallbackHeight
+
+      heights[index] = height
+      prefixSums[index + 1] = prefixSums[index]! + height
+    }
+
+    return { heights, prefixSums }
+  }, [hasPinnedRows, pretextHeights, pretextPrefixSums, rowHeight, rows, virtualizedRows])
 
   // Derive a stable hash from columnSizing so the virtualization hook can
   // invalidate its row-height cache when column widths change (text wrapping).
@@ -60,12 +101,12 @@ export function TableBody<TData extends RowData>({
 
   const { virtualRows, totalHeight } = useVirtualization({
     containerRef: scrollContainerRef,
-    totalRows: rows.length,
-    rowHeight,
+    totalRows: virtualizedRows.length,
+    rowHeight: virtualRowHeight,
     overscan,
     estimateRowHeight,
-    pretextHeights,
-    pretextPrefixSums,
+    pretextHeights: virtualPretext.heights,
+    pretextPrefixSums: virtualPretext.prefixSums,
     columnSizingHash,
   })
 
@@ -110,13 +151,7 @@ export function TableBody<TData extends RowData>({
     // When no rows are pinned, getCenterRows() === the full row set, so we keep
     // the original full-row render to guarantee identical output. Only split
     // into top/center/bottom sections once row pinning is actually in use.
-    const rowPinning = table.getState().rowPinning
-    const hasPinnedRows = (rowPinning.top?.length ?? 0) > 0 || (rowPinning.bottom?.length ?? 0) > 0
-
     if (hasPinnedRows) {
-      const topRows = table.getTopRows()
-      const centerRows = table.getCenterRows()
-      const bottomRows = table.getBottomRows()
       let visualIndex = 0
       return (
         <tbody className="yable-tbody">
@@ -134,7 +169,7 @@ export function TableBody<TData extends RowData>({
   }
 
   // Virtualized rendering
-  const hasPretextData = !!(pretextHeights && pretextPrefixSums)
+  const hasPretextData = !!(virtualPretext.heights && virtualPretext.prefixSums)
   const fixedRowHeight = typeof rowHeight === 'number' && !hasPretextData ? rowHeight : undefined
   const containerHeight = hasPretextData
     ? Math.min(totalHeight, 800) // Pretext: use real total, cap at 800px viewport
@@ -144,6 +179,7 @@ export function TableBody<TData extends RowData>({
 
   return (
     <tbody className="yable-tbody">
+      {hasPinnedRows && topRows.map((row, index) => renderRow(row, index, 'top'))}
       <tr style={{ height: 0, padding: 0, border: 'none' }}>
         <td style={{ height: 0, padding: 0, border: 'none' }} colSpan={visibleColumns.length}>
           <div
@@ -172,14 +208,15 @@ export function TableBody<TData extends RowData>({
                 {colgroup}
                 <tbody>
                   {virtualRows.map((vRow) => {
-                    const row = rows[vRow.index]
+                    const row = virtualizedRows[vRow.index]
                     if (!row) return null
+                    const visualRowIndex = hasPinnedRows ? topRows.length + vRow.index : vRow.index
                     return (
                       <MemoizedTableRow
                         key={row.id}
                         row={row}
                         table={table}
-                        rowIndex={vRow.index}
+                        rowIndex={visualRowIndex}
                         visibleColumns={visibleColumns}
                         isSelected={row.getIsSelected()}
                         isExpanded={row.getIsExpanded()}
@@ -187,7 +224,7 @@ export function TableBody<TData extends RowData>({
                           activeCell?.rowId === row.id ? activeCell.columnId : undefined
                         }
                         focusedColumnIndex={
-                          focusedCell?.rowIndex === vRow.index ? focusedCell.columnIndex : null
+                          focusedCell?.rowIndex === visualRowIndex ? focusedCell.columnIndex : null
                         }
                         hasFocusedCell={focusedCell !== null}
                         cellSelectionKey={cellSelectionKey}
@@ -211,6 +248,10 @@ export function TableBody<TData extends RowData>({
           </div>
         </td>
       </tr>
+      {hasPinnedRows &&
+        bottomRows.map((row, index) =>
+          renderRow(row, topRows.length + virtualizedRows.length + index, 'bottom'),
+        )}
     </tbody>
   )
 }
