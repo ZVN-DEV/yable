@@ -1,5 +1,11 @@
 # @zvndev/yable-react
 
+## 0.9.0
+
+### Minor Changes
+
+- 9463a3c: Render column `rowSpan` callbacks through React `<Table>` with native `td` row spans.
+
 ## 0.8.0
 
 ### Minor Changes
