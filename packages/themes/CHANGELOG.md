@@ -1,5 +1,11 @@
 # @zvndev/yable-themes
 
+## 0.4.5
+
+### Patch Changes
+
+- 001095b: Add observable full-row editing state and React row edit controls for desktop and adaptive table layouts.
+
 ## 0.4.4
 
 ### Patch Changes
