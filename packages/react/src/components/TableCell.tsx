@@ -13,6 +13,7 @@ interface TableCellProps<TData extends RowData> {
   columnIndex: number
   isFocused: boolean
   isTabStop: boolean
+  rowSpan?: number
   /** Mousedown handler for the fill handle; when present and the table has
    * `enableFillHandle`, the focused cell renders a drag-to-fill corner. */
   onFillHandleMouseDown?: (rowIndex: number, columnIndex: number, e: React.MouseEvent) => void
@@ -25,6 +26,7 @@ export function TableCell<TData extends RowData>({
   columnIndex,
   isFocused,
   isTabStop,
+  rowSpan,
   onFillHandleMouseDown,
 }: TableCellProps<TData>) {
   const column = cell.column
@@ -168,6 +170,7 @@ export function TableCell<TData extends RowData>({
     'yable-td',
     isFocused && 'yable-cell--focused',
     isCellSelected && 'yable-cell--selected',
+    rowSpan && rowSpan > 1 && 'yable-cell--row-spanned',
     selectionEdges?.top && 'yable-cell--selection-top',
     selectionEdges?.right && 'yable-cell--selection-right',
     selectionEdges?.bottom && 'yable-cell--selection-bottom',
@@ -189,10 +192,12 @@ export function TableCell<TData extends RowData>({
       data-grouped={isGroupRow || undefined}
       data-row-index={rowIndex}
       data-column-index={columnIndex}
+      data-row-span={rowSpan && rowSpan > 1 ? rowSpan : undefined}
       data-cell-selected={isCellSelected || undefined}
       aria-rowindex={rowIndex + 1}
       aria-colindex={columnIndex + 1}
       role="gridcell"
+      rowSpan={rowSpan}
       tabIndex={keyboardNavigationEnabled ? (isTabStop ? 0 : -1) : undefined}
       onMouseDown={handleMouseDown}
       onMouseEnter={handleMouseEnter}

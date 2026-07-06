@@ -1127,6 +1127,9 @@ interface ColumnDefExtensions<TData, TValue> {
   editable?: boolean | ((row: Row) => boolean)
   editConfig?: CellEditConfig
 
+  // Row spanning
+  rowSpan?: (row: Row, rows: Row[], rowIndex: number) => number | undefined
+
   // Styling
   cellClassName?: string | ((ctx: CellContext) => string | undefined)
   headerClassName?: string

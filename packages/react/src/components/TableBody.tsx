@@ -2,10 +2,17 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { Column, RowData, Table, Row } from '@zvndev/yable-core'
+import {
+  getRowSpan,
+  resolveRowSpans,
+  type RowSpanMap,
+} from '@zvndev/yable-core/features/rowSpanning'
 import { TableCell } from './TableCell'
 import { CellErrorBoundary } from './ErrorBoundary'
 import { MasterDetail } from './MasterDetail'
 import { useVirtualization } from '../hooks/useVirtualization'
+
+const EMPTY_PINNED_ROW_IDS: string[] = []
 
 interface TableBodyProps<TData extends RowData> {
   table: Table<TData>
@@ -21,15 +28,28 @@ export function TableBody<TData extends RowData>({
   colgroup,
   onFillHandleMouseDown,
 }: TableBodyProps<TData>) {
-  const rows = table.getRowModel().rows
+  const rowModel = table.getRowModel()
+  const rows = rowModel.rows
   const visibleColumns = table.getVisibleLeafColumns()
   const activeCell = table.getState().editing.activeCell
   const focusedCell = table.getFocusedCell()
   const rowPinning = table.getState().rowPinning
-  const hasPinnedRows = (rowPinning.top?.length ?? 0) > 0 || (rowPinning.bottom?.length ?? 0) > 0
-  const topRows = hasPinnedRows ? table.getTopRows() : []
-  const centerRows = hasPinnedRows ? table.getCenterRows() : rows
-  const bottomRows = hasPinnedRows ? table.getBottomRows() : []
+  const pinnedTopRowIds = rowPinning.top ?? EMPTY_PINNED_ROW_IDS
+  const pinnedBottomRowIds = rowPinning.bottom ?? EMPTY_PINNED_ROW_IDS
+  const hasPinnedRows = pinnedTopRowIds.length > 0 || pinnedBottomRowIds.length > 0
+  const coreRowsById = table.getCoreRowModel().rowsById
+  const topRows = useMemo(
+    () => (hasPinnedRows ? getRowsById(pinnedTopRowIds, coreRowsById) : []),
+    [coreRowsById, hasPinnedRows, pinnedTopRowIds],
+  )
+  const centerRows = useMemo(
+    () => (hasPinnedRows ? getUnpinnedRows(rows, pinnedTopRowIds, pinnedBottomRowIds) : rows),
+    [hasPinnedRows, pinnedBottomRowIds, pinnedTopRowIds, rows],
+  )
+  const bottomRows = useMemo(
+    () => (hasPinnedRows ? getRowsById(pinnedBottomRowIds, coreRowsById) : []),
+    [coreRowsById, hasPinnedRows, pinnedBottomRowIds],
+  )
   const virtualizedRows = hasPinnedRows ? centerRows : rows
   const cellSelection = table.getState().cellSelection ?? {
     range: null,
@@ -99,6 +119,39 @@ export function TableBody<TData extends RowData>({
     return h
   }, [columnSizing])
 
+  const rowSpanColumnDefs = useMemo(
+    () => visibleColumns.map((column) => column.columnDef),
+    [visibleColumns],
+  )
+  const hasRowSpanColumns = useMemo(
+    () => visibleColumns.some((column) => typeof column.columnDef.rowSpan === 'function'),
+    [visibleColumns],
+  )
+
+  const fullRowSpanMap = useMemo(
+    () => (hasRowSpanColumns ? resolveRowSpans(rows, rowSpanColumnDefs) : undefined),
+    [hasRowSpanColumns, rowSpanColumnDefs, rows],
+  )
+  const topRowSpanMap = useMemo(
+    () =>
+      hasRowSpanColumns && hasPinnedRows ? resolveRowSpans(topRows, rowSpanColumnDefs) : undefined,
+    [hasPinnedRows, hasRowSpanColumns, rowSpanColumnDefs, topRows],
+  )
+  const centerRowSpanMap = useMemo(
+    () =>
+      hasRowSpanColumns && (hasPinnedRows || enableVirtualization)
+        ? resolveRowSpans(virtualizedRows, rowSpanColumnDefs)
+        : undefined,
+    [enableVirtualization, hasPinnedRows, hasRowSpanColumns, rowSpanColumnDefs, virtualizedRows],
+  )
+  const bottomRowSpanMap = useMemo(
+    () =>
+      hasRowSpanColumns && hasPinnedRows
+        ? resolveRowSpans(bottomRows, rowSpanColumnDefs)
+        : undefined,
+    [bottomRows, hasPinnedRows, hasRowSpanColumns, rowSpanColumnDefs],
+  )
+
   const { virtualRows, totalHeight } = useVirtualization({
     containerRef: scrollContainerRef,
     totalRows: virtualizedRows.length,
@@ -114,6 +167,11 @@ export function TableBody<TData extends RowData>({
     ? `${cellSelection.range.start.rowIndex}:${cellSelection.range.start.columnIndex}:${cellSelection.range.end.rowIndex}:${cellSelection.range.end.columnIndex}:${cellSelection.isDragging ? 'dragging' : 'idle'}`
     : `none:${cellSelection.isDragging ? 'dragging' : 'idle'}`
 
+  const visibleVirtualRowIndexes = useMemo(() => {
+    if (!enableVirtualization || !hasRowSpanColumns) return undefined
+    return new Set(virtualRows.map((row) => row.index))
+  }, [enableVirtualization, hasRowSpanColumns, virtualRows])
+
   useEffect(() => {
     const handleWindowMouseUp = () => {
       if (table.getState().cellSelection?.isDragging) {
@@ -127,12 +185,20 @@ export function TableBody<TData extends RowData>({
     }
   }, [table])
 
-  const renderRow = (row: Row<TData>, rowIndex: number, pinnedPosition?: 'top' | 'bottom') => (
+  const renderRow = (
+    row: Row<TData>,
+    rowIndex: number,
+    pinnedPosition?: 'top' | 'bottom',
+    rowSpanMap?: RowSpanMap,
+    rowSpanRowIndex = rowIndex,
+  ) => (
     <MemoizedTableRow
       key={row.id}
       row={row}
       table={table}
       rowIndex={rowIndex}
+      rowSpanRowIndex={rowSpanRowIndex}
+      rowSpanMap={rowSpanMap}
       visibleColumns={visibleColumns}
       isSelected={row.getIsSelected()}
       isExpanded={row.getIsExpanded()}
@@ -155,16 +221,22 @@ export function TableBody<TData extends RowData>({
       let visualIndex = 0
       return (
         <tbody className="yable-tbody">
-          {topRows.map((row) => renderRow(row, visualIndex++, 'top'))}
-          {centerRows.map((row) => renderRow(row, visualIndex++))}
-          {bottomRows.map((row) => renderRow(row, visualIndex++, 'bottom'))}
+          {topRows.map((row, index) => renderRow(row, visualIndex++, 'top', topRowSpanMap, index))}
+          {centerRows.map((row, index) =>
+            renderRow(row, visualIndex++, undefined, centerRowSpanMap, index),
+          )}
+          {bottomRows.map((row, index) =>
+            renderRow(row, visualIndex++, 'bottom', bottomRowSpanMap, index),
+          )}
         </tbody>
       )
     }
 
     // Non-virtualized: render all rows directly
     return (
-      <tbody className="yable-tbody">{rows.map((row, rowIndex) => renderRow(row, rowIndex))}</tbody>
+      <tbody className="yable-tbody">
+        {rows.map((row, rowIndex) => renderRow(row, rowIndex, undefined, fullRowSpanMap, rowIndex))}
+      </tbody>
     )
   }
 
@@ -179,7 +251,8 @@ export function TableBody<TData extends RowData>({
 
   return (
     <tbody className="yable-tbody">
-      {hasPinnedRows && topRows.map((row, index) => renderRow(row, index, 'top'))}
+      {hasPinnedRows &&
+        topRows.map((row, index) => renderRow(row, index, 'top', topRowSpanMap, index))}
       <tr style={{ height: 0, padding: 0, border: 'none' }}>
         <td style={{ height: 0, padding: 0, border: 'none' }} colSpan={visibleColumns.length}>
           <div
@@ -217,6 +290,9 @@ export function TableBody<TData extends RowData>({
                         row={row}
                         table={table}
                         rowIndex={visualRowIndex}
+                        rowSpanRowIndex={vRow.index}
+                        rowSpanMap={centerRowSpanMap ?? fullRowSpanMap}
+                        visibleRowSpanIndexes={visibleVirtualRowIndexes}
                         visibleColumns={visibleColumns}
                         isSelected={row.getIsSelected()}
                         isExpanded={row.getIsExpanded()}
@@ -250,7 +326,13 @@ export function TableBody<TData extends RowData>({
       </tr>
       {hasPinnedRows &&
         bottomRows.map((row, index) =>
-          renderRow(row, topRows.length + virtualizedRows.length + index, 'bottom'),
+          renderRow(
+            row,
+            topRows.length + virtualizedRows.length + index,
+            'bottom',
+            bottomRowSpanMap,
+            index,
+          ),
         )}
     </tbody>
   )
@@ -264,6 +346,9 @@ interface TableRowProps<TData extends RowData> {
   row: Row<TData>
   table: Table<TData>
   rowIndex: number
+  rowSpanRowIndex: number
+  rowSpanMap?: RowSpanMap
+  visibleRowSpanIndexes?: Set<number>
   visibleColumns: Column<TData, unknown>[]
   isSelected: boolean
   isExpanded: boolean
@@ -282,6 +367,9 @@ function TableRowInner<TData extends RowData>({
   row,
   table,
   rowIndex,
+  rowSpanRowIndex,
+  rowSpanMap,
+  visibleRowSpanIndexes,
   visibleColumns,
   isSelected,
   isExpanded,
@@ -374,6 +462,14 @@ function TableRowInner<TData extends RowData>({
         onContextMenu={handleContextMenu}
       >
         {visibleCells.map((cell, columnIndex) => {
+          const rowSpan = resolveRenderedRowSpan(
+            rowSpanMap,
+            rowSpanRowIndex,
+            cell.column.id,
+            visibleRowSpanIndexes,
+          )
+          if (rowSpan === 0) return null
+
           const isFocused = focusedColumnIndex === columnIndex
           const isTabStop = isFocused || (!hasFocusedCell && rowIndex === 0 && columnIndex === 0)
 
@@ -389,6 +485,7 @@ function TableRowInner<TData extends RowData>({
                 columnIndex={columnIndex}
                 isFocused={isFocused}
                 isTabStop={isTabStop}
+                rowSpan={rowSpan}
                 onFillHandleMouseDown={onFillHandleMouseDown}
               />
             </CellErrorBoundary>
@@ -412,6 +509,9 @@ function areRowPropsEqual<TData extends RowData>(
 
   // Current row-model position changed
   if (prev.rowIndex !== next.rowIndex) return false
+  if (prev.rowSpanRowIndex !== next.rowSpanRowIndex) return false
+  if (prev.rowSpanMap !== next.rowSpanMap) return false
+  if (prev.visibleRowSpanIndexes !== next.visibleRowSpanIndexes) return false
 
   // Visible columns or ordering changed
   if (prev.visibleColumns !== next.visibleColumns) return false
@@ -453,6 +553,81 @@ function areRowPropsEqual<TData extends RowData>(
 }
 
 const MemoizedTableRow = React.memo(TableRowInner, areRowPropsEqual) as typeof TableRowInner
+
+function resolveRenderedRowSpan(
+  rowSpanMap: RowSpanMap | undefined,
+  rowIndex: number,
+  columnId: string,
+  visibleRowIndexes?: Set<number>,
+): number | undefined {
+  if (!rowSpanMap) return undefined
+
+  const span = getRowSpan(rowSpanMap, rowIndex, columnId)
+  if (span === undefined) return undefined
+
+  if (span > 1) {
+    if (!visibleRowIndexes) return span
+
+    const mountedSpan = getMountedRowSpan(rowIndex, span, visibleRowIndexes)
+    return mountedSpan > 1 ? mountedSpan : undefined
+  }
+
+  if (span === 0) {
+    if (!visibleRowIndexes) return 0
+
+    const origin = findRowSpanOrigin(rowSpanMap, rowIndex, columnId)
+    if (!origin || !visibleRowIndexes.has(origin.rowIndex)) return undefined
+
+    const mountedSpan = getMountedRowSpan(origin.rowIndex, origin.span, visibleRowIndexes)
+    return rowIndex < origin.rowIndex + mountedSpan ? 0 : undefined
+  }
+
+  return undefined
+}
+
+function findRowSpanOrigin(
+  rowSpanMap: RowSpanMap,
+  rowIndex: number,
+  columnId: string,
+): { rowIndex: number; span: number } | undefined {
+  for (let candidate = rowIndex - 1; candidate >= 0; candidate--) {
+    const span = getRowSpan(rowSpanMap, candidate, columnId)
+    if (span && span > 1 && candidate + span > rowIndex) {
+      return { rowIndex: candidate, span }
+    }
+  }
+
+  return undefined
+}
+
+function getMountedRowSpan(rowIndex: number, span: number, visibleRowIndexes: Set<number>): number {
+  let mountedSpan = 0
+
+  for (let offset = 0; offset < span; offset++) {
+    if (!visibleRowIndexes.has(rowIndex + offset)) break
+    mountedSpan++
+  }
+
+  return mountedSpan
+}
+
+function getRowsById<TData extends RowData>(
+  rowIds: string[],
+  rowsById: Record<string, Row<TData>>,
+): Row<TData>[] {
+  return rowIds
+    .map((id) => rowsById[id])
+    .filter((row: Row<TData> | undefined): row is Row<TData> => row !== undefined)
+}
+
+function getUnpinnedRows<TData extends RowData>(
+  rows: Row<TData>[],
+  pinnedTopRowIds: string[],
+  pinnedBottomRowIds: string[],
+): Row<TData>[] {
+  const pinned = new Set([...pinnedTopRowIds, ...pinnedBottomRowIds])
+  return rows.filter((row) => !pinned.has(row.id))
+}
 
 function getPendingValuesKey(values: Record<string, unknown> | undefined): string {
   if (!values) return ''

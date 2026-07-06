@@ -101,15 +101,17 @@ no parity tests are owed. Decision for Yable:
   row grouping + aggregation, pivot rendering through React `<Table>`, tree data with
   parent-chain filter/sort, fill handle drag UI, formula computed values,
   undo/redo controls + shortcuts, and master/detail rows.
+- **React-rendered row spanning:** core `rowSpan` callbacks now render through
+  React `<Table>` as native `<td rowSpan>` attributes, with covered cells skipped,
+  pinned row sections scoped independently, and virtualized spans clamped to the
+  mounted row window.
 - **API-first, not finished React UI yet:** full-row editing (core row edit methods,
-  no turnkey React row-editor controls), and row spanning (core `rowSpan` callback,
-  not rendered as `<td rowSpan>`). Label these as API-first or experimental wherever
-  public docs imply a finished adapter surface.
+  no turnkey React row-editor controls). Label this as API-first or experimental
+  wherever public docs imply a finished adapter surface.
 
 ### Next pickups
 
-1. Add turnkey UI or explicit API-first labels for full-row editing controls and row-span
-   rendering.
+1. Add turnkey UI or explicit API-first labels for full-row editing controls.
 2. Broaden keyboard-navigation and editor integration coverage.
 
 Covered this cycle: adaptive Playwright coverage for filter, edit, row expansion, and
