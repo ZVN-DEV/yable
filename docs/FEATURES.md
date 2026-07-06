@@ -952,6 +952,41 @@ const table = useTable({
 
 ---
 
+## Row Spanning
+
+Merge adjacent cells in a column by returning a span from the column `rowSpan`
+callback. React `<Table>` renders the origin cell as a native
+`<td rowSpan={n}>` and skips cells covered by that span.
+
+```tsx
+const columns = [
+  columnHelper.accessor('team', {
+    header: 'Team',
+    rowSpan: (row, rows, rowIndex) => {
+      const team = row.getValue('team')
+      let span = 1
+
+      while (rows[rowIndex + span]?.getValue('team') === team) {
+        span++
+      }
+
+      return span > 1 ? span : undefined
+    },
+  }),
+]
+```
+
+### Notes
+
+- The callback receives the rendered row-model order, so filtering, sorting,
+  grouping, and pagination are already reflected in `rows`.
+- Pinned top, center, and bottom row sections resolve spans independently; a
+  span will not cross a pinned-row boundary.
+- With row virtualization, spans are clamped to the mounted window because
+  native HTML cannot merge into rows that are not in the DOM.
+
+---
+
 ## Undo / Redo
 
 Track edit history and allow users to undo/redo changes.
