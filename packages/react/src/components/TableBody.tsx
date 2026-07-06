@@ -1,6 +1,6 @@
 // @zvndev/yable-react — Table Body Component
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Column, RowData, Table, Row } from '@zvndev/yable-core'
 import {
   getRowSpan,
@@ -172,6 +172,23 @@ export function TableBody<TData extends RowData>({
     return new Set(virtualRows.map((row) => row.index))
   }, [enableVirtualization, hasRowSpanColumns, virtualRows])
 
+  // Width of a classic (non-overlay) scrollbar in the virtual scroll
+  // container; the body table compensates by this much to stay width-synced
+  // with the header table. 0 on overlay-scrollbar platforms (macOS default).
+  const [scrollbarWidth, setScrollbarWidth] = useState(0)
+
+  useEffect(() => {
+    const el = scrollContainerRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const measure = () => {
+      setScrollbarWidth(Math.max(0, el.offsetWidth - el.clientWidth))
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [enableVirtualization])
+
   useEffect(() => {
     const handleWindowMouseUp = () => {
       if (table.getState().cellSelection?.isDragging) {
@@ -244,11 +261,18 @@ export function TableBody<TData extends RowData>({
   // Virtualized rendering
   const hasPretextData = !!(virtualPretext.heights && virtualPretext.prefixSums)
   const fixedRowHeight = typeof rowHeight === 'number' && !hasPretextData ? rowHeight : undefined
-  const containerHeight = hasPretextData
-    ? Math.min(totalHeight, 800) // Pretext: use real total, cap at 800px viewport
-    : fixedRowHeight
-      ? Math.min(totalHeight, fixedRowHeight * 20) // Default visible area ~20 rows
-      : 600 // Fallback for variable heights
+  const containerHeight =
+    options.virtualViewportHeight ??
+    (hasPretextData
+      ? Math.min(totalHeight, 800) // Pretext: use real total, cap at 800px viewport
+      : fixedRowHeight
+        ? Math.min(totalHeight, fixedRowHeight * 20) // Default visible area ~20 rows
+        : 600) // Fallback for variable heights
+
+  // The mounted window is offset as one block. Rows stay real table rows so
+  // the shared colgroup governs cell widths — per-row absolute positioning
+  // blockifies <tr>, detaching body cell widths from the header table.
+  const windowStart = virtualRows.length > 0 ? virtualRows[0]!.start : 0
 
   return (
     <tbody className="yable-tbody">
@@ -261,6 +285,7 @@ export function TableBody<TData extends RowData>({
             className="yable-virtual-scroll-container"
             style={{
               overflowY: 'auto',
+              overflowX: 'hidden',
               height: containerHeight,
               position: 'relative',
             }}
@@ -274,9 +299,14 @@ export function TableBody<TData extends RowData>({
                   position: 'absolute',
                   top: 0,
                   left: 0,
-                  width: '100%',
+                  // Match the header table's width (the scroll container's
+                  // border-box) so table-layout: fixed distributes the shared
+                  // colgroup identically in both tables even when a classic
+                  // scrollbar narrows this one's content-box.
+                  width: `calc(100% + ${scrollbarWidth}px)`,
                   tableLayout: 'fixed',
                   borderCollapse: 'collapse',
+                  transform: `translateY(${windowStart}px)`,
                 }}
               >
                 {colgroup}
@@ -309,14 +339,7 @@ export function TableBody<TData extends RowData>({
                         pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
                         clickable={clickableRows}
                         onFillHandleMouseDown={onFillHandleMouseDown}
-                        virtualStyle={{
-                          position: 'absolute' as const,
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: vRow.size,
-                          transform: `translateY(${vRow.start}px)`,
-                        }}
+                        virtualStyle={{ height: vRow.size }}
                       />
                     )
                   })}

@@ -166,14 +166,16 @@ async function firstVirtualRowIndex(page: Page) {
 }
 
 async function firstVirtualRowTranslateY(page: Page) {
-  const transform = await virtualRows(page)
+  // The mounted window is offset as one block on the inner table; measure the
+  // first row's real offset within the virtual spacer instead of a per-row
+  // transform so the assertion is layout-strategy agnostic.
+  return virtualRows(page)
     .first()
-    .evaluate((node) => getComputedStyle(node).transform)
-  if (transform === 'none') return 0
-  const matrixMatch = transform.match(/^matrix\(([^)]+)\)$/)
-  if (!matrixMatch) return 0
-  const values = matrixMatch[1]?.split(',').map((part) => Number(part.trim())) ?? []
-  return values[5] ?? 0
+    .evaluate((node) => {
+      const spacer = node.closest('.yable-virtual-spacer')
+      if (!spacer) return 0
+      return node.getBoundingClientRect().top - spacer.getBoundingClientRect().top
+    })
 }
 
 async function expectColumnWidthsAligned(headerCell: Locator, bodyCell: Locator) {
