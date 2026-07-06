@@ -1,5 +1,17 @@
 # @zvndev/yable-react
 
+## 0.10.0
+
+### Minor Changes
+
+- 001095b: Add observable full-row editing state and React row edit controls for desktop and adaptive table layouts.
+
+### Patch Changes
+
+- Updated dependencies [001095b]
+  - @zvndev/yable-core@0.8.0
+  - @zvndev/yable-themes@0.4.5
+
 ## 0.9.0
 
 ### Minor Changes
