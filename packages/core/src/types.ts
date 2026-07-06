@@ -421,6 +421,13 @@ export interface TableOptions<TData extends RowData> {
   pretextHeights?: Float64Array | null
   /** Pre-computed prefix sums for O(log n) scroll lookups */
   pretextPrefixSums?: Float64Array | null
+  /**
+   * Height in px of the virtualized scroll viewport. Without it the viewport
+   * falls back to built-in heuristics (~20 rows, capped at 800px), which can
+   * overflow a shorter styled container and leave a clipped-but-scrollable
+   * region below it.
+   */
+  virtualViewportHeight?: number
 
   // Export options
   enableExport?: boolean

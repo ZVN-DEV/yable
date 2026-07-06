@@ -1517,8 +1517,6 @@
 .speedPreview {
   border: 1px solid var(--line);
   background: rgba(0, 0, 0, 0.28);
-  max-height: 440px;
-  overflow: hidden;
 }
 
 .speedPreview :global(.yable) {
@@ -1708,10 +1706,6 @@
   .speedMetrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 28px 32px;
-  }
-
-  .speedPreview {
-    max-height: 380px;
   }
 }
 

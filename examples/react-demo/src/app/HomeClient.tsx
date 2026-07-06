@@ -931,6 +931,7 @@ function SpeedShowcase() {
     columns: speedColumns,
     getRowId: (row) => String(row.id),
     enableVirtualization: true,
+    virtualViewportHeight: 398,
     pretextHeights: ready && rowHeights ? rowHeights : undefined,
     pretextPrefixSums: ready && prefixSums ? prefixSums : undefined,
     rowHeight: 36,
