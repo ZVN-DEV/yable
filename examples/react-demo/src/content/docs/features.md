@@ -344,6 +344,37 @@ table.getValidationErrors() // Get validation errors
 table.isValid() // Check if all pending values are valid
 ```
 
+### Full-Row Editing Controls
+
+Use `RowEditControls` in a display column to switch a row between view mode and full-row edit mode. The control renders Edit, Save, and Cancel actions, disables Save while row validators fail, and works in both desktop table rows and adaptive card layouts.
+
+```tsx
+import { CellInput, RowEditControls, createColumnHelper } from '@zvndev/yable-react'
+
+const columnHelper = createColumnHelper<Employee>()
+
+const columns = [
+  columnHelper.accessor('name', {
+    header: 'Name',
+    editable: true,
+    editConfig: { type: 'text' },
+    cell: (context) =>
+      context.table.isRowEditing(context.row.id) ? (
+        <CellInput context={context} />
+      ) : (
+        context.getValue()
+      ),
+  }),
+  columnHelper.display({
+    id: 'actions',
+    header: 'Actions',
+    cell: (context) => <RowEditControls context={context} />,
+  }),
+]
+```
+
+When a row is editing, bundled form controls defer blur, Enter, Escape, and Tab behavior to the row edit session: Enter saves the row, Escape cancels, and Tab cycles through editable cells in that row.
+
 ### Always-Editable Cells
 
 To make a cell always show its editor (like a spreadsheet), set `alwaysEditable` in the column meta:

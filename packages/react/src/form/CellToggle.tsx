@@ -2,6 +2,7 @@
 
 import React from 'react'
 import type { RowData, CellContext } from '@zvndev/yable-core'
+import { handleRowEditKey } from './rowEditNavigation'
 
 interface CellToggleProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>
@@ -28,6 +29,9 @@ export function CellToggle<TData extends RowData, TValue>({
       className={`yable-toggle ${className ?? ''}`}
       checked={Boolean(currentValue)}
       onChange={handleChange}
+      onKeyDown={(e) => {
+        handleRowEditKey(e, table, row.id, column.id)
+      }}
       aria-checked={Boolean(currentValue)}
     />
   )

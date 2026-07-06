@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 import type { RowData, CellContext } from '@zvndev/yable-core'
+import { handleRowEditKey } from './rowEditNavigation'
 
 interface SelectOption {
   label: string
@@ -24,6 +25,7 @@ export function CellSelect<TData extends RowData, TValue>({
   const { table, row, column, cell } = context
   const isEditing = cell.getIsEditing()
   const isAlwaysEditable = cell.getIsAlwaysEditable()
+  const isRowEditing = table.isRowEditing(row.id)
 
   const pending = table.getPendingValue(row.id, column.id)
   const currentValue = pending !== undefined ? pending : cell.getValue()
@@ -46,7 +48,7 @@ export function CellSelect<TData extends RowData, TValue>({
     table.setPendingValue(row.id, column.id, e.target.value)
 
     // Auto-commit for selects (they don't need blur to commit)
-    if (isEditing && !isAlwaysEditable) {
+    if (isEditing && !isAlwaysEditable && !isRowEditing) {
       // Defer commit so the state update happens first
       if (commitTimerRef.current !== null) {
         clearTimeout(commitTimerRef.current)
@@ -63,6 +65,9 @@ export function CellSelect<TData extends RowData, TValue>({
       className={`yable-select ${className ?? ''}`}
       value={String(currentValue ?? '')}
       onChange={handleChange}
+      onKeyDown={(e) => {
+        handleRowEditKey(e, table, row.id, column.id)
+      }}
     >
       {placeholder && (
         <option value="" disabled>

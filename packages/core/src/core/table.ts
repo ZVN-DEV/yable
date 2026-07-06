@@ -1122,6 +1122,9 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     startRowEditing: () => {},
     commitRowEdit: () => {},
     cancelRowEdit: () => {},
+    isRowEditing: () => false,
+    getEditingRows: () => [],
+    getEditableColumnIds: () => [],
     getPivotRowModel: (): RowModel<TData> => ({ rows: [], flatRows: [], rowsById: {} }),
   }
 
@@ -1847,6 +1850,9 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
   table.startRowEditing = rowEditing.startRowEditing
   table.commitRowEdit = rowEditing.commitRowEdit
   table.cancelRowEdit = rowEditing.cancelRowEdit
+  table.isRowEditing = rowEditing.isRowEditing
+  table.getEditingRows = () => Array.from(rowEditing.getEditingRows())
+  table.getEditableColumnIds = rowEditing.getEditableColumns
 
   // Row drag / reorder. `resolvedOptions` is mutated in place by setOptions, so
   // getData reads the live data array and setData swaps it (invalidating the

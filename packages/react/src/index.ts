@@ -168,6 +168,8 @@ export { FloatingFilter } from './components/FloatingFilter'
 export { SetFilter } from './components/SetFilter'
 export { SortIndicator } from './components/SortIndicator'
 export { ErrorBoundary, CellErrorBoundary } from './components/ErrorBoundary'
+export { RowEditControls } from './components/RowEditControls'
+export type { RowEditControlsProps } from './components/RowEditControls'
 
 // Form components (editing)
 export { CellInput } from './form/CellInput'

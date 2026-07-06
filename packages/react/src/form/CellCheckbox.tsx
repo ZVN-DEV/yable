@@ -2,6 +2,7 @@
 
 import React from 'react'
 import type { RowData, CellContext } from '@zvndev/yable-core'
+import { handleRowEditKey } from './rowEditNavigation'
 
 interface CellCheckboxProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>
@@ -27,6 +28,9 @@ export function CellCheckbox<TData extends RowData, TValue>({
       className={`yable-checkbox ${className ?? ''}`}
       checked={Boolean(currentValue)}
       onChange={handleChange}
+      onKeyDown={(e) => {
+        handleRowEditKey(e, table, row.id, column.id)
+      }}
     />
   )
 }

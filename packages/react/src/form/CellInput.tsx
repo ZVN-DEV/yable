@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 import type { RowData, CellContext } from '@zvndev/yable-core'
+import { handleRowEditKey } from './rowEditNavigation'
 
 interface CellInputProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>
@@ -24,6 +25,7 @@ export function CellInput<TData extends RowData, TValue>({
   const inputRef = useRef<HTMLInputElement>(null)
   const isEditing = cell.getIsEditing()
   const isAlwaysEditable = cell.getIsAlwaysEditable()
+  const isRowEditing = table.isRowEditing(row.id)
 
   // Get pending value or fall back to current
   const pending = table.getPendingValue(row.id, column.id)
@@ -35,12 +37,14 @@ export function CellInput<TData extends RowData, TValue>({
   }
 
   const handleBlur = () => {
-    if (isEditing && !isAlwaysEditable) {
+    if (isEditing && !isAlwaysEditable && !isRowEditing) {
       table.commitEdit()
     }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (handleRowEditKey(e, table, row.id, column.id)) return
+
     if (e.key === 'Enter') {
       if (isEditing && !isAlwaysEditable) {
         table.commitEdit()
@@ -60,11 +64,7 @@ export function CellInput<TData extends RowData, TValue>({
     }
   }, [isEditing, autoFocus])
 
-  const classNames = [
-    'yable-input',
-    inline && 'yable-input--inline',
-    className,
-  ]
+  const classNames = ['yable-input', inline && 'yable-input--inline', className]
     .filter(Boolean)
     .join(' ')
 

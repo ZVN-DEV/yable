@@ -1526,6 +1526,71 @@
   border-color: color-mix(in srgb, var(--yable-accent) 20%, transparent);
 }
 
+.yable-adaptive-card--row-editing {
+  border-color: color-mix(in srgb, var(--yable-accent) 35%, var(--yable-border-color));
+  background: var(--yable-bg-cell-editing);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--yable-accent) 16%, transparent);
+}
+
+.yable-row-edit-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.yable-row-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--yable-border-color);
+  border-radius: var(--yable-border-radius-sm);
+  background: var(--yable-bg);
+  color: var(--yable-text-secondary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: var(--yable-font-weight-medium);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--yable-transition-fast),
+    background var(--yable-transition-fast),
+    border-color var(--yable-transition-fast),
+    box-shadow var(--yable-transition-fast);
+}
+
+.yable-row-edit-btn:hover:not(:disabled) {
+  color: var(--yable-text-primary);
+  background: var(--yable-bg-row-hover);
+  border-color: var(--yable-border-color-strong);
+}
+
+.yable-row-edit-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--yable-input-shadow-focus);
+}
+
+.yable-row-edit-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.yable-row-edit-btn--save {
+  color: var(--yable-accent);
+  border-color: color-mix(in srgb, var(--yable-accent) 32%, var(--yable-border-color));
+}
+
+.yable-row-edit-btn--save:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--yable-accent) 10%, transparent);
+}
+
+.yable-row-edit-btn--cancel {
+  color: var(--yable-text-tertiary);
+}
+
 /* ── Formula Cell ────────────────────────────────────────────────────────── */
 
 .yable-formula-bar {

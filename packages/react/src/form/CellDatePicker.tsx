@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 import type { RowData, CellContext } from '@zvndev/yable-core'
+import { handleRowEditKey } from './rowEditNavigation'
 
 interface CellDatePickerProps<TData extends RowData, TValue> {
   context: CellContext<TData, TValue>
@@ -18,6 +19,7 @@ export function CellDatePicker<TData extends RowData, TValue>({
   const inputRef = useRef<HTMLInputElement>(null)
   const isEditing = cell.getIsEditing()
   const isAlwaysEditable = cell.getIsAlwaysEditable()
+  const isRowEditing = table.isRowEditing(row.id)
 
   const pending = table.getPendingValue(row.id, column.id)
   const currentValue = pending !== undefined ? pending : cell.getValue()
@@ -30,7 +32,7 @@ export function CellDatePicker<TData extends RowData, TValue>({
   }
 
   const handleBlur = () => {
-    if (isEditing && !isAlwaysEditable) {
+    if (isEditing && !isAlwaysEditable && !isRowEditing) {
       table.commitEdit()
     }
   }
@@ -49,6 +51,9 @@ export function CellDatePicker<TData extends RowData, TValue>({
       value={formattedValue}
       onChange={handleChange}
       onBlur={handleBlur}
+      onKeyDown={(e) => {
+        handleRowEditKey(e, table, row.id, column.id)
+      }}
     />
   )
 }

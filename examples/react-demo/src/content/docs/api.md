@@ -624,6 +624,12 @@ The object returned by `createTable()` or `useTable()`. All methods are grouped 
 | `isValid()`                               | `boolean`                                | All pending values valid?                            |
 | `setEditing(updater)`                     | `void`                                   | Set editing state directly                           |
 | `resetEditing(defaultState?)`             | `void`                                   | Reset editing state                                  |
+| `startRowEditing(rowId)`                  | `void`                                   | Start full-row editing and seed editable values      |
+| `commitRowEdit(rowId)`                    | `void`                                   | Validate and commit all pending values for a row     |
+| `cancelRowEdit(rowId)`                    | `void`                                   | Discard all pending values for a row                 |
+| `isRowEditing(rowId)`                     | `boolean`                                | Check whether a row is in full-row edit mode         |
+| `getEditingRows()`                        | `string[]`                               | Get row IDs currently in full-row edit mode          |
+| `getEditableColumnIds(rowId)`             | `string[]`                               | Get editable column IDs for a row                    |
 
 ### Async Commit API
 

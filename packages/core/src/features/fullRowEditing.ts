@@ -54,9 +54,23 @@ export function createFullRowEditingIntegration<TData extends RowData>(
   /** Get editable column IDs for a row */
   getEditableColumns: (rowId: string) => string[]
 } {
-  const editingRows = new Set<string>()
+  const getEditingRows = () => new Set(table.getState().editing.editingRows ?? [])
 
-  const getEditingRows = () => new Set(editingRows)
+  const setRowEditing = (rowId: string, editing: boolean) => {
+    table.setEditing((old: EditingState) => {
+      const editingRows = new Set(old.editingRows ?? [])
+      if (editing) {
+        editingRows.add(rowId)
+      } else {
+        editingRows.delete(rowId)
+      }
+
+      return {
+        ...old,
+        editingRows: Array.from(editingRows),
+      }
+    })
+  }
 
   const getEditableColumns = (rowId: string): string[] => {
     const columns = table.getAllLeafColumns()
@@ -87,7 +101,7 @@ export function createFullRowEditingIntegration<TData extends RowData>(
       return
     }
 
-    editingRows.add(rowId)
+    setRowEditing(rowId, true)
 
     // Initialize pending values for all editable columns with current values
     const editableColumnIds = getEditableColumns(rowId)
@@ -114,7 +128,7 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     try {
       row = table.getRow(rowId, true)
     } catch {
-      editingRows.delete(rowId)
+      setRowEditing(rowId, false)
       return
     }
 
@@ -148,7 +162,7 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     }
 
     // Clean up editing state
-    editingRows.delete(rowId)
+    setRowEditing(rowId, false)
 
     // NOTE: do NOT call table.commitEdit() here. commitEdit() dispatches the
     // active cell on its own (through onCommit/onEditCommit), and the row-level
@@ -208,11 +222,11 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     try {
       row = table.getRow(rowId, true)
     } catch {
-      editingRows.delete(rowId)
+      setRowEditing(rowId, false)
       return
     }
 
-    editingRows.delete(rowId)
+    setRowEditing(rowId, false)
 
     // Clear pending values for this row
     table.setEditing((old: EditingState) => {
@@ -231,7 +245,7 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     } as YableEventMap<TData>['row:edit:cancel'])
   }
 
-  const isRowEditing = (rowId: string) => editingRows.has(rowId)
+  const isRowEditing = (rowId: string) => getEditingRows().has(rowId)
 
   return {
     getEditingRows,
