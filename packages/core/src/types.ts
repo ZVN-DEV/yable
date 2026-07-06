@@ -1012,6 +1012,9 @@ export interface Table<TData extends RowData> {
   startRowEditing: (rowId: string) => void
   commitRowEdit: (rowId: string) => void
   cancelRowEdit: (rowId: string) => void
+  isRowEditing: (rowId: string) => boolean
+  getEditingRows: () => string[]
+  getEditableColumnIds: (rowId: string) => string[]
 
   // Pivot API
   getPivotRowModel: () => RowModel<TData>

@@ -202,6 +202,7 @@ export function TableBody<TData extends RowData>({
       visibleColumns={visibleColumns}
       isSelected={row.getIsSelected()}
       isExpanded={row.getIsExpanded()}
+      isRowEditing={table.isRowEditing(row.id)}
       activeColumnId={activeCell?.rowId === row.id ? activeCell.columnId : undefined}
       focusedColumnIndex={focusedCell?.rowIndex === rowIndex ? focusedCell.columnIndex : null}
       hasFocusedCell={focusedCell !== null}
@@ -296,6 +297,7 @@ export function TableBody<TData extends RowData>({
                         visibleColumns={visibleColumns}
                         isSelected={row.getIsSelected()}
                         isExpanded={row.getIsExpanded()}
+                        isRowEditing={table.isRowEditing(row.id)}
                         activeColumnId={
                           activeCell?.rowId === row.id ? activeCell.columnId : undefined
                         }
@@ -352,6 +354,7 @@ interface TableRowProps<TData extends RowData> {
   visibleColumns: Column<TData, unknown>[]
   isSelected: boolean
   isExpanded: boolean
+  isRowEditing: boolean
   activeColumnId?: string
   focusedColumnIndex: number | null
   hasFocusedCell: boolean
@@ -373,6 +376,7 @@ function TableRowInner<TData extends RowData>({
   visibleColumns,
   isSelected,
   isExpanded,
+  isRowEditing,
   activeColumnId,
   focusedColumnIndex,
   hasFocusedCell,
@@ -439,6 +443,7 @@ function TableRowInner<TData extends RowData>({
   const rowClassName = [
     'yable-tr',
     pinnedPosition && `yable-tr--pinned-${pinnedPosition}`,
+    isRowEditing && 'yable-tr--row-editing',
     userRowClassName,
   ]
     .filter(Boolean)
@@ -451,6 +456,7 @@ function TableRowInner<TData extends RowData>({
         style={mergedRowStyle}
         data-selected={isSelected || undefined}
         data-expanded={isExpanded || undefined}
+        data-row-editing={isRowEditing || undefined}
         data-clickable={clickable || undefined}
         data-pinned-row={pinnedPosition}
         data-row-id={row.id}
@@ -524,6 +530,9 @@ function areRowPropsEqual<TData extends RowData>(
 
   // Expansion state
   if (prev.isExpanded !== next.isExpanded) return false
+
+  // Full-row editing state
+  if (prev.isRowEditing !== next.isRowEditing) return false
 
   // Clickable prop
   if (prev.clickable !== next.clickable) return false

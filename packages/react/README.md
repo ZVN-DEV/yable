@@ -83,11 +83,12 @@ const table = useTable({
 
 ### Interactive Components
 
-| Component       | Description                                                                                                                                                                 |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Pagination`    | Page navigation with first/last/prev/next buttons, page numbers, and page size selector. Props: optional `table`, `showPageSize`, `pageSizes`, `showInfo`, `showFirstLast`. |
-| `GlobalFilter`  | Debounced search input for the global filter. Props: `table`, `placeholder`, `debounce`, `className`.                                                                       |
-| `SortIndicator` | Sort direction arrow icon. Props: `direction`, `index` (for multi-sort badge).                                                                                              |
+| Component         | Description                                                                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Pagination`      | Page navigation with first/last/prev/next buttons, page numbers, and page size selector. Props: optional `table`, `showPageSize`, `pageSizes`, `showInfo`, `showFirstLast`. |
+| `GlobalFilter`    | Debounced search input for the global filter. Props: `table`, `placeholder`, `debounce`, `className`.                                                                       |
+| `SortIndicator`   | Sort direction arrow icon. Props: `direction`, `index` (for multi-sort badge).                                                                                              |
+| `RowEditControls` | Edit/Save/Cancel buttons for full-row editing. Props: optional `table`, `row`, `rowId`, or `context`.                                                                       |
 
 ### Form Components (In-Cell Editing)
 
@@ -98,6 +99,8 @@ const table = useTable({
 | `CellCheckbox`   | Checkbox for boolean cell values.                                                                   |
 | `CellToggle`     | Toggle switch for boolean cell values.                                                              |
 | `CellDatePicker` | Date input for cell editing.                                                                        |
+
+When a row is in full-row edit mode, the bundled form components route Enter, Escape, and Tab through the row edit session. Enter saves the row, Escape cancels, and Tab cycles through editable cells.
 
 ### Context
 

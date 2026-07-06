@@ -69,6 +69,25 @@ describe('full-row editing wiring', () => {
     table.cancelRowEdit('1')
     expect(table.getPendingValue('1', 'name')).toBeUndefined()
   })
+
+  it('exposes row editing state and editable column ids through the public table API', () => {
+    const table = makeTable()
+
+    expect(table.isRowEditing('1')).toBe(false)
+    expect(table.getEditingRows()).toEqual([])
+    expect(table.getEditableColumnIds('1')).toEqual(['name', 'age'])
+
+    table.startRowEditing('1')
+
+    expect(table.isRowEditing('1')).toBe(true)
+    expect(table.getEditingRows()).toEqual(['1'])
+    expect(table.getState().editing.editingRows).toEqual(['1'])
+
+    table.cancelRowEdit('1')
+
+    expect(table.isRowEditing('1')).toBe(false)
+    expect(table.getEditingRows()).toEqual([])
+  })
 })
 
 // ===========================================================================

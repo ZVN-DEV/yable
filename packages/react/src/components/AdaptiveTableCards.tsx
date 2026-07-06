@@ -71,13 +71,19 @@ function AdaptiveTableCard<TData extends RowData>({
 }: AdaptiveTableCardProps<TData>) {
   const { cells, primaryCell, secondaryCells } = getAdaptiveCells(row, visibleColumns, layout)
   const detailPanel = getAdaptiveDetailPanel(row, table)
+  const isRowEditing = table.isRowEditing(row.id)
 
   return (
     <article
-      className="yable-adaptive-card"
+      className={
+        isRowEditing
+          ? 'yable-adaptive-card yable-adaptive-card--row-editing'
+          : 'yable-adaptive-card'
+      }
       role="row"
       data-selected={row.getIsSelected() || undefined}
       data-expanded={row.getIsExpanded() || undefined}
+      data-row-editing={isRowEditing || undefined}
       data-clickable={clickable || undefined}
       data-row-id={row.id}
       data-row-index={rowIndex}

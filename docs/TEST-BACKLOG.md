@@ -105,14 +105,14 @@ no parity tests are owed. Decision for Yable:
   React `<Table>` as native `<td rowSpan>` attributes, with covered cells skipped,
   pinned row sections scoped independently, and virtualized spans clamped to the
   mounted row window.
-- **API-first, not finished React UI yet:** full-row editing (core row edit methods,
-  no turnkey React row-editor controls). Label this as API-first or experimental
-  wherever public docs imply a finished adapter surface.
+- **Turnkey full-row editing controls:** core row edit methods now expose observable
+  row-edit state, and React ships `RowEditControls` for Edit/Save/Cancel action
+  columns across table rows and adaptive cards.
 
 ### Next pickups
 
-1. Add turnkey UI or explicit API-first labels for full-row editing controls.
-2. Broaden keyboard-navigation and editor integration coverage.
+1. Broaden keyboard-navigation and editor integration coverage.
+2. Add checked e2e coverage for row drag/reorder and editor focus handoffs.
 
 Covered this cycle: adaptive Playwright coverage for filter, edit, row expansion, and
 custom card renderer edge cases now lives in `e2e/adaptive-layout.spec.ts`; adaptive

@@ -85,6 +85,7 @@ describe('createFullRowEditingIntegration — start / commit / cancel', () => {
 
     expect(integration.isRowEditing('1')).toBe(true)
     expect(integration.getEditingRows().has('1')).toBe(true)
+    expect(table.getState().editing.editingRows).toEqual(['1'])
     // Pending values seeded from the live row.
     expect(table.getPendingValue('1', 'name')).toBe('Alice')
     expect(table.getPendingValue('1', 'age')).toBe(30)
@@ -104,6 +105,7 @@ describe('createFullRowEditingIntegration — start / commit / cancel', () => {
     expect(onEditCommit).toHaveBeenCalledTimes(1)
     expect(onEditCommit.mock.calls[0]![0]).toEqual({ '1': { name: 'Alicia', age: 30 } })
     expect(integration.isRowEditing('1')).toBe(false)
+    expect(table.getState().editing.editingRows).toEqual([])
     expect(table.getPendingRow('1')).toBeUndefined()
   })
 
@@ -131,6 +133,7 @@ describe('createFullRowEditingIntegration — start / commit / cancel', () => {
 
     expect(onEditCommit).not.toHaveBeenCalled()
     expect(integration.isRowEditing('1')).toBe(false)
+    expect(table.getState().editing.editingRows).toEqual([])
     expect(table.getPendingRow('1')).toBeUndefined()
   })
 
