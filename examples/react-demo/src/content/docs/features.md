@@ -50,16 +50,17 @@ columnHelper.accessor('name', {
 
 ### Table Options
 
-| Option                 | Type                       | Default    | Description                                          |
-| ---------------------- | -------------------------- | ---------- | ---------------------------------------------------- |
-| `enableSorting`        | `boolean`                  | `true`     | Enable/disable sorting globally                      |
-| `enableMultiSort`      | `boolean`                  | `true`     | Allow sorting by multiple columns                    |
-| `enableSortingRemoval` | `boolean`                  | `true`     | Allow removing sort (third click)                    |
-| `maxMultiSortColCount` | `number`                   | `Infinity` | Max simultaneous sort columns                        |
-| `manualSorting`        | `boolean`                  | `false`    | If true, sorting is handled externally (server-side) |
-| `sortDescFirst`        | `boolean`                  | `false`    | Start with descending on first click                 |
-| `isMultiSortEvent`     | `(e) => boolean`           | Shift key  | Which modifier key triggers multi-sort               |
-| `onSortingChange`      | `OnChangeFn<SortingState>` | --         | Callback when sorting state changes                  |
+| Option                 | Type                       | Default    | Description                                             |
+| ---------------------- | -------------------------- | ---------- | ------------------------------------------------------- |
+| `enableSorting`        | `boolean`                  | `true`     | Enable/disable sorting globally                         |
+| `enableMultiSort`      | `boolean`                  | `true`     | Allow sorting by multiple columns                       |
+| `enableSortingRemoval` | `boolean`                  | `true`     | Allow removing sort (third click)                       |
+| `maxMultiSortColCount` | `number`                   | `Infinity` | Max simultaneous sort columns                           |
+| `manualSorting`        | `boolean`                  | `false`    | If true, sorting is handled externally (server-side)    |
+| `sortDescFirst`        | `boolean`                  | `false`    | Start with descending on first click                    |
+| `isMultiSortEvent`     | `(e) => boolean`           | Shift key  | Which modifier key triggers multi-sort                  |
+| `onSortingChange`      | `OnChangeFn<SortingState>` | --         | Callback when sorting state changes                     |
+| `postSortRows`         | `(rows) => Row[] \| void`  | --         | Reorder the final sorted rows before render (AG-parity) |
 
 ### Column Options
 
@@ -95,6 +96,27 @@ columnHelper.accessor('priority', {
   },
 })
 ```
+
+### Post-sort hook
+
+`postSortRows` runs after the sorted row model is built and lets you reorder the
+final rows before render — the AG Grid `postSortRows` equivalent. Return a new
+array or mutate the given one in place. It runs on every sort (and with no
+active sort), so it is the right place to keep child rows under their parents:
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  postSortRows: (rows) => {
+    const pinned = rows.filter((r) => r.original.pinned)
+    const rest = rows.filter((r) => !r.original.pinned)
+    return [...pinned, ...rest]
+  },
+})
+```
+
+`postSortRows` is skipped under `manualSorting`.
 
 ### Programmatic Control
 
@@ -1354,6 +1376,18 @@ table.events.emit('cell:click', {
 
 // Remove all listeners
 table.events.removeAllListeners()
+```
+
+### Reacting to sorting changes
+
+`sort:change` fires whenever sorting changes — a header click, a context-menu
+action, or a programmatic `table.setSorting(...)` — with the new `sorting`
+array. This is the idiomatic hook for AG Grid `onSortChanged`-style consumers:
+
+```typescript
+table.events.on('sort:change', ({ sorting }) => {
+  console.log('Sorting changed:', sorting) // [{ id: 'name', desc: true }]
+})
 ```
 
 ### Table Callback Options

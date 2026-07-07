@@ -11,7 +11,7 @@
 // non-virtualized grid, with live-resize and sorting enabled, so
 // e2e/interactions.spec.ts can drive everything with genuine pointer input.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTable, Table, createColumnHelper } from '@zvndev/yable-react'
 
 interface Item {
@@ -131,6 +131,66 @@ function PlainInteractive() {
   return <Table table={table} bordered />
 }
 
+// --- Events fixture: sort:change emission + postSortRows reordering ---------
+
+interface Person {
+  id: number
+  name: string
+  team: 'A' | 'B'
+}
+
+// A "pinned" row that postSortRows always floats to the top, regardless of the
+// active column sort — proves the hook reorders the final sorted model.
+const PEOPLE: Person[] = [
+  { id: 1, name: 'Mango', team: 'A' },
+  { id: 2, name: 'Apple', team: 'B' },
+  { id: 3, name: 'PINNED', team: 'A' },
+  { id: 4, name: 'Cherry', team: 'B' },
+]
+
+const pcol = createColumnHelper<Person>()
+
+function EventsFixture() {
+  const [sortChangeCount, setSortChangeCount] = useState(0)
+  const [lastSorting, setLastSorting] = useState('none')
+
+  const table = useTable<Person>({
+    data: PEOPLE,
+    columns: [
+      pcol.accessor('name', { header: 'Name', size: 160 }),
+      pcol.accessor('team', { header: 'Team', size: 100 }),
+    ],
+    getRowId: (row) => String(row.id),
+    enableSorting: true,
+    // Always float the PINNED row to the top of the final sorted order.
+    postSortRows: (rows) => {
+      const pinned = rows.filter((r) => r.original.name === 'PINNED')
+      const rest = rows.filter((r) => r.original.name !== 'PINNED')
+      return [...pinned, ...rest]
+    },
+    initialState: { pagination: { pageIndex: 0, pageSize: 100 } },
+  })
+
+  useEffect(() => {
+    const off = table.events.on('sort:change', (payload) => {
+      setSortChangeCount((c) => c + 1)
+      setLastSorting(JSON.stringify(payload.sorting))
+    })
+    return off
+  }, [table])
+
+  const firstRowName = table.getRowModel().rows[0]?.original.name ?? ''
+
+  return (
+    <div>
+      <div data-testid="sort-change-count">{sortChangeCount}</div>
+      <div data-testid="sort-change-payload">{lastSorting}</div>
+      <div data-testid="post-sort-first-row">{firstRowName}</div>
+      <Table table={table} bordered />
+    </div>
+  )
+}
+
 export default function InteractionsFixturePage() {
   return (
     <main style={{ padding: 24 }}>
@@ -139,9 +199,13 @@ export default function InteractionsFixturePage() {
         <h2>Virtualized</h2>
         <VirtualizedInteractive />
       </section>
-      <section data-testid="grid-plain" style={{ width: 1000 }}>
+      <section data-testid="grid-plain" style={{ width: 1000, marginBottom: 48 }}>
         <h2>Non-virtualized</h2>
         <PlainInteractive />
+      </section>
+      <section data-testid="grid-events" style={{ width: 600 }}>
+        <h2>Events</h2>
+        <EventsFixture />
       </section>
     </main>
   )

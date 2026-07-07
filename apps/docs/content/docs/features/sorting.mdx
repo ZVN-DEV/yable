@@ -28,6 +28,7 @@ columnHelper.accessor('name', {
 | `sortDescFirst`        | `boolean`                  | `false`    | Start with descending on first click                 |
 | `isMultiSortEvent`     | `(e) => boolean`           | Shift key  | Which modifier key triggers multi-sort               |
 | `onSortingChange`      | `OnChangeFn<SortingState>` | --         | Callback when sorting state changes                  |
+| `postSortRows`         | `(rows) => Row[] \| void`  | --         | Reorder the final sorted rows before render (AG-parity) |
 
 ### Column Options
 
@@ -63,6 +64,29 @@ columnHelper.accessor('priority', {
   },
 })
 ```
+
+### Post-sort hook
+
+`postSortRows` runs after the sorted row model is built and lets you reorder
+the final rows before they render — the AG Grid `postSortRows` equivalent. It
+receives the sorted `Row` array; return a new array or mutate the given one in
+place. It runs on every sort (and even with no active sort), so it is the right
+place to keep child rows grouped under their parents:
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  postSortRows: (rows) => {
+    // Float pinned rows to the top regardless of the active column sort.
+    const pinned = rows.filter((r) => r.original.pinned)
+    const rest = rows.filter((r) => !r.original.pinned)
+    return [...pinned, ...rest]
+  },
+})
+```
+
+`postSortRows` is skipped under `manualSorting`, where the server controls order.
 
 ### Programmatic Control
 

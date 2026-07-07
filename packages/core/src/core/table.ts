@@ -1449,35 +1449,65 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
   table.getSortedRowModel = memo(
     () => [table.getFilteredRowModel(), table.getState().sorting],
     (filteredModel: RowModel<TData>) => {
+      // `postSortRows` (AG-parity) may reorder the final rows even when no
+      // column sorting is active — e.g. keeping child rows under their parents.
+      const postSortRows = resolvedOptions.postSortRows
+      const applyPostSort = (rows: Row<TData>[]): Row<TData>[] | null => {
+        if (!postSortRows) return null
+        const arr = rows.slice()
+        const returned = postSortRows(arr)
+        return Array.isArray(returned) ? returned : arr
+      }
+
+      const buildModel = (rows: Row<TData>[]): RowModel<TData> => {
+        const rowsById: Record<string, Row<TData>> = {}
+        for (const row of rows) {
+          rowsById[row.id] = row
+        }
+        return { rows, flatRows: rows, rowsById }
+      }
+
       if (resolvedOptions.manualSorting) return filteredModel
 
       const sorting = table.getState().sorting
-      if (!sorting.length) return filteredModel
+      const hasSorting = sorting.length > 0
 
-      if (resolvedOptions.treeData && resolvedOptions.getDataPath) {
+      if ((hasSorting || postSortRows) && resolvedOptions.treeData && resolvedOptions.getDataPath) {
         const columnFilters = table.getState().columnFilters
         const globalFilter = table.getState().globalFilter
         const hasFilters = columnFilters.length > 0 || Boolean(globalFilter)
 
-        return getTreeRowModel(table, resolvedOptions.data ?? [], resolvedOptions.getDataPath, {
-          filterNode: hasFilters
-            ? (node) =>
-                rowPassesFilters(table, createTreeNodeRow(table, node), columnFilters, globalFilter)
-            : undefined,
-          compareNodes: createTreeNodeComparator(table, sorting),
-        })
+        const treeModel = getTreeRowModel(
+          table,
+          resolvedOptions.data ?? [],
+          resolvedOptions.getDataPath,
+          {
+            filterNode: hasFilters
+              ? (node) =>
+                  rowPassesFilters(
+                    table,
+                    createTreeNodeRow(table, node),
+                    columnFilters,
+                    globalFilter,
+                  )
+              : undefined,
+            compareNodes: hasSorting ? createTreeNodeComparator(table, sorting) : undefined,
+          },
+        )
+        const posted = applyPostSort(treeModel.rows)
+        return posted ? buildModel(posted) : treeModel
+      }
+
+      if (!hasSorting) {
+        const posted = applyPostSort(filteredModel.rows)
+        return posted ? buildModel(posted) : filteredModel
       }
 
       const sorted = [...filteredModel.rows].sort((a, b) =>
         compareRowsBySorting(table, a, b, sorting),
       )
 
-      const rowsById: Record<string, Row<TData>> = {}
-      for (const row of sorted) {
-        rowsById[row.id] = row
-      }
-
-      return { rows: sorted, flatRows: sorted, rowsById }
+      return buildModel(applyPostSort(sorted) ?? sorted)
     },
     { key: 'getSortedRowModel' },
   )

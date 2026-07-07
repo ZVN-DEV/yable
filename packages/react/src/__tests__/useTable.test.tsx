@@ -90,3 +90,56 @@ describe('useTable — latest onStateChange', () => {
     expect(calls.at(-1)).toBe('second')
   })
 })
+
+// The `sort:change` event exists in core's typed event map but the React
+// binding never emitted it, leaving `onSortChanged`-style subscriptions dead.
+describe('useTable — sort:change event', () => {
+  it('emits sort:change with the new sorting when sorting changes', () => {
+    let tableRef: Table<TestRow> | null = null
+
+    function Host() {
+      tableRef = useTable<TestRow>({
+        data: testData,
+        columns,
+        getRowId: (row) => row.id,
+      })
+      return null
+    }
+
+    render(<Host />)
+
+    const events: { sorting: unknown }[] = []
+    tableRef!.events.on('sort:change', (payload) => events.push(payload))
+
+    act(() => {
+      tableRef!.setSorting([{ id: 'name', desc: true }])
+    })
+
+    expect(events).toHaveLength(1)
+    expect(events[0]?.sorting).toEqual([{ id: 'name', desc: true }])
+  })
+
+  it('does not emit sort:change for non-sorting state changes', () => {
+    let tableRef: Table<TestRow> | null = null
+
+    function Host() {
+      tableRef = useTable<TestRow>({
+        data: testData,
+        columns,
+        getRowId: (row) => row.id,
+      })
+      return null
+    }
+
+    render(<Host />)
+
+    const events: unknown[] = []
+    tableRef!.events.on('sort:change', (payload) => events.push(payload))
+
+    act(() => {
+      tableRef!.setPageIndex(0)
+    })
+
+    expect(events).toHaveLength(0)
+  })
+})

@@ -137,16 +137,17 @@ The configuration object passed to `createTable()` or `useTable()`.
 
 ### Sorting Options
 
-| Option                 | Type                        | Default    | Description                                   |
-| ---------------------- | --------------------------- | ---------- | --------------------------------------------- |
-| `enableSorting`        | `boolean`                   | `true`     | Enable sorting globally                       |
-| `enableMultiSort`      | `boolean`                   | `true`     | Allow multi-column sorting                    |
-| `enableSortingRemoval` | `boolean`                   | `true`     | Allow removing sort on third click            |
-| `maxMultiSortColCount` | `number`                    | `Infinity` | Max simultaneous sort columns                 |
-| `manualSorting`        | `boolean`                   | `false`    | Disable client-side sorting (for server-side) |
-| `sortingFns`           | `Record<string, SortingFn>` | --         | Additional named sorting functions            |
-| `onSortingChange`      | `OnChangeFn<SortingState>`  | --         | Sorting state change callback                 |
-| `isMultiSortEvent`     | `(e) => boolean`            | Shift key  | Multi-sort modifier key test                  |
+| Option                 | Type                        | Default    | Description                                             |
+| ---------------------- | --------------------------- | ---------- | ------------------------------------------------------- |
+| `enableSorting`        | `boolean`                   | `true`     | Enable sorting globally                                 |
+| `enableMultiSort`      | `boolean`                   | `true`     | Allow multi-column sorting                              |
+| `enableSortingRemoval` | `boolean`                   | `true`     | Allow removing sort on third click                      |
+| `maxMultiSortColCount` | `number`                    | `Infinity` | Max simultaneous sort columns                           |
+| `manualSorting`        | `boolean`                   | `false`    | Disable client-side sorting (for server-side)           |
+| `sortingFns`           | `Record<string, SortingFn>` | --         | Additional named sorting functions                      |
+| `onSortingChange`      | `OnChangeFn<SortingState>`  | --         | Sorting state change callback                           |
+| `postSortRows`         | `(rows) => Row[] \| void`   | --         | Reorder the final sorted rows before render (AG-parity) |
+| `isMultiSortEvent`     | `(e) => boolean`            | Shift key  | Multi-sort modifier key test                            |
 
 ### Filtering Options
 
