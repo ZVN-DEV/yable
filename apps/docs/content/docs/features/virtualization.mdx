@@ -52,4 +52,30 @@ The `overscan` option (default 5) mounts extra rows above and below the window t
 - **Pinned rows** — top/bottom pinned rows render outside the virtual window and stay put while the center scrolls.
 - **Pinned columns** — left/right pinned columns stay frozen to the viewport edges during horizontal scroll: the whole virtualized table shares one scroll container, so pinned header and body cells move together. The horizontal scrollbar sits at the bottom of the `virtualViewportHeight` box, reachable without scrolling to the last row.
 - **Row spanning** — native `rowSpan` merges cells inside the mounted window; spans are clamped to the window edge.
+- **Row expanding / detail panels** — the detail panel *renders* for expanded rows in the window, but the virtualizer does **not** measure its height. See below.
 - **Interactive cells** — checkboxes, buttons, inputs, and links in cells receive real pointer events anywhere in the window, at any scroll depth.
+
+### Row expanding & master-detail
+
+`enableExpanding` / `renderDetailPanel` work under virtualization in the sense that
+the detail panel mounts for each expanded row in the window — it is not disabled.
+But the virtualizer computes scroll offsets and total height purely from the
+row-height strategy above (`rowHeight`, a `rowHeight(index)` function, or
+Pretext-measured text heights). **It never measures the detail panel's DOM
+height.** So the extra height an expanded panel adds is not reflected in the
+scrollbar or in the position of rows below it: within a single mounted window the
+panel flows correctly, but once you scroll past an expanded row the window drifts
+out of alignment.
+
+Recommended patterns for detail content on large, virtualized datasets:
+
+- **Out-of-table detail view (preferred)** — open the detail in a drawer, modal, or
+  side panel on row click instead of expanding inline. Every row stays a
+  predictable height, so virtualization measurements stay exact.
+- **Disable virtualization for expansion-heavy views** — if inline expansion is the
+  point of the screen and the dataset is small enough to render without
+  virtualization, leave `enableVirtualization` off.
+- **Fixed-height panels only** — if you must expand inline while virtualized, keep
+  the panel a single known height and encode it in a `rowHeight(index)` function
+  that returns `base + panelHeight` for expanded rows. Variable-height panels are
+  not supported under virtualization.

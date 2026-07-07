@@ -4,6 +4,7 @@
 
 import type { RowData, Table, ColumnDefExtensions, EditingState, YableEventMap } from '../types'
 import { getCommitCoordinator } from '../core/table'
+import { fireColumnCommitHooks } from '../core/editCommitHooks'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -171,6 +172,10 @@ export function createFullRowEditingIntegration<TData extends RowData>(
     // once with a partial payload (just the active cell), once with the full
     // row. The active cell's editing state is cleared by the setEditing() call
     // at the end of this function instead.
+
+    // Per-column commit hooks fire for every committed cell, independent of the
+    // table-level onCommit/onEditCommit handler below.
+    fireColumnCommitHooks(table, { [rowId]: values })
 
     // Dispatch through CommitCoordinator if onCommit is defined; otherwise
     // fall back to the legacy onEditCommit hook.

@@ -303,6 +303,7 @@ interface CellEditConfig {
   format?: (value: TValue) => string // Format value for display
   placeholder?: string
   render?: (props: CellEditRenderProps) => unknown // Custom editor render
+  commit?: (row: Row<TData>, value: TValue) => void // Per-column commit handler
 }
 ```
 
@@ -352,6 +353,46 @@ const table = useTable({
   },
 })
 ```
+
+### Commit payloads are keyed by column id
+
+The `onEditCommit` payload is `Record<rowId, Record<columnId, value>>` — keyed by
+**column id, not data-field path**. For a string-path column the id defaults to
+the path, so the patch looks like a `Partial<TData>`. But a function / derived
+accessor sets its own `id`, and the committed value lands under that id, not under
+any real field:
+
+```typescript
+columnHelper.accessor((row) => row.pricing.tier1, {
+  id: 'tier1Price', // commit key is 'tier1Price', not 'pricing.tier1'
+  editable: true,
+  editConfig: { type: 'number' },
+})
+
+// onEditCommit receives: { [rowId]: { tier1Price: 42 } }
+// NOT { [rowId]: { pricing: { tier1: 42 } } }
+```
+
+### Per-column commit handler
+
+`editConfig.commit(row, value)` fires once for every committed value in that
+column — on single-cell commit, full-row commit, and `commitAllPending()` — with
+the pre-commit row and the new value. It lets the column-id → data-field mapping
+live on the column def instead of a `switch (columnId)` inside `onEditCommit`:
+
+```tsx
+columnHelper.accessor((row) => row.pricing.tier1, {
+  id: 'tier1Price',
+  editable: true,
+  editConfig: {
+    type: 'number',
+    commit: (row, value) => updateTierPrice(row.original.id, 'tier1', value),
+  },
+})
+```
+
+`commit` fires regardless of whether `onEditCommit` / `onCommit` is also set — if
+both are defined, both run, so pick one owner per column.
 
 ### Editors render automatically
 
@@ -970,6 +1011,26 @@ table.toggleAllRowsExpanded(false)
 table.getRow('0').getIsExpanded() // boolean
 table.getIsAllRowsExpanded() // boolean
 ```
+
+### With row virtualization
+
+Detail panels still render when `enableVirtualization` is on, but the virtualizer
+sizes rows only from `rowHeight` / Pretext heights — it does **not** measure the
+detail panel's DOM height. So a variable-height inline panel is not reflected in
+the scrollbar or in the position of rows below it: within one mounted window the
+panel flows correctly, but scrolling past an expanded row drifts the window out of
+alignment.
+
+For detail content on large, virtualized datasets:
+
+- **Out-of-table detail (preferred)** — open the detail in a drawer, modal, or side
+  panel on row click. Every row keeps a predictable height.
+- **Disable virtualization** for expansion-heavy views where the dataset is small
+  enough to render fully.
+- **Fixed-height panels only** — if you must expand inline while virtualized, keep
+  the panel one known height and encode it in a `rowHeight(index)` function that
+  returns `base + panelHeight` for expanded rows. Variable-height inline panels are
+  not supported under virtualization.
 
 ---
 
