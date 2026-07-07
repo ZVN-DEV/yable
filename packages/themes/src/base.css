@@ -349,6 +349,27 @@
   background: var(--yable-bg-row-hover);
 }
 
+/* When the renderer stamps the absolute display index (React does), stripe by
+   it instead of DOM position: under virtualization nth-child parity shifts
+   with the mounted window, making stripes swap as you scroll. These rules
+   come after the nth-child ones so they win the tie for attribute-bearing
+   rows; renderers without the attribute (vanilla) keep nth-child striping. */
+.yable--striped .yable-tr[data-row-parity='odd'] {
+  background: var(--yable-bg-row);
+}
+
+.yable--striped .yable-tr[data-row-parity='even'] {
+  background: var(--yable-bg-row-alt);
+}
+
+.yable--striped .yable-tr[data-row-parity]:hover {
+  background: var(--yable-bg-row-hover);
+}
+
+.yable--striped .yable-tr[data-row-parity][data-selected='true'] {
+  background: var(--yable-bg-row-selected);
+}
+
 /* Bordered variant — visible column separators */
 .yable--bordered .yable-th + .yable-th,
 .yable--bordered .yable-td + .yable-td {

@@ -115,7 +115,7 @@ function VirtualizedInteractive() {
     columnResizeMode: 'onChange',
     initialState: { pagination: { pageIndex: 0, pageSize: 100_000 } },
   })
-  return <Table table={table} bordered />
+  return <Table table={table} bordered striped />
 }
 
 function PlainInteractive() {

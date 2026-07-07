@@ -127,6 +127,37 @@ test.describe('real-pointer core interactions', () => {
     })
   }
 
+  test('stripes follow the absolute row index, not the mounted window (virtualized)', async ({
+    page,
+  }) => {
+    const root = grid(page, 'grid-virtual')
+    const readParity = () =>
+      root.locator('tbody tr[data-row-index]').evaluateAll((rows) =>
+        rows.slice(0, 6).map((r) => ({
+          idx: Number(r.getAttribute('data-row-index')),
+          striped:
+            getComputedStyle(r).backgroundColor !==
+            getComputedStyle(rows.find((o) => Number(o.getAttribute('data-row-index')) % 2 === 1)!)
+              .backgroundColor,
+        })),
+      )
+    // Baseline: even display indexes carry the alt background.
+    const before = await readParity()
+    expect(before.every((r) => r.striped === (r.idx % 2 === 0))).toBe(true)
+
+    // Scroll to a window whose start index has flipped parity several times.
+    const scroller = root.locator('.yable-virtual-scroll-container')
+    await scroller.evaluate((node) => {
+      node.scrollTop = 4123
+      node.dispatchEvent(new Event('scroll', { bubbles: true }))
+    })
+    await expect
+      .poll(async () => (await readParity()).every((r) => r.striped === (r.idx % 2 === 0)), {
+        message: 'stripe parity must stay tied to the absolute row index after scrolling',
+      })
+      .toBe(true)
+  })
+
   test('interactive elements still respond after deep scroll (virtualized)', async ({ page }) => {
     const root = grid(page, 'grid-virtual')
     const scroller = root.locator('.yable-virtual-scroll-container')
