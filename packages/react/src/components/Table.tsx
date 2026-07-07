@@ -1,6 +1,6 @@
 // @zvndev/yable-react — Main Table Component
 
-import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
+import React, { useMemo, useState, useCallback, useRef, useEffect, useId } from 'react'
 import {
   createTable,
   generatePivotColumnDefs,
@@ -30,6 +30,8 @@ import { useContextMenu } from '../hooks/useContextMenu'
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation'
 import { useColumnVirtualization } from '../hooks/useColumnVirtualization'
 import { useFillHandle } from '../hooks/useFillHandle'
+import { useAutoColumnSizing } from '../hooks/useAutoColumnSizing'
+import type { AutoColumnWidthOptions } from '../types'
 
 function filterHeaderGroups<TData extends RowData>(
   groups: HeaderGroup<TData>[],
@@ -49,6 +51,8 @@ export function Table<TData extends RowData>({
   striped: stripedProp,
   bordered: borderedProp,
   compact: compactProp,
+  density: densityProp,
+  autoColumnWidth: autoColumnWidthProp,
   theme: themeProp,
   config,
   configProfile,
@@ -91,6 +95,9 @@ export function Table<TData extends RowData>({
   const striped = stripedProp ?? profileTableProps?.striped ?? providerTableProps?.striped
   const bordered = borderedProp ?? profileTableProps?.bordered ?? providerTableProps?.bordered
   const compact = compactProp ?? profileTableProps?.compact ?? providerTableProps?.compact
+  const density = densityProp ?? profileTableProps?.density ?? providerTableProps?.density
+  const resolvedAutoColumnWidth =
+    autoColumnWidthProp ?? profileTableProps?.autoColumnWidth ?? providerTableProps?.autoColumnWidth
   const theme = themeProp ?? profileTableProps?.theme ?? providerTableProps?.theme
   const direction = directionProp ?? profileTableProps?.direction ?? providerTableProps?.direction
   const ariaLabel = ariaLabelProp ?? profileTableProps?.ariaLabel ?? providerTableProps?.ariaLabel
@@ -113,7 +120,9 @@ export function Table<TData extends RowData>({
     resolvedDefaultSidebarPanel ?? 'columns',
   )
   const containerRef = useRef<HTMLDivElement>(null)
+  const mainRef = useRef<HTMLDivElement>(null)
   const horizontalScrollRef = useRef<HTMLDivElement>(null)
+  const autoWidthInstanceId = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   const tableState = table.getState()
   const sourceData = table.options.data
   const pivotTable = usePivotRenderTable(table, tableState, sourceData)
@@ -132,6 +141,7 @@ export function Table<TData extends RowData>({
     striped && 'yable--striped',
     bordered && 'yable--bordered',
     compact && 'yable--compact',
+    density && `yable--density-${density}`,
     loading && 'yable-loading',
     isRtl && 'yable--rtl',
     sidebarOpen && 'yable--sidebar-open',
@@ -306,6 +316,33 @@ export function Table<TData extends RowData>({
       </colgroup>
     )
 
+  // Smart column width (opt-in). Disabled for pivot, adaptive cards, and the
+  // column-virtualization shell (those own their own width math). Squish + wrap
+  // is further disabled under row virtualization inside the hook.
+  const autoColumnWidthActive =
+    Boolean(resolvedAutoColumnWidth) &&
+    !pivotTable &&
+    !adaptiveLayoutActive &&
+    !showColumnVirtualizationShell
+  const autoColumnWidthConfig: AutoColumnWidthOptions =
+    resolvedAutoColumnWidth && typeof resolvedAutoColumnWidth === 'object'
+      ? resolvedAutoColumnWidth
+      : {}
+  const autoColumnSignature = autoColumnWidthActive
+    ? `${visibleLeafColumns.map((column) => column.id).join(',')}|${rows.length}|${density ?? ''}|${compact ? 1 : 0}`
+    : ''
+  const { wrapColumnIds } = useAutoColumnSizing({
+    table: renderTable,
+    columns: visibleLeafColumns,
+    measureRef: mainRef,
+    enabled: autoColumnWidthActive,
+    config: autoColumnWidthConfig,
+    isVirtualized: enableRowVirtualization,
+    signature: autoColumnSignature,
+  })
+  const autoWidthClass = wrapColumnIds.length > 0 ? `yable-autofit-${autoWidthInstanceId}` : ''
+  const wrapStyleCss = wrapColumnIds.length > 0 ? buildWrapCss(autoWidthClass, wrapColumnIds) : ''
+
   const outerTableStyle = useMemo((): React.CSSProperties | undefined => {
     if (columnVirtualState.isVirtualized) {
       return {
@@ -377,7 +414,7 @@ export function Table<TData extends RowData>({
     <TableProvider value={baseTable}>
       <div
         ref={containerRef}
-        className={classNames}
+        className={autoWidthClass ? `${classNames} ${autoWidthClass}` : classNames}
         data-theme={theme}
         dir={direction}
         role="grid"
@@ -387,7 +424,8 @@ export function Table<TData extends RowData>({
         onContextMenu={handleContextMenu}
         {...rest}
       >
-        <div className="yable-main">
+        {wrapStyleCss ? <style dangerouslySetInnerHTML={{ __html: wrapStyleCss }} /> : null}
+        <div className="yable-main" ref={mainRef}>
           {showColumnVirtualizationShell && !adaptiveLayoutActive ? (
             <div
               ref={horizontalScrollRef}
@@ -504,6 +542,21 @@ export function Table<TData extends RowData>({
       </div>
     </TableProvider>
   )
+}
+
+// Scoped CSS enabling text wrap on squished auto-sized columns. Scoped to this
+// grid instance's generated class so it never affects sibling grids.
+function buildWrapCss(scope: string, columnIds: string[]): string {
+  const selectors = columnIds
+    .map((id) => {
+      const escaped = id.replace(/[\\"]/g, '\\$&')
+      return (
+        `.${scope} .yable-td[data-column-id="${escaped}"],` +
+        `.${scope} .yable-th[data-column-id="${escaped}"]`
+      )
+    })
+    .join(',')
+  return `${selectors}{white-space:normal;overflow-wrap:anywhere;}`
 }
 
 type PivotEngineConfig = Parameters<typeof buildPivotRowModel<RowData>>[2]

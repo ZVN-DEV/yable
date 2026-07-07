@@ -16,6 +16,8 @@ export type YableTableVisualConfig = Partial<
     | 'striped'
     | 'bordered'
     | 'compact'
+    | 'density'
+    | 'autoColumnWidth'
     | 'stickyHeader'
     | 'theme'
     | 'direction'

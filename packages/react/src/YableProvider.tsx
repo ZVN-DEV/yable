@@ -28,6 +28,8 @@ export interface YableDefaults {
       | 'striped'
       | 'bordered'
       | 'compact'
+      | 'density'
+      | 'autoColumnWidth'
       | 'stickyHeader'
       | 'theme'
       | 'direction'

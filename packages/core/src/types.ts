@@ -117,6 +117,13 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   minSize?: number
   maxSize?: number
   flex?: number
+  /**
+   * Opt out of the React `autoColumnWidth` feature for this column. When `false`
+   * (or when an explicit `size` is set) the column keeps its width and is
+   * excluded from content measurement and squishing. Passive flag — no core
+   * logic reads it; the React adapter honors it.
+   */
+  enableAutoSize?: boolean
 
   // Sorting
   enableSorting?: boolean

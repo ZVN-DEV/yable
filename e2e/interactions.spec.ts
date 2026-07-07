@@ -456,3 +456,88 @@ test.describe('virtualization without pagination override', () => {
     await expect(root.locator('td[data-column-id="id"]').filter({ hasText: /^90$/ })).toBeVisible()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Density presets (Feature B). Each `density` preset maps to a token set; the
+// rendered row height must grow condensed < regular < spacious.
+// ---------------------------------------------------------------------------
+
+test.describe('density presets', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/e2e/density')
+    await expect(page.getByTestId('density-regular').locator('tbody tr').first()).toBeVisible()
+  })
+
+  async function firstBodyCellHeight(page: Page, testId: string): Promise<number> {
+    const cell = page.getByTestId(testId).locator('tbody tr').first().locator('td').first()
+    const box = await cell.boundingBox()
+    return box?.height ?? 0
+  }
+
+  test('applies the density class per preset', async ({ page }) => {
+    await expect(
+      page.getByTestId('density-condensed').locator('.yable--density-condensed'),
+    ).toBeVisible()
+    await expect(
+      page.getByTestId('density-regular').locator('.yable--density-regular'),
+    ).toBeVisible()
+    await expect(
+      page.getByTestId('density-spacious').locator('.yable--density-spacious'),
+    ).toBeVisible()
+  })
+
+  test('row height grows condensed < regular < spacious', async ({ page }) => {
+    const condensed = await firstBodyCellHeight(page, 'density-condensed')
+    const regular = await firstBodyCellHeight(page, 'density-regular')
+    const spacious = await firstBodyCellHeight(page, 'density-spacious')
+
+    expect(condensed).toBeGreaterThan(0)
+    expect(regular).toBeGreaterThan(condensed)
+    expect(spacious).toBeGreaterThan(regular)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Smart column width (Feature A). `fit` squishes + wraps to avoid horizontal
+// scroll; `scroll` keeps natural widths and scrolls. Opt-out columns keep width.
+// ---------------------------------------------------------------------------
+
+test.describe('smart column width', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/e2e/auto-column-width')
+    await expect(page.getByTestId('auto-fit').locator('tbody tr').first()).toBeVisible()
+    await expect(page.getByTestId('auto-scroll').locator('tbody tr').first()).toBeVisible()
+  })
+
+  test('fit mode produces no horizontal scroll', async ({ page }) => {
+    const main = page.getByTestId('auto-fit').locator('.yable-main')
+    const overflow = await main.evaluate((n) => n.scrollWidth - n.clientWidth)
+    // Allow 2px for sub-pixel rounding; anything larger means it scrolls.
+    expect(overflow).toBeLessThanOrEqual(2)
+  })
+
+  test('fit mode wraps the long-content column (cell taller than one line)', async ({ page }) => {
+    const cell = page
+      .getByTestId('auto-fit')
+      .locator('tbody tr')
+      .first()
+      .locator('td[data-column-id="description"]')
+    const box = await cell.boundingBox()
+    // A single unwrapped line sits around the ~40px row min-height; a wrapped
+    // long sentence in a squished column is clearly taller.
+    expect(box?.height ?? 0).toBeGreaterThan(60)
+  })
+
+  test('scroll mode keeps natural widths and scrolls horizontally', async ({ page }) => {
+    const main = page.getByTestId('auto-scroll').locator('.yable-main')
+    const overflow = await main.evaluate((n) => n.scrollWidth - n.clientWidth)
+    expect(overflow).toBeGreaterThan(20)
+  })
+
+  test('opt-out column keeps its explicit width under fit squish', async ({ page }) => {
+    const statusHeader = page.getByTestId('auto-fit').locator('th[data-column-id="status"]').first()
+    const box = await statusHeader.boundingBox()
+    // Explicit size:120 + enableAutoSize:false — never measured or squished.
+    expect(Math.abs((box?.width ?? 0) - 120)).toBeLessThanOrEqual(2)
+  })
+})
