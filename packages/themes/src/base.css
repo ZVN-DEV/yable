@@ -209,13 +209,18 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: calc(var(--yable-resize-handle-width) * 2);
+  width: calc(var(--yable-resize-handle-width) * 3);
   cursor: col-resize;
   z-index: var(--yable-z-resize);
   touch-action: none;
   display: flex;
   align-items: center;
-  justify-content: center;
+  /* The visible bar must sit ON the column divider (the th's right edge).
+     Centering it in the hotspot draws it half a hotspot-width to the left of
+     the line users actually aim for. The hotspot cannot overhang into the
+     next th (sticky headers would paint and hit-test over it), so it extends
+     inward only, flush with the divider. */
+  justify-content: flex-end;
 }
 
 .yable-resize-handle::after {
