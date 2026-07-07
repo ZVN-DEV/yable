@@ -212,7 +212,7 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
    * React resolves this through `YableProvider` / `useTable` config profiles.
    */
   cellConfig?: string | string[]
-  headerClassName?: string
+  headerClassName?: string | ((ctx: HeaderContext<TData, TValue>) => string | undefined)
   footerClassName?: string
 
   // Tooltip
