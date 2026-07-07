@@ -26,3 +26,4 @@ AUDIT-REPORT.md
 .vercel
 .env*.local
 .omx/
+*.jpeg
