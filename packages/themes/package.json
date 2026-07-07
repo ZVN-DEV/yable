@@ -1,6 +1,6 @@
 {
   "name": "@zvndev/yable-themes",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "CSS design token system and themes for Yable data tables",
   "keywords": [
     "table",
