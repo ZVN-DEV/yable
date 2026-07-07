@@ -157,6 +157,12 @@ export function useTable<TData extends RowData>(options: UseTableOptions<TData>)
     } else {
       setState((prev) => functionalUpdate(updater, prev))
     }
+    // The 'state:change' event is part of the typed event map but nothing
+    // emitted it — subscribers (e.g. layout-persistence code) never fired.
+    const table = tableRef.current
+    if (table) {
+      table.events.emit('state:change', { state: table.getState() } as never)
+    }
   }, [])
 
   const resolvedOptions: TableOptions<TData> = useMemo(

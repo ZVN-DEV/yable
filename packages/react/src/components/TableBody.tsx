@@ -484,6 +484,7 @@ function TableRowInner<TData extends RowData>({
         data-pinned-row={pinnedPosition}
         data-row-id={row.id}
         data-row-index={rowIndex}
+        data-row-parity={rowIndex % 2 === 0 ? 'even' : 'odd'}
         aria-selected={selectionEnabled ? isSelected : undefined}
         aria-expanded={expansionEnabled ? isExpanded : undefined}
         onClick={handleClick}

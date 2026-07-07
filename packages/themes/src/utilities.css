@@ -15,7 +15,6 @@
      9. Print Utilities      — print-optimized rendering
    ============================================================================ */
 
-
 /* ============================================================================
    1. DENSITY MODIFIERS
    Control padding, font size, and row height for different data densities.
@@ -76,7 +75,6 @@
   letter-spacing: 0;
 }
 
-
 /* ============================================================================
    2. VISUAL MODIFIERS
    Control borders, backgrounds, corners, and shadows.
@@ -93,7 +91,29 @@
 }
 
 /* Selected state takes precedence over striped */
-.yable--striped .yable-tbody .yable-tr[data-selected="true"]:nth-child(even) {
+.yable--striped .yable-tbody .yable-tr[data-selected='true']:nth-child(even) {
+  background: var(--yable-bg-row-selected);
+}
+
+/* When the renderer stamps the absolute display index (React does), stripe by
+   it instead of DOM position: under virtualization nth-child parity shifts with
+   the mounted window, making stripes swap colors while you scroll. These rules
+   match the specificity of the nth-child rules above and come after them, so
+   they win the tie for attribute-bearing rows; renderers that don't stamp the
+   attribute (vanilla) keep the nth-child striping untouched. */
+.yable--striped .yable-tbody .yable-tr[data-row-parity='odd'] {
+  background: var(--yable-bg-row);
+}
+
+.yable--striped .yable-tbody .yable-tr[data-row-parity='even'] {
+  background: var(--yable-bg-row-alt);
+}
+
+.yable--striped .yable-tbody .yable-tr[data-row-parity]:hover {
+  background: var(--yable-bg-row-hover);
+}
+
+.yable--striped .yable-tbody .yable-tr[data-row-parity][data-selected='true'] {
   background: var(--yable-bg-row-selected);
 }
 
@@ -145,7 +165,6 @@
   box-shadow: var(--yable-shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.08));
 }
 
-
 /* ============================================================================
    3. HOVER CONTROL
    Row hover is on by default in base.css. These classes opt out.
@@ -169,10 +188,9 @@
 }
 
 /* Preserve selected state when hover is disabled */
-.yable--no-hover .yable-tr[data-selected="true"]:hover {
+.yable--no-hover .yable-tr[data-selected='true']:hover {
   background: var(--yable-bg-row-selected);
 }
-
 
 /* ============================================================================
    4. LAYOUT MODIFIERS
@@ -210,7 +228,6 @@
   font-size: var(--yable-font-size);
 }
 
-
 /* ============================================================================
    5. ANIMATION UTILITIES
    Opt-in animations for row mount/unmount and cell value changes.
@@ -223,12 +240,24 @@
 }
 
 /* Stagger child rows for a cascade effect */
-.yable--animate-rows .yable-tbody .yable-tr:nth-child(1) { animation-delay: 0ms; }
-.yable--animate-rows .yable-tbody .yable-tr:nth-child(2) { animation-delay: 20ms; }
-.yable--animate-rows .yable-tbody .yable-tr:nth-child(3) { animation-delay: 40ms; }
-.yable--animate-rows .yable-tbody .yable-tr:nth-child(4) { animation-delay: 60ms; }
-.yable--animate-rows .yable-tbody .yable-tr:nth-child(5) { animation-delay: 80ms; }
-.yable--animate-rows .yable-tbody .yable-tr:nth-child(n+6) { animation-delay: 100ms; }
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(1) {
+  animation-delay: 0ms;
+}
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(2) {
+  animation-delay: 20ms;
+}
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(3) {
+  animation-delay: 40ms;
+}
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(4) {
+  animation-delay: 60ms;
+}
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(5) {
+  animation-delay: 80ms;
+}
+.yable--animate-rows .yable-tbody .yable-tr:nth-child(n + 6) {
+  animation-delay: 100ms;
+}
 
 /* ── Row Enter / Exit — Applied programmatically by the core engine ──────── */
 
@@ -267,7 +296,6 @@
   }
 }
 
-
 /* ============================================================================
    6. SCROLLBAR STYLING
    Custom scrollbar appearance for Webkit/Blink browsers.
@@ -296,7 +324,7 @@
 .yable {
   scrollbar-width: thin;
   scrollbar-color: var(--yable-scrollbar-thumb, rgba(0, 0, 0, 0.15))
-                   var(--yable-scrollbar-track, transparent);
+    var(--yable-scrollbar-track, transparent);
 }
 
 /* ── Scrollbar corner (where h + v scrollbars meet) ──────────────────────── */
@@ -304,7 +332,6 @@
 .yable::-webkit-scrollbar-corner {
   background: var(--yable-scrollbar-track, transparent);
 }
-
 
 /* ============================================================================
    7. FOCUS UTILITIES
@@ -337,7 +364,6 @@
 .yable-td:focus-within:not(:focus-visible) {
   outline: none;
 }
-
 
 /* ============================================================================
    8. RESPONSIVE BEHAVIOR
@@ -427,7 +453,6 @@
     display: none;
   }
 }
-
 
 /* ============================================================================
    9. PRINT UTILITIES
