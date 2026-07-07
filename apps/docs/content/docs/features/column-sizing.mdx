@@ -66,16 +66,66 @@ offsets, the `<colgroup>`, and virtualization totals all stay in agreement. Once
 you drag a column's resize handle, that column is excluded from further
 auto-sizing so it never fights your manual width.
 
+### Measuring rendered content
+
+By default a column is measured by its raw accessor value (`String(row.getValue(id))`).
+When the cell displays something different — a formatter or a custom `cell`
+renderer — the raw value under-measures and the rendered text can clip (accessor
+`19` rendered as `"$19.00 (Gold)"`). Two per-column overrides fix this:
+
+```tsx
+columnHelper.accessor('price', {
+  header: 'Price',
+  cell: ({ getValue }) => formatCurrency(getValue()),
+  // Measure the string the cell actually renders:
+  autoSizeText: (row) => formatCurrency(row.original.price),
+})
+
+columnHelper.accessor('trend', {
+  header: 'Trend',
+  cell: ({ getValue }) => <Sparkline value={getValue()} width={80} />,
+  // Or provide an EXACT natural pixel width — bypasses text measurement
+  // entirely (no padding or sort-indicator is added):
+  autoSizeWidth: () => 80,
+})
+```
+
+Precedence per column: `autoSizeWidth` (exact px, used verbatim) → `autoSizeText`
+(measured string) → the raw accessor value. Both take a row and are sampled the
+same way as normal values; `autoSizeText` still gets cell padding and the
+sort-indicator allowance added, while `autoSizeWidth` does not.
+
+### `minSize` is a hard floor
+
+A column can **never** render below its `minSize` — core `getSize` clamps every
+width (auto-computed, resized, or persisted) up to `minSize`. Auto-sizing honors
+this: a column whose content is narrower than its `minSize` renders at `minSize`,
+not tighter. If you set `minSize` purely as a flex floor and want auto-sizing to
+size closer to the content, lower or omit it.
+
+### Persisted widths
+
+The hook **never overwrites a width it did not itself write this session** — a
+user-dragged width or a width restored from persisted `columnSizing` is left
+alone (it is treated as user-set, exactly like an in-session resize). The
+trade-off: if you persist `columnSizing` while `autoColumnWidth` is on, persisted
+columns won't be re-auto-measured on reload. Prefer either **not** persisting
+`columnSizing` under `autoColumnWidth` (auto recomputes deterministically from
+content) or persisting **only** the columns the user actually resized.
+
 ### Limitations
 
-- **Custom cell renderers.** Measurement uses each cell's string value, so
+- **Custom cell renderers.** Measurement uses each cell's raw string value. For
   columns rendering non-text content (badges, progress bars, custom components)
-  won't measure accurately. Give those columns an explicit `size` or
-  `enableAutoSize: false`.
-- **Row virtualization.** Wrapped rows have variable heights that the virtualizer
-  does not measure. When the table is row-virtualized, `overflow: 'fit'` falls
-  back to `scroll` behavior (natural widths, horizontal scroll) instead of
-  squishing and wrapping.
+  or formatted text, provide [`autoSizeText` or `autoSizeWidth`](#measuring-rendered-content),
+  or give the column an explicit `size` / `enableAutoSize: false`.
+- **Row virtualization.** Wrapped rows have variable heights that the fixed-height
+  virtualizer does not measure. When the table is row-virtualized, `overflow: 'fit'`
+  falls back to `scroll` behavior (natural widths, horizontal scroll) instead of
+  squishing and wrapping, and emits a one-time dev-only console warning. The
+  supported way to get fit + wrap under virtualization is Pretext-measured row
+  heights; otherwise disable virtualization or set `overflow: 'scroll'` to
+  silence the warning.
 
 ## Density Presets
 

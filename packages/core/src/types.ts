@@ -124,6 +124,24 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
    * logic reads it; the React adapter honors it.
    */
   enableAutoSize?: boolean
+  /**
+   * React `autoColumnWidth` measurement override: the string to MEASURE for this
+   * column's content width (measured with the body font, plus cell padding and
+   * the sort-indicator allowance, exactly like a normal value). Use this when the
+   * displayed cell differs from the raw accessor value (a formatter or custom
+   * `cell` renderer) so auto-sizing measures what the user actually sees instead
+   * of the underlying value. Passive flag — only the React adapter reads it.
+   */
+  autoSizeText?: (row: Row<TData>) => string
+  /**
+   * React `autoColumnWidth` measurement override: an EXACT natural pixel width for
+   * this row's cell. When present it bypasses text measurement entirely and is
+   * used verbatim (no padding or sort-indicator is added). The column's natural
+   * width is the max of this over sampled rows and the header's measured width.
+   * Takes precedence over {@link autoSizeText}. Passive flag — only the React
+   * adapter reads it.
+   */
+  autoSizeWidth?: (row: Row<TData>) => number
 
   // Sorting
   enableSorting?: boolean
@@ -194,7 +212,7 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
    * React resolves this through `YableProvider` / `useTable` config profiles.
    */
   cellConfig?: string | string[]
-  headerClassName?: string
+  headerClassName?: string | ((ctx: HeaderContext<TData, TValue>) => string | undefined)
   footerClassName?: string
 
   // Tooltip

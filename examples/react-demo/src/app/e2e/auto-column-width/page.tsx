@@ -51,6 +51,49 @@ function AutoGrid({ overflow }: { overflow: 'fit' | 'scroll' }) {
   return <Table table={table} autoColumnWidth={{ overflow }} bordered />
 }
 
+// --- Rendered-content measurement (autoSizeText) ---------------------------
+// Both columns hold the same small numeric accessor value and render the SAME
+// wide formatted string. The `formatted` column sets `autoSizeText` so it is
+// measured by what the cell RENDERS; the `raw` column is measured by its raw
+// accessor value (`1234`) and therefore undershoots. `overflow: 'scroll'` keeps
+// both at natural width so the spec can compare them directly.
+
+interface PriceRow {
+  id: number
+  amount: number
+}
+
+const PRICE_ROWS: PriceRow[] = Array.from({ length: 12 }, (_, i) => ({
+  id: i + 1,
+  amount: 1234,
+}))
+
+const formatPrice = (n: number): string => `$${n.toFixed(2)} (Infrastructure Platform)`
+
+const priceCol = createColumnHelper<PriceRow>()
+const priceColumns = [
+  priceCol.accessor('amount', {
+    id: 'raw',
+    header: 'Raw',
+    cell: ({ getValue }) => formatPrice(getValue()),
+  }),
+  priceCol.accessor('amount', {
+    id: 'formatted',
+    header: 'Formatted',
+    cell: ({ getValue }) => formatPrice(getValue()),
+    autoSizeText: (row) => formatPrice(row.original.amount),
+  }),
+]
+
+function FormattedGrid() {
+  const table = useTable<PriceRow>({
+    data: PRICE_ROWS,
+    columns: priceColumns,
+    getRowId: (row) => String(row.id),
+  })
+  return <Table table={table} autoColumnWidth={{ overflow: 'scroll' }} bordered />
+}
+
 export default function AutoColumnWidthFixturePage() {
   return (
     <main style={{ padding: 24 }}>
@@ -59,9 +102,13 @@ export default function AutoColumnWidthFixturePage() {
         <h2>overflow: fit</h2>
         <AutoGrid overflow="fit" />
       </section>
-      <section data-testid="auto-scroll" style={{ width: 520 }}>
+      <section data-testid="auto-scroll" style={{ width: 520, marginBottom: 48 }}>
         <h2>overflow: scroll</h2>
         <AutoGrid overflow="scroll" />
+      </section>
+      <section data-testid="auto-formatted" style={{ width: 640 }}>
+        <h2>autoSizeText (rendered-content measurement)</h2>
+        <FormattedGrid />
       </section>
     </main>
   )

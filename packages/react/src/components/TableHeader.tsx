@@ -318,6 +318,15 @@ function HeaderCell<TData extends RowData>({
       ? (column.columnDef.header as HeaderRenderer)(header.getContext())
       : (column.columnDef.header ?? header.id)
 
+  // Mirror TableCell's cellClassName: a column may style its header th with a
+  // static class or a function of the header context.
+  const headerClassNameDef = column.columnDef.headerClassName
+  const userHeaderClassName =
+    typeof headerClassNameDef === 'function'
+      ? headerClassNameDef(header.getContext())
+      : headerClassNameDef
+  const thClassName = ['yable-th', userHeaderClassName].filter(Boolean).join(' ')
+
   const style = useMemo((): React.CSSProperties => {
     const s: React.CSSProperties = {
       width: header.getSize(),
@@ -407,7 +416,7 @@ function HeaderCell<TData extends RowData>({
 
   return (
     <th
-      className="yable-th"
+      className={thClassName}
       style={style}
       data-column-id={column.id}
       data-sortable={canSort || undefined}
