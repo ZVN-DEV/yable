@@ -18,6 +18,7 @@
     "row-selection",
     "row-expanding",
     "row-pinning",
+    "virtualization",
     "tree-data",
     "pivot-tables",
     "undo-redo",
