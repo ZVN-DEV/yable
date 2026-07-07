@@ -885,7 +885,7 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
               <Link href="/docs/features" className={s.heroCtaSecondary}>
                 Features
               </Link>
-              <Link href="/docs/features/async-commits" className={s.heroCtaSecondary}>
+              <Link href="/docs/async-commits" className={s.heroCtaSecondary}>
                 Async Commits
               </Link>
             </div>
