@@ -1,5 +1,33 @@
 # @zvndev/yable-core
 
+## 0.13.0
+
+### Minor Changes
+
+- 4edd7d6: Smart column width v2
+  - **core:** new per-column `autoSizeText(row)` and `autoSizeWidth(row)` column-def
+    fields for the React `autoColumnWidth` feature — measure the string a cell
+    actually renders, or supply an exact natural pixel width.
+  - **react:** `autoColumnWidth` now measures rendered content via those overrides
+    (precedence `autoSizeWidth` > `autoSizeText` > raw accessor value), so
+    formatted/custom cells no longer clip.
+  - **react:** `overflow: 'fit'` under row virtualization now emits a one-time
+    dev-only warning when it silently falls back to `scroll` (wrapped row heights
+    aren't measured by the virtualizer) instead of failing quietly.
+  - **react:** width provenance — the hook never overwrites a width it did not
+    itself write this session, so user-dragged and persisted `columnSizing` widths
+    survive reloads.
+
+### Patch Changes
+
+- adbd782: Fix: `headerClassName` on a column def is now applied to the header `th`.
+
+  It was declared on the core `ColumnDef` but the React renderer only applied
+  `cellClassName`, so any header class (e.g. right-aligning a money column's header)
+  silently no-op'd. The header `th` now receives `headerClassName`, mirroring how
+  `cellClassName` is applied to body cells — including function form:
+  `headerClassName?: string | ((ctx: HeaderContext<TData, TValue>) => string | undefined)`.
+
 ## 0.12.0
 
 ### Minor Changes
