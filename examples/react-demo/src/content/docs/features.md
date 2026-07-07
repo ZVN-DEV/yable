@@ -650,13 +650,51 @@ Computed widths flow through `columnSizing`, so pinned offsets, the `<colgroup>`
 and virtualization totals stay in sync. Dragging a column's resize handle
 excludes it from further auto-sizing.
 
+### Measuring rendered content
+
+By default a column is measured by its raw accessor value. When the cell renders
+something wider — a formatter or custom `cell` (accessor `19` shown as
+`"$19.00 (Gold)"`) — the raw value under-measures and clips. Two per-column
+overrides fix it:
+
+```tsx
+columnHelper.accessor('price', {
+  cell: ({ getValue }) => formatCurrency(getValue()),
+  autoSizeText: (row) => formatCurrency(row.original.price), // measure what renders
+})
+columnHelper.accessor('trend', {
+  cell: ({ getValue }) => <Sparkline value={getValue()} width={80} />,
+  autoSizeWidth: () => 80, // exact px, bypasses text measurement (no padding added)
+})
+```
+
+Precedence: `autoSizeWidth` (exact px, verbatim) → `autoSizeText` (measured
+string, gets padding + sort-indicator) → raw accessor value.
+
+### `minSize` is a hard floor
+
+A column can never render below its `minSize` — core `getSize` clamps every width
+up to `minSize`. Auto-sizing treats it as a hard floor: content narrower than
+`minSize` renders at `minSize`. Want tighter auto-sizing? Lower or omit `minSize`.
+
+### Persisted widths
+
+The hook never overwrites a width it didn't write this session — a user-dragged
+width or one restored from persisted `columnSizing` is treated as user-set and
+left alone. Trade-off: persisted columns aren't re-auto-measured on reload.
+Prefer not persisting `columnSizing` under `autoColumnWidth` (auto recomputes
+from content), or persist only user-resized columns.
+
 ### Limitations
 
-- **Custom cell renderers** (badges, progress, custom components) measure by their
-  string value and won't size accurately — give them an explicit `size` or
-  `enableAutoSize: false`.
+- **Custom cell renderers** (badges, progress, custom components) or formatted
+  text measure by the raw string value — use `autoSizeText` / `autoSizeWidth`
+  above, or give them an explicit `size` / `enableAutoSize: false`.
 - **Row virtualization**: wrapped row heights aren't measured, so under row
-  virtualization `overflow: 'fit'` falls back to `scroll` behavior.
+  virtualization `overflow: 'fit'` falls back to `scroll` behavior and logs a
+  one-time dev warning. The supported way to get fit + wrap under virtualization
+  is Pretext-measured row heights; otherwise disable virtualization or set
+  `overflow: 'scroll'`.
 
 ---
 

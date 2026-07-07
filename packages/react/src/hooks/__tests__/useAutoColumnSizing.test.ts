@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { computeAutoColumnWidths, type AutoSizeColumnInput } from '../useAutoColumnSizing'
+import {
+  computeAutoColumnWidths,
+  resolveColumnNatural,
+  type AutoSizeColumnInput,
+} from '../useAutoColumnSizing'
 
 function auto(
   id: string,
@@ -147,6 +151,52 @@ describe('computeAutoColumnWidths', () => {
     })
   })
 
+  describe('downgradedFit — fit-under-virtualization fallback flag', () => {
+    it('true only when fit + canSquish=false + real overflow', () => {
+      const { downgradedFit } = computeAutoColumnWidths({
+        columns: [auto('a', 400), auto('b', 400)],
+        containerWidth: 500, // 800 natural > 500 → real overflow
+        overflow: 'fit',
+        underflow: 'leave',
+        canSquish: false,
+      })
+      expect(downgradedFit).toBe(true)
+    })
+
+    it('false when there is no overflow (content fits)', () => {
+      const { downgradedFit } = computeAutoColumnWidths({
+        columns: [auto('a', 100), auto('b', 100)],
+        containerWidth: 500, // 200 natural ≤ 500 → no overflow
+        overflow: 'fit',
+        underflow: 'leave',
+        canSquish: false,
+      })
+      expect(downgradedFit).toBe(false)
+    })
+
+    it('false when canSquish is true (fit actually squishes)', () => {
+      const { downgradedFit } = computeAutoColumnWidths({
+        columns: [auto('a', 400), auto('b', 400)],
+        containerWidth: 500,
+        overflow: 'fit',
+        underflow: 'leave',
+        canSquish: true,
+      })
+      expect(downgradedFit).toBe(false)
+    })
+
+    it("false when overflow is 'scroll' (no fit was requested)", () => {
+      const { downgradedFit } = computeAutoColumnWidths({
+        columns: [auto('a', 400), auto('b', 400)],
+        containerWidth: 500,
+        overflow: 'scroll',
+        underflow: 'leave',
+        canSquish: false,
+      })
+      expect(downgradedFit).toBe(false)
+    })
+  })
+
   describe('clamping', () => {
     it('auto column natural width is clamped to minSize/maxSize before layout', () => {
       const { widths } = computeAutoColumnWidths({
@@ -159,5 +209,101 @@ describe('computeAutoColumnWidths', () => {
       expect(widths.a!).toBe(200) // clamped down to maxSize
       expect(widths.b!).toBe(80) // clamped up to minSize
     })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// resolveColumnNatural — per-column measurement precedence
+// (autoSizeWidth > autoSizeText > raw accessor value).
+// ---------------------------------------------------------------------------
+
+interface StubRow {
+  raw: unknown
+  formatted?: string
+  exact?: number
+}
+
+// Deterministic measurer: 10px per character, font-agnostic.
+const measure = (text: string): number => text.length * 10
+
+const PADDING = 14
+const INDICATOR = 6
+
+function natural(
+  rows: StubRow[],
+  overrides: Partial<{
+    headerText: string
+    autoSizeText: (row: StubRow) => string
+    autoSizeWidth: (row: StubRow) => number
+  }> = {},
+): number {
+  return resolveColumnNatural<StubRow>({
+    rows,
+    headerText: overrides.headerText ?? 'H',
+    measure,
+    bodyFont: 'body',
+    headerFont: 'header',
+    horizontalPadding: PADDING,
+    indicator: INDICATOR,
+    getRawValue: (row) => row.raw,
+    autoSizeText: overrides.autoSizeText,
+    autoSizeWidth: overrides.autoSizeWidth,
+  })
+}
+
+describe('resolveColumnNatural', () => {
+  it('raw fallback: measures String(rawValue) + padding + indicator', () => {
+    // 'hello' → 50, header 'H' → 10, content 50 → ceil(50 + 14 + 6) = 70
+    expect(natural([{ raw: 'hello' }])).toBe(70)
+  })
+
+  it('raw fallback: header content wins when wider than every row', () => {
+    // header 'HEADER' → 60, raw 'x' → 10 → ceil(60 + 20) = 80
+    expect(natural([{ raw: 'x' }], { headerText: 'HEADER' })).toBe(80)
+  })
+
+  it('autoSizeText takes precedence over the raw value', () => {
+    const rows: StubRow[] = [{ raw: 19, formatted: '$1,234.00' }]
+    // autoSizeText '$1,234.00' → 90; raw '19' → 20.
+    const withText = natural(rows, { autoSizeText: (r) => r.formatted! })
+    const rawOnly = natural(rows)
+    expect(withText).toBe(110) // ceil(90 + 14 + 6)
+    expect(rawOnly).toBe(40) // ceil(20 + 14 + 6) — what the old measurement gave
+    expect(withText).toBeGreaterThan(rawOnly)
+  })
+
+  it('autoSizeWidth takes precedence over autoSizeText AND the raw value', () => {
+    const rows: StubRow[] = [
+      { raw: 'aaaaaaaaaaaaaaaaaaaa', exact: 100 }, // huge raw string
+      { raw: 'bbbbbbbbbbbbbbbbbbbb', exact: 250 },
+    ]
+    // autoSizeWidth is used verbatim: max(ceil(100), ceil(250)) = 250; header
+    // natural = ceil(10 + 14 + 6) = 30 → max(250, 30) = 250. Text is ignored.
+    const width = natural(rows, {
+      autoSizeText: () => 'this text is extremely long and would measure very wide',
+      autoSizeWidth: (r) => r.exact!,
+    })
+    expect(width).toBe(250)
+  })
+
+  it('autoSizeWidth: header natural width wins when wider than every exact width', () => {
+    const rows: StubRow[] = [{ raw: '', exact: 12 }]
+    // exact 12 vs header 'WIDE HEADER' (11 chars → 110) natural = ceil(110+20)=130
+    const width = natural(rows, {
+      headerText: 'WIDE HEADER',
+      autoSizeWidth: (r) => r.exact!,
+    })
+    expect(width).toBe(130)
+  })
+
+  it('autoSizeWidth: does NOT add padding/indicator to the per-row widths', () => {
+    const rows: StubRow[] = [{ raw: '', exact: 200 }]
+    // 200 verbatim, header natural = ceil(0-content? header 'H'→10 +20)=30 → 200
+    expect(natural(rows, { autoSizeWidth: (r) => r.exact! })).toBe(200)
+  })
+
+  it('autoSizeWidth: ceils each row width before taking the max', () => {
+    const rows: StubRow[] = [{ raw: '', exact: 150.2 }]
+    expect(natural(rows, { autoSizeWidth: (r) => r.exact! })).toBe(151)
   })
 })

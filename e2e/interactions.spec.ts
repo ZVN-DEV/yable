@@ -540,4 +540,27 @@ test.describe('smart column width', () => {
     // Explicit size:120 + enableAutoSize:false — never measured or squished.
     expect(Math.abs((box?.width ?? 0) - 120)).toBeLessThanOrEqual(2)
   })
+
+  test('autoSizeText sizes to rendered content, not the raw accessor value', async ({ page }) => {
+    const grid = page.getByTestId('auto-formatted')
+    await expect(grid.locator('tbody tr').first()).toBeVisible()
+
+    const rawWidth =
+      (await grid.locator('th[data-column-id="raw"]').first().boundingBox())?.width ?? 0
+    const formattedWidth =
+      (await grid.locator('th[data-column-id="formatted"]').first().boundingBox())?.width ?? 0
+
+    // Both columns render the same wide string. The `raw` column is measured by
+    // its accessor value ("1234") and undershoots; the `formatted` column sets
+    // `autoSizeText` and is measured by what it renders — so it is clearly wider
+    // and wide enough to hold the rendered content ("$1234.00 (Infrastructure
+    // Platform)" ≈ 220px+).
+    expect(formattedWidth).toBeGreaterThan(rawWidth + 60)
+    expect(formattedWidth).toBeGreaterThanOrEqual(200)
+
+    // And the rendered cell is not clipped inside the sized column.
+    const cell = grid.locator('tbody tr').first().locator('td[data-column-id="formatted"]')
+    const clip = await cell.evaluate((n) => n.scrollWidth - n.clientWidth)
+    expect(clip).toBeLessThanOrEqual(2)
+  })
 })

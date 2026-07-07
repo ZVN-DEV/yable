@@ -46,6 +46,13 @@ export interface ComputeAutoColumnWidthsResult {
   widths: Record<string, number>
   /** Auto columns that were squished below natural and must wrap their cells. */
   wrapColumnIds: string[]
+  /**
+   * True only when a real `fit` downgrade occurred: `overflow: 'fit'` was
+   * requested, squish was disabled (`canSquish: false`, e.g. row virtualization),
+   * AND natural content actually overflows the container — so the grid silently
+   * fell back to `scroll` behavior. Callers may surface a dev warning.
+   */
+  downgradedFit: boolean
 }
 
 function clamp(value: number, min?: number, max?: number): number {
@@ -86,20 +93,28 @@ export function computeAutoColumnWidths(
   const autoColumns = columns.filter((c) => c.auto)
   const naturalTotal = columns.reduce((sum, c) => sum + base.get(c.id)!, 0)
 
+  // A `fit` request downgrades to `scroll` only when squish is disabled AND the
+  // content genuinely overflows the container (otherwise there is nothing to
+  // squish and no downgrade actually happened).
+  const downgradedFit = overflow === 'fit' && !canSquish && naturalTotal > containerWidth
+
   // --- Underflow: natural content already fits the container -----------------
   if (naturalTotal <= containerWidth) {
     if (underflow === 'distribute' && autoColumns.length > 0 && containerWidth > naturalTotal) {
       distributeExtraSpace(autoColumns, base, widths, containerWidth - naturalTotal)
     }
-    return { widths, wrapColumnIds: [] }
+    return { widths, wrapColumnIds: [], downgradedFit }
   }
 
   // --- Overflow: `scroll` (or squish disabled) keeps natural widths ----------
   if (overflow === 'scroll' || !canSquish) {
-    return { widths, wrapColumnIds: [] }
+    return { widths, wrapColumnIds: [], downgradedFit }
   }
 
   // --- Overflow: `fit` — squish auto columns to fit, taking from slack -------
+  // `minSize` is a HARD floor, not a soft target: core `getSize` clamps every
+  // rendered width up to `minSize`, so squishing below it would be undone at
+  // render time. We therefore never squish a column below max(minSize, hardMin).
   const floors = new Map<string, number>()
   let totalSlack = 0
   for (const col of autoColumns) {
@@ -110,7 +125,7 @@ export function computeAutoColumnWidths(
 
   if (totalSlack <= 0) {
     // Nothing to give — columns stay at natural width and the grid scrolls.
-    return { widths, wrapColumnIds: [] }
+    return { widths, wrapColumnIds: [], downgradedFit }
   }
 
   const required = Math.min(naturalTotal - containerWidth, totalSlack)
@@ -128,7 +143,7 @@ export function computeAutoColumnWidths(
     if (next < baseWidth) wrapColumnIds.push(col.id)
   }
 
-  return { widths, wrapColumnIds }
+  return { widths, wrapColumnIds, downgradedFit }
 }
 
 function distributeExtraSpace(
@@ -146,6 +161,88 @@ function distributeExtraSpace(
     // Respect maxSize: never distribute a column past its cap.
     widths[col.id] = Math.round(clamp(grown, undefined, col.maxSize))
   }
+}
+
+// ---------------------------------------------------------------------------
+// Pure per-column natural-width resolution — precedence + measurement math,
+// no DOM. The caller supplies a `measure(text, font)` callback (canvas in the
+// hook) and the sampled rows; this decides WHAT to measure per column.
+// ---------------------------------------------------------------------------
+
+export interface ResolveColumnNaturalParams<R> {
+  /** Sampled rows (already capped to sampleSize by the caller). */
+  rows: R[]
+  /** Header label, or '' when the header is not a plain string. */
+  headerText: string
+  /** Measures a string's pixel width in the given canvas font shorthand. */
+  measure: (text: string, font: string) => number
+  bodyFont: string
+  headerFont: string
+  /** Total horizontal cell padding (both sides). */
+  horizontalPadding: number
+  /** Sort-indicator width allowance (0 when the column can't sort). */
+  indicator: number
+  /** Raw accessor value for a row — the default measured string source. */
+  getRawValue: (row: R) => unknown
+  /** Override: measure this string instead of the raw value. */
+  autoSizeText?: (row: R) => string
+  /** Override: use this exact natural pixel width, bypassing measurement. */
+  autoSizeWidth?: (row: R) => number
+}
+
+/**
+ * Resolve one column's natural (unclamped) content width. Precedence:
+ *   1. `autoSizeWidth` — max of ceil(width) over sampled rows, then max with the
+ *      header's measured natural width (incl. padding + indicator). Used verbatim
+ *      (no padding/indicator added to the per-row widths themselves).
+ *   2. `autoSizeText` — measure that string per row with the body font.
+ *   3. raw accessor value — `String(row.getValue(id))`, today's default.
+ * For (2) and (3): natural = ceil(max(headerContent, maxTextWidth) + padding + indicator).
+ */
+export function resolveColumnNatural<R>(params: ResolveColumnNaturalParams<R>): number {
+  const {
+    rows,
+    headerText,
+    measure,
+    bodyFont,
+    headerFont,
+    horizontalPadding,
+    indicator,
+    getRawValue,
+    autoSizeText,
+    autoSizeWidth,
+  } = params
+
+  const headerContent = headerText ? measure(headerText, headerFont) : 0
+
+  if (autoSizeWidth) {
+    let maxWidth = 0
+    for (const row of rows) {
+      const raw = autoSizeWidth(row)
+      if (!Number.isFinite(raw)) continue
+      const w = Math.ceil(raw)
+      if (w > maxWidth) maxWidth = w
+    }
+    const headerNatural = Math.ceil(headerContent + horizontalPadding + indicator)
+    return Math.max(maxWidth, headerNatural)
+  }
+
+  let content = headerContent
+  for (const row of rows) {
+    let text: string
+    if (autoSizeText) {
+      const raw = autoSizeText(row)
+      text = raw == null ? '' : String(raw)
+    } else {
+      const raw = getRawValue(row)
+      text = raw == null ? '' : String(raw)
+    }
+    if (text.length === 0) continue
+    const width = measure(text, bodyFont)
+    if (width > content) content = width
+  }
+
+  return Math.ceil(content + horizontalPadding + indicator)
 }
 
 // ---------------------------------------------------------------------------
@@ -215,6 +312,14 @@ export function useAutoColumnSizing<TData extends RowData>({
     userResizedRef.current.add(resizingColumn)
   }
 
+  // Widths this hook itself wrote this session, keyed by column id. Used to tell
+  // an auto-written width apart from an externally-provenanced one (a user drag
+  // or a persisted/restored `columnSizing` value) so we never overwrite a width
+  // we did not set — even a persisted one present on the very first mount.
+  const autoWrittenRef = useRef<Map<string, number>>(new Map())
+  // One-shot guard so the `fit`-under-virtualization downgrade warns at most once.
+  const warnedDowngradeRef = useRef(false)
+
   const overflow = config.overflow ?? 'fit'
   const underflow = config.underflow ?? 'leave'
   const sampleSize = config.sampleSize ?? DEFAULT_SAMPLE_SIZE
@@ -262,12 +367,25 @@ export function useAutoColumnSizing<TData extends RowData>({
 
     const rows = table.getRowModel().rows
     const rowLimit = Math.min(rows.length, Math.max(0, sampleSize))
+    const sampledRows = rows.slice(0, rowLimit)
+    const columnSizing = table.getState().columnSizing
 
     const inputs: AutoSizeColumnInput[] = columns.map((column) => {
       const def = column.columnDef
       const hasExplicitSize = typeof def.size === 'number'
+      // Externally provenanced = a width exists that this hook did not write
+      // (a user drag or persisted/restored state). Such columns are excluded so
+      // we never clobber a user-set or persisted width.
+      const currentWidth = columnSizing[column.id]
+      const isExternallyProvenanced =
+        currentWidth !== undefined &&
+        (!autoWrittenRef.current.has(column.id) ||
+          autoWrittenRef.current.get(column.id) !== currentWidth)
       const isAuto =
-        !hasExplicitSize && def.enableAutoSize !== false && !userResizedRef.current.has(column.id)
+        !hasExplicitSize &&
+        def.enableAutoSize !== false &&
+        !userResizedRef.current.has(column.id) &&
+        !isExternallyProvenanced
 
       if (!isAuto) {
         return {
@@ -280,29 +398,40 @@ export function useAutoColumnSizing<TData extends RowData>({
       }
 
       const headerText = typeof def.header === 'string' ? def.header : ''
-      let content = headerText ? measure(headerText, headerFont) : 0
-      for (let i = 0; i < rowLimit; i++) {
-        const row = rows[i]
-        if (!row) continue
-        const value = row.getValue(column.id)
-        const text = value == null ? '' : String(value)
-        if (text.length === 0) continue
-        const width = measure(text, bodyFont)
-        if (width > content) content = width
-      }
-
       const indicator = column.getCanSort() ? SORT_INDICATOR_ALLOWANCE : 0
-      const natural = Math.ceil(content + horizontalPadding + indicator)
+      const natural = resolveColumnNatural({
+        rows: sampledRows,
+        headerText,
+        measure,
+        bodyFont,
+        headerFont,
+        horizontalPadding,
+        indicator,
+        getRawValue: (row) => row.getValue(column.id),
+        autoSizeText: def.autoSizeText,
+        autoSizeWidth: def.autoSizeWidth,
+      })
       return { id: column.id, natural, minSize: def.minSize, maxSize: def.maxSize, auto: true }
     })
 
-    const { widths, wrapColumnIds: nextWrap } = computeAutoColumnWidths({
+    const {
+      widths,
+      wrapColumnIds: nextWrap,
+      downgradedFit,
+    } = computeAutoColumnWidths({
       columns: inputs,
       containerWidth,
       overflow,
       underflow,
       canSquish: !isVirtualized,
     })
+
+    if (downgradedFit && !warnedDowngradeRef.current && process.env.NODE_ENV !== 'production') {
+      warnedDowngradeRef.current = true
+      console.warn(
+        "[yable] autoColumnWidth overflow:'fit' fell back to 'scroll' under row virtualization: wrapped row heights aren't measured by the virtualizer. Use Pretext-measured heights, disable virtualization, or set overflow:'scroll' to silence this.",
+      )
+    }
 
     // Only write auto (non-user-resized) columns into columnSizing so explicit
     // sizes and user resizes are never clobbered.
@@ -312,7 +441,11 @@ export function useAutoColumnSizing<TData extends RowData>({
     const next: Record<string, number> = { ...current }
     for (const id of autoIds) {
       const width = widths[id]
-      if (typeof width === 'number' && current[id] !== width) {
+      if (typeof width !== 'number') continue
+      // Record every width we own this session (even unchanged ones) so the
+      // provenance check keeps recognizing it as auto-written on later passes.
+      autoWrittenRef.current.set(id, width)
+      if (current[id] !== width) {
         next[id] = width
         changed = true
       }
