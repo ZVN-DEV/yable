@@ -20,6 +20,7 @@ Detailed guide for every Yable feature. Each section explains what the feature d
 - [Row Expanding / Master-Detail](#row-expanding--master-detail)
 - [Row Pinning](#row-pinning)
 - [Tree Data](#tree-data)
+- [Row Virtualization](#row-virtualization)
 - [Pivot Tables](#pivot-tables)
 - [Undo / Redo](#undo--redo)
 - [Clipboard](#clipboard)
@@ -1015,6 +1016,38 @@ const columns = [
   span will not cross a pinned-row boundary.
 - With row virtualization, spans are clamped to the mounted window because
   native HTML cannot merge into rows that are not in the DOM.
+
+---
+
+## Row Virtualization
+
+Mount only the visible row window inside a scrollable viewport so very large
+datasets scroll smoothly. Mounted rows are real table rows sharing the header
+`<colgroup>`, keeping header/body columns pixel-aligned and every interactive
+element inside cells clickable at any scroll depth.
+
+```tsx
+const table = useTable({
+  data,
+  columns,
+  enableVirtualization: true,
+  rowHeight: 40, // or (index) => number for variable heights
+  virtualViewportHeight: 480,
+  initialState: { pagination: { pageIndex: 0, pageSize: 100_000 } },
+})
+```
+
+### Notes
+
+- The virtualizer consumes the **paginated** row model — raise the page size
+  above your dataset size or only the default first page (10 rows) renders.
+- `virtualViewportHeight` sets the scroll viewport in px; without it a
+  heuristic (~20 rows, capped at 800px) applies, which can overflow shorter
+  styled containers. Measure fixed-height panels and pass the available
+  height explicitly.
+- `overscan` (default 5) mounts extra rows around the window; exact
+  per-row heights can come from Pretext via `pretextHeights` /
+  `pretextPrefixSums`.
 
 ---
 

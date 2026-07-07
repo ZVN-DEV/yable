@@ -20,7 +20,7 @@ const mono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://yable-demo.vercel.app'),
   title: {
     default: 'Yable — The open-source React data table',
     template: '%s · Yable',

@@ -151,6 +151,20 @@ The configuration object passed to `createTable()` or `useTable()`.
 | `onHeaderClick` | `(event: HeaderClickEvent) => void` | Header click handler |
 | `onHeaderContextMenu` | `(event: HeaderClickEvent) => void` | Header right-click handler |
 
+### Virtualization Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `enableVirtualization` | `boolean` | `false` | Render only the visible row window inside a scrollable viewport |
+| `virtualViewportHeight` | `number` | heuristic | Height in px of the virtual scroll viewport. Without it the viewport falls back to ~20 rows capped at 800px, which can overflow shorter styled containers |
+| `rowHeight` | `number \| (index) => number` | `40` | Fixed or per-row height used for scroll math |
+| `overscan` | `number` | `5` | Extra rows rendered above/below the visible window |
+| `estimateRowHeight` | `number` | -- | Estimated height for unmeasured variable-height rows |
+| `pretextHeights` | `Float64Array \| null` | -- | Pre-measured row heights from Pretext |
+| `pretextPrefixSums` | `Float64Array \| null` | -- | Prefix sums for O(log n) scroll offset lookups |
+
+> Virtualization reads the paginated row model. If you virtualize a large dataset, raise the page size (e.g. `initialState: { pagination: { pageSize: 100_000 } }`) or only the default first page of 10 rows will render. See [Virtualization](/docs/features/virtualization).
+
 ### Export Options
 
 | Option | Type | Default | Description |

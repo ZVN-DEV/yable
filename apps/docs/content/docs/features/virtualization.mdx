@@ -1,0 +1,43 @@
+---
+title: Row Virtualization
+description: Render tens of thousands of rows smoothly by mounting only the visible window, with fixed, variable, or Pretext-measured row heights.
+---
+
+Row virtualization keeps the DOM small — only the rows inside (and just around) the visible scroll window are mounted, so 50,000 rows scroll as smoothly as 50. Mounted rows are real table rows that share the header's `<colgroup>`, so header and body columns stay pixel-aligned at any container width, and everything inside a cell (buttons, links, inputs, checkboxes) stays fully interactive.
+
+### Enable it
+
+```tsx
+const table = useTable({
+  data,
+  columns,
+  enableVirtualization: true,
+  rowHeight: 40,
+  virtualViewportHeight: 480,
+  // Virtualization reads the paginated row model — raise the page size or
+  // only the default first page (10 rows) will render and nothing scrolls.
+  initialState: { pagination: { pageIndex: 0, pageSize: 100_000 } },
+})
+```
+
+### Sizing the viewport
+
+`virtualViewportHeight` sets the scrollable viewport height in pixels. Without it, Yable falls back to a heuristic (about 20 rows, capped at 800px) — fine for quick demos, but a styled container shorter than the heuristic will clip a still-scrollable region below its fold. If your grid lives in a fixed-height panel, measure the panel (e.g. with a `ResizeObserver`) and pass the available height minus the header.
+
+### Row heights
+
+| Strategy | How |
+|---|---|
+| Fixed | `rowHeight: 40` |
+| Per-row function | `rowHeight: (index) => index % 5 === 0 ? 64 : 40` |
+| Estimated | `estimateRowHeight: 44` for variable content measured on mount |
+| Pretext (exact) | `pretextHeights` + `pretextPrefixSums` from `useTableRowHeights` — every row pre-measured before paint |
+
+The `overscan` option (default 5) mounts extra rows above and below the window to keep fast scrolling gap-free.
+
+### Interplay with other features
+
+- **Pagination** — the virtualizer consumes the *paginated* row model. For "one big scrolling list" semantics, set a page size larger than your dataset (see above).
+- **Pinned rows** — top/bottom pinned rows render outside the virtual window and stay put while the center scrolls.
+- **Row spanning** — native `rowSpan` merges cells inside the mounted window; spans are clamped to the window edge.
+- **Interactive cells** — checkboxes, buttons, inputs, and links in cells receive real pointer events anywhere in the window, at any scroll depth.

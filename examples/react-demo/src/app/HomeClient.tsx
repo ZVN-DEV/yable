@@ -69,7 +69,7 @@ const allThemes = [
 type ThemeId = (typeof allThemes)[number]['id']
 type DemoTab = 'data' | 'editable' | 'themes'
 
-const CURRENT_VERSION = '0.5.0'
+const CURRENT_VERSION = '0.10.2'
 const PASSING_TESTS = '596'
 const REACT_GZIPPED_SIZE = '35.5kB'
 
