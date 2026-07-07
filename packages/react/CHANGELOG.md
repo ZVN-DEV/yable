@@ -1,5 +1,12 @@
 # @zvndev/yable-react
 
+## 0.10.3
+
+### Patch Changes
+
+- Updated dependencies [2499b0a]
+  - @zvndev/yable-themes@0.4.7
+
 ## 0.10.2
 
 ### Patch Changes
