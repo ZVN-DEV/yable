@@ -51,3 +51,7 @@ table.setColumnPinning({ left: ['name', 'id'], right: ['actions'] })
 // Check if any columns are pinned
 table.getIsSomeColumnsPinned('left') // boolean
 ```
+
+### With row virtualization
+
+Pinned columns stay frozen to the viewport edges under `enableVirtualization` too. The virtualized grid renders inside a single scroll container that holds both the header and the body, so pinned header and body cells share one sticky context and move together during horizontal scroll. The horizontal scrollbar sits at the bottom of the `virtualViewportHeight` viewport, so it is reachable without scrolling to the last row.

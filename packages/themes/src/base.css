@@ -2831,6 +2831,31 @@
   pointer-events: auto;
 }
 
+/* Row-virtualization surface: the header lives INSIDE the single scroll
+   container (so pinned header `th` and pinned body `td` share one sticky
+   context). Keep the header pinned to the top of the fixed-height viewport even
+   when `stickyHeader` is off, matching the pre-surface layout where the header
+   sat above the scrolling body. The `> .yable-table > .yable-thead` chain scopes
+   this to the surface's own header and never the nested body table (which has no
+   thead) nor the column-virtualization path (whose thead is not a child of the
+   scroll container). */
+.yable-virtual-scroll-container > .yable-table > .yable-thead .yable-th {
+  position: sticky;
+  top: 0;
+}
+
+.yable-virtual-scroll-container > .yable-table > .yable-thead .yable-th:not([data-pinned]) {
+  z-index: var(--yable-z-header);
+  background: var(--yable-bg-header);
+}
+
+/* A pinned header cell sticks in both axes (left/right from the pinning rules,
+   top from above) and must stack over both the plain sticky header and the
+   pinned body cells. */
+.yable-virtual-scroll-container > .yable-table > .yable-thead .yable-th[data-pinned] {
+  z-index: calc(var(--yable-z-header) + var(--yable-z-pinned));
+}
+
 /* ============================================================================
    Display Cell Types — Styled cell primitives for common data patterns.
    These use theme tokens so they adapt to any theme automatically.

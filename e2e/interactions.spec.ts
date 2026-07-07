@@ -280,3 +280,112 @@ test.describe('configured editors on styled cells (#58)', () => {
     await expect(select).toHaveValue('A')
   })
 })
+
+// ---------------------------------------------------------------------------
+// Pinned columns under row virtualization (backlog item 2).
+//
+// Pre-fix: the header lived in the outer table (sticky against `.yable-main`)
+// while body cells lived in an inner container that only scrolled vertically,
+// so pinned body `td` rode away during horizontal scroll and the h-scrollbar
+// was unreachable without scrolling to the last row. The fix wraps the whole
+// virtualized table in a single scroll container so header `th` and body `td`
+// share one sticky/scroll context.
+// ---------------------------------------------------------------------------
+
+test.describe('pinned columns under row virtualization', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/e2e/pinned-virtual')
+    await expect(
+      grid(page, 'grid-pinned-virtual').locator('.yable-virtual-spacer tbody tr').first(),
+    ).toBeVisible()
+  })
+
+  async function boxX(locator: Locator): Promise<{ left: number; right: number }> {
+    const box = await locator.boundingBox()
+    if (!box) throw new Error('expected bounding box')
+    return { left: box.x, right: box.x + box.width }
+  }
+
+  async function wheelOverBody(page: Page, container: Locator, times: number) {
+    const box = await container.boundingBox()
+    if (!box) throw new Error('expected container bounding box')
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    for (let i = 0; i < times; i++) {
+      await page.mouse.wheel(300, 0)
+    }
+  }
+
+  test('pinned th AND td stay x-stable during horizontal scroll', async ({ page }) => {
+    const root = grid(page, 'grid-pinned-virtual')
+    const container = root.locator('.yable-virtual-scroll-container')
+
+    const leftHeader = root.locator('th[data-column-id="id"]')
+    const leftCell = root.locator('td[data-column-id="id"]').first()
+    const centerHeader = root.locator('th[data-column-id="d"]')
+    const rightHeader = root.locator('th[data-column-id="actions"]')
+    const rightCell = root.locator('td[data-column-id="actions"]').first()
+
+    const leftHeaderBefore = await boxX(leftHeader)
+    const leftCellBefore = await boxX(leftCell)
+    const centerBefore = await boxX(centerHeader)
+    const rightHeaderBefore = await boxX(rightHeader)
+    const rightCellBefore = await boxX(rightCell)
+
+    // Pinned header and body cell must already agree (sanity, pre-scroll).
+    expect(Math.abs(leftHeaderBefore.left - leftCellBefore.left)).toBeLessThanOrEqual(1)
+    expect(Math.abs(rightHeaderBefore.right - rightCellBefore.right)).toBeLessThanOrEqual(1)
+
+    // Drive REAL horizontal scroll (setting scrollLeft directly no-ops pre-fix
+    // because the container did not scroll horizontally).
+    await wheelOverBody(page, container, 10)
+    await expect
+      .poll(async () => (await container.evaluate((n) => n.scrollLeft)) as number)
+      .toBeGreaterThan(0)
+
+    const leftHeaderAfter = await boxX(leftHeader)
+    const leftCellAfter = await boxX(leftCell)
+    const centerAfter = await boxX(centerHeader)
+    const rightHeaderAfter = await boxX(rightHeader)
+    const rightCellAfter = await boxX(rightCell)
+
+    // A center (unpinned) column actually moved left → horizontal scroll happened.
+    expect(centerAfter.left).toBeLessThan(centerBefore.left - 50)
+
+    // Left-pinned header stayed put AND the body cell tracked it.
+    expect(Math.abs(leftHeaderAfter.left - leftHeaderBefore.left)).toBeLessThanOrEqual(1)
+    expect(Math.abs(leftCellAfter.left - leftHeaderAfter.left)).toBeLessThanOrEqual(1)
+
+    // Right-pinned header stayed put AND the body cell tracked it.
+    expect(Math.abs(rightHeaderAfter.right - rightHeaderBefore.right)).toBeLessThanOrEqual(1)
+    expect(Math.abs(rightCellAfter.right - rightHeaderAfter.right)).toBeLessThanOrEqual(1)
+  })
+
+  test('horizontal scroll lives on the bounded viewport', async ({ page }) => {
+    const root = grid(page, 'grid-pinned-virtual')
+    const container = root.locator('.yable-virtual-scroll-container')
+
+    const metrics = await container.evaluate((n) => ({
+      scrollWidth: n.scrollWidth,
+      clientWidth: n.clientWidth,
+      clientHeight: n.clientHeight,
+      scrollLeft: n.scrollLeft,
+    }))
+
+    // The single scroll container is horizontally scrollable (pre-fix it had
+    // overflow-x: hidden so scrollWidth === clientWidth).
+    expect(metrics.scrollWidth).toBeGreaterThan(metrics.clientWidth)
+    // The viewport is bounded to virtualViewportHeight, so the h-scrollbar is
+    // reachable without vertically scrolling to the last row.
+    expect(Math.abs(metrics.clientHeight - 300)).toBeLessThanOrEqual(4)
+    expect(metrics.scrollLeft).toBe(0)
+
+    const box = await container.boundingBox()
+    if (!box) throw new Error('expected container bounding box')
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.wheel(300, 0)
+
+    await expect
+      .poll(async () => (await container.evaluate((n) => n.scrollLeft)) as number)
+      .toBeGreaterThan(0)
+  })
+})

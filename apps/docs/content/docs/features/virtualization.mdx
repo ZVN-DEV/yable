@@ -51,5 +51,6 @@ The `overscan` option (default 5) mounts extra rows above and below the window t
 
 - **Pagination** — the virtualizer consumes the *paginated* row model. For "one big scrolling list" semantics, set a page size larger than your dataset (see above).
 - **Pinned rows** — top/bottom pinned rows render outside the virtual window and stay put while the center scrolls.
+- **Pinned columns** — left/right pinned columns stay frozen to the viewport edges during horizontal scroll: the whole virtualized table shares one scroll container, so pinned header and body cells move together. The horizontal scrollbar sits at the bottom of the `virtualViewportHeight` box, reachable without scrolling to the last row.
 - **Row spanning** — native `rowSpan` merges cells inside the mounted window; spans are clamped to the window edge.
 - **Interactive cells** — checkboxes, buttons, inputs, and links in cells receive real pointer events anywhere in the window, at any scroll depth.
