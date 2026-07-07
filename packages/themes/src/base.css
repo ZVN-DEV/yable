@@ -171,7 +171,11 @@
 }
 
 /* Show sort indicator on header hover */
-.yable-th[data-sortable='true']:hover .yable-sort-indicator {
+/* Hover hint only for columns that are NOT actively sorted — this selector
+   outweighs the data-active rule below, so without the :not() guard the
+   indicator dims to 0.4 whenever the pointer is on the header, which is
+   exactly where it is right after clicking to sort. */
+.yable-th[data-sortable='true']:hover .yable-sort-indicator:not([data-active='true']) {
   opacity: 0.4;
 }
 
@@ -2790,7 +2794,15 @@
 
 .yable-virtual-spacer {
   width: 100%;
+  /* The spacer itself must not capture pointer input (it is mostly empty
+     space standing in for unmounted rows), but the mounted window inside it
+     must stay fully interactive — a bare pointer-events: none here disables
+     every checkbox, button, and link in a virtualized table body. */
   pointer-events: none;
+}
+
+.yable-virtual-spacer > table {
+  pointer-events: auto;
 }
 
 /* ============================================================================
