@@ -37,6 +37,7 @@ The configuration object passed to `createTable()` or `useTable()`.
 | `manualSorting` | `boolean` | `false` | Disable client-side sorting (for server-side) |
 | `sortingFns` | `Record<string, SortingFn>` | -- | Additional named sorting functions |
 | `onSortingChange` | `OnChangeFn<SortingState>` | -- | Sorting state change callback |
+| `postSortRows` | `(rows) => Row[] \| void` | -- | Reorder the final sorted rows before render (AG-parity) |
 | `isMultiSortEvent` | `(e) => boolean` | Shift key | Multi-sort modifier key test |
 
 ### Filtering Options

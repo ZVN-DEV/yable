@@ -10,6 +10,7 @@ import {
   type TableState,
   type Table,
   type Updater,
+  type SortingState,
 } from '@zvndev/yable-core'
 import { useYableDefaults } from './YableProvider'
 import { applyYableConfigToColumns, getYableDefaultColumnDef, resolveYableProfile } from './config'
@@ -33,6 +34,19 @@ function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boolean {
   for (const key of keysA) {
     if (!Object.prototype.hasOwnProperty.call(b, key)) return false
     if ((a as any)[key] !== (b as any)[key]) return false
+  }
+  return true
+}
+
+/** Structural equality for a `SortingState` (order-sensitive). */
+function sortingStateEqual(a: SortingState, b: SortingState): boolean {
+  if (a === b) return true
+  if (a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i]
+    const y = b[i]
+    if (x === undefined || y === undefined) return false
+    if (x.id !== y.id || x.desc !== y.desc) return false
   }
   return true
 }
@@ -151,17 +165,32 @@ export function useTable<TData extends RowData>(options: UseTableOptions<TData>)
   )
 
   const onStateChange = useCallback((updater: Updater<TableState>) => {
+    // Resolve the next state from the current one *before* applying, so event
+    // payloads are accurate even though React's setState is asynchronous
+    // (table.getState() would still read the stale state at emit time).
+    const table = tableRef.current
+    const previousState = table ? table.getState() : undefined
+    const nextState =
+      previousState !== undefined ? functionalUpdate(updater, previousState) : undefined
+
     const latest = onStateChangeRef.current
     if (latest) {
       latest(updater)
     } else {
       setState((prev) => functionalUpdate(updater, prev))
     }
-    // The 'state:change' event is part of the typed event map but nothing
-    // emitted it — subscribers (e.g. layout-persistence code) never fired.
-    const table = tableRef.current
-    if (table) {
-      table.events.emit('state:change', { state: table.getState() } as never)
+
+    if (table && previousState !== undefined && nextState !== undefined) {
+      // The 'state:change' event is part of the typed event map but nothing
+      // emitted it — subscribers (e.g. layout-persistence code) never fired.
+      table.events.emit('state:change', { state: nextState, previousState })
+
+      // 'sort:change' is likewise in the typed event map but the React binding
+      // never emitted it, leaving consumers' onSortChanged subscriptions dead.
+      // Emit only when the sorting slice actually changed.
+      if (!sortingStateEqual(previousState.sorting, nextState.sorting)) {
+        table.events.emit('sort:change', { sorting: nextState.sorting })
+      }
     }
   }, [])
 

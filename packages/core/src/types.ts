@@ -311,6 +311,14 @@ export interface TableOptions<TData extends RowData> {
   sortingFns?: Record<string, SortingFn<TData>>
   onSortingChange?: OnChangeFn<SortingState>
   isMultiSortEvent?: (e: unknown) => boolean
+  /**
+   * Native post-sort hook (AG-parity `postSortRows`). Runs after the sorted row
+   * model is built, receiving the sorted rows array. Return a reordered array,
+   * or mutate the provided array in place, to control final render order — e.g.
+   * keeping child rows grouped under their parents. Runs whenever provided,
+   * including when no sorting is active. Skipped under `manualSorting`.
+   */
+  postSortRows?: (rows: Row<TData>[]) => Row<TData>[] | void
 
   // Filtering options
   enableFilters?: boolean

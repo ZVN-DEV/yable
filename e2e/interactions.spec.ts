@@ -199,3 +199,45 @@ test.describe('real-pointer core interactions', () => {
       .toBeLessThanOrEqual(562)
   })
 })
+
+// sort:change was in core's typed event map but the React binding never
+// emitted it; postSortRows is a new AG-parity hook. Both are exercised through
+// a real header click that changes the sort.
+test.describe('sort:change event + postSortRows', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/e2e/interactions')
+    await expect(grid(page, 'grid-events').locator('tbody tr').first()).toBeVisible()
+  })
+
+  test('clicking a sortable header emits sort:change with the new sorting', async ({ page }) => {
+    const root = grid(page, 'grid-events')
+    const count = root.getByTestId('sort-change-count')
+    const payload = root.getByTestId('sort-change-payload')
+
+    await expect(count).toHaveText('0')
+
+    await root.locator('th[data-column-id="name"]').click()
+    await expect(count).toHaveText('1')
+    await expect(payload).toHaveText('[{"id":"name","desc":false}]')
+
+    await root.locator('th[data-column-id="name"]').click()
+    await expect(count).toHaveText('2')
+    await expect(payload).toHaveText('[{"id":"name","desc":true}]')
+  })
+
+  test('postSortRows keeps the pinned row first across sorts', async ({ page }) => {
+    const root = grid(page, 'grid-events')
+    const firstRow = root.getByTestId('post-sort-first-row')
+
+    // Unsorted: postSortRows still floats PINNED to the top.
+    await expect(firstRow).toHaveText('PINNED')
+
+    // Ascending name sort would put Apple first — postSortRows overrides it.
+    await root.locator('th[data-column-id="name"]').click()
+    await expect(firstRow).toHaveText('PINNED')
+
+    // Descending too.
+    await root.locator('th[data-column-id="name"]').click()
+    await expect(firstRow).toHaveText('PINNED')
+  })
+})

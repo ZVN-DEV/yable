@@ -51,6 +51,21 @@ table.events.emit('cell:click', {
 table.events.removeAllListeners()
 ```
 
+### Reacting to sorting changes
+
+The `sort:change` event fires whenever the sorting state changes (via a header
+click, a context-menu action, or a programmatic `table.setSorting(...)`), with
+the new `sorting` array:
+
+```typescript
+const unsubscribe = table.events.on('sort:change', ({ sorting }) => {
+  console.log('Sorting changed:', sorting) // [{ id: 'name', desc: true }]
+})
+```
+
+The payload matches the `SortChangeEvent` type. This is the idiomatic hook for
+AG Grid `onSortChanged`-style consumers.
+
 ### Table Callback Options
 
 You can also handle events via table options:
