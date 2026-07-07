@@ -191,6 +191,43 @@ function EventsFixture() {
   )
 }
 
+// --- Editing fixture: styled (custom-cell) column with editConfig (#58) -----
+
+function EditingFixture() {
+  const columns = [
+    pcol.accessor('name', {
+      header: 'Name',
+      size: 200,
+      editable: true,
+      editConfig: { type: 'text' },
+      // A styled display cell — this must NOT prevent the editor from rendering.
+      cell: (ctx) => <span className="tabular-nums">{`«${ctx.getValue()}»`}</span>,
+    }),
+    pcol.accessor('team', {
+      header: 'Team',
+      size: 140,
+      editable: true,
+      editConfig: {
+        type: 'select',
+        options: [
+          { label: 'A', value: 'A' },
+          { label: 'B', value: 'B' },
+        ],
+      },
+      cell: (ctx) => (
+        <strong data-testid={`team-disp-${ctx.row.id}`}>{String(ctx.getValue())}</strong>
+      ),
+    }),
+  ]
+  const table = useTable<Person>({
+    data: PEOPLE.slice(0, 2),
+    columns,
+    getRowId: (row) => String(row.id),
+    initialState: { pagination: { pageIndex: 0, pageSize: 100 } },
+  })
+  return <Table table={table} bordered />
+}
+
 export default function InteractionsFixturePage() {
   return (
     <main style={{ padding: 24 }}>
@@ -206,6 +243,10 @@ export default function InteractionsFixturePage() {
       <section data-testid="grid-events" style={{ width: 600 }}>
         <h2>Events</h2>
         <EventsFixture />
+      </section>
+      <section data-testid="grid-editing" style={{ width: 600 }}>
+        <h2>Editing</h2>
+        <EditingFixture />
       </section>
     </main>
   )

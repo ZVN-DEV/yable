@@ -120,7 +120,12 @@ export type {
   UseColumnVirtualizationOptions,
   UseColumnVirtualizationResult,
 } from './hooks/useColumnVirtualization'
-export { usePretextMeasurement } from './hooks/usePretextMeasurement'
+// Pretext-powered measurement hooks (`usePretextMeasurement`,
+// `useTableRowHeights`, `DEFAULT_TEXT_RECIPE`) live behind the
+// `@zvndev/yable-react/pretext` subpath so the optional `@chenglou/pretext`
+// dynamic import stays out of this entry's bundle — see ./pretext.ts.
+// The TYPES stay exported here (they are erased at build time and carry no
+// runtime pretext reference) so type-only imports keep working.
 export type {
   CellMeasurement,
   UsePretextMeasurementOptions,
@@ -128,7 +133,6 @@ export type {
 } from './hooks/usePretextMeasurement'
 export { useAutoMeasurements, resolveMeasureRecipe } from './hooks/useAutoMeasurements'
 export type { AutoMeasurementsOptions } from './hooks/useAutoMeasurements'
-export { useTableRowHeights, DEFAULT_TEXT_RECIPE } from './hooks/useTableRowHeights'
 export type { UseTableRowHeightsOptions } from './hooks/useTableRowHeights'
 export { getMeasureRecipeForCellType, getRegisteredCellTypes } from './cells/resolver'
 

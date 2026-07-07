@@ -74,6 +74,33 @@ const table = useTable({
 })
 ```
 
+### Editors render automatically
+
+An `editConfig` renders the matching built-in editor for you as soon as a cell
+enters edit mode — you do **not** need to hand-wire `<CellInput>` in a `cell`
+renderer. The `type` maps to: `text`/`number`/`email`/`url`/`tel` → text input,
+`select` → dropdown (from `options`/`getOptions`), `toggle`/`checkbox` → checkbox,
+`date` → date input, and `custom` (with `render`) → your own editor.
+
+### Custom cells stay editable
+
+A column can define both a custom `cell` renderer (for its styled display) and
+an `editConfig`. The custom `cell` is used for **display mode only**; while the
+cell is being edited, the configured editor takes over automatically:
+
+```tsx
+columnHelper.accessor('price', {
+  editable: true,
+  editConfig: { type: 'number' },
+  // Display-mode view. The number editor renders automatically while editing.
+  cell: (ctx) => <span className="tabular-nums">{fmt(ctx.getValue())}</span>,
+})
+```
+
+For a fully custom editor, use `editConfig.render` (or `type: 'custom'` with
+`render`). To render your own editor inside the `cell` renderer instead, branch
+on `ctx.cell.getIsEditing()` and omit `editConfig`.
+
 ### Table Methods
 
 ```typescript

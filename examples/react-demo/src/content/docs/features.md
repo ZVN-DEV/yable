@@ -351,6 +351,29 @@ const table = useTable({
 })
 ```
 
+### Editors render automatically
+
+An `editConfig` renders the matching built-in editor as soon as a cell enters
+edit mode — you do not need to hand-wire `<CellInput>` in a `cell` renderer. The
+`type` maps to: `text`/`number`/`email`/`url`/`tel` → text input, `select` →
+dropdown, `toggle`/`checkbox` → checkbox, `date` → date input, and `custom`
+(with `render`) → your own editor.
+
+A column may define both a custom `cell` renderer (styled display) and an
+`editConfig`. The custom `cell` is used for display mode only; while editing,
+the configured editor takes over automatically:
+
+```tsx
+columnHelper.accessor('price', {
+  editable: true,
+  editConfig: { type: 'number' },
+  cell: (ctx) => <span className="tabular-nums">{fmt(ctx.getValue())}</span>,
+})
+```
+
+For a fully custom editor use `editConfig.render`; to render your own editor
+inside the `cell`, branch on `ctx.cell.getIsEditing()` and omit `editConfig`.
+
 ### Table Methods
 
 ```typescript
@@ -1042,6 +1065,12 @@ const table = useTable({
 - `overscan` (default 5) mounts extra rows around the window; exact
   per-row heights can come from Pretext via `pretextHeights` /
   `pretextPrefixSums`.
+- The Pretext hooks (`useTableRowHeights`, `usePretextMeasurement`) are
+  imported from the `@zvndev/yable-react/pretext` subpath and need the optional
+  `@chenglou/pretext` peer installed. The subpath keeps `@chenglou/pretext` out
+  of the main entry, so importing `@zvndev/yable-react` never forces your
+  bundler (e.g. Next.js/Turbopack) to resolve it:
+  `import { useTableRowHeights } from '@zvndev/yable-react/pretext'`.
 
 ---
 

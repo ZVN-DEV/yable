@@ -241,3 +241,42 @@ test.describe('sort:change event + postSortRows', () => {
     await expect(firstRow).toHaveText('PINNED')
   })
 })
+
+// #58 — a column with a custom (styled) `cell` renderer AND editConfig must
+// still enter edit mode: the configured editor renders while editing.
+test.describe('configured editors on styled cells (#58)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/e2e/interactions')
+    await expect(grid(page, 'grid-editing').locator('tbody tr').first()).toBeVisible()
+  })
+
+  test('clicking a styled text cell swaps in the built-in text editor', async ({ page }) => {
+    const root = grid(page, 'grid-editing')
+
+    // Display mode shows the custom-rendered value.
+    const display = root.getByText('«Mango»')
+    await expect(display).toBeVisible()
+
+    await display.click()
+
+    // The configured text editor now renders with the current value — before
+    // the fix the custom `cell` fn won and no input ever appeared.
+    const input = root.locator('input.yable-input')
+    await expect(input).toBeVisible()
+    await expect(input).toHaveValue('Mango')
+
+    // It is a live editor — typing updates its value.
+    await input.fill('Mango Edited')
+    await expect(input).toHaveValue('Mango Edited')
+  })
+
+  test('clicking a styled select cell swaps in the built-in select editor', async ({ page }) => {
+    const root = grid(page, 'grid-editing')
+
+    await root.getByTestId('team-disp-1').click()
+
+    const select = root.locator('select')
+    await expect(select).toBeVisible()
+    await expect(select).toHaveValue('A')
+  })
+})

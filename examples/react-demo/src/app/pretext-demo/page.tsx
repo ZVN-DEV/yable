@@ -1,13 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import {
-  useTable,
-  Table,
-  createColumnHelper,
-  useTableRowHeights,
-  type CellMeasureRecipe,
-} from '@zvndev/yable-react'
+import { useTable, Table, createColumnHelper, type CellMeasureRecipe } from '@zvndev/yable-react'
+import { useTableRowHeights } from '@zvndev/yable-react/pretext'
 import s from './pretext-demo.module.css'
 
 /* ── Data with variable-length text ────────────────────────────────────── */
@@ -25,8 +20,16 @@ interface Article {
 
 const categories = ['Technology', 'Design', 'Engineering', 'Product', 'Culture', 'Research']
 const authors = [
-  'Alice Chen', 'Bob Martinez', 'Carol Wu', 'David Okafor', 'Eve Johansson',
-  'Frank Patel', 'Grace Kim', 'Henry Dubois', 'Ivy Tanaka', 'Jack Morrison',
+  'Alice Chen',
+  'Bob Martinez',
+  'Carol Wu',
+  'David Okafor',
+  'Eve Johansson',
+  'Frank Patel',
+  'Grace Kim',
+  'Henry Dubois',
+  'Ivy Tanaka',
+  'Jack Morrison',
 ]
 
 const excerpts = [
@@ -34,7 +37,7 @@ const excerpts = [
   'The rise of edge computing has fundamentally changed how we think about latency and data locality in distributed systems.',
   'Understanding memory allocation patterns in modern garbage collectors requires a deep dive into generational collection strategies, concurrent marking algorithms, and the tradeoffs between throughput and pause time that every runtime must navigate.',
   'CSS Grid changed everything.',
-  'When we started migrating our monolith to microservices, we quickly learned that the hardest problems weren\'t technical at all. They were organizational. Conway\'s Law hit us hard, and we had to restructure three teams before the architecture could follow.',
+  "When we started migrating our monolith to microservices, we quickly learned that the hardest problems weren't technical at all. They were organizational. Conway's Law hit us hard, and we had to restructure three teams before the architecture could follow.",
   'TypeScript 5.0 is here.',
   'The debate between server-side rendering and client-side rendering has evolved into a nuanced conversation about streaming, partial hydration, resumability, and the spectrum of rendering strategies that modern frameworks now support. There is no single right answer, and the best choice depends on your specific use case, audience, and performance requirements.',
   'Quick thoughts on testing.',
@@ -53,7 +56,7 @@ const titles = [
   'Deep Dive: Memory Allocation in GC Runtimes',
   'CSS Grid: A Complete Guide',
   'Lessons from Our Microservices Migration',
-  'What\'s New in TypeScript 5.0',
+  "What's New in TypeScript 5.0",
   'The Rendering Spectrum: SSR, CSR, and Beyond',
   'A Minimalist Approach to Testing',
   'Building Truly Accessible Data Tables',
@@ -73,8 +76,8 @@ function generateArticles(count: number): Article[] {
     author: authors[i % authors.length],
     category: categories[i % categories.length],
     excerpt: excerpts[i % excerpts.length],
-    wordCount: 120 + (i * 347) % 3000,
-    publishedAt: `${2023 + (i % 3)}-${String(1 + (i * 3) % 12).padStart(2, '0')}-${String(1 + (i * 7) % 28).padStart(2, '0')}`,
+    wordCount: 120 + ((i * 347) % 3000),
+    publishedAt: `${2023 + (i % 3)}-${String(1 + ((i * 3) % 12)).padStart(2, '0')}-${String(1 + ((i * 7) % 28)).padStart(2, '0')}`,
     status: statuses[i % 3],
   }))
 }
@@ -175,8 +178,8 @@ export default function PretextDemoPage() {
     columns,
     getRowId: (row) => String(row.id),
     enableVirtualization: true,
-    pretextHeights: usePretextMode && pretextReady ? rowHeights ?? undefined : undefined,
-    pretextPrefixSums: usePretextMode && pretextReady ? prefixSums ?? undefined : undefined,
+    pretextHeights: usePretextMode && pretextReady ? (rowHeights ?? undefined) : undefined,
+    pretextPrefixSums: usePretextMode && pretextReady ? (prefixSums ?? undefined) : undefined,
     rowHeight: 40,
     // Disable pagination so all rows go to virtualizer
     initialState: { pagination: { pageIndex: 0, pageSize: 100_000 } },
@@ -185,7 +188,9 @@ export default function PretextDemoPage() {
   // Compute height distribution stats
   const heightStats = useMemo(() => {
     if (!rowHeights) return null
-    let min = Infinity, max = -Infinity, sum = 0
+    let min = Infinity,
+      max = -Infinity,
+      sum = 0
     const unique = new Set<number>()
     for (let i = 0; i < data.length; i++) {
       const h = rowHeights[i]
@@ -211,7 +216,9 @@ export default function PretextDemoPage() {
           <p className={s.subtitle}>Pixel-perfect variable-height virtualization</p>
         </div>
         <div className={s.headerRight}>
-          <a href="/playground" className={s.backLink}>Playground</a>
+          <a href="/playground" className={s.backLink}>
+            Playground
+          </a>
         </div>
       </header>
 
@@ -284,7 +291,9 @@ export default function PretextDemoPage() {
               <>
                 <div className={s.stat}>
                   <span className={s.statLabel}>Height Range</span>
-                  <span className={s.statValue}>{heightStats.min}–{heightStats.max}px</span>
+                  <span className={s.statValue}>
+                    {heightStats.min}–{heightStats.max}px
+                  </span>
                 </div>
                 <div className={s.stat}>
                   <span className={s.statLabel}>Unique Heights</span>
@@ -316,7 +325,8 @@ export default function PretextDemoPage() {
         {usePretextMode ? (
           <>
             <span className={s.modeDot} />
-            Pretext: Every row height pre-computed before render. No DOM measurement. No scroll jitter.
+            Pretext: Every row height pre-computed before render. No DOM measurement. No scroll
+            jitter.
           </>
         ) : (
           <>
@@ -328,13 +338,7 @@ export default function PretextDemoPage() {
 
       {/* ── Table ───────────────────────────────────────────────────── */}
       <div className={s.tableWrap}>
-        <Table
-          table={table}
-          theme="midnight"
-          striped
-          bordered
-          stickyHeader
-        />
+        <Table table={table} theme="midnight" striped bordered stickyHeader />
       </div>
 
       {/* ── Explainer ───────────────────────────────────────────────── */}
@@ -344,17 +348,26 @@ export default function PretextDemoPage() {
           <div className={s.explainerCard}>
             <span className={s.explainerStep}>1</span>
             <h3>prepare(text, font)</h3>
-            <p>Measures every glyph width via Canvas API. One-time cost per unique text+font combo. Cached across cells.</p>
+            <p>
+              Measures every glyph width via Canvas API. One-time cost per unique text+font combo.
+              Cached across cells.
+            </p>
           </div>
           <div className={s.explainerCard}>
             <span className={s.explainerStep}>2</span>
             <h3>layout(width, lineHeight)</h3>
-            <p>Pure arithmetic. Given column width, returns exact pixel height. ~0.0003ms per cell. 50k cells in 15ms.</p>
+            <p>
+              Pure arithmetic. Given column width, returns exact pixel height. ~0.0003ms per cell.
+              50k cells in 15ms.
+            </p>
           </div>
           <div className={s.explainerCard}>
             <span className={s.explainerStep}>3</span>
             <h3>Prefix sums + binary search</h3>
-            <p>Pre-computed cumulative heights enable O(log n) scroll position lookup. Instant scrollTo for any row.</p>
+            <p>
+              Pre-computed cumulative heights enable O(log n) scroll position lookup. Instant
+              scrollTo for any row.
+            </p>
           </div>
         </div>
       </div>

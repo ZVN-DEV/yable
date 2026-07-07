@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/pretext.ts'],
   format: ['esm', 'cjs'],
   dts: true,
   splitting: true,
@@ -9,5 +9,11 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   minify: false,
-  external: ['react', 'react-dom', '@zvndev/yable-core', '@zvndev/yable-themes', '@chenglou/pretext'],
+  external: [
+    'react',
+    'react-dom',
+    '@zvndev/yable-core',
+    '@zvndev/yable-themes',
+    '@chenglou/pretext',
+  ],
 })

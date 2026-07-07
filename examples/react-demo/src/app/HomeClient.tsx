@@ -11,11 +11,11 @@ import {
   CellSelect,
   CellCheckbox,
   createColumnHelper,
-  useTableRowHeights,
   type ColumnDef,
   type TableInstance,
   type CellMeasureRecipe,
 } from '@zvndev/yable-react'
+import { useTableRowHeights } from '@zvndev/yable-react/pretext'
 import { people, departments, type Person } from '@/data'
 import s from './page.module.css'
 

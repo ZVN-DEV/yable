@@ -35,6 +35,18 @@ const table = useTable({
 
 The `overscan` option (default 5) mounts extra rows above and below the window to keep fast scrolling gap-free.
 
+<Callout type="info">
+  The Pretext measurement hooks (`useTableRowHeights`, `usePretextMeasurement`)
+  are imported from the **`@zvndev/yable-react/pretext`** subpath and require the
+  optional `@chenglou/pretext` peer dependency (`pnpm add @chenglou/pretext`).
+  They live behind a subpath so importing the main `@zvndev/yable-react` entry
+  never forces your bundler to resolve `@chenglou/pretext` when you don't use it.
+
+  ```tsx
+  import { useTableRowHeights } from '@zvndev/yable-react/pretext'
+  ```
+</Callout>
+
 ### Interplay with other features
 
 - **Pagination** — the virtualizer consumes the *paginated* row model. For "one big scrolling list" semantics, set a page size larger than your dataset (see above).

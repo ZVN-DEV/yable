@@ -201,6 +201,24 @@ jobs:
               }
             ' "$pkg_json" "$pkg_dir/package"
           done
+      - name: Assert optional @chenglou/pretext stays out of the main react entry
+        run: |
+          set -euo pipefail
+          # Regression guard for #50: importing @zvndev/yable-react must never
+          # pull the optional peer @chenglou/pretext into a consumer's bundle
+          # graph. It may only appear in the ./pretext subpath entry.
+          for pkg_dir in .pack/unpacked/*yable-react*/package; do
+            for entry in dist/index.js dist/index.cjs; do
+              if grep -q "@chenglou/pretext" "$pkg_dir/$entry"; then
+                echo "ERROR: $entry references @chenglou/pretext — it must live only in dist/pretext.*"
+                exit 1
+              fi
+            done
+            if ! grep -q "@chenglou/pretext" "$pkg_dir/dist/pretext.js"; then
+              echo "ERROR: dist/pretext.js is missing the @chenglou/pretext import"
+              exit 1
+            fi
+          done
 
   e2e:
     name: E2E (Playwright)
