@@ -563,4 +563,22 @@ test.describe('smart column width', () => {
     const clip = await cell.evaluate((n) => n.scrollWidth - n.clientWidth)
     expect(clip).toBeLessThanOrEqual(2)
   })
+
+  test('re-measures and widens a column when async values are merged in', async ({ page }) => {
+    const grid = page.getByTestId('auto-async')
+    await expect(grid.locator('tbody tr').first()).toBeVisible()
+
+    const amountHeader = grid.locator('th[data-column-id="amount"]').first()
+    const placeholderWidth = (await amountHeader.boundingBox())?.width ?? 0
+    expect(placeholderWidth).toBeGreaterThan(0)
+
+    // Merge the wide real values (a NEW data array) → debounced auto re-measure.
+    await grid.getByTestId('async-load').click()
+
+    // The Amount column must grow to hold the wide currency strings. Poll to
+    // absorb the ~60ms re-measure debounce deterministically.
+    await expect
+      .poll(async () => (await amountHeader.boundingBox())?.width ?? 0, { timeout: 5000 })
+      .toBeGreaterThan(placeholderWidth + 40)
+  })
 })

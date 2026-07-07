@@ -66,6 +66,92 @@ describe('computeAutoColumnWidths', () => {
       expect(widths.a).toBe(100)
       expect(widths.b).toBe(300)
     })
+
+    it('distribute waterfall: extra beyond one maxSize spills to the uncapped column', () => {
+      // a caps at 130 (base 100, +30); the rest of the 200px extra goes to b.
+      const { widths } = computeAutoColumnWidths({
+        columns: [auto('a', 100, { maxSize: 130 }), auto('b', 100)],
+        containerWidth: 400,
+        overflow: 'fit',
+        underflow: 'distribute',
+        canSquish: true,
+      })
+      expect(widths.a).toBe(130)
+      expect(widths.b).toBe(270)
+      // No gutter: a capped but b absorbed the spill → sum fills the container.
+      expect(widths.a! + widths.b!).toBe(400)
+    })
+
+    it('distribute waterfall: gutter remains ONLY when every auto column is capped', () => {
+      // Both cap at 130; extra is 200 but only 60px of headroom exists (30 each).
+      const { widths } = computeAutoColumnWidths({
+        columns: [auto('a', 100, { maxSize: 130 }), auto('b', 100, { maxSize: 130 })],
+        containerWidth: 400,
+        overflow: 'fit',
+        underflow: 'distribute',
+        canSquish: true,
+      })
+      expect(widths.a).toBe(130)
+      expect(widths.b).toBe(130)
+      // Everything capped → a 140px gutter is left (400 - 260), by design.
+      expect(widths.a! + widths.b!).toBe(260)
+    })
+
+    it('stretch: all columns capped but underfilled → grows past maxSize, fills exactly', () => {
+      // Same capped setup as above, but stretch treats maxSize as a SOFT cap and
+      // grows both past it proportionally (equal base → 200 each) to fill 400.
+      const { widths } = computeAutoColumnWidths({
+        columns: [auto('a', 100, { maxSize: 130 }), auto('b', 100, { maxSize: 130 })],
+        containerWidth: 400,
+        overflow: 'fit',
+        underflow: 'stretch',
+        canSquish: true,
+      })
+      expect(widths.a).toBeGreaterThan(130)
+      expect(widths.b).toBeGreaterThan(130)
+      expect(widths.a).toBe(200)
+      expect(widths.b).toBe(200)
+      expect(widths.a! + widths.b!).toBe(400)
+    })
+
+    it('stretch: uneven bases grow proportionally past maxSize and sum exactly', () => {
+      // a base 100 cap 120, b base 300 cap 320. extra = 900-400 = 500.
+      // Waterfall caps both (a +20, b +20 = 40 spent), 460 left; stretch grows
+      // by base ratio 1:3 → a +115 = 235, b +345 = 665. Sum = 900 exactly.
+      const { widths } = computeAutoColumnWidths({
+        columns: [auto('a', 100, { maxSize: 120 }), auto('b', 300, { maxSize: 320 })],
+        containerWidth: 900,
+        overflow: 'fit',
+        underflow: 'stretch',
+        canSquish: true,
+      })
+      expect(widths.a).toBe(235)
+      expect(widths.b).toBe(665)
+      expect(widths.a! + widths.b!).toBe(900)
+    })
+
+    it('stretch: with no caps behaves like distribute and fills exactly', () => {
+      const { widths } = computeAutoColumnWidths({
+        columns: [auto('a', 100), auto('b', 300)],
+        containerWidth: 800,
+        overflow: 'fit',
+        underflow: 'stretch',
+        canSquish: true,
+      })
+      expect(widths).toEqual({ a: 200, b: 600 })
+    })
+
+    it('distribute: rounding remainder is absorbed so the sum is exact', () => {
+      // 3 equal columns, 100px extra doesn't divide evenly (33.33 each).
+      const { widths } = computeAutoColumnWidths({
+        columns: [auto('a', 100), auto('b', 100), auto('c', 100)],
+        containerWidth: 400,
+        overflow: 'fit',
+        underflow: 'distribute',
+        canSquish: true,
+      })
+      expect(widths.a! + widths.b! + widths.c!).toBe(400)
+    })
   })
 
   describe('overflow — natural total exceeds container', () => {

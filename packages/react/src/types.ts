@@ -19,10 +19,16 @@ export interface AutoColumnWidthOptions {
    */
   overflow?: 'fit' | 'scroll'
   /**
-   * When natural total ≤ container: `'distribute'` extra space across columns,
-   * or `'leave'` them at natural width. Default `'leave'`.
+   * When natural total ≤ container, how to spend the leftover space:
+   * - `'leave'` (default) — keep columns at natural width, leave a gutter.
+   * - `'distribute'` — grow auto columns proportionally in a waterfall that
+   *   respects each `maxSize` as a HARD cap; a gutter remains only if EVERY
+   *   auto column hits its `maxSize`.
+   * - `'stretch'` — same waterfall, but `maxSize` is a SOFT cap: if space is
+   *   still left after every column caps, grow past `maxSize` so the container
+   *   fills exactly and never gutters.
    */
-  underflow?: 'distribute' | 'leave'
+  underflow?: 'leave' | 'distribute' | 'stretch'
 }
 
 export interface AdaptiveTableCardContext<TData extends RowData> {

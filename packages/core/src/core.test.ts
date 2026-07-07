@@ -1076,3 +1076,37 @@ describe('createColumnHelper', () => {
     expect(out[0]).toBe(source[0])
   })
 })
+
+describe('remeasureColumns', () => {
+  it("emits 'columns:remeasure' when called", () => {
+    const { table } = createTestTable()
+    const handler = vi.fn()
+    const off = table.events.on('columns:remeasure', handler)
+
+    table.remeasureColumns()
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    off()
+  })
+
+  it('forwards the optional reason on the event payload', () => {
+    const { table } = createTestTable()
+    const handler = vi.fn()
+    table.events.on('columns:remeasure', handler)
+
+    table.remeasureColumns('async-merge-done')
+
+    expect(handler).toHaveBeenCalledWith({ reason: 'async-merge-done' })
+  })
+
+  it('does not fire after the listener unsubscribes', () => {
+    const { table } = createTestTable()
+    const handler = vi.fn()
+    const off = table.events.on('columns:remeasure', handler)
+    off()
+
+    table.remeasureColumns()
+
+    expect(handler).not.toHaveBeenCalled()
+  })
+})

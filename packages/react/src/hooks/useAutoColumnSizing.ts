@@ -30,7 +30,7 @@ export interface ComputeAutoColumnWidthsOptions {
   columns: AutoSizeColumnInput[]
   containerWidth: number
   overflow: 'fit' | 'scroll'
-  underflow: 'distribute' | 'leave'
+  underflow: 'leave' | 'distribute' | 'stretch'
   /** Absolute floor a squished column may never drop below. Default 48. */
   hardMinWidth?: number
   /**
@@ -100,8 +100,12 @@ export function computeAutoColumnWidths(
 
   // --- Underflow: natural content already fits the container -----------------
   if (naturalTotal <= containerWidth) {
-    if (underflow === 'distribute' && autoColumns.length > 0 && containerWidth > naturalTotal) {
-      distributeExtraSpace(autoColumns, base, widths, containerWidth - naturalTotal)
+    if (
+      (underflow === 'distribute' || underflow === 'stretch') &&
+      autoColumns.length > 0 &&
+      containerWidth > naturalTotal
+    ) {
+      distributeExtraSpace(autoColumns, base, widths, containerWidth - naturalTotal, underflow)
     }
     return { widths, wrapColumnIds: [], downgradedFit }
   }
@@ -146,20 +150,88 @@ export function computeAutoColumnWidths(
   return { widths, wrapColumnIds, downgradedFit }
 }
 
+/**
+ * Waterfall underflow distribution. Grows auto columns proportionally to their
+ * base width to spend `extra` leftover pixels:
+ *   - `'distribute'` — `maxSize` is a HARD cap. When a column would exceed its
+ *     cap it is pinned at `maxSize` and its leftover share cascades to the
+ *     remaining uncapped columns; iterate until nothing is left or every column
+ *     is capped. A gutter remains ONLY when every auto column is capped.
+ *   - `'stretch'` — `maxSize` is a SOFT cap: run the same waterfall, then if
+ *     space is still left after all columns cap, grow every column past its
+ *     `maxSize` proportionally so the container fills exactly.
+ * Deterministic and total-preserving: final auto widths sum to
+ * `autoBaseTotal + spent`, with the ±1px rounding remainder absorbed into the
+ * last grown column so the integer sum is exact.
+ */
 function distributeExtraSpace(
   autoColumns: AutoSizeColumnInput[],
   base: Map<string, number>,
   widths: Record<string, number>,
   extra: number,
+  mode: 'distribute' | 'stretch',
 ): void {
   const autoBaseTotal = autoColumns.reduce((sum, c) => sum + base.get(c.id)!, 0)
-  if (autoBaseTotal <= 0) return
+  if (autoBaseTotal <= 0 || extra <= 0) return
 
+  const EPS = 1e-6
+  const current = new Map<string, number>()
+  for (const col of autoColumns) current.set(col.id, base.get(col.id)!)
+
+  const capped = new Set<string>()
+  let remaining = extra
+
+  while (remaining > EPS) {
+    const uncapped = autoColumns.filter((c) => !capped.has(c.id))
+    if (uncapped.length === 0) break
+    const weightTotal = uncapped.reduce((sum, c) => sum + base.get(c.id)!, 0)
+    if (weightTotal <= 0) break
+
+    let spentThisPass = 0
+    let newlyCapped = false
+    for (const col of uncapped) {
+      const share = remaining * (base.get(col.id)! / weightTotal)
+      const cur = current.get(col.id)!
+      const cap = col.maxSize
+      if (typeof cap === 'number' && cur + share >= cap) {
+        spentThisPass += cap - cur
+        current.set(col.id, cap)
+        capped.add(col.id)
+        newlyCapped = true
+      } else {
+        current.set(col.id, cur + share)
+        spentThisPass += share
+      }
+    }
+    remaining -= spentThisPass
+    // No column capped and nothing measurable moved → avoid spinning on dust.
+    if (!newlyCapped && spentThisPass <= EPS) break
+  }
+
+  // `stretch`: still underfilled with every column capped → grow past maxSize
+  // proportionally so the container fills exactly.
+  if (mode === 'stretch' && remaining > EPS) {
+    for (const col of autoColumns) {
+      const cur = current.get(col.id)!
+      current.set(col.id, cur + remaining * (base.get(col.id)! / autoBaseTotal))
+    }
+    remaining = 0
+  }
+
+  // Round to integers, then absorb the rounding remainder into the last grown
+  // column so the total matches the float target exactly.
+  const targetSum = Math.round(autoBaseTotal + (extra - remaining))
+  let sumRounded = 0
+  let lastGrownId: string | null = null
   for (const col of autoColumns) {
-    const baseWidth = base.get(col.id)!
-    const grown = baseWidth + extra * (baseWidth / autoBaseTotal)
-    // Respect maxSize: never distribute a column past its cap.
-    widths[col.id] = Math.round(clamp(grown, undefined, col.maxSize))
+    const rounded = Math.round(current.get(col.id)!)
+    widths[col.id] = rounded
+    sumRounded += rounded
+    if (current.get(col.id)! > base.get(col.id)! + EPS) lastGrownId = col.id
+  }
+  const diff = targetSum - sumRounded
+  if (diff !== 0 && lastGrownId !== null) {
+    widths[lastGrownId] = (widths[lastGrownId] ?? 0) + diff
   }
 }
 
@@ -271,6 +343,8 @@ export interface UseAutoColumnSizingResult {
 const DEFAULT_SAMPLE_SIZE = 100
 const DEFAULT_PADDING_X = 14
 const SORT_INDICATOR_ALLOWANCE = 20
+/** Debounce for auto re-measure on data-identity change (coalesce rapid merges). */
+const REMEASURE_DEBOUNCE_MS = 60
 
 let sharedCanvas: HTMLCanvasElement | null = null
 let sharedContext: CanvasRenderingContext2D | null = null
@@ -303,6 +377,9 @@ export function useAutoColumnSizing<TData extends RowData>({
 }: UseAutoColumnSizingOptions<TData>): UseAutoColumnSizingResult {
   const [wrapColumnIds, setWrapColumnIds] = useState<string[]>([])
   const [containerWidth, setContainerWidth] = useState(0)
+  // Bumped to force a re-measure: automatically on data-identity change
+  // (debounced) and immediately on `table.remeasureColumns()`.
+  const [remeasureVersion, setRemeasureVersion] = useState(0)
 
   // Track columns the user has manually resized this session; once resized, a
   // column is excluded from auto-sizing so we never fight an active drag.
@@ -341,6 +418,47 @@ export function useAutoColumnSizing<TData extends RowData>({
     observer.observe(node)
     return () => observer.disconnect()
   }, [enabled, measureRef])
+
+  // Auto re-measure when the row DATA reference changes identity — an async
+  // value merge (same rows, values filled in later) produces a NEW `data`
+  // array, so columns sized on placeholder content get corrected. We key on the
+  // raw `data` reference (NOT the derived row model) so sort/filter/pagination
+  // don't needlessly re-measure. Debounced to coalesce rapid updates. The
+  // provenance rule in the measure effect still holds: only auto-owned widths
+  // update; user-set/persisted widths are untouched.
+  const currentData = enabled ? table.options?.data : undefined
+  const seenDataRef = useRef(false)
+  const lastDataRef = useRef<unknown>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (!enabled) return
+    // First data we observe: record it without scheduling — the initial measure
+    // already keys on `signature`, so scheduling here would just double-run.
+    if (!seenDataRef.current) {
+      seenDataRef.current = true
+      lastDataRef.current = currentData
+      return
+    }
+    if (lastDataRef.current === currentData) return
+    lastDataRef.current = currentData
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null
+      setRemeasureVersion((v) => v + 1)
+    }, REMEASURE_DEBOUNCE_MS)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [enabled, currentData])
+
+  // Explicit escape hatch: `table.remeasureColumns()` emits this event when an
+  // adapter knows an async merge is done. Re-measure immediately (no debounce).
+  useEffect(() => {
+    if (!enabled) return
+    return table.events.on('columns:remeasure', () => {
+      setRemeasureVersion((v) => v + 1)
+    })
+  }, [enabled, table])
 
   useEffect(() => {
     if (!enabled) {
@@ -456,7 +574,16 @@ export function useAutoColumnSizing<TData extends RowData>({
 
     setWrapColumnIds((prev) => (arraysEqual(prev, nextWrap) ? prev : nextWrap))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `signature` folds in data/columns/font; other deps are stable
-  }, [enabled, signature, containerWidth, overflow, underflow, sampleSize, isVirtualized])
+  }, [
+    enabled,
+    signature,
+    containerWidth,
+    overflow,
+    underflow,
+    sampleSize,
+    isVirtualized,
+    remeasureVersion,
+  ])
 
   return { wrapColumnIds }
 }

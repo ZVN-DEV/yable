@@ -619,7 +619,7 @@ prop — **off by default**, so existing layouts are unchanged.
   autoColumnWidth={{
     sampleSize: 100,    // rows sampled for measurement (default 100)
     overflow: 'fit',    // 'fit' | 'scroll' (default 'fit')
-    underflow: 'leave', // 'distribute' | 'leave' (default 'leave')
+    underflow: 'leave', // 'leave' | 'distribute' | 'stretch' (default 'leave')
   }}
 />
 ```
@@ -634,7 +634,14 @@ prop — **off by default**, so existing layouts are unchanged.
 ### Underflow modes (natural total < container)
 
 - **`leave`** — columns keep their natural width.
-- **`distribute`** — extra space is spread proportionally across auto-sized columns.
+- **`distribute`** — extra space is spread proportionally across auto-sized
+  columns in a **waterfall** that respects each `maxSize` as a **hard cap**: a
+  column that would exceed `maxSize` is pinned and its leftover cascades to the
+  uncapped columns. A gutter remains **only** when every auto column is capped.
+- **`stretch`** — same waterfall, but `maxSize` is a **soft cap**: if space is
+  still left after all columns cap, they grow past `maxSize` proportionally so the
+  container fills **exactly** — never a dead gutter (handy for modal/settings
+  tables with a few capped columns).
 
 ### Per-column opt-out
 
@@ -671,6 +678,28 @@ columnHelper.accessor('trend', {
 Precedence: `autoSizeWidth` (exact px, verbatim) → `autoSizeText` (measured
 string, gets padding + sort-indicator) → raw accessor value.
 
+### Async values (re-measure)
+
+When cell values arrive **after** mount (rows render with placeholders like `$0`
+/ `'-'`, then real values merge in from a separate query), the first measurement
+sizes on the placeholder. Auto-sizing corrects this by re-measuring whenever the
+**row data reference changes identity** — an async merge produces a new `data`
+array, which triggers a debounced (~60ms) re-measure. Sorting, filtering, and
+pagination do **not** re-measure (they change the derived row model, not `data`).
+Re-measure respects provenance: only auto-owned widths update; user-resized and
+persisted widths are untouched.
+
+If values merge **without** a new `data` array (in-place mutation), call the
+escape hatch when the merge is done:
+
+```tsx
+table.remeasureColumns() // immediate re-measure (no debounce)
+table.remeasureColumns('prices-loaded') // optional reason, forwarded on the event
+```
+
+`table.remeasureColumns(reason?)` emits `'columns:remeasure'`; it is a no-op when
+smart width is off and only re-sizes auto-owned columns.
+
 ### `minSize` is a hard floor
 
 A column can never render below its `minSize` — core `getSize` clamps every width
@@ -681,9 +710,16 @@ up to `minSize`. Auto-sizing treats it as a hard floor: content narrower than
 
 The hook never overwrites a width it didn't write this session — a user-dragged
 width or one restored from persisted `columnSizing` is treated as user-set and
-left alone. Trade-off: persisted columns aren't re-auto-measured on reload.
-Prefer not persisting `columnSizing` under `autoColumnWidth` (auto recomputes
-from content), or persist only user-resized columns.
+left alone.
+
+> **Persisting auto-sized widths neuters smart width.** If you save the whole
+> `columnSizing` state (it includes the widths auto-sizing computed) and restore
+> it on the next load, those restored widths look **user-set** to the provenance
+> rule and are skipped — the column stops auto-measuring, and async re-measure and
+> `stretch` won't touch it. Prefer **not** persisting `columnSizing` under
+> `autoColumnWidth` (auto recomputes from content every load), or persist **only**
+> the columns the user actually resized (mark them at resize time) and restore
+> just those.
 
 ### Limitations
 

@@ -9,6 +9,7 @@
 //   - scroll mode: horizontal scroll present (scrollWidth > clientWidth).
 //   - the opt-out column (explicit size + enableAutoSize:false) keeps its width.
 
+import { useState } from 'react'
 import { useTable, Table, createColumnHelper } from '@zvndev/yable-react'
 
 interface WideRow {
@@ -94,10 +95,62 @@ function FormattedGrid() {
   return <Table table={table} autoColumnWidth={{ overflow: 'scroll' }} bordered />
 }
 
+// --- Async re-measure (values merged in after mount) -----------------------
+// Same rows render first with a placeholder amount ('-'); clicking "Load values"
+// swaps in a NEW data array carrying the wide real values. Smart width watches
+// the `data` reference identity, so the debounced auto re-measure widens the
+// Amount column from its placeholder width. The container is wide enough that
+// nothing squishes — the width change comes purely from the re-measure.
+
+interface AsyncRow {
+  id: number
+  label: string
+  amount: string
+}
+
+const ASYNC_LABELS = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot']
+const PLACEHOLDER_ROWS: AsyncRow[] = ASYNC_LABELS.map((label, i) => ({
+  id: i + 1,
+  label,
+  amount: '-',
+}))
+const LOADED_ROWS: AsyncRow[] = ASYNC_LABELS.map((label, i) => ({
+  id: i + 1,
+  label,
+  amount: `$${(i + 1).toString()},234,567,890.00`,
+}))
+
+const asyncCol = createColumnHelper<AsyncRow>()
+const asyncColumns = [
+  asyncCol.accessor('label', { header: 'Label' }),
+  asyncCol.accessor('amount', { header: 'Amount' }),
+]
+
+function AsyncMergeGrid() {
+  const [data, setData] = useState<AsyncRow[]>(PLACEHOLDER_ROWS)
+  const table = useTable<AsyncRow>({
+    data,
+    columns: asyncColumns,
+    getRowId: (row) => String(row.id),
+  })
+  return (
+    <>
+      <button type="button" data-testid="async-load" onClick={() => setData(LOADED_ROWS)}>
+        Load values
+      </button>
+      <Table table={table} autoColumnWidth bordered />
+    </>
+  )
+}
+
 export default function AutoColumnWidthFixturePage() {
   return (
     <main style={{ padding: 24 }}>
       <h1>Smart column width fixture</h1>
+      <section data-testid="auto-async" style={{ width: 900, marginBottom: 48 }}>
+        <h2>async re-measure</h2>
+        <AsyncMergeGrid />
+      </section>
       <section data-testid="auto-fit" style={{ width: 520, marginBottom: 48 }}>
         <h2>overflow: fit</h2>
         <AutoGrid overflow="fit" />
