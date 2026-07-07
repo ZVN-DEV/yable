@@ -75,6 +75,45 @@
   letter-spacing: 0;
 }
 
+/* ── Density presets (React `density` prop) ──────────────────────────────────
+   First-class three-step density scale. Each preset declares the full token
+   set EXPLICITLY — including `regular` — so a grid nested inside a differently
+   scaled ancestor still renders its own density rather than inheriting the
+   ancestor's overridden CSS variables. */
+
+.yable--density-condensed {
+  --yable-cell-padding-x: 8px;
+  --yable-cell-padding-y: 4px;
+  --yable-header-padding-x: 8px;
+  --yable-header-padding-y: 4px;
+  --yable-row-min-height: 32px;
+  --yable-header-min-height: 32px;
+  --yable-font-size: 12px;
+  --yable-font-size-header: 11px;
+}
+
+.yable--density-regular {
+  --yable-cell-padding-x: 14px;
+  --yable-cell-padding-y: 10px;
+  --yable-header-padding-x: 14px;
+  --yable-header-padding-y: 11px;
+  --yable-row-min-height: 40px;
+  --yable-header-min-height: 40px;
+  --yable-font-size: 13px;
+  --yable-font-size-header: 12px;
+}
+
+.yable--density-spacious {
+  --yable-cell-padding-x: 20px;
+  --yable-cell-padding-y: 14px;
+  --yable-header-padding-x: 20px;
+  --yable-header-padding-y: 14px;
+  --yable-row-min-height: 48px;
+  --yable-header-min-height: 48px;
+  --yable-font-size: 14px;
+  --yable-font-size-header: 13px;
+}
+
 /* ============================================================================
    2. VISUAL MODIFIERS
    Control borders, backgrounds, corners, and shadows.

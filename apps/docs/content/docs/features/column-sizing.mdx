@@ -1,0 +1,100 @@
+---
+title: Column Sizing & Density
+description: Fit columns to their content with smart width, and control row/cell spacing with density presets.
+---
+
+Two React `<Table>` props tune layout: `autoColumnWidth` sizes columns to their
+content, and `density` sets a spacing preset. Both are opt-in and leave existing
+layouts unchanged when unset.
+
+## Smart Column Width
+
+`autoColumnWidth` measures each column's content and resolves final widths under
+a chosen overflow policy. It is **off by default** — pass `true` for the default
+policy, or an object to tune it.
+
+```tsx
+// Default policy: fit to container, leave underflow, sample 100 rows.
+<Table table={table} autoColumnWidth />
+
+// Tuned:
+<Table
+  table={table}
+  autoColumnWidth={{
+    sampleSize: 100,          // rows sampled for measurement (default 100)
+    overflow: 'fit',          // 'fit' | 'scroll' (default 'fit')
+    underflow: 'leave',       // 'distribute' | 'leave' (default 'leave')
+  }}
+/>
+```
+
+### Overflow modes
+
+When the columns' natural (content) widths sum to **more** than the container:
+
+- **`fit`** — never scroll horizontally. Over-wide columns are squished and their
+  cells **wrap**. Width is taken first from the columns with the most slack
+  (largest content), proportional to each column's slack, and never below a
+  floor (its `minSize`, or 48px).
+- **`scroll`** — keep natural widths and allow the grid to scroll horizontally.
+
+### Underflow modes
+
+When natural widths sum to **less** than the container:
+
+- **`leave`** — columns keep their natural width (the grid may not fill the container).
+- **`distribute`** — extra space is spread proportionally across auto-sized columns.
+
+### Per-column opt-out
+
+A column keeps its width and is excluded from measurement and squishing when it
+has an explicit `size`, or `enableAutoSize: false`:
+
+```tsx
+columnHelper.accessor('status', {
+  header: 'Status',
+  size: 120,               // explicit size opts out
+})
+columnHelper.accessor('actions', {
+  header: '',
+  enableAutoSize: false,   // keeps its width, never measured or squished
+})
+```
+
+Computed widths flow through the table's `columnSizing` state, so pinned-column
+offsets, the `<colgroup>`, and virtualization totals all stay in agreement. Once
+you drag a column's resize handle, that column is excluded from further
+auto-sizing so it never fights your manual width.
+
+### Limitations
+
+- **Custom cell renderers.** Measurement uses each cell's string value, so
+  columns rendering non-text content (badges, progress bars, custom components)
+  won't measure accurately. Give those columns an explicit `size` or
+  `enableAutoSize: false`.
+- **Row virtualization.** Wrapped rows have variable heights that the virtualizer
+  does not measure. When the table is row-virtualized, `overflow: 'fit'` falls
+  back to `scroll` behavior (natural widths, horizontal scroll) instead of
+  squishing and wrapping.
+
+## Density Presets
+
+`density` maps to a token set (cell/header padding, row height, font size)
+defined in the themes package. It is independent of the legacy `compact` prop,
+which continues to work unchanged.
+
+```tsx
+<Table table={table} density="condensed" />
+<Table table={table} density="regular" />
+<Table table={table} density="spacious" />
+```
+
+| Preset       | Cell padding | Row height | Font size |
+| ------------ | ------------ | ---------- | --------- |
+| `condensed`  | 8 × 4px      | 32px       | 12px      |
+| `regular`    | 14 × 10px    | 40px       | 13px      |
+| `spacious`   | 20 × 14px    | 48px       | 14px      |
+
+Each preset declares its full token set explicitly — including `regular` — so a
+grid nested inside a differently scaled ancestor still renders its own density
+rather than inheriting the ancestor's overridden variables.

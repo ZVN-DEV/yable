@@ -6,6 +6,25 @@ import type { YableConfig } from './config'
 
 export type AdaptiveTableLayoutMode = 'auto' | 'table' | 'cards'
 
+/** Density preset controlling cell/header padding, row height, and font size. */
+export type TableDensity = 'condensed' | 'regular' | 'spacious'
+
+/** Object form of the `autoColumnWidth` prop. */
+export interface AutoColumnWidthOptions {
+  /** Rows sampled for measurement. Default 100. */
+  sampleSize?: number
+  /**
+   * `'fit'` = never horizontally scroll: squish over-wide columns and let them
+   * WRAP. `'scroll'` = keep natural widths, allow horizontal scroll. Default `'fit'`.
+   */
+  overflow?: 'fit' | 'scroll'
+  /**
+   * When natural total ≤ container: `'distribute'` extra space across columns,
+   * or `'leave'` them at natural width. Default `'leave'`.
+   */
+  underflow?: 'distribute' | 'leave'
+}
+
 export interface AdaptiveTableCardContext<TData extends RowData> {
   table: Table<TData>
   row: Row<TData>
@@ -49,6 +68,24 @@ export interface TableProps<TData extends RowData> extends Omit<
   bordered?: boolean
   /** Enable compact spacing */
   compact?: boolean
+  /**
+   * Density preset: `'condensed'`, `'regular'`, or `'spacious'`. Maps to a token
+   * set (padding, row height, font size) in the themes package. Independent of
+   * and layered under `compact` — both may be set, though a single density
+   * preset is the recommended path.
+   */
+  density?: TableDensity
+  /**
+   * Opt-in smart column sizing. `true` fits columns to their content using the
+   * default policy (`overflow: 'fit'`, `underflow: 'leave'`, `sampleSize: 100`);
+   * pass an object to tune it. Default OFF — existing layouts are unaffected.
+   *
+   * Columns with an explicit `size` or `enableAutoSize: false` keep their width
+   * and are excluded from measurement and squishing. Squish + wrap is only
+   * applied when the table is NOT row-virtualized; under virtualization the
+   * table falls back to `overflow: 'scroll'` behavior.
+   */
+  autoColumnWidth?: boolean | AutoColumnWidthOptions
   /** Theme variant */
   theme?: string
   /** Named table profile from `YableProvider config` */

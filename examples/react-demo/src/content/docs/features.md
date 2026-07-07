@@ -12,6 +12,8 @@ Detailed guide for every Yable feature. Each section explains what the feature d
 - [Cell Editing](#cell-editing)
 - [Column Pinning](#column-pinning)
 - [Column Resizing](#column-resizing)
+- [Smart Column Width](#smart-column-width)
+- [Density Presets](#density-presets)
 - [Column Visibility](#column-visibility)
 - [Column Ordering](#column-ordering)
 - [Column Grouping](#column-grouping)
@@ -556,6 +558,87 @@ const table = useTable({
   onColumnSizingChange: setColumnSizing,
 })
 ```
+
+---
+
+## Smart Column Width
+
+Size columns to their content. Opt-in via the React `<Table autoColumnWidth>`
+prop — **off by default**, so existing layouts are unchanged.
+
+### How to Enable
+
+```tsx
+// Default policy: fit to container, leave underflow, sample 100 rows.
+<Table table={table} autoColumnWidth />
+
+// Tuned:
+<Table
+  table={table}
+  autoColumnWidth={{
+    sampleSize: 100,    // rows sampled for measurement (default 100)
+    overflow: 'fit',    // 'fit' | 'scroll' (default 'fit')
+    underflow: 'leave', // 'distribute' | 'leave' (default 'leave')
+  }}
+/>
+```
+
+### Overflow modes (natural total > container)
+
+- **`fit`** — never scroll horizontally. Over-wide columns are squished and their
+  cells **wrap**, taking width first from the columns with the most slack,
+  never below a floor (`minSize`, or 48px).
+- **`scroll`** — keep natural widths and allow horizontal scrolling.
+
+### Underflow modes (natural total < container)
+
+- **`leave`** — columns keep their natural width.
+- **`distribute`** — extra space is spread proportionally across auto-sized columns.
+
+### Per-column opt-out
+
+A column with an explicit `size` or `enableAutoSize: false` keeps its width and
+is excluded from measurement and squishing:
+
+```tsx
+columnHelper.accessor('status', { header: 'Status', size: 120 })
+columnHelper.accessor('actions', { header: '', enableAutoSize: false })
+```
+
+Computed widths flow through `columnSizing`, so pinned offsets, the `<colgroup>`,
+and virtualization totals stay in sync. Dragging a column's resize handle
+excludes it from further auto-sizing.
+
+### Limitations
+
+- **Custom cell renderers** (badges, progress, custom components) measure by their
+  string value and won't size accurately — give them an explicit `size` or
+  `enableAutoSize: false`.
+- **Row virtualization**: wrapped row heights aren't measured, so under row
+  virtualization `overflow: 'fit'` falls back to `scroll` behavior.
+
+---
+
+## Density Presets
+
+Control cell/header padding, row height, and font size with the React
+`<Table density>` prop. Independent of the legacy `compact` prop (which still
+works unchanged).
+
+```tsx
+<Table table={table} density="condensed" />
+<Table table={table} density="regular" />
+<Table table={table} density="spacious" />
+```
+
+| Preset      | Cell padding | Row height | Font size |
+| ----------- | ------------ | ---------- | --------- |
+| `condensed` | 8 × 4px      | 32px       | 12px      |
+| `regular`   | 14 × 10px    | 40px       | 13px      |
+| `spacious`  | 20 × 14px    | 48px       | 14px      |
+
+Each preset declares its full token set explicitly (including `regular`), so a
+grid nested inside a differently scaled ancestor renders its own density.
 
 ---
 

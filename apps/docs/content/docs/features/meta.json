@@ -10,6 +10,7 @@
     "cell-types",
     "column-pinning",
     "column-resizing",
+    "column-sizing",
     "column-visibility",
     "column-ordering",
     "column-presets",
