@@ -488,6 +488,68 @@ describe('Cell Editing', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Per-column editConfig.commit hook (#52)
+// ---------------------------------------------------------------------------
+describe('per-column editConfig.commit', () => {
+  type Committed = { id: number; value: unknown }
+
+  // Column whose committed value is keyed by column id, not a data path — the
+  // exact nested/derived-accessor case #52 is about.
+  function createCommitTable(committed: Committed[]) {
+    return createTestTable({
+      columns: [
+        columnHelper.accessor((row: Person) => row.salary, {
+          id: 'salaryUsd',
+          header: 'Salary',
+          editConfig: {
+            type: 'number',
+            commit: (row, value) => committed.push({ id: row.original.id, value }),
+          },
+        }),
+        columnHelper.accessor('lastName', { header: 'Last' }),
+      ],
+    })
+  }
+
+  it('commitEdit fires the column hook with the pre-commit row and new value', () => {
+    const committed: Committed[] = []
+    const { table } = createCommitTable(committed)
+
+    table.startEditing('1', 'salaryUsd')
+    table.setPendingValue('1', 'salaryUsd', 999)
+    table.commitEdit()
+
+    expect(committed).toEqual([{ id: 1, value: 999 }])
+  })
+
+  it('does not fire for columns without a commit hook', () => {
+    const committed: Committed[] = []
+    const { table } = createCommitTable(committed)
+
+    table.startEditing('1', 'lastName')
+    table.setPendingValue('1', 'lastName', 'Nguyen')
+    table.commitEdit()
+
+    expect(committed).toEqual([])
+  })
+
+  it('commitAllPending fires the hook once per committed cell', () => {
+    const committed: Committed[] = []
+    const { table } = createCommitTable(committed)
+
+    table.setPendingValue('1', 'salaryUsd', 100)
+    table.setPendingValue('2', 'salaryUsd', 200)
+    table.setPendingValue('2', 'lastName', 'Skip') // no hook on lastName
+    table.commitAllPending()
+
+    expect(committed).toEqual([
+      { id: 1, value: 100 },
+      { id: 2, value: 200 },
+    ])
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Sorting functions
 // ---------------------------------------------------------------------------
 describe('sortingFns', () => {
@@ -990,5 +1052,27 @@ describe('createColumnHelper', () => {
   it('creates display column', () => {
     const col = columnHelper.display({ id: 'actions', header: 'Actions' })
     expect(col).toHaveProperty('id', 'actions')
+  })
+
+  it('columns() normalizes a heterogeneous accessor array (#53)', () => {
+    // string / number / boolean TValues + a display column in one array — this
+    // assigns to ColumnDef<Person, unknown>[] without per-column casts, which is
+    // the whole point of the builder (compiling is the assertion for #53).
+    const cols = columnHelper.columns([
+      columnHelper.accessor('firstName', { header: 'First' }),
+      columnHelper.accessor('age', { header: 'Age' }),
+      columnHelper.accessor('active', { header: 'Active' }),
+      columnHelper.display({ id: 'actions', header: 'Actions' }),
+    ])
+    expect(cols).toHaveLength(4)
+    expect(cols[0]).toHaveProperty('accessorKey', 'firstName')
+    expect(cols[3]).toHaveProperty('id', 'actions')
+  })
+
+  it('columns() returns a fresh array preserving element identity and order', () => {
+    const source = [columnHelper.accessor('salary', { header: 'Salary' })]
+    const out = columnHelper.columns(source)
+    expect(out).not.toBe(source)
+    expect(out[0]).toBe(source[0])
   })
 })

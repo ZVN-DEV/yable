@@ -259,6 +259,20 @@ export interface CellEditConfig<TData extends RowData, TValue = unknown> {
   format?: (value: TValue) => string
   placeholder?: string
   render?: (props: CellEditRenderProps<TData, TValue>) => unknown
+  /**
+   * Per-column commit handler. Fires once for every committed value in this
+   * column — on single-cell commit, full-row commit, and `commitAllPending()` —
+   * with the (pre-commit) row and the newly committed value.
+   *
+   * Lets the column-id → data-field mapping live on the column def instead of a
+   * `switch (columnId)` inside a table-level `onEditCommit`/`onCommit` handler.
+   * This is the recommended shape for nested/derived accessors
+   * (`columnHelper.accessor((r) => r.a.b, { id })`), whose committed value is
+   * keyed by column **id**, not by a `Partial<TData>` data path. Fires
+   * regardless of whether `onEditCommit`/`onCommit` is also set; if both are
+   * defined they both run, so pick one owner per column.
+   */
+  commit?: (row: Row<TData>, value: TValue) => void
 }
 
 export interface CellEditRenderProps<TData extends RowData, TValue = unknown> {
@@ -1464,6 +1478,22 @@ export interface ColumnHelper<TData extends RowData> {
 
   display: (column: DisplayColumnDef<TData>) => ColumnDef<TData, unknown>
   group: (column: GroupColumnDef<TData>) => ColumnDef<TData, unknown>
+
+  /**
+   * Normalize a heterogeneous column list into `ColumnDef<TData, unknown>[]`.
+   *
+   * `helper.accessor(...)` returns a `ColumnDef<TData, TValue>` with a concrete,
+   * per-column `TValue`. Because `TValue` is invariant, an inline array of mixed
+   * accessor columns (string, number, boolean, derived) infers as a union of
+   * element types that does **not** assign to `ColumnDef<TData, unknown>[]`,
+   * forcing an `as ColumnDef<TData, unknown>` cast on nearly every column. Wrap
+   * the array in `helper.columns([...])` to erase the per-column `TValue` in one
+   * place and get an array the table options accept directly.
+   */
+  columns: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accepts any concrete per-column TValue; erased to unknown on return
+    columns: ReadonlyArray<ColumnDef<TData, any>>,
+  ) => ColumnDef<TData, unknown>[]
 }
 
 // ---------------------------------------------------------------------------

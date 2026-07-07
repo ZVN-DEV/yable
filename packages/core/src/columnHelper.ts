@@ -38,5 +38,9 @@ export function createColumnHelper<TData extends RowData>(): ColumnHelper<TData>
     group: (column: GroupColumnDef<TData, unknown>): ColumnDef<TData, unknown> => {
       return column
     },
+
+    columns: (columns: ReadonlyArray<ColumnDef<TData, unknown>>): ColumnDef<TData, unknown>[] => {
+      return [...columns]
+    },
   }
 }

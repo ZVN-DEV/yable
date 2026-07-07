@@ -37,3 +37,11 @@ table.toggleAllRowsExpanded(false)
 table.getRow('0').getIsExpanded() // boolean
 table.getIsAllRowsExpanded() // boolean
 ```
+
+### With row virtualization
+
+Detail panels still render when `enableVirtualization` is on, but the virtualizer
+does not measure their height, so variable-height inline panels drift the scroll
+position once you scroll past an expanded row. On large virtualized datasets,
+prefer an out-of-table detail view (drawer/modal) or a fixed-height panel. See
+[Row Virtualization → Row expanding & master-detail](/docs/features/virtualization#row-expanding--master-detail).

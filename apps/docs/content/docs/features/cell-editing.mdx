@@ -24,6 +24,7 @@ interface CellEditConfig {
   format?: (value: TValue) => string // Format value for display
   placeholder?: string
   render?: (props: CellEditRenderProps) => unknown // Custom editor render
+  commit?: (row: Row<TData>, value: TValue) => void // Per-column commit handler
 }
 ```
 
@@ -73,6 +74,53 @@ const table = useTable({
   },
 })
 ```
+
+### Commit payloads are keyed by column id
+
+The `onEditCommit` payload is `Record<rowId, Record<columnId, value>>` — **keyed by
+column id, not by data-field path**. For a plain string-path column
+(`accessor('name', …)`) the column id defaults to the path, so the patch happens
+to look like a `Partial<TData>`. But for a **function / derived accessor** you set
+the `id` yourself, and the committed value lands under that id — not under any real
+field:
+
+```typescript
+columnHelper.accessor((row) => row.pricing.tier1, {
+  id: 'tier1Price', // ← commit key is 'tier1Price', not 'pricing.tier1'
+  editable: true,
+  editConfig: { type: 'number' },
+})
+
+// onEditCommit receives: { [rowId]: { tier1Price: 42 } }
+// NOT { [rowId]: { pricing: { tier1: 42 } } }
+```
+
+So a table-level `onEditCommit` for nested/derived columns needs a
+`columnId → setter` mapping. You can either handle that centrally, or move the
+mapping onto the column with `editConfig.commit`.
+
+### Per-column commit handler
+
+`editConfig.commit(row, value)` fires once for every committed value in that
+column — on single-cell commit (`commitEdit`), full-row commit, and
+`commitAllPending()` — with the **pre-commit** row and the newly committed value.
+It lets the column-id → data-field mapping live on the column def instead of a
+`switch (columnId)` inside `onEditCommit`:
+
+```tsx
+columnHelper.accessor((row) => row.pricing.tier1, {
+  id: 'tier1Price',
+  editable: true,
+  editConfig: {
+    type: 'number',
+    // The mapping lives here, next to the accessor it inverts.
+    commit: (row, value) => updateTierPrice(row.original.id, 'tier1', value),
+  },
+})
+```
+
+`commit` fires regardless of whether `onEditCommit` / `onCommit` is also set — if
+both are defined, both run, so pick one owner per column.
 
 ### Editors render automatically
 

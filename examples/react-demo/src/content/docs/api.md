@@ -56,7 +56,7 @@ const table = createTable({
 function createColumnHelper<TData extends RowData>(): ColumnHelper<TData>
 ```
 
-Returns a type-safe column definition builder. The helper provides three methods:
+Returns a type-safe column definition builder. The helper provides four methods:
 
 ### `.accessor(accessorKeyOrFn, options)`
 
@@ -107,6 +107,30 @@ const col = columnHelper.group({
   ],
 })
 ```
+
+### `.columns(columnList)`
+
+Normalize a heterogeneous column list into `ColumnDef<TData, unknown>[]`.
+
+Each `.accessor(...)` returns a `ColumnDef<TData, TValue>` with a concrete,
+per-column value type. Because `TValue` is invariant, an inline array mixing
+string, number, and boolean columns infers as a union that does **not** assign to
+`ColumnDef<TData, unknown>[]`, forcing an `as ColumnDef<TData, unknown>` cast on
+nearly every column. Wrap the array in `.columns([...])` to erase the per-column
+`TValue` in one place:
+
+```typescript
+const columns = columnHelper.columns([
+  columnHelper.accessor('name', { header: 'Name' }), // TValue = string
+  columnHelper.accessor('age', { header: 'Age' }), // TValue = number
+  columnHelper.accessor('active', { header: 'Active' }), // TValue = boolean
+  columnHelper.display({ id: 'actions', header: 'Actions' }),
+])
+// columns: ColumnDef<Person, unknown>[] — no per-column casts
+```
+
+It returns a fresh array (safe to mutate) and preserves element identity and
+order.
 
 ---
 

@@ -7,7 +7,7 @@ description: Returns a type-safe column definition builder with accessor, displa
 function createColumnHelper<TData extends RowData>(): ColumnHelper<TData>
 ```
 
-Returns a type-safe column definition builder. The helper provides three methods:
+Returns a type-safe column definition builder. The helper provides four methods:
 
 ### `.accessor(accessorKeyOrFn, options)`
 
@@ -61,3 +61,39 @@ const col = columnHelper.group({
   ],
 })
 ```
+
+### `.columns(columnList)`
+
+Normalize a heterogeneous list of columns into `ColumnDef<TData, unknown>[]`.
+
+Each `.accessor(...)` call returns a `ColumnDef<TData, TValue>` with a concrete,
+per-column value type. Because `TValue` is invariant, an inline array mixing
+string, number, boolean and derived columns infers as a *union* of element types
+that does **not** assign to `ColumnDef<TData, unknown>[]` — so without this helper
+nearly every column needs an `as ColumnDef<TData, unknown>` cast:
+
+```typescript
+// ❌ Each element has a different TValue → union doesn't assign to the array type
+const columns: ColumnDef<Person, unknown>[] = [
+  columnHelper.accessor('name', { header: 'Name' }),      // TValue = string
+  columnHelper.accessor('age', { header: 'Age' }),        // TValue = number
+  columnHelper.accessor('active', { header: 'Active' }),  // TValue = boolean
+] // type error without per-column casts
+```
+
+Wrap the array in `.columns([...])` to erase the per-column `TValue` in one place
+and get a value the table options accept directly:
+
+```typescript
+// ✅ One call, no casts
+const columns = columnHelper.columns([
+  columnHelper.accessor('name', { header: 'Name' }),
+  columnHelper.accessor('age', { header: 'Age' }),
+  columnHelper.accessor('active', { header: 'Active' }),
+  columnHelper.display({ id: 'actions', header: 'Actions' }),
+])
+// columns: ColumnDef<Person, unknown>[]
+```
+
+It returns a fresh array (safe to mutate) and preserves element identity and
+order — it is a type-normalizing pass-through, not a copy of each column def.

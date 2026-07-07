@@ -37,6 +37,7 @@ import type {
 import { functionalUpdate, memo, makeStateUpdater } from '../utils'
 import { createColumn } from './column'
 import { createRow } from './row'
+import { fireColumnCommitHooks } from './editCommitHooks'
 import { buildHeaderGroups } from './headers'
 import { EventEmitterImpl } from '../events/EventEmitter'
 import { getDefaultLocale } from '../i18n/locales'
@@ -863,6 +864,12 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
         table.setFocusedCell(focusedCell)
       }
 
+      // Per-column commit hooks fire for every committed cell, independent of
+      // the table-level onCommit/onEditCommit handler below.
+      if (hasPending) {
+        fireColumnCommitHooks(table, { [rowId]: { [columnId]: pendingValue } })
+      }
+
       // If onCommit is defined and autoCommit !== false, dispatch through the
       // coordinator. Otherwise (legacy mode), fire the existing onEditCommit hook.
       const opts = table.options
@@ -936,6 +943,7 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     },
     commitAllPending: () => {
       const changes = table.getAllPendingChanges()
+      fireColumnCommitHooks(table, changes)
       resolvedOptions.onEditCommit?.(changes)
       table.setEditing((old: EditingState) => ({
         ...old,
