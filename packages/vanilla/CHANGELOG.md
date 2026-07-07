@@ -1,5 +1,12 @@
 # @zvndev/yable-vanilla
 
+## 0.3.13
+
+### Patch Changes
+
+- Updated dependencies [2499b0a]
+  - @zvndev/yable-themes@0.4.7
+
 ## 0.3.12
 
 ### Patch Changes
