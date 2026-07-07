@@ -20,6 +20,19 @@ interface TableBodyProps<TData extends RowData> {
   colgroup?: React.ReactNode
   /** Stable mousedown handler for the fill handle, lifted from `useFillHandle`. */
   onFillHandleMouseDown?: (rowIndex: number, columnIndex: number, e: React.MouseEvent) => void
+  /**
+   * When set (row-virtualization surface mode), TableBody owns the whole
+   * scrollable surface: it renders the single `.yable-virtual-scroll-container`
+   * wrapping the header and body inside one `<table>` so pinned header `th` and
+   * pinned body `td` resolve `position: sticky` against the same horizontally
+   * scrolling element. When absent, TableBody renders a bare `<tbody>` (its
+   * historical behavior, still used by the non-virtualized and column-
+   * virtualization paths).
+   */
+  virtualizationSurface?: {
+    header: React.ReactNode
+    footer?: React.ReactNode
+  }
 }
 
 export function TableBody<TData extends RowData>({
@@ -27,10 +40,16 @@ export function TableBody<TData extends RowData>({
   clickableRows,
   colgroup,
   onFillHandleMouseDown,
+  virtualizationSurface,
 }: TableBodyProps<TData>) {
   const rowModel = table.getRowModel()
   const rows = rowModel.rows
   const visibleColumns = table.getVisibleLeafColumns()
+  // Summed pixel width of every visible column. In the row-virtualization
+  // surface, both the header table and the nested body table are sized to this
+  // exact px width (+ table-layout: fixed + the shared colgroup) so their
+  // columns pixel-align regardless of the vertical scrollbar.
+  const totalColumnWidth = visibleColumns.reduce((sum, column) => sum + column.getSize(), 0)
   const activeCell = table.getState().editing.activeCell
   const focusedCell = table.getFocusedCell()
   const rowPinning = table.getState().rowPinning
@@ -274,6 +293,103 @@ export function TableBody<TData extends RowData>({
   // blockifies <tr>, detaching body cell widths from the header table.
   const windowStart = virtualRows.length > 0 ? virtualRows[0]!.start : 0
 
+  const mountedRows = virtualRows.map((vRow) => {
+    const row = virtualizedRows[vRow.index]
+    if (!row) return null
+    const visualRowIndex = hasPinnedRows ? topRows.length + vRow.index : vRow.index
+    return (
+      <MemoizedTableRow
+        key={row.id}
+        row={row}
+        table={table}
+        rowIndex={visualRowIndex}
+        rowSpanRowIndex={vRow.index}
+        rowSpanMap={centerRowSpanMap ?? fullRowSpanMap}
+        visibleRowSpanIndexes={visibleVirtualRowIndexes}
+        visibleColumns={visibleColumns}
+        isSelected={row.getIsSelected()}
+        isExpanded={row.getIsExpanded()}
+        isRowEditing={table.isRowEditing(row.id)}
+        activeColumnId={activeCell?.rowId === row.id ? activeCell.columnId : undefined}
+        focusedColumnIndex={
+          focusedCell?.rowIndex === visualRowIndex ? focusedCell.columnIndex : null
+        }
+        hasFocusedCell={focusedCell !== null}
+        cellSelectionKey={cellSelectionKey}
+        pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
+        clickable={clickableRows}
+        onFillHandleMouseDown={onFillHandleMouseDown}
+        virtualStyle={{ height: vRow.size }}
+      />
+    )
+  })
+
+  // Surface mode: the scroll container wraps the whole table (header + body),
+  // so a single element scrolls both axes. Pinned header `th` and pinned body
+  // `td` both resolve `position: sticky` against it, and the horizontal
+  // scrollbar sits at the bottom of the fixed-height viewport. The spacer's
+  // nested table is sized to the exact total column width to pixel-align with
+  // the header table's columns.
+  if (virtualizationSurface) {
+    return (
+      <div
+        ref={scrollContainerRef}
+        className="yable-virtual-scroll-container"
+        style={{
+          overflow: 'auto',
+          height: containerHeight,
+          position: 'relative',
+          maxWidth: '100%',
+        }}
+      >
+        <table
+          className="yable-table"
+          style={{ width: totalColumnWidth, tableLayout: 'fixed', borderCollapse: 'collapse' }}
+        >
+          {colgroup}
+          {virtualizationSurface.header}
+          <tbody className="yable-tbody">
+            {hasPinnedRows &&
+              topRows.map((row, index) => renderRow(row, index, 'top', topRowSpanMap, index))}
+            <tr style={{ height: 0, padding: 0, border: 'none' }}>
+              <td style={{ height: 0, padding: 0, border: 'none' }} colSpan={visibleColumns.length}>
+                <div
+                  className="yable-virtual-spacer"
+                  style={{ height: totalHeight, position: 'relative' }}
+                >
+                  <table
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: totalColumnWidth,
+                      tableLayout: 'fixed',
+                      borderCollapse: 'collapse',
+                      transform: `translateY(${windowStart}px)`,
+                    }}
+                  >
+                    {colgroup}
+                    <tbody>{mountedRows}</tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            {hasPinnedRows &&
+              bottomRows.map((row, index) =>
+                renderRow(
+                  row,
+                  topRows.length + virtualizedRows.length + index,
+                  'bottom',
+                  bottomRowSpanMap,
+                  index,
+                ),
+              )}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
   return (
     <tbody className="yable-tbody">
       {hasPinnedRows &&
@@ -310,40 +426,7 @@ export function TableBody<TData extends RowData>({
                 }}
               >
                 {colgroup}
-                <tbody>
-                  {virtualRows.map((vRow) => {
-                    const row = virtualizedRows[vRow.index]
-                    if (!row) return null
-                    const visualRowIndex = hasPinnedRows ? topRows.length + vRow.index : vRow.index
-                    return (
-                      <MemoizedTableRow
-                        key={row.id}
-                        row={row}
-                        table={table}
-                        rowIndex={visualRowIndex}
-                        rowSpanRowIndex={vRow.index}
-                        rowSpanMap={centerRowSpanMap ?? fullRowSpanMap}
-                        visibleRowSpanIndexes={visibleVirtualRowIndexes}
-                        visibleColumns={visibleColumns}
-                        isSelected={row.getIsSelected()}
-                        isExpanded={row.getIsExpanded()}
-                        isRowEditing={table.isRowEditing(row.id)}
-                        activeColumnId={
-                          activeCell?.rowId === row.id ? activeCell.columnId : undefined
-                        }
-                        focusedColumnIndex={
-                          focusedCell?.rowIndex === visualRowIndex ? focusedCell.columnIndex : null
-                        }
-                        hasFocusedCell={focusedCell !== null}
-                        cellSelectionKey={cellSelectionKey}
-                        pendingValuesKey={getPendingValuesKey(pendingValues[row.id])}
-                        clickable={clickableRows}
-                        onFillHandleMouseDown={onFillHandleMouseDown}
-                        virtualStyle={{ height: vRow.size }}
-                      />
-                    )
-                  })}
-                </tbody>
+                <tbody>{mountedRows}</tbody>
               </table>
             </div>
           </div>

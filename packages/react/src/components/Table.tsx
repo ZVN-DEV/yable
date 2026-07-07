@@ -202,6 +202,16 @@ export function Table<TData extends RowData>({
 
   const showColumnVirtualizationShell = canVirtualizeColumns
 
+  // Row virtualization renders its own scroll surface: a single scroll
+  // container that wraps BOTH the header and the body so pinned header `th` and
+  // pinned body `td` resolve their `position: sticky` against the same
+  // horizontally-scrolling element. This is bypassed while the column-
+  // virtualization shell is active (that path owns its own horizontal scroller)
+  // or when the adaptive card layout is showing.
+  const enableRowVirtualization = Boolean(renderTable.options.enableVirtualization)
+  const useRowVirtualizationSurface =
+    enableRowVirtualization && !showColumnVirtualizationShell && !adaptiveLayoutActive
+
   const contextMenu = useContextMenu()
   useKeyboardNavigation(baseTable, { containerRef })
 
@@ -334,6 +344,22 @@ export function Table<TData extends RowData>({
     </table>
   )
 
+  // Row-virtualization surface: TableBody renders the full
+  // `<div.yable-virtual-scroll-container><table>{colgroup}{header}<tbody/></table></div>`
+  // so header and body share one sticky/scroll context.
+  const rowVirtualizationSurfaceNode = (
+    <TableBody
+      table={renderTable}
+      clickableRows={resolvedClickableRows}
+      colgroup={colgroup}
+      onFillHandleMouseDown={onFillHandleMouseDown}
+      virtualizationSurface={{
+        header: <TableHeader table={renderTable} floatingFilters={resolvedFloatingFilters} />,
+        footer: footer ? <TableFooter table={renderTable} /> : undefined,
+      }}
+    />
+  )
+
   const tableNode =
     adaptiveLayoutActive && adaptiveLayout ? (
       <AdaptiveTableCards
@@ -341,6 +367,8 @@ export function Table<TData extends RowData>({
         layout={adaptiveLayout}
         clickableRows={resolvedClickableRows}
       />
+    ) : useRowVirtualizationSurface ? (
+      rowVirtualizationSurfaceNode
     ) : (
       desktopTableNode
     )

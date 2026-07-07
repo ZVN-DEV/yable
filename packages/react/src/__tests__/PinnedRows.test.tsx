@@ -174,11 +174,15 @@ describe('Pinned rows', () => {
       expect(dataRows[1]).not.toHaveAttribute('data-pinned-row')
       expect(dataRows[2]).toHaveAttribute('data-pinned-row', 'bottom')
 
+      // Pinned rows render outside the virtualized center window (the spacer).
+      // The scroll container now wraps the whole surface (header + pinned rows +
+      // window) so pinned rows live inside it, but never inside the spacer that
+      // holds the virtualized center rows.
       expect(
-        container.querySelector('.yable-virtual-scroll-container tr[data-row-id="2"]'),
+        container.querySelector('.yable-virtual-spacer tr[data-row-id="2"]'),
       ).not.toBeInTheDocument()
       expect(
-        container.querySelector('.yable-virtual-scroll-container tr[data-row-id="3"]'),
+        container.querySelector('.yable-virtual-spacer tr[data-row-id="3"]'),
       ).not.toBeInTheDocument()
       expect(container.querySelectorAll('tr[data-row-id="2"]')).toHaveLength(1)
       expect(container.querySelectorAll('tr[data-row-id="3"]')).toHaveLength(1)

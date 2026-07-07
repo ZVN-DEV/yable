@@ -487,6 +487,10 @@ table.setColumnPinning({ left: ['name', 'id'], right: ['actions'] })
 table.getIsSomeColumnsPinned('left') // boolean
 ```
 
+### With Row Virtualization
+
+Pinned columns stay frozen to the viewport edges under `enableVirtualization` too. The virtualized grid renders inside a single scroll container that holds both the header and the body, so pinned header and body cells share one sticky context and move together during horizontal scroll. The horizontal scrollbar sits at the bottom of the `virtualViewportHeight` viewport, so it is reachable without scrolling to the last row.
+
 ---
 
 ## Column Resizing
@@ -1065,6 +1069,10 @@ const table = useTable({
 - `overscan` (default 5) mounts extra rows around the window; exact
   per-row heights can come from Pretext via `pretextHeights` /
   `pretextPrefixSums`.
+- **Pinned columns** stay frozen to the viewport edges during horizontal
+  scroll: the header and body share one scroll container, so pinned header and
+  body cells move together. The horizontal scrollbar sits at the bottom of the
+  `virtualViewportHeight` viewport, reachable without scrolling to the last row.
 - The Pretext hooks (`useTableRowHeights`, `usePretextMeasurement`) are
   imported from the `@zvndev/yable-react/pretext` subpath and need the optional
   `@chenglou/pretext` peer installed. The subpath keeps `@chenglou/pretext` out
