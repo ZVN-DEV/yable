@@ -23,7 +23,7 @@ policy, or an object to tune it.
   autoColumnWidth={{
     sampleSize: 100,          // rows sampled for measurement (default 100)
     overflow: 'fit',          // 'fit' | 'scroll' (default 'fit')
-    underflow: 'leave',       // 'distribute' | 'leave' (default 'leave')
+    underflow: 'leave',       // 'leave' | 'distribute' | 'stretch' (default 'leave')
   }}
 />
 ```
@@ -43,7 +43,22 @@ When the columns' natural (content) widths sum to **more** than the container:
 When natural widths sum to **less** than the container:
 
 - **`leave`** — columns keep their natural width (the grid may not fill the container).
-- **`distribute`** — extra space is spread proportionally across auto-sized columns.
+- **`distribute`** — extra space is spread proportionally across auto-sized columns
+  in a **waterfall** that respects each column's `maxSize` as a **hard cap**. When
+  a column would exceed its `maxSize` it is pinned at the cap and its leftover
+  share cascades to the remaining uncapped columns, repeating until the space is
+  spent or every column is capped. A gutter is left **only** when every auto column
+  has hit its `maxSize`.
+- **`stretch`** — the same waterfall, but `maxSize` is a **soft cap**. If space is
+  still left after every column caps, all auto columns grow past their `maxSize`
+  proportionally so the container fills **exactly** — never a gutter. Use this on
+  modal/settings tables with a few capped columns where a trailing dead gutter
+  looks broken.
+
+Both `distribute` and `stretch` are total-preserving: final widths sum to the
+container width (with the ±1px rounding remainder folded into the last grown
+column), except `distribute` when every column is capped, which intentionally
+leaves the remainder as a gutter.
 
 ### Per-column opt-out
 
@@ -95,6 +110,34 @@ Precedence per column: `autoSizeWidth` (exact px, used verbatim) → `autoSizeTe
 same way as normal values; `autoSizeText` still gets cell padding and the
 sort-indicator allowance added, while `autoSizeWidth` does not.
 
+### Async values (re-measure)
+
+When a column's cell values arrive **after** mount — for example the rows render
+first with placeholders (`$0`, `'-'`) and the real values are merged in from a
+separate query — the first measurement sizes on the placeholder. Auto-sizing
+corrects this automatically: it re-measures whenever the **row data reference
+changes identity**. An async value merge produces a new `data` array, which
+triggers a debounced (~60ms, to coalesce rapid updates) re-measure. Sorting,
+filtering, and pagination do **not** re-measure — those change the derived row
+model, not the `data` reference the hook watches.
+
+Re-measure respects the provenance rule: only widths auto-sizing itself wrote are
+updated; user-resized and persisted widths are never touched.
+
+If you merge values **without** replacing the `data` array (mutating rows in
+place, or any case where identity does not change), call the explicit escape
+hatch once the merge is done:
+
+```tsx
+// After your async values are merged into the rows:
+table.remeasureColumns()            // re-measures immediately (no debounce)
+table.remeasureColumns('prices-loaded') // optional reason, forwarded on the event
+```
+
+`table.remeasureColumns(reason?)` emits a `'columns:remeasure'` event that any
+active `autoColumnWidth` sizing listens for. It is a no-op when smart width is
+off, and — like the automatic path — only re-sizes auto-owned columns.
+
 ### `minSize` is a hard floor
 
 A column can **never** render below its `minSize` — core `getSize` clamps every
@@ -107,11 +150,19 @@ size closer to the content, lower or omit it.
 
 The hook **never overwrites a width it did not itself write this session** — a
 user-dragged width or a width restored from persisted `columnSizing` is left
-alone (it is treated as user-set, exactly like an in-session resize). The
-trade-off: if you persist `columnSizing` while `autoColumnWidth` is on, persisted
-columns won't be re-auto-measured on reload. Prefer either **not** persisting
-`columnSizing` under `autoColumnWidth` (auto recomputes deterministically from
-content) or persisting **only** the columns the user actually resized.
+alone (it is treated as user-set, exactly like an in-session resize).
+
+<Callout type="warn">
+  **Persisting auto-sized widths neuters smart width.** If you save the whole
+  `columnSizing` state (which includes the widths auto-sizing computed) and
+  restore it into `columnSizing` on the next load, those restored widths look
+  **user-set** to the provenance rule and are skipped — the column is no longer
+  auto-measured, and async re-measure and `stretch` won't touch it. Prefer either
+  **not** persisting `columnSizing` under `autoColumnWidth` (auto recomputes
+  deterministically from content on every load), or persisting **only** the
+  columns the user actually resized (mark them at resize time) and restoring just
+  those, so genuinely auto columns stay auto.
+</Callout>
 
 ### Limitations
 

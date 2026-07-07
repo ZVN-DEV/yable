@@ -1079,6 +1079,17 @@ export interface Table<TData extends RowData> {
   /** Returns true while a column header drag is in progress. */
   getIsColumnDragActive: () => boolean
 
+  // Smart column width
+  /**
+   * Ask any active `autoColumnWidth` sizing to re-measure column content now.
+   * Emits `'columns:remeasure'`. Call this after an async value merge (cell
+   * values arriving from a separate query) so smart width re-sizes on the real
+   * content instead of the placeholder it first saw. No-op when smart width is
+   * off. Respects the provenance rule: only auto-owned widths update; user-set
+   * or persisted widths are never overwritten.
+   */
+  remeasureColumns: (reason?: string) => void
+
   // Event Emitter
   events: EventEmitter<YableEventMap<TData>>
 
@@ -1346,6 +1357,12 @@ export interface YableEventMap<TData extends RowData> {
   'row:edit:start': RowEditEvent<TData>
   'row:edit:commit': RowEditCommitEvent<TData>
   'row:edit:cancel': RowEditEvent<TData>
+  'columns:remeasure': ColumnsRemeasureEvent
+}
+
+export interface ColumnsRemeasureEvent {
+  /** Optional caller-supplied hint for why a re-measure was requested. */
+  reason?: string
 }
 
 export interface CellClickEvent<TData extends RowData> {

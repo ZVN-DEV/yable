@@ -1115,6 +1115,12 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     },
     getIsColumnDragActive: () => _columnDragActive,
 
+    // Smart column width — signal any active `autoColumnWidth` sizing (wired in
+    // the React layer via `table.events`) to re-measure now.
+    remeasureColumns: (reason?: string) => {
+      events.emit('columns:remeasure', { reason })
+    },
+
     // Stubs for externally-wired features — filled in by integration functions
     // (undoRedo, fillHandle, formulas, rowDragging, fullRowEditing, pivot)
     undo: () => {},

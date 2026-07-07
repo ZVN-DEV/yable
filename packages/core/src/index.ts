@@ -101,6 +101,7 @@ export type {
   RowDragEvent,
   RowDragEndEvent,
   RowReorderEvent,
+  ColumnsRemeasureEvent,
   ClipboardOptions,
 
   // Feature state types
