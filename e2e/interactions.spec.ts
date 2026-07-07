@@ -87,6 +87,13 @@ test.describe('real-pointer core interactions', () => {
       const hb = await handle.boundingBox()
       if (!hb) throw new Error('resize handle not visible')
 
+      // The grab zone must reach the column divider and the visible bar must
+      // sit ON the divider, not centered inside the hotspot (which reads as
+      // "the indicator is left of the line I'm dragging").
+      const thb = (await nameTh.boundingBox())!
+      expect(Math.abs(hb.x + hb.width - (thb.x + thb.width))).toBeLessThanOrEqual(1.5)
+      await expect(handle).toHaveCSS('justify-content', 'flex-end')
+
       const before = (await nameTh.boundingBox())!.width
       await page.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2)
       await page.mouse.down()
