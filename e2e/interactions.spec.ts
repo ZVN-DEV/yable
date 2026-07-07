@@ -389,3 +389,70 @@ test.describe('pinned columns under row virtualization', () => {
       .toBeGreaterThan(0)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Container-level theme pinning (#51). A grid wrapped in a
+// `data-yable-theme="light"` container must render with light tokens even when
+// the OS prefers dark — previously the auto dark tokens only keyed off :root so
+// the container inherited dark. `--yable-bg` is #ffffff (light) / #09090b (dark).
+// ---------------------------------------------------------------------------
+
+test.describe('container-level theme pinning', () => {
+  const LIGHT_BG = 'rgb(255, 255, 255)'
+  const DARK_BG = 'rgb(9, 9, 11)'
+
+  async function gridBg(page: Page, sectionTestId: string): Promise<string> {
+    return grid(page, sectionTestId)
+      .locator('.yable')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor)
+  }
+
+  // The demo app pins `<html data-yable-theme="dark">`, so an unpinned
+  // ("auto") grid inherits dark. The #51 fix is that a `data-yable-theme="light"`
+  // CONTAINER re-declares the light tokens and overrides that inherited dark —
+  // the same cascade that failed on a dark OS with an unpinned root. We assert
+  // the container pinning holds under BOTH OS colour-scheme preferences.
+  for (const scheme of ['dark', 'light'] as const) {
+    test(`container pins win over inherited dark (OS ${scheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme })
+      await page.goto('/e2e/theme-pinning')
+      await expect(grid(page, 'theme-light').locator('tbody tr').first()).toBeVisible()
+
+      // Light-pinned container overrides the inherited dark tokens → light.
+      expect(await gridBg(page, 'theme-light')).toBe(LIGHT_BG)
+      // Dark-pinned container stays dark.
+      expect(await gridBg(page, 'theme-dark')).toBe(DARK_BG)
+      // Unpinned grid follows the app's pinned-dark <html>.
+      expect(await gridBg(page, 'theme-auto')).toBe(DARK_BG)
+    })
+  }
+})
+
+// ---------------------------------------------------------------------------
+// Row virtualization without a pagination override (#54). Virtualization must
+// render the full dataset, not just the default 10-row page.
+// ---------------------------------------------------------------------------
+
+test.describe('virtualization without pagination override', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/e2e/virtual-no-pagination')
+    await expect(
+      grid(page, 'grid-virt-nopage').locator('.yable-virtual-spacer tbody tr').first(),
+    ).toBeVisible()
+  })
+
+  test('exposes the whole dataset, not just the first page', async ({ page }) => {
+    const root = grid(page, 'grid-virt-nopage')
+
+    // aria-rowcount reflects the full row model (100), not the default page (10).
+    await expect(root.locator('[role="grid"]').first()).toHaveAttribute('aria-rowcount', '100')
+
+    // Deep-scrolling the virtual viewport reveals rows far past index 10.
+    const container = root.locator('.yable-virtual-scroll-container')
+    await container.evaluate((n) => {
+      n.scrollTop = 3200 // ~row 80 at 40px each
+    })
+    await expect(root.locator('td[data-column-id="id"]').filter({ hasText: /^90$/ })).toBeVisible()
+  })
+})

@@ -45,14 +45,70 @@ export interface Employee {
 import type { Employee } from './types'
 
 export const employees: Employee[] = [
-  { id: 1, name: 'Alice Johnson', department: 'Engineering', salary: 120000, startDate: '2021-03-15', active: true },
-  { id: 2, name: 'Bob Smith', department: 'Marketing', salary: 85000, startDate: '2020-07-01', active: true },
-  { id: 3, name: 'Charlie Brown', department: 'Engineering', salary: 110000, startDate: '2022-01-10', active: false },
-  { id: 4, name: 'Diana Prince', department: 'Sales', salary: 95000, startDate: '2019-11-20', active: true },
-  { id: 5, name: 'Eve Williams', department: 'Engineering', salary: 130000, startDate: '2018-05-03', active: true },
-  { id: 6, name: 'Frank Miller', department: 'Marketing', salary: 78000, startDate: '2023-02-14', active: true },
-  { id: 7, name: 'Grace Lee', department: 'Sales', salary: 92000, startDate: '2021-08-22', active: false },
-  { id: 8, name: 'Henry Davis', department: 'Engineering', salary: 115000, startDate: '2020-12-01', active: true },
+  {
+    id: 1,
+    name: 'Alice Johnson',
+    department: 'Engineering',
+    salary: 120000,
+    startDate: '2021-03-15',
+    active: true,
+  },
+  {
+    id: 2,
+    name: 'Bob Smith',
+    department: 'Marketing',
+    salary: 85000,
+    startDate: '2020-07-01',
+    active: true,
+  },
+  {
+    id: 3,
+    name: 'Charlie Brown',
+    department: 'Engineering',
+    salary: 110000,
+    startDate: '2022-01-10',
+    active: false,
+  },
+  {
+    id: 4,
+    name: 'Diana Prince',
+    department: 'Sales',
+    salary: 95000,
+    startDate: '2019-11-20',
+    active: true,
+  },
+  {
+    id: 5,
+    name: 'Eve Williams',
+    department: 'Engineering',
+    salary: 130000,
+    startDate: '2018-05-03',
+    active: true,
+  },
+  {
+    id: 6,
+    name: 'Frank Miller',
+    department: 'Marketing',
+    salary: 78000,
+    startDate: '2023-02-14',
+    active: true,
+  },
+  {
+    id: 7,
+    name: 'Grace Lee',
+    department: 'Sales',
+    salary: 92000,
+    startDate: '2021-08-22',
+    active: false,
+  },
+  {
+    id: 8,
+    name: 'Henry Davis',
+    department: 'Engineering',
+    salary: 115000,
+    startDate: '2020-12-01',
+    active: true,
+  },
 ]
 ```
 
@@ -244,12 +300,7 @@ export function EmployeeTable() {
     <div>
       <GlobalFilter table={table} placeholder="Search employees..." />
       <Table table={table} striped>
-        <Pagination
-          table={table}
-          showPageSize
-          pageSizes={[5, 10, 25, 50]}
-          showInfo
-        />
+        <Pagination table={table} showPageSize pageSizes={[5, 10, 25, 50]} showInfo />
       </Table>
     </div>
   )
@@ -335,7 +386,7 @@ export function EmployeeTable() {
         prev.map((row, i) => {
           const rowChanges = changes[String(i)]
           return rowChanges ? { ...row, ...rowChanges } : row
-        })
+        }),
       )
     },
   })
@@ -368,12 +419,17 @@ import '@zvndev/yable-themes'
 
 ### Dark Mode
 
-Dark mode activates automatically when the user's system preference is dark. To force a mode:
+Dark mode activates automatically when the user's system preference is dark. To force a mode, set `data-yable-theme` on the document element **or on any container** — a pinned container overrides the inherited theme (including the OS preference) for its subtree:
 
 ```html
-<!-- Force dark -->
+<!-- Force dark for one grid -->
 <div data-yable-theme="dark">
-  <Table table={table} />
+  <table table="{table}" />
+</div>
+
+<!-- Force light for one grid, even on a dark-OS machine or inside a dark app -->
+<div data-yable-theme="light">
+  <table table="{table}" />
 </div>
 ```
 
@@ -421,7 +477,7 @@ export function EmployeeTable() {
             id: p.rowId,
             field: p.columnId,
             value: p.value,
-          }))
+          })),
         ),
         signal: patches[0].signal, // cancel if user edits again
       })
@@ -441,7 +497,7 @@ export function EmployeeTable() {
         prev.map((row) => {
           const update = saved.find((s: any) => s.id === row.id)
           return update ? { ...row, ...update } : row
-        })
+        }),
       )
     },
   })
@@ -523,14 +579,70 @@ const columns = [
 
 // Initial data
 const initialData: Employee[] = [
-  { id: 1, name: 'Alice Johnson', department: 'Engineering', salary: 120000, startDate: '2021-03-15', active: true },
-  { id: 2, name: 'Bob Smith', department: 'Marketing', salary: 85000, startDate: '2020-07-01', active: true },
-  { id: 3, name: 'Charlie Brown', department: 'Engineering', salary: 110000, startDate: '2022-01-10', active: false },
-  { id: 4, name: 'Diana Prince', department: 'Sales', salary: 95000, startDate: '2019-11-20', active: true },
-  { id: 5, name: 'Eve Williams', department: 'Engineering', salary: 130000, startDate: '2018-05-03', active: true },
-  { id: 6, name: 'Frank Miller', department: 'Marketing', salary: 78000, startDate: '2023-02-14', active: true },
-  { id: 7, name: 'Grace Lee', department: 'Sales', salary: 92000, startDate: '2021-08-22', active: false },
-  { id: 8, name: 'Henry Davis', department: 'Engineering', salary: 115000, startDate: '2020-12-01', active: true },
+  {
+    id: 1,
+    name: 'Alice Johnson',
+    department: 'Engineering',
+    salary: 120000,
+    startDate: '2021-03-15',
+    active: true,
+  },
+  {
+    id: 2,
+    name: 'Bob Smith',
+    department: 'Marketing',
+    salary: 85000,
+    startDate: '2020-07-01',
+    active: true,
+  },
+  {
+    id: 3,
+    name: 'Charlie Brown',
+    department: 'Engineering',
+    salary: 110000,
+    startDate: '2022-01-10',
+    active: false,
+  },
+  {
+    id: 4,
+    name: 'Diana Prince',
+    department: 'Sales',
+    salary: 95000,
+    startDate: '2019-11-20',
+    active: true,
+  },
+  {
+    id: 5,
+    name: 'Eve Williams',
+    department: 'Engineering',
+    salary: 130000,
+    startDate: '2018-05-03',
+    active: true,
+  },
+  {
+    id: 6,
+    name: 'Frank Miller',
+    department: 'Marketing',
+    salary: 78000,
+    startDate: '2023-02-14',
+    active: true,
+  },
+  {
+    id: 7,
+    name: 'Grace Lee',
+    department: 'Sales',
+    salary: 92000,
+    startDate: '2021-08-22',
+    active: false,
+  },
+  {
+    id: 8,
+    name: 'Henry Davis',
+    department: 'Engineering',
+    salary: 115000,
+    startDate: '2020-12-01',
+    active: true,
+  },
 ]
 
 export function EmployeeTable() {
@@ -548,7 +660,7 @@ export function EmployeeTable() {
         prev.map((row, i) => {
           const rowChanges = changes[String(i)]
           return rowChanges ? { ...row, ...rowChanges } : row
-        })
+        }),
       )
     },
     initialState: {

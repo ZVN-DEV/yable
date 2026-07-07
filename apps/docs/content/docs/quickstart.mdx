@@ -361,11 +361,16 @@ import '@zvndev/yable-themes'
 
 ### Dark Mode
 
-Dark mode activates automatically when the user's system preference is dark. To force a mode:
+Dark mode activates automatically when the user's system preference is dark. To force a mode, set `data-yable-theme` on the document element **or on any container** — a pinned container overrides the inherited theme (including the OS preference) for its subtree:
 
 ```html
-<!-- Force dark -->
+<!-- Force dark for one grid -->
 <div data-yable-theme="dark">
+  <Table table={table} />
+</div>
+
+<!-- Force light for one grid, even on a dark-OS machine or inside a dark app -->
+<div data-yable-theme="light">
   <Table table={table} />
 </div>
 ```

@@ -1054,14 +1054,15 @@ const table = useTable({
   enableVirtualization: true,
   rowHeight: 40, // or (index) => number for variable heights
   virtualViewportHeight: 480,
-  initialState: { pagination: { pageIndex: 0, pageSize: 100_000 } },
 })
 ```
 
 ### Notes
 
-- The virtualizer consumes the **paginated** row model — raise the page size
-  above your dataset size or only the default first page (10 rows) renders.
+- Virtualization **bypasses client pagination** automatically — the whole
+  (sorted/grouped) dataset scrolls, so the old `pageSize: 100_000` workaround is
+  no longer needed. `manualPagination` (server-side) is still respected, and
+  you should not combine virtualization with the `<Pagination>` control.
 - `virtualViewportHeight` sets the scroll viewport in px; without it a
   heuristic (~20 rows, capped at 800px) applies, which can overflow shorter
   styled containers. Measure fixed-height panels and pass the available

@@ -14,11 +14,10 @@ const table = useTable({
   enableVirtualization: true,
   rowHeight: 40,
   virtualViewportHeight: 480,
-  // Virtualization reads the paginated row model — raise the page size or
-  // only the default first page (10 rows) will render and nothing scrolls.
-  initialState: { pagination: { pageIndex: 0, pageSize: 100_000 } },
 })
 ```
+
+Enabling virtualization automatically **bypasses client pagination** — the virtualizer scrolls the full (sorted/grouped) dataset, so you no longer need the `pagination: { pageSize: Infinity }` workaround. `manualPagination` still wins, so server-driven paging keeps feeding one page at a time.
 
 ### Sizing the viewport
 
@@ -49,7 +48,7 @@ The `overscan` option (default 5) mounts extra rows above and below the window t
 
 ### Interplay with other features
 
-- **Pagination** — the virtualizer consumes the *paginated* row model. For "one big scrolling list" semantics, set a page size larger than your dataset (see above).
+- **Pagination** — virtualization bypasses client pagination and scrolls the whole dataset; `manualPagination` (server-side) is still respected. Don't combine virtualization with the `<Pagination>` control — they present the data two different ways.
 - **Pinned rows** — top/bottom pinned rows render outside the virtual window and stay put while the center scrolls.
 - **Pinned columns** — left/right pinned columns stay frozen to the viewport edges during horizontal scroll: the whole virtualized table shares one scroll container, so pinned header and body cells move together. The horizontal scrollbar sits at the bottom of the `virtualViewportHeight` box, reachable without scrolling to the last row.
 - **Row spanning** — native `rowSpan` merges cells inside the mounted window; spans are clamped to the window edge.

@@ -1540,6 +1540,15 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
     (preModel: RowModel<TData>) => {
       if (resolvedOptions.manualPagination) return preModel
 
+      // Row virtualization renders the full (sorted/grouped) dataset directly.
+      // If client pagination also sliced here, the virtualizer would only ever
+      // receive one page (the default 10 rows) — making virtualization look
+      // broken with no error. Bypass the slice so `enableVirtualization` works
+      // over the whole dataset without a `pageSize: Infinity` workaround. See
+      // issue #54. (`manualPagination` above still wins — the server controls
+      // the page there.)
+      if (resolvedOptions.enableVirtualization) return preModel
+
       const { pageIndex, pageSize } = table.getState().pagination
       // Clamp the page at read time: when filtering/data changes shrink the row
       // set below the current page, render the last valid page instead of an

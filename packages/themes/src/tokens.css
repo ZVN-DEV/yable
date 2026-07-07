@@ -27,7 +27,15 @@
      focusRing     -> --yable-focus-ring
    ============================================================================ */
 
-:root {
+/* Light defaults apply to the document root AND to any element that pins itself
+   to the light theme via `data-yable-theme="light"`. Without the container
+   selector, a light-pinned container on a dark-OS machine still inherited the
+   auto dark tokens from `:root` (the `@media (prefers-color-scheme: dark)` block
+   below targets `:root`), rendering the grid dark inside a light app. Declaring
+   the light tokens directly on the container overrides those inherited values
+   for its subtree. See issue #51. */
+:root,
+[data-yable-theme='light'] {
   /* ── Surface Colors ────────────────────────────────────────────────────── */
   --yable-bg: #ffffff;
   --yable-bg-header: #fafafa;
@@ -71,12 +79,12 @@
   --yable-cell-error-bg: rgba(248, 113, 113, 0.08);
   --yable-cell-error-icon-color: #f87171;
   --yable-cell-conflict-border-color: #fbbf24;
-  --yable-cell-conflict-bg: rgba(251, 191, 36, 0.10);
+  --yable-cell-conflict-bg: rgba(251, 191, 36, 0.1);
   --yable-cell-conflict-icon-color: #fbbf24;
   --yable-cell-status-badge-size: 18px;
 
   /* ── Typography ────────────────────────────────────────────────────────── */
-  --yable-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --yable-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --yable-font-size: 13px;
   --yable-font-size-sm: 12px;
   --yable-font-size-header: 12px;
@@ -184,7 +192,7 @@
 
 /* ── Dark Mode (auto via prefers-color-scheme) ───────────────────────────── */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-yable-theme="light"]) {
+  :root:not([data-yable-theme='light']) {
     --yable-bg: #09090b;
     --yable-bg-header: #18181b;
     --yable-bg-footer: #18181b;
@@ -242,7 +250,7 @@
 }
 
 /* ── Dark Mode (manual override) ─────────────────────────────────────────── */
-[data-yable-theme="dark"] {
+[data-yable-theme='dark'] {
   --yable-bg: #09090b;
   --yable-bg-header: #18181b;
   --yable-bg-footer: #18181b;
