@@ -1,5 +1,12 @@
 # @zvndev/yable-vanilla
 
+## 0.3.17
+
+### Patch Changes
+
+- Updated dependencies [2bb88fe]
+  - @zvndev/yable-core@0.11.1
+
 ## 0.3.16
 
 ### Patch Changes
