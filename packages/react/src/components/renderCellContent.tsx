@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Cell, CellContext, RowData, Table } from '@zvndev/yable-core'
 import { resolveCellType } from '../cells/resolver'
+import { renderConfiguredEditor } from './renderConfiguredEditor'
 
 type CellRenderer<TData extends RowData> = (ctx: CellContext<TData, unknown>) => React.ReactNode
 
@@ -19,7 +20,17 @@ export function renderCellContent<TData extends RowData>(
   const cellDef = column.columnDef.cell
   const cellType = column.columnDef.cellType
 
-  if (typeof cellDef === 'function') {
+  // While a cell is in edit mode (or is always-editable), a column's
+  // `editConfig` drives which built-in editor renders — even when the column
+  // also defines a custom `cell` renderer (which then acts as the display-mode
+  // view only). Without this, columns that style their cells could never enter
+  // edit mode because the custom `cell` fn always won.
+  const configuredEditor =
+    isEditing || isAlwaysEditable ? renderConfiguredEditor(cell, table) : undefined
+
+  if (configuredEditor !== undefined) {
+    content = configuredEditor
+  } else if (typeof cellDef === 'function') {
     const ctx = cell.getContext()
     if (overrideValue !== undefined) {
       const overriddenCtx = {

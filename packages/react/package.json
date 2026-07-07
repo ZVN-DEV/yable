@@ -34,6 +34,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./pretext": {
+      "import": {
+        "types": "./dist/pretext.d.ts",
+        "default": "./dist/pretext.js"
+      },
+      "require": {
+        "types": "./dist/pretext.d.cts",
+        "default": "./dist/pretext.cjs"
+      }
     }
   },
   "files": [
