@@ -393,3 +393,95 @@ describe('resolveColumnNatural', () => {
     expect(natural(rows, { autoSizeWidth: (r) => r.exact! })).toBe(151)
   })
 })
+
+describe('computeAutoColumnWidths — fitThreshold (small-overflow compression)', () => {
+  const sum = (w: Record<string, number>) => Object.values(w).reduce((a, b) => a + b, 0)
+
+  it('compresses to fit (no wrap) when overflow is within the threshold', () => {
+    // total 550, container 500 → overflow 50 = 10% ≤ 15% threshold.
+    const { widths, wrapColumnIds } = computeAutoColumnWidths({
+      columns: [auto('a', 250), auto('b', 300)],
+      containerWidth: 500,
+      overflow: 'scroll',
+      underflow: 'leave',
+      canSquish: true,
+      fitThreshold: 0.15,
+    })
+    expect(sum(widths)).toBe(500)
+    expect(wrapColumnIds).toEqual([]) // compression never wraps
+  })
+
+  it('falls back to the normal overflow mode when overflow exceeds the threshold', () => {
+    // overflow 100 = 20% > 15% → scroll: natural widths kept.
+    const { widths } = computeAutoColumnWidths({
+      columns: [auto('a', 250), auto('b', 350)],
+      containerWidth: 500,
+      overflow: 'scroll',
+      underflow: 'leave',
+      canSquish: true,
+      fitThreshold: 0.15,
+    })
+    expect(widths).toEqual({ a: 250, b: 350 })
+  })
+
+  it('applies under row virtualization (canSquish: false) — pure width math, no wrap', () => {
+    const { widths, wrapColumnIds, downgradedFit } = computeAutoColumnWidths({
+      columns: [auto('a', 250), auto('b', 300)],
+      containerWidth: 500,
+      overflow: 'fit',
+      underflow: 'leave',
+      canSquish: false, // virtualized
+      fitThreshold: 0.15,
+    })
+    expect(sum(widths)).toBe(500)
+    expect(wrapColumnIds).toEqual([])
+    expect(downgradedFit).toBe(false) // compressed, not downgraded to scroll
+  })
+
+  it('respects minSize as a hard floor while compressing', () => {
+    // a is nearly at its floor, so b absorbs most of the compression.
+    const { widths } = computeAutoColumnWidths({
+      columns: [auto('a', 250, { minSize: 240 }), auto('b', 300)],
+      containerWidth: 500,
+      overflow: 'scroll',
+      underflow: 'leave',
+      canSquish: true,
+      fitThreshold: 0.15,
+    })
+    expect(widths.a).toBeGreaterThanOrEqual(240)
+    expect(sum(widths)).toBe(500)
+  })
+
+  it('boundary: exactly at the threshold compresses; just over falls back', () => {
+    const atThreshold = computeAutoColumnWidths({
+      columns: [auto('a', 250), auto('b', 325)], // overflow 75 = 15% exactly
+      containerWidth: 500,
+      overflow: 'scroll',
+      underflow: 'leave',
+      canSquish: true,
+      fitThreshold: 0.15,
+    })
+    expect(sum(atThreshold.widths)).toBe(500)
+
+    const justOver = computeAutoColumnWidths({
+      columns: [auto('a', 250), auto('b', 326)], // overflow 76 > 15%
+      containerWidth: 500,
+      overflow: 'scroll',
+      underflow: 'leave',
+      canSquish: true,
+      fitThreshold: 0.15,
+    })
+    expect(justOver.widths).toEqual({ a: 250, b: 326 }) // scroll
+  })
+
+  it('does nothing when fitThreshold is 0 / omitted', () => {
+    const { widths } = computeAutoColumnWidths({
+      columns: [auto('a', 250), auto('b', 300)],
+      containerWidth: 500,
+      overflow: 'scroll',
+      underflow: 'leave',
+      canSquish: true,
+    })
+    expect(widths).toEqual({ a: 250, b: 300 }) // scroll, no compression
+  })
+})

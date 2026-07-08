@@ -39,6 +39,15 @@ export interface ComputeAutoColumnWidthsOptions {
    * wrapped row heights are not measured by the virtualizer.
    */
   canSquish: boolean
+  /**
+   * Small-overflow compression. When natural widths overflow the container by
+   * `≤ fitThreshold × containerWidth`, columns are proportionally compressed to
+   * fit WITHOUT wrapping (respecting `minSize`), instead of showing a scrollbar.
+   * Because it is pure width math (no wrapped-row measurement), it applies even
+   * under row virtualization. Above the threshold, the normal `overflow`
+   * behavior takes over. `0`/undefined disables it.
+   */
+  fitThreshold?: number
 }
 
 export interface ComputeAutoColumnWidthsResult {
@@ -76,6 +85,7 @@ export function computeAutoColumnWidths(
 ): ComputeAutoColumnWidthsResult {
   const { columns, containerWidth, overflow, underflow, canSquish } = options
   const hardMinWidth = options.hardMinWidth ?? 48
+  const fitThreshold = Math.max(0, options.fitThreshold ?? 0)
 
   // Base width: auto columns are clamped to their min/max; fixed columns keep
   // their supplied width verbatim.
@@ -110,15 +120,52 @@ export function computeAutoColumnWidths(
     return { widths, wrapColumnIds: [], downgradedFit }
   }
 
+  // --- Small-overflow compression (`fitThreshold`) ---------------------------
+  // When the overflow is small (≤ threshold), compress columns to fit WITHOUT
+  // wrapping — pure width math, so it works even under row virtualization (no
+  // wrapped-row heights to measure). Runs ahead of the scroll/fit branches so a
+  // few-pixel overflow never produces a scrollbar OR a wrapped row.
+  const overflowPx = naturalTotal - containerWidth
+  if (fitThreshold > 0 && overflowPx <= fitThreshold * containerWidth) {
+    squishAutoColumns(autoColumns, base, widths, overflowPx, hardMinWidth)
+    return { widths, wrapColumnIds: [], downgradedFit: false }
+  }
+
   // --- Overflow: `scroll` (or squish disabled) keeps natural widths ----------
   if (overflow === 'scroll' || !canSquish) {
     return { widths, wrapColumnIds: [], downgradedFit }
   }
 
   // --- Overflow: `fit` — squish auto columns to fit, taking from slack -------
-  // `minSize` is a HARD floor, not a soft target: core `getSize` clamps every
-  // rendered width up to `minSize`, so squishing below it would be undone at
-  // render time. We therefore never squish a column below max(minSize, hardMin).
+  // Columns squished below their natural width WRAP their cells (never clip).
+  const wrapColumnIds = squishAutoColumns(
+    autoColumns,
+    base,
+    widths,
+    naturalTotal - containerWidth,
+    hardMinWidth,
+  )
+
+  return { widths, wrapColumnIds, downgradedFit }
+}
+
+/**
+ * Proportionally shrink auto columns to reclaim `required` pixels, taking from
+ * each column's slack above its floor. `minSize` is a HARD floor, not a soft
+ * target: core `getSize` clamps every rendered width up to `minSize`, so
+ * squishing below it would be undone at render time — we never drop a column
+ * below `max(minSize, hardMin)`. Mutates `widths`; returns the ids of columns
+ * that were actually reduced (callers use this to decide whether to wrap).
+ */
+function squishAutoColumns(
+  autoColumns: AutoSizeColumnInput[],
+  base: Map<string, number>,
+  widths: Record<string, number>,
+  required: number,
+  hardMinWidth: number,
+): string[] {
+  if (required <= 0) return []
+
   const floors = new Map<string, number>()
   let totalSlack = 0
   for (const col of autoColumns) {
@@ -126,28 +173,22 @@ export function computeAutoColumnWidths(
     floors.set(col.id, floor)
     totalSlack += Math.max(0, base.get(col.id)! - floor)
   }
+  if (totalSlack <= 0) return []
 
-  if (totalSlack <= 0) {
-    // Nothing to give — columns stay at natural width and the grid scrolls.
-    return { widths, wrapColumnIds: [], downgradedFit }
-  }
-
-  const required = Math.min(naturalTotal - containerWidth, totalSlack)
-  const wrapColumnIds: string[] = []
-
+  const toReclaim = Math.min(required, totalSlack)
+  const reduced: string[] = []
   for (const col of autoColumns) {
     const baseWidth = base.get(col.id)!
     const floor = floors.get(col.id)!
     const slack = Math.max(0, baseWidth - floor)
     if (slack <= 0) continue
 
-    const reduction = required * (slack / totalSlack)
+    const reduction = toReclaim * (slack / totalSlack)
     const next = Math.max(floor, Math.round(baseWidth - reduction))
     widths[col.id] = next
-    if (next < baseWidth) wrapColumnIds.push(col.id)
+    if (next < baseWidth) reduced.push(col.id)
   }
-
-  return { widths, wrapColumnIds, downgradedFit }
+  return reduced
 }
 
 /**
@@ -399,6 +440,7 @@ export function useAutoColumnSizing<TData extends RowData>({
 
   const overflow = config.overflow ?? 'fit'
   const underflow = config.underflow ?? 'leave'
+  const fitThreshold = config.fitThreshold ?? 0
   const sampleSize = config.sampleSize ?? DEFAULT_SAMPLE_SIZE
 
   // Observe the grid content width so squish/distribute recompute on resize.
@@ -542,6 +584,7 @@ export function useAutoColumnSizing<TData extends RowData>({
       overflow,
       underflow,
       canSquish: !isVirtualized,
+      fitThreshold,
     })
 
     if (downgradedFit && !warnedDowngradeRef.current && process.env.NODE_ENV !== 'production') {
@@ -580,6 +623,7 @@ export function useAutoColumnSizing<TData extends RowData>({
     containerWidth,
     overflow,
     underflow,
+    fitThreshold,
     sampleSize,
     isVirtualized,
     remeasureVersion,

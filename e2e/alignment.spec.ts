@@ -117,13 +117,14 @@ test.describe('header/body column alignment (virtualized)', () => {
       if (!handleBox) throw new Error('resize handle not visible')
 
       const beforeWidth = (await headerBoxes(root))[0]!.width
-      await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+      // Grab from the inward half of the handle: under a sticky virtualized
+      // header the next th paints over the handle's overhanging (right) half, so
+      // the reliable grab zone is up to the divider from the left.
+      const grabX = handleBox.x + handleBox.width / 2 - 4
+      const grabY = handleBox.y + handleBox.height / 2
+      await page.mouse.move(grabX, grabY)
       await page.mouse.down()
-      await page.mouse.move(
-        handleBox.x + handleBox.width / 2 + 80,
-        handleBox.y + handleBox.height / 2,
-        { steps: 8 },
-      )
+      await page.mouse.move(grabX + 80, grabY, { steps: 8 })
       await page.mouse.up()
 
       await expect

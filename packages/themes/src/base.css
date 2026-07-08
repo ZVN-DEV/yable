@@ -128,8 +128,9 @@
   color: var(--yable-text-header);
   text-align: left;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* NOTE: label ellipsis is clipped on `.yable-th-content` (below), NOT here.
+     The th must NOT set `overflow: hidden`, or it clips the absolutely
+     positioned resize handle, forcing it inward off the column divider. */
   border-bottom: calc(var(--yable-border-width) + 1px) solid var(--yable-border-color-strong);
   user-select: none;
   vertical-align: middle;
@@ -145,12 +146,23 @@
   background: var(--yable-bg-row-hover);
 }
 
-/* Header content wrapper */
+/* Header content wrapper — owns the label ellipsis clip (moved off `.yable-th`
+   so the resize handle can straddle the column divider without being clipped). */
 .yable-th-content {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  overflow: hidden;
   min-height: calc(var(--yable-header-min-height) - var(--yable-header-padding-y) * 2);
+}
+
+/* The label itself ellipsizes; the sort indicator (a later child) stays fixed. */
+.yable-th-content > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ── Sort Indicator ──────────────────────────────────────────────────────── */
@@ -207,19 +219,31 @@
 .yable-resize-handle {
   position: absolute;
   top: 0;
-  right: 0;
   bottom: 0;
+  /* Center the hotspot ON the column divider (the th's right edge) so both the
+     visible bar and the pointer hit zone straddle it symmetrically — grabbing
+     no longer requires aiming left of the line. The hotspot is anchored flush
+     to the divider (`right: 0`) and shifted out by half its width with a
+     TRANSFORM (not a negative offset): a transform is visual-only, so the
+     overhang past the last/right-pinned column never inflates the grid's
+     scrollWidth. `.yable-th` intentionally has no `overflow: hidden`, so the
+     overhang isn't clipped; z-resize keeps it above neighbour cells. */
+  right: 0;
   width: calc(var(--yable-resize-handle-width) * 3);
+  transform: translateX(50%);
   cursor: col-resize;
   z-index: var(--yable-z-resize);
   touch-action: none;
   display: flex;
   align-items: center;
-  /* The visible bar must sit ON the column divider (the th's right edge).
-     Centering it in the hotspot draws it half a hotspot-width to the left of
-     the line users actually aim for. The hotspot cannot overhang into the
-     next th (sticky headers would paint and hit-test over it), so it extends
-     inward only, flush with the divider. */
+  justify-content: center;
+}
+
+/* The last column's divider IS the grid's right edge — a transformed overhang
+   there would inflate the grid's scrollWidth (phantom horizontal scroll). Keep
+   its handle flush inside; there is no next column to straddle anyway. */
+.yable-th:last-child .yable-resize-handle {
+  transform: none;
   justify-content: flex-end;
 }
 
@@ -2620,6 +2644,7 @@
 .yable--rtl .yable-resize-handle {
   right: auto;
   left: 0;
+  transform: translateX(-50%);
 }
 
 .yable--rtl .yable-tr[data-selected='true'] {
