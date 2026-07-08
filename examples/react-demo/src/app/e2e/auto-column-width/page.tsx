@@ -52,6 +52,42 @@ function AutoGrid({ overflow }: { overflow: 'fit' | 'scroll' }) {
   return <Table table={table} autoColumnWidth={{ overflow }} bordered />
 }
 
+// Small-overflow compression under ROW VIRTUALIZATION: natural widths overflow
+// the container by a modest amount, and `fitThreshold` compresses them to fit
+// instead of scrolling — even though `overflow:'fit'` alone falls back to scroll
+// under virtualization. Proves the pure-width compression path works virtualized.
+interface SmallRow {
+  a: string
+  b: string
+  c: string
+  d: string
+}
+const SMALL_ROWS: SmallRow[] = Array.from({ length: 20 }, () => ({
+  a: 'Marlborough',
+  b: 'Casablanca',
+  c: 'Willamette',
+  d: 'Stellenbosch',
+}))
+const smallCol = createColumnHelper<SmallRow>()
+const smallColumns = [
+  smallCol.accessor('a', { header: 'Region A' }),
+  smallCol.accessor('b', { header: 'Region B' }),
+  smallCol.accessor('c', { header: 'Region C' }),
+  smallCol.accessor('d', { header: 'Region D' }),
+]
+
+function FitSmallVirtualGrid() {
+  const table = useTable<SmallRow>({
+    data: SMALL_ROWS,
+    columns: smallColumns,
+    getRowId: (_row, i) => String(i),
+    enableVirtualization: true,
+    virtualViewportHeight: 240,
+    rowHeight: 36,
+  })
+  return <Table table={table} autoColumnWidth={{ overflow: 'fit', fitThreshold: 0.5 }} bordered />
+}
+
 // --- Rendered-content measurement (autoSizeText) ---------------------------
 // Both columns hold the same small numeric accessor value and render the SAME
 // wide formatted string. The `formatted` column sets `autoSizeText` so it is
@@ -154,6 +190,10 @@ export default function AutoColumnWidthFixturePage() {
       <section data-testid="auto-fit" style={{ width: 520, marginBottom: 48 }}>
         <h2>overflow: fit</h2>
         <AutoGrid overflow="fit" />
+      </section>
+      <section data-testid="auto-fit-small-virtual" style={{ width: 360, marginBottom: 48 }}>
+        <h2>fitThreshold under virtualization</h2>
+        <FitSmallVirtualGrid />
       </section>
       <section data-testid="auto-scroll" style={{ width: 520, marginBottom: 48 }}>
         <h2>overflow: scroll</h2>

@@ -617,9 +617,10 @@ prop — **off by default**, so existing layouts are unchanged.
 <Table
   table={table}
   autoColumnWidth={{
-    sampleSize: 100,    // rows sampled for measurement (default 100)
-    overflow: 'fit',    // 'fit' | 'scroll' (default 'fit')
-    underflow: 'leave', // 'leave' | 'distribute' | 'stretch' (default 'leave')
+    sampleSize: 100,     // rows sampled for measurement (default 100)
+    overflow: 'fit',     // 'fit' | 'scroll' (default 'fit')
+    underflow: 'leave',  // 'leave' | 'distribute' | 'stretch' (default 'leave')
+    fitThreshold: 0.15,  // compress instead of scroll when overflow ≤ 15% (default 0 = off)
   }}
 />
 ```
@@ -630,6 +631,19 @@ prop — **off by default**, so existing layouts are unchanged.
   cells **wrap**, taking width first from the columns with the most slack,
   never below a floor (`minSize`, or 48px).
 - **`scroll`** — keep natural widths and allow horizontal scrolling.
+
+### Small-overflow compression (`fitThreshold`)
+
+A few-pixel horizontal scrollbar is almost always an accident. `fitThreshold` (a
+fraction of the container, e.g. `0.15` = 15%) says "keep it in view if it nearly
+fits": when natural widths overflow by **≤ the threshold**, columns are
+proportionally compressed to fit **without wrapping** (respecting `minSize`)
+instead of scrolling. Above the threshold, the normal `overflow` behavior applies.
+
+Because compression is pure width math (no wrapped-row heights to measure), it
+works **even under row virtualization** — unlike `overflow: 'fit'`, which wraps and
+so falls back to `scroll` when virtualized. It also survives async re-measures and
+never touches user-resized columns.
 
 ### Underflow modes (natural total < container)
 

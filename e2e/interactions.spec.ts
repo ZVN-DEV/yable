@@ -525,6 +525,31 @@ test.describe('smart column width', () => {
     expect(overflow).toBeLessThanOrEqual(2)
   })
 
+  test('fitThreshold compresses small overflow under virtualization (no h-scroll, columns fill)', async ({
+    page,
+  }) => {
+    const root = page.getByTestId('auto-fit-small-virtual')
+    const scroller = root.locator('.yable-virtual-scroll-container')
+    await expect(scroller).toBeVisible()
+    await expect(root.locator('tbody tr').first()).toBeVisible()
+
+    const { overflow, headerW, clientW } = await scroller.evaluate((n) => {
+      const header = n.querySelector('.yable-thead')
+      return {
+        overflow: n.scrollWidth - n.clientWidth,
+        headerW: header ? (header as HTMLElement).getBoundingClientRect().width : 0,
+        clientW: n.clientWidth,
+      }
+    })
+
+    // Compressed to fit: no horizontal scrollbar despite natural overflow…
+    expect(overflow).toBeLessThanOrEqual(2)
+    // …and the columns FILL the container (proving compression happened, not an
+    // underflow gutter — with `underflow: 'leave'` a non-overflowing grid would
+    // leave the header narrower than the viewport).
+    expect(headerW).toBeGreaterThanOrEqual(clientW - 2)
+  })
+
   test('fit mode wraps the long-content column (cell taller than one line)', async ({ page }) => {
     const cell = page
       .getByTestId('auto-fit')

@@ -24,6 +24,7 @@ policy, or an object to tune it.
     sampleSize: 100,          // rows sampled for measurement (default 100)
     overflow: 'fit',          // 'fit' | 'scroll' (default 'fit')
     underflow: 'leave',       // 'leave' | 'distribute' | 'stretch' (default 'leave')
+    fitThreshold: 0.15,       // compress instead of scroll when overflow ≤ 15% (default 0 = off)
   }}
 />
 ```
@@ -37,6 +38,25 @@ When the columns' natural (content) widths sum to **more** than the container:
   (largest content), proportional to each column's slack, and never below a
   floor (its `minSize`, or 48px).
 - **`scroll`** — keep natural widths and allow the grid to scroll horizontally.
+
+### Small-overflow compression (`fitThreshold`)
+
+A few-pixel horizontal scrollbar is almost always an accident — the content
+_nearly_ fits. `fitThreshold` (a fraction of the container width, e.g. `0.15` =
+15%) declares "keep it in view if it nearly fits": when natural widths overflow
+the container by **≤ the threshold**, columns are proportionally compressed to fit
+**without wrapping** (respecting `minSize`), instead of showing a scrollbar. Above
+the threshold, the normal `overflow` behavior applies.
+
+Unlike `overflow: 'fit'` (which wraps and therefore falls back to `scroll` under
+row virtualization), compression is **pure width math** — no wrapped-row heights to
+measure — so it works **even under row virtualization**. It also survives async
+re-measures, and never touches columns the user has resized.
+
+```tsx
+// Squeeze a small overflow to fit; scroll only when it's meaningfully too wide.
+<Table table={table} autoColumnWidth={{ overflow: 'scroll', fitThreshold: 0.15 }} />
+```
 
 ### Underflow modes
 

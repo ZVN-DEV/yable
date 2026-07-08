@@ -29,6 +29,17 @@ export interface AutoColumnWidthOptions {
    *   fills exactly and never gutters.
    */
   underflow?: 'leave' | 'distribute' | 'stretch'
+  /**
+   * Small-overflow compression, as a fraction of the container width (e.g.
+   * `0.15` = 15%). When natural widths overflow the container by ≤ this amount,
+   * columns are proportionally compressed to fit WITHOUT wrapping — respecting
+   * `minSize` and user resizes — instead of showing a horizontal scrollbar.
+   * It is pure width math, so it also applies under row virtualization (unlike
+   * `overflow: 'fit'`, which needs to wrap). Above the threshold the normal
+   * `overflow` behavior applies. Re-measures (including async) preserve the
+   * compression. Default `0` (off).
+   */
+  fitThreshold?: number
 }
 
 export interface AdaptiveTableCardContext<TData extends RowData> {
