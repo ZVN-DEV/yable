@@ -157,8 +157,10 @@
   min-height: calc(var(--yable-header-min-height) - var(--yable-header-padding-y) * 2);
 }
 
-/* The label itself ellipsizes; the sort indicator (a later child) stays fixed. */
-.yable-th-content > span:first-child {
+/* Only STRING headers ellipsize (marked `.yable-th-label`); component/empty
+   headers such as a selection checkbox are never clipped. The sort indicator
+   (a later child) stays fixed. */
+.yable-th-content > .yable-th-label {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

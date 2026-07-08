@@ -419,6 +419,27 @@ describe('Column sizing min/max bounds', () => {
     expect(table.getColumn('name')!.getSize()).toBe(300)
   })
 
+  it('renders a size up to resizeMaxSize when set above maxSize', () => {
+    const { table } = makeTable([
+      { accessorKey: 'name', header: 'Name', size: 500, maxSize: 300, resizeMaxSize: 600 },
+    ])
+    // getSize's upper clamp is resizeMaxSize (600), not maxSize (300).
+    expect(table.getColumn('name')!.getSize()).toBe(500)
+  })
+
+  it('applies no upper clamp when resizeMaxSize is Infinity', () => {
+    const { table } = makeTable([
+      {
+        accessorKey: 'name',
+        header: 'Name',
+        size: 5000,
+        maxSize: 300,
+        resizeMaxSize: Number.POSITIVE_INFINITY,
+      },
+    ])
+    expect(table.getColumn('name')!.getSize()).toBe(5000)
+  })
+
   it('warns once when minSize > maxSize and resolves to a sane size (min wins)', () => {
     const { table } = makeTable([
       // minSize 400, maxSize 200 — invalid; min wins per documented policy.

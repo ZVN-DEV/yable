@@ -129,6 +129,12 @@ export function createColumn<TData extends RowData, TValue = unknown>(
       const min = ext.minSize
       const max = ext.maxSize
 
+      // A user-set width may render up to `resizeMaxSize` (defaults to `maxSize`).
+      // Auto/stretch widths are already clamped to `maxSize` upstream (in
+      // `computeAutoColumnWidths`), so raising this render ceiling only affects
+      // widths a human dragged — it never lets auto-sizing exceed `maxSize`.
+      const resizeMax = typeof ext.resizeMaxSize === 'number' ? ext.resizeMaxSize : max
+
       // Validate bounds: if a user accidentally sets minSize > maxSize the
       // resulting clamp would silently flip the size. Warn once and resolve
       // by treating minSize as the floor (i.e. min wins). This is documented
@@ -138,13 +144,16 @@ export function createColumn<TData extends RowData, TValue = unknown>(
           warnedInvalidSizeBounds = true
           console.warn(`[yable] column "${id}" has minSize (${min}) > maxSize (${max})`)
         }
-        // Min wins: clamp the raw size up to min, ignoring the broken max.
+      }
+
+      // Min wins on inversion against the resolved upper bound.
+      if (typeof min === 'number' && typeof resizeMax === 'number' && min > resizeMax) {
         return Math.max(raw, min)
       }
 
       let resolved = raw
       if (typeof min === 'number') resolved = Math.max(resolved, min)
-      if (typeof max === 'number') resolved = Math.min(resolved, max)
+      if (typeof resizeMax === 'number') resolved = Math.min(resolved, resizeMax)
       return resolved
     },
     getStart: (position?: ColumnPinningPosition) => {

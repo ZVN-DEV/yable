@@ -24,8 +24,27 @@ columnHelper.accessor('name', {
   header: 'Name',
   size: 200, // Default width in px
   minSize: 100, // Minimum width
-  maxSize: 400, // Maximum width
+  maxSize: 400, // Maximum width (also caps auto-sizing/stretch)
+  resizeMaxSize: Infinity, // Upper bound for USER drag-resize (defaults to maxSize)
   enableResizing: true,
+})
+```
+
+### Separating the resize cap from `maxSize`
+
+`maxSize` caps **both** auto-sizing/stretch **and** user drag-resize, so a column
+given a `maxSize` for auto-size discipline feels non-resizable past that width.
+Use `resizeMaxSize` to raise the ceiling for user drags only — `maxSize` keeps
+capping auto-sizing/stretch, while a human can drag the column up to
+`resizeMaxSize`. It defaults to `maxSize` (fully back-compatible).
+
+```typescript
+// App-wide: let users drag any column past its auto-size cap.
+const table = useTable({
+  data,
+  columns,
+  enableColumnResizing: true,
+  defaultColumnDef: { resizeMaxSize: Infinity },
 })
 ```
 
@@ -34,3 +53,4 @@ columnHelper.accessor('name', {
 - `columnResizeMode: 'onChange'` updates widths as the user drags
 - `columnResizeMode: 'onEnd'` only updates when the user releases the mouse
 - The `table.getTotalSize()` method returns the total width of all visible columns
+- `resizeMaxSize` only affects user drag-resize; auto-sizing/stretch always honor `maxSize`

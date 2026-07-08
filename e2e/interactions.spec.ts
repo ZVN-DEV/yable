@@ -667,3 +667,57 @@ test.describe('resize handle alignment', () => {
     expect(handleBox.x + handleBox.width).toBeGreaterThan(boundary)
   })
 })
+
+// The header-label ellipsis clip (added in 0.6.1) must only apply to STRING
+// headers. A `selectColumn()` renders a checkbox `<label>` with no text; the
+// clip previously collapsed its content span and cropped the 16px checkbox to
+// 0px even at the column's natural width.
+test.describe('label-less header is not clipped by the label ellipsis', () => {
+  test('selection checkbox header stays fully visible at size 40', async ({ page }) => {
+    await page.goto('/e2e/column-sizing')
+    const root = grid(page, 'grid-select-header')
+    await expect(root.locator('thead th').first()).toBeVisible()
+
+    const hitbox = root.locator('thead .yable-checkbox-hitbox')
+    await expect(hitbox).toBeVisible()
+
+    // The hitbox (and the checkbox it wraps) must not be collapsed by ellipsis.
+    const hitboxBox = (await hitbox.boundingBox())!
+    expect(hitboxBox.width).toBeGreaterThanOrEqual(16)
+
+    const checkbox = root.locator('thead input[type="checkbox"]')
+    const checkboxBox = (await checkbox.boundingBox())!
+    expect(checkboxBox.width).toBeGreaterThanOrEqual(12)
+  })
+})
+
+// `resizeMaxSize` (defaults to `maxSize`) caps USER drag-resize independently of
+// `maxSize`. With `resizeMaxSize: Infinity` set app-wide via `defaultColumnDef`,
+// a human can drag a `maxSize`-capped column wider than its cap.
+test.describe('resizeMaxSize lets user drag past maxSize', () => {
+  test('dragging a maxSize-capped column grows it past maxSize', async ({ page }) => {
+    await page.goto('/e2e/column-sizing')
+    const root = grid(page, 'grid-resize-max')
+    const nameTh = root.locator('thead th[data-column-id="name"]')
+    await expect(nameTh).toBeVisible()
+
+    const handle = nameTh.locator('.yable-resize-handle')
+    const hb = (await handle.boundingBox())!
+    const before = (await nameTh.boundingBox())!.width
+
+    // Grab just inside the divider and drag well past maxSize (180).
+    const thb = (await nameTh.boundingBox())!
+    const boundary = thb.x + thb.width
+    const grabX = boundary - 4
+    const grabY = hb.y + hb.height / 2
+    await page.mouse.move(grabX, grabY)
+    await page.mouse.down()
+    await page.mouse.move(grabX + 200, grabY, { steps: 8 })
+    await page.mouse.up()
+
+    const after = (await nameTh.boundingBox())!.width
+    expect(after).toBeGreaterThan(before)
+    // maxSize is 180; without resizeMaxSize the width would clamp there.
+    expect(after).toBeGreaterThan(200)
+  })
+})
