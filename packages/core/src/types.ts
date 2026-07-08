@@ -116,6 +116,13 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   size?: number
   minSize?: number
   maxSize?: number
+  /**
+   * Upper bound for USER drag-resize (defaults to `maxSize`). `maxSize` still
+   * caps auto-sizing/stretch; set this (e.g. `Number.POSITIVE_INFINITY`, or via
+   * `defaultColumnDef` for app-wide) to let a human drag a column past its
+   * auto-size cap.
+   */
+  resizeMaxSize?: number
   flex?: number
   /**
    * Opt out of the React `autoColumnWidth` feature for this column. When `false`

@@ -955,6 +955,59 @@ describe('Column Resizing', () => {
     expect(getState().columnSizingInfo.isResizingColumn).toBe(false)
   })
 
+  it('lets user drag-resize past maxSize when resizeMaxSize is higher', () => {
+    const { table, getState } = createTestTable({
+      columns: [
+        columnHelper.accessor('firstName', {
+          header: 'First Name',
+          size: 120,
+          minSize: 100,
+          maxSize: 180,
+          resizeMaxSize: Number.POSITIVE_INFINITY,
+        }),
+      ],
+    })
+    const column = table.getColumn('firstName')!
+    const header = table.getHeaderGroups()[0]!.headers[0]!
+    const resize = header.getResizeHandler()!
+
+    withMockDocument((dispatch) => {
+      resize({ clientX: 0 })
+      dispatch('mousemove', { clientX: 200, preventDefault: vi.fn() })
+      dispatch('mouseup', { clientX: 200 })
+    })
+
+    // clampColumnSize honored resizeMax: width committed past maxSize (120 + 200).
+    expect(getState().columnSizing.firstName).toBe(320)
+    // getSize RENDERS the committed width instead of clamping back to maxSize.
+    expect(column.getSize()).toBe(320)
+  })
+
+  it('still clamps user drag-resize to maxSize when resizeMaxSize is unset (back-compat)', () => {
+    const { table, getState } = createTestTable({
+      columns: [
+        columnHelper.accessor('firstName', {
+          header: 'First Name',
+          size: 120,
+          minSize: 100,
+          maxSize: 180,
+        }),
+      ],
+    })
+    const column = table.getColumn('firstName')!
+    const header = table.getHeaderGroups()[0]!.headers[0]!
+    const resize = header.getResizeHandler()!
+
+    withMockDocument((dispatch) => {
+      resize({ clientX: 0 })
+      dispatch('mousemove', { clientX: 200, preventDefault: vi.fn() })
+      dispatch('mouseup', { clientX: 200 })
+    })
+
+    expect(getState().columnSizing.firstName).toBe(180)
+    expect(column.getSize()).toBe(180)
+  })
+
   it('honors columnResizeMode="onEnd"', () => {
     const { table, getState } = createTestTable({
       columnResizeMode: 'onEnd',

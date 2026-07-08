@@ -6,12 +6,17 @@ function clampColumnSize<TData extends RowData, TValue>(
   column: Column<TData, TValue>,
   size: number,
 ): number {
-  const { minSize, maxSize } = column.columnDef
+  const { minSize, maxSize, resizeMaxSize } = column.columnDef
   let next = Math.max(size, 30)
 
+  // User drag-resize is capped by `resizeMaxSize` (defaults to `maxSize`), so a
+  // column can be given a `maxSize` for auto-size discipline while still being
+  // draggable past it. `maxSize` continues to cap auto-sizing/stretch elsewhere.
+  const resizeMax = typeof resizeMaxSize === 'number' ? resizeMaxSize : maxSize
+
   if (typeof minSize === 'number') next = Math.max(next, minSize)
-  if (typeof maxSize === 'number' && !(typeof minSize === 'number' && minSize > maxSize)) {
-    next = Math.min(next, maxSize)
+  if (typeof resizeMax === 'number' && !(typeof minSize === 'number' && minSize > resizeMax)) {
+    next = Math.min(next, resizeMax)
   }
 
   return next

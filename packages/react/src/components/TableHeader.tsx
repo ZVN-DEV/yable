@@ -318,6 +318,10 @@ function HeaderCell<TData extends RowData>({
       ? (column.columnDef.header as HeaderRenderer)(header.getContext())
       : (column.columnDef.header ?? header.id)
 
+  // Only string headers ellipsize; component/empty headers (e.g. a selection
+  // checkbox) must never be clipped — see `.yable-th-label` in base.css.
+  const isTextHeader = typeof column.columnDef.header === 'string'
+
   // Mirror TableCell's cellClassName: a column may style its header th with a
   // static class or a function of the header context.
   const headerClassNameDef = column.columnDef.headerClassName
@@ -442,7 +446,7 @@ function HeaderCell<TData extends RowData>({
         className="yable-th-content"
         onPointerDown={canReorder && !pinned ? handleContentPointerDown : undefined}
       >
-        <span>{headerContent}</span>
+        <span className={isTextHeader ? 'yable-th-label' : undefined}>{headerContent}</span>
         {canSort && (
           <SortIndicator direction={sortDirection} index={sortIndex > 0 ? sortIndex : undefined} />
         )}

@@ -559,8 +559,26 @@ columnHelper.accessor('name', {
   header: 'Name',
   size: 200, // Default width in px
   minSize: 100, // Minimum width
-  maxSize: 400, // Maximum width
+  maxSize: 400, // Maximum width (also caps auto-sizing/stretch)
+  resizeMaxSize: Infinity, // Upper bound for USER drag-resize (defaults to maxSize)
   enableResizing: true,
+})
+```
+
+### Separating the resize cap from `maxSize`
+
+`maxSize` caps **both** auto-sizing/stretch **and** user drag-resize. To let a
+human drag a column past its auto-size cap, set `resizeMaxSize` — it caps user
+drag-resize independently and defaults to `maxSize` (fully back-compatible).
+`maxSize` keeps capping auto-sizing/stretch. Set it app-wide via
+`defaultColumnDef`:
+
+```typescript
+const table = useTable({
+  data,
+  columns,
+  enableColumnResizing: true,
+  defaultColumnDef: { resizeMaxSize: Infinity },
 })
 ```
 
@@ -569,9 +587,12 @@ columnHelper.accessor('name', {
 - `columnResizeMode: 'onChange'` updates widths as the user drags
 - `columnResizeMode: 'onEnd'` only updates when the user releases the mouse
 - The `table.getTotalSize()` method returns the total width of all visible columns
+- `resizeMaxSize` only affects user drag-resize; auto-sizing/stretch always honor `maxSize`
+- Header labels only truncate with an ellipsis for **string** headers; component headers
+  (e.g. a selection checkbox) are never clipped.
 - Header and body columns share the same internal `<colgroup>`, so wide tables and
   horizontal scrolling do not require custom CSS or ResizeObserver width-sync code.
-- Prefer column definition options (`size`, `minSize`, `maxSize`, `enableResizing`)
+- Prefer column definition options (`size`, `minSize`, `maxSize`, `resizeMaxSize`, `enableResizing`)
   or `defaultColumnDef` for sizing policy. Use CSS only for visual theming.
 
 ### Sizing All Columns
