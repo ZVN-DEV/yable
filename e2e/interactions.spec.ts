@@ -87,18 +87,27 @@ test.describe('real-pointer core interactions', () => {
       const hb = await handle.boundingBox()
       if (!hb) throw new Error('resize handle not visible')
 
-      // The grab zone must reach the column divider and the visible bar must
-      // sit ON the divider, not centered inside the hotspot (which reads as
-      // "the indicator is left of the line I'm dragging").
+      // The handle must be CENTERED on the column divider (th's right edge) and
+      // straddle it — so the visible bar sits ON the line and the hit zone
+      // reaches both sides, not inward-only.
       const thb = (await nameTh.boundingBox())!
-      expect(Math.abs(hb.x + hb.width - (thb.x + thb.width))).toBeLessThanOrEqual(1.5)
-      await expect(handle).toHaveCSS('justify-content', 'flex-end')
+      const boundary = thb.x + thb.width
+      expect(Math.abs(hb.x + hb.width / 2 - boundary)).toBeLessThanOrEqual(1.5)
+      expect(hb.x).toBeLessThan(boundary)
+      expect(hb.x + hb.width).toBeGreaterThan(boundary)
+      await expect(handle).toHaveCSS('justify-content', 'center')
 
       const before = (await nameTh.boundingBox())!.width
-      await page.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2)
+      // Grab from just inside the divider. Under a sticky header the next th
+      // paints over the handle's overhanging (right) half, so the reliable grab
+      // zone is the inward half up to the divider — which is where a user aiming
+      // at the centered bar lands.
+      const grabX = boundary - 4
+      const grabY = hb.y + hb.height / 2
+      await page.mouse.move(grabX, grabY)
       await page.mouse.down()
       // Mid-drag: move 60px and assert width followed BEFORE releasing.
-      await page.mouse.move(hb.x + hb.width / 2 + 60, hb.y + hb.height / 2, { steps: 6 })
+      await page.mouse.move(grabX + 60, grabY, { steps: 6 })
       await expect
         .poll(async () => (await nameTh.boundingBox())!.width, {
           message: 'header width must track pointer before mouseup (live resize)',
@@ -580,5 +589,56 @@ test.describe('smart column width', () => {
     await expect
       .poll(async () => (await amountHeader.boundingBox())?.width ?? 0, { timeout: 5000 })
       .toBeGreaterThan(placeholderWidth + 40)
+  })
+})
+
+// The resize handle (visual bar AND pointer hit zone) must sit ON the column
+// divider — centered on the boundary between th n and th n+1, straddling it
+// symmetrically — not offset inward. Regression: `.yable-th { overflow: hidden }`
+// clipped the handle so it rendered flush-inside the divider, forcing users to
+// aim left of the line to grab it.
+test.describe('resize handle alignment', () => {
+  for (const { id, label } of GRIDS) {
+    test(`handle centers on the column divider (${label})`, async ({ page }) => {
+      await page.goto('/e2e/interactions')
+      const root = grid(page, id)
+      await expect(root.locator('.yable-thead th[data-column-id="name"]')).toBeVisible()
+
+      const nameTh = root.locator('.yable-thead th[data-column-id="name"]')
+      const nextTh = root.locator('.yable-thead th[data-column-id="action"]')
+      const handle = nameTh.locator('.yable-resize-handle')
+
+      const nameBox = (await nameTh.boundingBox())!
+      const nextBox = (await nextTh.boundingBox())!
+      const handleBox = (await handle.boundingBox())!
+
+      // The divider: name's right edge coincides with the next column's left.
+      const boundary = nameBox.x + nameBox.width
+      expect(Math.abs(nextBox.x - boundary)).toBeLessThanOrEqual(1)
+
+      // Handle centre sits on the divider (±1px)…
+      const handleCenter = handleBox.x + handleBox.width / 2
+      expect(Math.abs(handleCenter - boundary)).toBeLessThanOrEqual(1)
+      // …and the hit zone straddles it (not inward-only).
+      expect(handleBox.x).toBeLessThan(boundary)
+      expect(handleBox.x + handleBox.width).toBeGreaterThan(boundary)
+    })
+  }
+
+  test('handle centers on the divider for a pinned column', async ({ page }) => {
+    await page.goto('/e2e/pinned-virtual')
+    const root = grid(page, 'grid-pinned-virtual')
+    await expect(root.locator('.yable-thead th[data-column-id="id"]')).toBeVisible()
+
+    const idTh = root.locator('.yable-thead th[data-column-id="id"]')
+    const handle = idTh.locator('.yable-resize-handle')
+    const idBox = (await idTh.boundingBox())!
+    const handleBox = (await handle.boundingBox())!
+
+    const boundary = idBox.x + idBox.width
+    const handleCenter = handleBox.x + handleBox.width / 2
+    expect(Math.abs(handleCenter - boundary)).toBeLessThanOrEqual(1)
+    expect(handleBox.x).toBeLessThan(boundary)
+    expect(handleBox.x + handleBox.width).toBeGreaterThan(boundary)
   })
 })

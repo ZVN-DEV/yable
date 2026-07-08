@@ -41,31 +41,32 @@
 .yable--rtl .yable-resize-handle {
   right: auto;
   left: 0;
+  transform: translateX(-50%);
 }
 
 /* ── Column pinning: Swap left/right ────────────────────────────────────── */
 
-.yable--rtl .yable-th[data-pinned="left"],
-.yable--rtl .yable-td[data-pinned="left"] {
+.yable--rtl .yable-th[data-pinned='left'],
+.yable--rtl .yable-td[data-pinned='left'] {
   left: auto;
   right: var(--yable-pin-offset, 0px);
 }
 
-.yable--rtl .yable-th[data-pinned="right"],
-.yable--rtl .yable-td[data-pinned="right"] {
+.yable--rtl .yable-th[data-pinned='right'],
+.yable--rtl .yable-td[data-pinned='right'] {
   right: auto;
   left: var(--yable-pin-offset, 0px);
 }
 
 /* Pinned shadow edges — mirror */
-.yable--rtl .yable-th[data-pinned-edge="left"],
-.yable--rtl .yable-td[data-pinned-edge="left"] {
+.yable--rtl .yable-th[data-pinned-edge='left'],
+.yable--rtl .yable-td[data-pinned-edge='left'] {
   box-shadow: calc(var(--yable-shadow-pinned) * -1);
   clip-path: inset(0 0 0 -10px);
 }
 
-.yable--rtl .yable-th[data-pinned-edge="right"],
-.yable--rtl .yable-td[data-pinned-edge="right"] {
+.yable--rtl .yable-th[data-pinned-edge='right'],
+.yable--rtl .yable-td[data-pinned-edge='right'] {
   box-shadow: var(--yable-shadow-pinned);
   clip-path: inset(0 -10px 0 0);
 }
@@ -113,7 +114,7 @@
 
 /* ── Expand toggle ──────────────────────────────────────────────────────── */
 
-.yable--rtl .yable-expand-toggle[data-expanded="true"] {
+.yable--rtl .yable-expand-toggle[data-expanded='true'] {
   transform: rotate(-90deg);
 }
 

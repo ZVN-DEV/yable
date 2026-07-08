@@ -64,6 +64,8 @@ function PinnedVirtualGrid() {
     virtualViewportHeight: 300,
     rowHeight: 40,
     overscan: 5,
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
     initialState: {
       pagination: { pageIndex: 0, pageSize: 100_000 },
       columnPinning: { left: ['id'], right: ['actions'] },

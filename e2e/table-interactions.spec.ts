@@ -75,15 +75,14 @@ test.describe('Yable browser interactions', () => {
     const handleBox = await box(handle)
     const beforeWidth = await width(nameHeader)
 
-    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+    // Grab the inward half of the handle: a sticky virtualized header paints
+    // over the handle's overhanging (right) half, so the reliable grab zone is
+    // up to the divider from the left.
+    const grabX = handleBox.x + handleBox.width / 2 - 4
+    const grabY = handleBox.y + handleBox.height / 2
+    await page.mouse.move(grabX, grabY)
     await page.mouse.down()
-    await page.mouse.move(
-      handleBox.x + handleBox.width / 2 + 64,
-      handleBox.y + handleBox.height / 2,
-      {
-        steps: 10,
-      },
-    )
+    await page.mouse.move(grabX + 64, grabY, { steps: 10 })
     await page.mouse.up()
 
     await expect.poll(() => width(nameHeader)).toBeGreaterThan(beforeWidth + 40)
