@@ -111,7 +111,6 @@ test.describe('header/body column alignment (virtualized)', () => {
 
     test(`stays pixel-aligned after a column resize (${label})`, async ({ page }) => {
       const root = grid(page, id)
-      const firstHeader = root.locator('thead th').first()
       const handle = root.locator('.yable-resize-overlay-handle').first()
       const handleBox = await handle.boundingBox()
       if (!handleBox) throw new Error('resize handle not visible')
