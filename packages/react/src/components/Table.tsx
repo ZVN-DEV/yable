@@ -18,6 +18,7 @@ import { useYableDefaults } from '../YableProvider'
 import { resolveYableProfile } from '../config'
 import type { TableProps } from '../types'
 import { TableHeader } from './TableHeader'
+import { ResizeHandleOverlay } from './ResizeHandleOverlay'
 import { TableBody } from './TableBody'
 import { AdaptiveTableCards, type RequiredAdaptiveLayout } from './AdaptiveTableCards'
 import { TableFooter } from './TableFooter'
@@ -307,6 +308,18 @@ export function Table<TData extends RowData>({
     0,
   )
 
+  // Resize handles live in an overlay layer (see ResizeHandleOverlay) so their
+  // hit zones straddle each divider even under sticky headers. This signature
+  // re-measures handle positions whenever column ids/sizes change — including
+  // per-frame during a live `onChange` drag-resize — plus RTL and the
+  // column-virtualization horizontal offset.
+  const anyResizable = visibleLeafColumns.some((column) => column.getCanResize())
+  const resizeOverlaySignature = anyResizable
+    ? `${visibleLeafColumns.map((c) => `${c.id}:${c.getSize()}:${c.getCanResize() ? 1 : 0}`).join('|')}|${
+        isRtl ? 1 : 0
+      }|${columnVirtualState.startOffset ?? 0}|${baseState.columnSizingInfo?.isResizingColumn ?? ''}`
+    : ''
+
   const colgroup =
     visibleLeafColumns.length === 0 ? null : (
       <colgroup>
@@ -452,6 +465,15 @@ export function Table<TData extends RowData>({
             </div>
           ) : (
             tableNode
+          )}
+
+          {anyResizable && !adaptiveLayoutActive && (
+            <ResizeHandleOverlay
+              table={renderTable}
+              mainRef={mainRef}
+              isRtl={isRtl}
+              signature={resizeOverlaySignature}
+            />
           )}
 
           <LoadingOverlay

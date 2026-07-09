@@ -267,7 +267,7 @@ describe('Table', () => {
   it('updates shared column widths when dragging a resize handle', () => {
     const { container } = render(<SizedTable />)
 
-    const resizeHandle = container.querySelector('.yable-resize-handle') as HTMLDivElement
+    const resizeHandle = container.querySelector('.yable-resize-overlay-handle') as HTMLDivElement
     fireEvent.mouseDown(resizeHandle, { clientX: 100 })
     fireEvent.mouseMove(document, { clientX: 140 })
     fireEvent.mouseUp(document, { clientX: 140 })

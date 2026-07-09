@@ -83,7 +83,7 @@ test.describe('real-pointer core interactions', () => {
     test(`column resize tracks the pointer LIVE during drag (${label})`, async ({ page }) => {
       const root = grid(page, id)
       const nameTh = root.locator('th[data-column-id="name"]')
-      const handle = nameTh.locator('.yable-resize-handle')
+      const handle = root.locator('.yable-resize-overlay-handle[data-column-id="name"]')
       const hb = await handle.boundingBox()
       if (!hb) throw new Error('resize handle not visible')
 
@@ -631,7 +631,7 @@ test.describe('resize handle alignment', () => {
 
       const nameTh = root.locator('.yable-thead th[data-column-id="name"]')
       const nextTh = root.locator('.yable-thead th[data-column-id="action"]')
-      const handle = nameTh.locator('.yable-resize-handle')
+      const handle = root.locator('.yable-resize-overlay-handle[data-column-id="name"]')
 
       const nameBox = (await nameTh.boundingBox())!
       const nextBox = (await nextTh.boundingBox())!
@@ -656,7 +656,7 @@ test.describe('resize handle alignment', () => {
     await expect(root.locator('.yable-thead th[data-column-id="id"]')).toBeVisible()
 
     const idTh = root.locator('.yable-thead th[data-column-id="id"]')
-    const handle = idTh.locator('.yable-resize-handle')
+    const handle = root.locator('.yable-resize-overlay-handle[data-column-id="id"]')
     const idBox = (await idTh.boundingBox())!
     const handleBox = (await handle.boundingBox())!
 
@@ -666,6 +666,40 @@ test.describe('resize handle alignment', () => {
     expect(handleBox.x).toBeLessThan(boundary)
     expect(handleBox.x + handleBox.width).toBeGreaterThan(boundary)
   })
+
+  // The regression Kirby keeps hitting: under a sticky (here: virtualized)
+  // header the neighbouring th painted OVER the handle's outer half, so a grab
+  // from the right side of the divider missed and did nothing — resizing only
+  // worked when aiming left of the line. The overlay layer paints above every
+  // header cell, so a drag must start identically from BOTH sides of the
+  // divider. `grid-virtual` uses the row-virtualization surface (sticky `th`).
+  for (const side of [-4, 4] as const) {
+    const label = side < 0 ? 'inner' : 'outer'
+    test(`drag-resize starts from the ${label} side of the divider under a sticky header`, async ({
+      page,
+    }) => {
+      await page.goto('/e2e/interactions')
+      const root = grid(page, 'grid-virtual')
+      const nameTh = root.locator('.yable-thead th[data-column-id="name"]')
+      await expect(nameTh).toBeVisible()
+      const handle = root.locator('.yable-resize-overlay-handle[data-column-id="name"]')
+      await expect(handle).toBeVisible()
+
+      const before = (await nameTh.boundingBox())!
+      const boundary = before.x + before.width
+      const handleBox = (await handle.boundingBox())!
+      const grabX = boundary + side
+      const grabY = handleBox.y + handleBox.height / 2
+
+      await page.mouse.move(grabX, grabY)
+      await page.mouse.down()
+      await page.mouse.move(grabX + 70, grabY, { steps: 10 })
+      await page.mouse.up()
+
+      const after = (await nameTh.boundingBox())!.width
+      expect(after).toBeGreaterThan(before.width + 40)
+    })
+  }
 })
 
 // The header-label ellipsis clip (added in 0.6.1) must only apply to STRING
@@ -701,7 +735,7 @@ test.describe('resizeMaxSize lets user drag past maxSize', () => {
     const nameTh = root.locator('thead th[data-column-id="name"]')
     await expect(nameTh).toBeVisible()
 
-    const handle = nameTh.locator('.yable-resize-handle')
+    const handle = root.locator('.yable-resize-overlay-handle[data-column-id="name"]')
     const hb = (await handle.boundingBox())!
     const before = (await nameTh.boundingBox())!.width
 
