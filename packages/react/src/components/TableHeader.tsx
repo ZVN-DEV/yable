@@ -13,6 +13,7 @@ import type {
 } from '@zvndev/yable-core'
 import { SortIndicator } from './SortIndicator'
 import { FloatingFilter } from './FloatingFilter'
+import { recentResizeEndAt } from './resizeGuard'
 
 interface TableHeaderProps<TData extends RowData> {
   table: Table<TData>
@@ -307,7 +308,6 @@ function HeaderCell<TData extends RowData>({
   const canSort = column.getCanSort()
   const sortDirection = column.getIsSorted()
   const sortIndex = column.getSortIndex()
-  const canResize = column.getCanResize()
   const canReorder = column.getCanReorder() && !header.isPlaceholder
   const pinned = column.getIsPinned()
   type HeaderRenderer = (ctx: HeaderContext<TData, unknown>) => React.ReactNode
@@ -358,30 +358,6 @@ function HeaderCell<TData extends RowData>({
     return s
   }, [header, column, pinned, isDragSource, dragTransform])
 
-  const lastResizeEndRef = useRef(0)
-
-  const startResize = useCallback(
-    (e: React.MouseEvent | React.TouchEvent) => {
-      e.stopPropagation()
-
-      const onEnd = () => {
-        lastResizeEndRef.current = Date.now()
-        document.removeEventListener('mouseup', onEnd, true)
-        document.removeEventListener('touchend', onEnd, true)
-      }
-      document.addEventListener('mouseup', onEnd, true)
-      document.addEventListener('touchend', onEnd, true)
-
-      const handler = header.getResizeHandler()
-      if (handler) (handler as (ev: unknown) => void)(e.nativeEvent)
-    },
-    [header],
-  )
-
-  const handleResizeClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-  }, [])
-
   const handleContentPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!canReorder || pinned) return
@@ -399,12 +375,12 @@ function HeaderCell<TData extends RowData>({
       } satisfies HeaderClickEvent<TData>)
       if (!canSort) return
       // Swallow the click that ends a resize or a reorder drag.
-      if (Date.now() - lastResizeEndRef.current < 250) return
+      if (Date.now() - recentResizeEndAt(table) < 250) return
       if (Date.now() - reorderEndRef.current < 250) return
       const handler = column.getToggleSortingHandler()
       if (handler) handler(e)
     },
-    [canSort, column, header, table.events, reorderEndRef],
+    [canSort, column, header, table, reorderEndRef],
   )
 
   const handleHeaderContextMenu = useCallback(
@@ -451,16 +427,6 @@ function HeaderCell<TData extends RowData>({
           <SortIndicator direction={sortDirection} index={sortIndex > 0 ? sortIndex : undefined} />
         )}
       </div>
-
-      {canResize && (
-        <div
-          className="yable-resize-handle"
-          data-resizing={column.getIsResizing() || undefined}
-          onMouseDown={startResize}
-          onTouchStart={startResize}
-          onClick={handleResizeClick}
-        />
-      )}
     </th>
   )
 }

@@ -71,14 +71,14 @@ test.describe('Yable browser interactions', () => {
     const visibleNameCell = firstVisibleCell(page, 'name')
     await expectColumnWidthsAligned(nameHeader, visibleNameCell)
 
-    const handle = nameHeader.locator('.yable-resize-handle')
+    const handle = page.locator('.yable-resize-overlay-handle[data-column-id="name"]')
     const handleBox = await box(handle)
     const beforeWidth = await width(nameHeader)
 
-    // Grab the inward half of the handle: a sticky virtualized header paints
-    // over the handle's overhanging (right) half, so the reliable grab zone is
-    // up to the divider from the left.
-    const grabX = handleBox.x + handleBox.width / 2 - 4
+    // Grab the handle centre — the overlay layer sits above every header cell so
+    // the hit zone straddles the divider and is grabbable from either side, even
+    // under a sticky virtualized header.
+    const grabX = handleBox.x + handleBox.width / 2
     const grabY = handleBox.y + handleBox.height / 2
     await page.mouse.move(grabX, grabY)
     await page.mouse.down()

@@ -112,15 +112,14 @@ test.describe('header/body column alignment (virtualized)', () => {
     test(`stays pixel-aligned after a column resize (${label})`, async ({ page }) => {
       const root = grid(page, id)
       const firstHeader = root.locator('thead th').first()
-      const handle = firstHeader.locator('.yable-resize-handle')
+      const handle = root.locator('.yable-resize-overlay-handle').first()
       const handleBox = await handle.boundingBox()
       if (!handleBox) throw new Error('resize handle not visible')
 
       const beforeWidth = (await headerBoxes(root))[0]!.width
-      // Grab from the inward half of the handle: under a sticky virtualized
-      // header the next th paints over the handle's overhanging (right) half, so
-      // the reliable grab zone is up to the divider from the left.
-      const grabX = handleBox.x + handleBox.width / 2 - 4
+      // Grab the handle centre — the overlay layer sits above every header cell
+      // so the hit zone straddles the divider and is grabbable from either side.
+      const grabX = handleBox.x + handleBox.width / 2
       const grabY = handleBox.y + handleBox.height / 2
       await page.mouse.move(grabX, grabY)
       await page.mouse.down()

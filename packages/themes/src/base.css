@@ -270,6 +270,71 @@
   height: 70%;
 }
 
+/* ── Column Resize Overlay (React) ───────────────────────────────────────────
+   The React table renders resize handles in ONE layer OUTSIDE every `th`
+   (`.yable-resize-overlay`, a child of `.yable-main`) instead of an absolutely
+   positioned child of each header cell. Under sticky headers every `th` becomes
+   an equal-z stacking context, so a later sibling paints over the previous
+   cell's overhanging handle and only its inner half is grabbable. Lifting the
+   handles into a single higher layer lets each hit zone straddle its divider
+   symmetrically — the grab works identically from either side. Handle
+   `left`/`top`/`height` are measured from the real header rects in JS
+   (see ResizeHandleOverlay), so this tracks sticky/pinned/virtualized/scrolled
+   layouts. The in-`th` `.yable-resize-handle` above is retained for the vanilla
+   package, which renders its handles inside the cell. */
+.yable-resize-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--yable-z-resize-overlay);
+}
+
+.yable-resize-overlay-handle {
+  position: absolute;
+  /* Centered ON the measured divider so both the visible bar and the pointer
+     hit zone straddle it symmetrically. `left`/`top`/`height` set imperatively. */
+  transform: translateX(-50%);
+  width: calc(var(--yable-resize-handle-width) * 3);
+  cursor: col-resize;
+  pointer-events: auto;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The grid's outer edge (last column LTR / first RTL) has no next column to
+   straddle; keep the hotspot flush INSIDE so its overhang can't inflate the
+   grid's scrollWidth (phantom horizontal scroll). */
+.yable-resize-overlay-handle[data-edge] {
+  transform: translateX(-100%);
+  justify-content: flex-end;
+}
+
+.yable-resize-overlay-handle::after {
+  content: '';
+  width: var(--yable-resize-handle-width);
+  height: 0%;
+  border-radius: 2px;
+  background: var(--yable-resize-handle-color);
+  transition:
+    background var(--yable-transition),
+    height var(--yable-transition);
+}
+
+.yable-resize-overlay-handle:hover::after {
+  background: var(--yable-border-color-strong);
+  height: 50%;
+}
+
+.yable-resize-overlay-handle[data-resizing='true']::after {
+  background: var(--yable-resize-handle-color-active);
+  height: 70%;
+}
+
 /* ── Column Reorder ──────────────────────────────────────────────────────── */
 
 .yable-th[data-reorderable='true'] > .yable-th-content {
@@ -2647,6 +2712,14 @@
   right: auto;
   left: 0;
   transform: translateX(-50%);
+}
+
+/* Overlay edge handle in RTL: the grid's outer edge is the FIRST column's
+   leading (left) boundary, so keep the hotspot flush to the RIGHT of it (inside
+   the grid) rather than overhanging left past the grid edge. */
+.yable--rtl .yable-resize-overlay-handle[data-edge] {
+  transform: translateX(0);
+  justify-content: flex-start;
 }
 
 .yable--rtl .yable-tr[data-selected='true'] {

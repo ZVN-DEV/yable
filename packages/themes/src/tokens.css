@@ -179,6 +179,9 @@
   --yable-z-header: 10;
   --yable-z-pinned: 20;
   --yable-z-resize: 30;
+  /* Resize handle overlay layer — above sticky+pinned header cells
+     (z-header + z-pinned = 30) but below content overlays (loading, etc.). */
+  --yable-z-resize-overlay: 35;
   --yable-z-overlay: 40;
   --yable-z-tooltip: 9999;
   --yable-z-context-menu: 9999;
