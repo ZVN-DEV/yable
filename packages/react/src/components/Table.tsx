@@ -348,6 +348,7 @@ export function Table<TData extends RowData>({
     table: renderTable,
     columns: visibleLeafColumns,
     measureRef: mainRef,
+    scrollRegionRef: horizontalScrollRef,
     enabled: autoColumnWidthActive,
     config: autoColumnWidthConfig,
     isVirtualized: enableRowVirtualization,

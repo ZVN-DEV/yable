@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [react-0.19.1] - 2026-07-21
+
+### Fixed
+
+- **Phantom horizontal scrollbar on fitted tables**: `autoColumnWidth` now fits columns to the scroll container's `clientWidth` instead of `.yable-main`'s width. Classic (space-consuming) vertical scrollbars render inside the scroller, so the previous fit target overflowed by exactly the scrollbar width and every vertically-scrolling table showed a needless horizontal scrollbar. The scroller is resolved from a new optional `scrollRegionRef` on `useAutoColumnSizing` (wired in `<Table>` for the column-virtualization shell) and, when that ref is empty, by a `.yable-virtual-scroll-container` class lookup under the measured node (the row-virtualization surface renders its scroller inside `TableBody` with a private ref). The scroller is also observed so scrollbar appearance/disappearance re-fits.
+
 ## [0.4.0] — 2026-05-15
 
 ### Added

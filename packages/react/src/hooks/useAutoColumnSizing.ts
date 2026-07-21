@@ -368,6 +368,14 @@ export interface UseAutoColumnSizingOptions<TData extends RowData> {
   columns: Column<TData, unknown>[]
   /** Ref to the grid content element whose width bounds the columns. */
   measureRef: React.RefObject<HTMLElement | null>
+  /**
+   * Ref to the scroll container the columns actually render inside. When
+   * provided, its clientWidth is the fit target instead of measureRef's:
+   * classic (space-consuming) scrollbars live inside the scroller, so fitting
+   * to the outer element's width overflows by exactly the scrollbar width and
+   * shows a phantom horizontal scrollbar on tables that otherwise fit.
+   */
+  scrollRegionRef?: React.RefObject<HTMLElement | null>
   enabled: boolean
   config: AutoColumnWidthOptions
   /** When true, squish + wrap is disabled (falls back to scroll on overflow). */
@@ -411,6 +419,7 @@ export function useAutoColumnSizing<TData extends RowData>({
   table,
   columns,
   measureRef,
+  scrollRegionRef,
   enabled,
   config,
   isVirtualized,
@@ -450,16 +459,38 @@ export function useAutoColumnSizing<TData extends RowData>({
       setContainerWidth(0)
       return
     }
-    const update = () => setContainerWidth(node.clientWidth)
-    update()
+    // Fit target: the scroll container's clientWidth when available (it
+    // excludes any classic vertical scrollbar / reserved gutter), falling back
+    // to the outer content element. `scrollRegionRef` only covers the
+    // column-virtualization shell; the row-virtualization surface renders its
+    // scroller inside TableBody with a private ref, so resolve it by class
+    // lookup. The scroller usually mounts AFTER this effect (with the first
+    // rows), so it is observed lazily on each update.
+    let observer: ResizeObserver | undefined
+    let observedScroller: HTMLElement | null = null
+    const update = () => {
+      const scroller =
+        scrollRegionRef?.current ??
+        (node.querySelector('.yable-virtual-scroll-container') as HTMLElement | null)
+      if (observer && scroller && scroller !== observedScroller) {
+        // Its clientWidth changes when the vertical scrollbar appears or
+        // disappears even though the outer element's size doesn't, and that
+        // change must re-fit the columns.
+        observer.observe(scroller)
+        observedScroller = scroller
+      }
+      setContainerWidth(scroller ? scroller.clientWidth : node.clientWidth)
+    }
     if (typeof ResizeObserver === 'undefined') {
+      update()
       window.addEventListener('resize', update)
       return () => window.removeEventListener('resize', update)
     }
-    const observer = new ResizeObserver(update)
+    observer = new ResizeObserver(update)
     observer.observe(node)
-    return () => observer.disconnect()
-  }, [enabled, measureRef])
+    update()
+    return () => observer?.disconnect()
+  }, [enabled, measureRef, scrollRegionRef])
 
   // Auto re-measure when the row DATA reference changes identity — an async
   // value merge (same rows, values filled in later) produces a NEW `data`
@@ -509,7 +540,17 @@ export function useAutoColumnSizing<TData extends RowData>({
     }
     const node = measureRef.current
     const ctx = getMeasureContext()
-    if (!node || !ctx || containerWidth <= 0) return
+    // The scroll region often mounts AFTER the width effect's initial pass
+    // (it renders with the first rows), so read it synchronously here: at
+    // sizing time it exists and its clientWidth is the true fit target. The
+    // containerWidth state still drives reactivity for outer resizes. Same
+    // resolution order as the width effect: explicit ref, then the
+    // row-virtualization surface's scroller by class lookup.
+    const scrollRegion =
+      scrollRegionRef?.current ??
+      (node?.querySelector('.yable-virtual-scroll-container') as HTMLElement | null)
+    const fitWidth = scrollRegion ? scrollRegion.clientWidth : containerWidth
+    if (!node || !ctx || fitWidth <= 0) return
 
     const style = getComputedStyle(node)
     const fontFamily = readVar(style, '--yable-font-family') || style.fontFamily || 'sans-serif'
@@ -580,7 +621,7 @@ export function useAutoColumnSizing<TData extends RowData>({
       downgradedFit,
     } = computeAutoColumnWidths({
       columns: inputs,
-      containerWidth,
+      containerWidth: fitWidth,
       overflow,
       underflow,
       canSquish: !isVirtualized,
