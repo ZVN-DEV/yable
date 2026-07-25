@@ -1,5 +1,67 @@
 # @zvndev/yable-core
 
+## 0.16.0
+
+### Minor Changes
+
+- 2155437: Symmetric select-all handlers and token-driven header/cell typography.
+
+  **core:** `table.getToggleAllRowsSelectedHandler()` and
+  `table.getToggleAllPageRowsSelectedHandler()` mirror `row.getToggleSelectedHandler()`.
+  Both ignore their event argument, so wiring one straight to `onChange` toggles
+  instead of reading the event object as a truthy `value` flag (the trap in the old
+  `onChange={table.toggleAllPageRowsSelected}` docs example).
+
+  **themes:** new typography tokens, all inheriting existing defaults so nothing
+  renders differently out of the box:
+  - `--yable-font-family-header`, `--yable-font-family-cell` (both default to
+    `--yable-font-family`), so mono data under sans headers is a one-line override
+  - `--yable-font-weight-header`, `--yable-header-text-transform`,
+    `--yable-header-letter-spacing`
+
+  Every bundled theme now declares its header typography through these tokens
+  instead of hardcoding it on its own `.yable-th` rule. That rule outranked any
+  token set on the grid root, so killing a theme's uppercase headers previously
+  required class overrides; setting `--yable-header-text-transform` is now enough.
+  Density utilities that set `--yable-font-size-header` also reach the header for
+  the first time. `createTheme()` gains matching `fontFamilyHeader`,
+  `fontFamilyCell`, `fontWeightHeader`, `headerTextTransform`, and
+  `headerLetterSpacing` keys, and the Tailwind preset gains `font-yable-header` /
+  `font-yable-cell`.
+
+- 2155437: Column alignment, a `data-sorted` hook, and tokens for frosted headers and detail accents.
+
+  **`align` on a column def** (`'left' | 'center' | 'right'`) emits `data-align` on
+  that column's header, body, and footer cells, so one declaration replaces a
+  per-cell style. Right-aligned body cells also get `font-variant-numeric:
+tabular-nums`, which is what numeric columns want. Header labels live in a flex
+  wrapper, so the alignment is applied there too rather than through `text-align`
+  alone. Supported by both the React and vanilla renderers.
+
+  **`data-sorted="asc|desc"`** on `.yable-th` mirrors `aria-sort` as a plain
+  attribute. Highlighting the actively sorted column previously meant
+  `:has(.yable-sort-indicator[data-active='true'])`, which reaches into the sort
+  indicator's internals. Vanilla footers/headers also gained `data-column-id` on
+  footer cells for targeting.
+
+  **New theme tokens**, all defaulting to visual no-ops:
+  - `--yable-header-backdrop-filter` (with the `-webkit-` prefix applied for
+    Safari) makes a frosted sticky header declarative: pair it with a translucent
+    `--yable-bg-header`.
+  - `--yable-detail-accent-width` / `--yable-detail-accent-color` draw an inset
+    edge on an expanded master-detail panel, tying it to its parent row.
+
+  `createTheme()` gained `headerBackdropFilter`, `detailAccentWidth`, and
+  `detailAccentColor`. The themes README now documents the density presets
+  (`<Table density>` / `.yable--density-*`), which already replace hand-setting six
+  spacing tokens, plus the data-attribute styling hooks.
+
+### Patch Changes
+
+- 2155437: Export `./package.json` from every package. `require.resolve('@zvndev/yable-react/package.json')`
+  previously threw `ERR_PACKAGE_PATH_NOT_EXPORTED`, which breaks common
+  version-introspection tooling.
+
 ## 0.15.0
 
 ### Minor Changes

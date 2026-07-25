@@ -1,5 +1,97 @@
 # @zvndev/yable-react
 
+## 0.20.0
+
+### Minor Changes
+
+- 2155437: Fix container underflow on fully sized tables, and stop `clickableRows` gating `onRowClick`.
+
+  **Underflow.** `autoColumnWidth`'s `distribute` / `stretch` policies only grew
+  auto-sized columns, so a table where every column has an explicit `size` had
+  nothing to grow: it pinned to its sized total and left a dead band on the right
+  that no policy could close. When a table has no auto columns, every visible
+  column now participates instead. New `underflow: 'stretch-last'` hands the whole
+  remainder to the last visible column (ignoring its `maxSize`) and leaves the rest
+  at their exact widths.
+
+  Resolved widths flow through `columnSizing`, so the sticky header, the body, the
+  virtualized inner table, and pinned offsets all read one set of numbers. The CSS
+  workaround for this (`.yable-table { min-width: 100% }`) let the header and the
+  virtualized body resolve the slack independently and drift out of column
+  alignment. Widths an underflow policy grows are tracked against their declared
+  base, so shrinking the container un-stretches instead of ratcheting upward.
+
+  **`clickableRows`.** `row:click` was only emitted when the rendered `<Table>` had
+  `clickableRows` set, so passing `onRowClick` to `useTable` without also setting
+  that prop silently did nothing (`row:dblclick` and `row:contextmenu` always
+  emitted unconditionally). `row:click` now emits unconditionally, and
+  `clickableRows` is purely the visual affordance: it defaults on when the table
+  has an `onRowClick` handler, and `clickableRows={false}` drops the affordance
+  while keeping the handler. `clickableRows` can also be set on `YableProvider`'s
+  `tableProps` now, like every other visual default.
+
+- 2155437: Column alignment, a `data-sorted` hook, and tokens for frosted headers and detail accents.
+
+  **`align` on a column def** (`'left' | 'center' | 'right'`) emits `data-align` on
+  that column's header, body, and footer cells, so one declaration replaces a
+  per-cell style. Right-aligned body cells also get `font-variant-numeric:
+tabular-nums`, which is what numeric columns want. Header labels live in a flex
+  wrapper, so the alignment is applied there too rather than through `text-align`
+  alone. Supported by both the React and vanilla renderers.
+
+  **`data-sorted="asc|desc"`** on `.yable-th` mirrors `aria-sort` as a plain
+  attribute. Highlighting the actively sorted column previously meant
+  `:has(.yable-sort-indicator[data-active='true'])`, which reaches into the sort
+  indicator's internals. Vanilla footers/headers also gained `data-column-id` on
+  footer cells for targeting.
+
+  **New theme tokens**, all defaulting to visual no-ops:
+  - `--yable-header-backdrop-filter` (with the `-webkit-` prefix applied for
+    Safari) makes a frosted sticky header declarative: pair it with a translucent
+    `--yable-bg-header`.
+  - `--yable-detail-accent-width` / `--yable-detail-accent-color` draw an inset
+    edge on an expanded master-detail panel, tying it to its parent row.
+
+  `createTheme()` gained `headerBackdropFilter`, `detailAccentWidth`, and
+  `detailAccentColor`. The themes README now documents the density presets
+  (`<Table density>` / `.yable--density-*`), which already replace hand-setting six
+  spacing tokens, plus the data-attribute styling hooks.
+
+### Patch Changes
+
+- 2155437: Symmetric select-all handlers and token-driven header/cell typography.
+
+  **core:** `table.getToggleAllRowsSelectedHandler()` and
+  `table.getToggleAllPageRowsSelectedHandler()` mirror `row.getToggleSelectedHandler()`.
+  Both ignore their event argument, so wiring one straight to `onChange` toggles
+  instead of reading the event object as a truthy `value` flag (the trap in the old
+  `onChange={table.toggleAllPageRowsSelected}` docs example).
+
+  **themes:** new typography tokens, all inheriting existing defaults so nothing
+  renders differently out of the box:
+  - `--yable-font-family-header`, `--yable-font-family-cell` (both default to
+    `--yable-font-family`), so mono data under sans headers is a one-line override
+  - `--yable-font-weight-header`, `--yable-header-text-transform`,
+    `--yable-header-letter-spacing`
+
+  Every bundled theme now declares its header typography through these tokens
+  instead of hardcoding it on its own `.yable-th` rule. That rule outranked any
+  token set on the grid root, so killing a theme's uppercase headers previously
+  required class overrides; setting `--yable-header-text-transform` is now enough.
+  Density utilities that set `--yable-font-size-header` also reach the header for
+  the first time. `createTheme()` gains matching `fontFamilyHeader`,
+  `fontFamilyCell`, `fontWeightHeader`, `headerTextTransform`, and
+  `headerLetterSpacing` keys, and the Tailwind preset gains `font-yable-header` /
+  `font-yable-cell`.
+
+- 2155437: Export `./package.json` from every package. `require.resolve('@zvndev/yable-react/package.json')`
+  previously threw `ERR_PACKAGE_PATH_NOT_EXPORTED`, which breaks common
+  version-introspection tooling.
+- Updated dependencies [2155437]
+- Updated dependencies [2155437]
+- Updated dependencies [2155437]
+  - @zvndev/yable-core@0.16.0
+
 ## 0.19.0
 
 ### Minor Changes
