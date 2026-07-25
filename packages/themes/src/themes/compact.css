@@ -10,7 +10,7 @@
    ============================================================================ */
 
 .yable-theme-compact,
-.yable[data-theme="compact"] {
+.yable[data-theme='compact'] {
   /* Surface — light gray background for data density */
   --yable-bg: #ffffff;
   --yable-bg-header: #f3f4f6;
@@ -74,43 +74,44 @@
 
   /* Resize handle */
   --yable-resize-handle-width: 3px;
+
+  /* Header typography: bold, borderline industrial */
+  --yable-header-text-transform: uppercase;
+  --yable-header-letter-spacing: 0.04em;
+  --yable-font-size-header: 10px;
+  --yable-font-weight-header: var(--yable-font-weight-semibold);
 }
 
-/* Headers — bold, borderline industrial */
 .yable-theme-compact .yable-th,
-.yable[data-theme="compact"] .yable-th {
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 10px;
-  font-weight: var(--yable-font-weight-semibold);
+.yable[data-theme='compact'] .yable-th {
   color: var(--yable-text-secondary);
   background: var(--yable-bg-header);
 }
 
 /* All rows get separators */
 .yable-theme-compact .yable-tr:not(:last-child) .yable-td,
-.yable[data-theme="compact"] .yable-tr:not(:last-child) .yable-td {
+.yable[data-theme='compact'] .yable-tr:not(:last-child) .yable-td {
   border-bottom: var(--yable-border-width) solid var(--yable-border-color);
 }
 
 /* Also add vertical borders for the spreadsheet feel */
 .yable-theme-compact .yable-th,
-.yable[data-theme="compact"] .yable-th,
+.yable[data-theme='compact'] .yable-th,
 .yable-theme-compact .yable-td,
-.yable[data-theme="compact"] .yable-td {
+.yable[data-theme='compact'] .yable-td {
   border-right: var(--yable-border-width) solid var(--yable-border-color);
 }
 
 .yable-theme-compact .yable-th:last-child,
-.yable[data-theme="compact"] .yable-th:last-child,
+.yable[data-theme='compact'] .yable-th:last-child,
 .yable-theme-compact .yable-td:last-child,
-.yable[data-theme="compact"] .yable-td:last-child {
+.yable[data-theme='compact'] .yable-td:last-child {
   border-right: none;
 }
 
 /* Number cells — monospace */
-.yable-theme-compact [data-type="number"],
-.yable[data-theme="compact"] [data-type="number"] {
+.yable-theme-compact [data-type='number'],
+.yable[data-theme='compact'] [data-type='number'] {
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -118,8 +119,8 @@
 /* ── Compact Dark Mode ───────────────────────────────────────────────────── */
 
 @media (prefers-color-scheme: dark) {
-  .yable-theme-compact:not([data-yable-theme="light"]),
-  .yable[data-theme="compact"]:not([data-yable-theme="light"]) {
+  .yable-theme-compact:not([data-yable-theme='light']),
+  .yable[data-theme='compact']:not([data-yable-theme='light']) {
     --yable-bg: #0d0f14;
     --yable-bg-header: #141720;
     --yable-bg-footer: #141720;
@@ -148,8 +149,8 @@
   }
 }
 
-[data-yable-theme="dark"] .yable-theme-compact,
-[data-yable-theme="dark"] .yable[data-theme="compact"] {
+[data-yable-theme='dark'] .yable-theme-compact,
+[data-yable-theme='dark'] .yable[data-theme='compact'] {
   --yable-bg: #0d0f14;
   --yable-bg-header: #141720;
   --yable-bg-footer: #141720;

@@ -96,7 +96,9 @@ function AdaptiveTableCard<TData extends RowData>({
         ) {
           row.toggleSelected()
         }
-        if (clickable) emitRowEvent(table, 'row:click', row, e.nativeEvent)
+        // Unconditional, matching TableRow: `clickable` is a visual affordance,
+        // not an event gate.
+        emitRowEvent(table, 'row:click', row, e.nativeEvent)
       }}
       onDoubleClick={(e) => emitRowEvent(table, 'row:dblclick', row, e.nativeEvent)}
       onContextMenu={(e) => emitRowEvent(table, 'row:contextmenu', row, e.nativeEvent)}

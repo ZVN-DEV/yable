@@ -123,8 +123,10 @@
   position: relative;
   padding: var(--yable-header-padding-y) var(--yable-header-padding-x);
   min-height: var(--yable-header-min-height);
+  font-family: var(--yable-font-family-header);
   font-size: var(--yable-font-size-header);
-  font-weight: var(--yable-font-weight-medium);
+  font-weight: var(--yable-font-weight-header);
+  text-transform: var(--yable-header-text-transform);
   color: var(--yable-text-header);
   text-align: left;
   white-space: nowrap;
@@ -134,7 +136,7 @@
   border-bottom: calc(var(--yable-border-width) + 1px) solid var(--yable-border-color-strong);
   user-select: none;
   vertical-align: middle;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--yable-header-letter-spacing);
   transition: background var(--yable-transition-fast);
 }
 
@@ -371,9 +373,11 @@
   align-items: center;
   box-sizing: border-box;
   padding: var(--yable-header-padding-y) var(--yable-header-padding-x);
+  font-family: var(--yable-font-family-header);
   font-size: var(--yable-font-size-header);
-  font-weight: var(--yable-font-weight-medium);
-  letter-spacing: 0.02em;
+  font-weight: var(--yable-font-weight-header);
+  text-transform: var(--yable-header-text-transform);
+  letter-spacing: var(--yable-header-letter-spacing);
   color: var(--yable-text-header);
   background: var(--yable-bg-header);
   border: 1px solid var(--yable-accent);
@@ -486,6 +490,7 @@
 .yable-td {
   padding: var(--yable-cell-padding-y) var(--yable-cell-padding-x);
   min-height: var(--yable-row-min-height);
+  font-family: var(--yable-font-family-cell);
   vertical-align: middle;
   white-space: nowrap;
   overflow: hidden;
@@ -708,6 +713,33 @@
   clip-path: inset(0 0 0 -10px);
 }
 
+/* ── Column Alignment (columnDef `align`) ────────────────────────────────── */
+
+.yable-th[data-align='center'],
+.yable-td[data-align='center'] {
+  text-align: center;
+}
+
+.yable-th[data-align='right'],
+.yable-td[data-align='right'] {
+  text-align: right;
+}
+
+/* The header label lives in a flex wrapper, so text-align alone can't move it. */
+.yable-th[data-align='center'] > .yable-th-content {
+  justify-content: center;
+}
+
+.yable-th[data-align='right'] > .yable-th-content {
+  justify-content: flex-end;
+}
+
+/* Right alignment is what numeric columns use; tabular figures keep the digits
+   in vertical columns, which is the whole point of aligning them right. */
+.yable-td[data-align='right'] {
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Sticky Header ───────────────────────────────────────────────────────── */
 
 .yable--sticky-header .yable-thead .yable-th {
@@ -715,6 +747,10 @@
   top: 0;
   z-index: var(--yable-z-header);
   background: var(--yable-bg-header);
+  /* `none` by default. Pair a translucent --yable-bg-header with e.g.
+     `blur(8px)` for a frosted sticky header, entirely through tokens. */
+  backdrop-filter: var(--yable-header-backdrop-filter);
+  -webkit-backdrop-filter: var(--yable-header-backdrop-filter);
 }
 
 /* Pinned + sticky header stacks z-index */
@@ -1481,6 +1517,9 @@
 
 .yable-detail-panel {
   padding: 16px var(--yable-cell-padding-x);
+  /* Inset edge tying the panel back to its parent row. Zero-width by default,
+     so set --yable-detail-accent-width to turn it on. */
+  box-shadow: inset var(--yable-detail-accent-width) 0 0 0 var(--yable-detail-accent-color);
 }
 
 .yable-detail-expand-icon {

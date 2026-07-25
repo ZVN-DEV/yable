@@ -21,14 +21,22 @@ export interface AutoColumnWidthOptions {
   /**
    * When natural total ≤ container, how to spend the leftover space:
    * - `'leave'` (default) — keep columns at natural width, leave a gutter.
-   * - `'distribute'` — grow auto columns proportionally in a waterfall that
+   * - `'distribute'` — grow columns proportionally in a waterfall that
    *   respects each `maxSize` as a HARD cap; a gutter remains only if EVERY
-   *   auto column hits its `maxSize`.
+   *   column hits its `maxSize`.
    * - `'stretch'` — same waterfall, but `maxSize` is a SOFT cap: if space is
    *   still left after every column caps, grow past `maxSize` so the container
    *   fills exactly and never gutters.
+   * - `'stretch-last'` — give the entire remainder to the last visible column,
+   *   ignoring its `maxSize`. Useful when one trailing column should absorb the
+   *   slack and the rest must keep their exact widths.
+   *
+   * Growth normally targets only auto columns (no explicit `size`, not
+   * user-resized). When a table has NO auto columns at all, every visible column
+   * participates instead — otherwise a fully-sized table could never fill its
+   * container and would keep a dead band on the right.
    */
-  underflow?: 'leave' | 'distribute' | 'stretch'
+  underflow?: 'leave' | 'distribute' | 'stretch' | 'stretch-last'
   /**
    * Small-overflow compression, as a fraction of the container width (e.g.
    * `0.15` = 15%). When natural widths overflow the container by ≤ this amount,

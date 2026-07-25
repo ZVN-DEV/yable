@@ -35,6 +35,7 @@ export interface YableDefaults {
       | 'direction'
       | 'ariaLabel'
       | 'adaptiveLayout'
+      | 'clickableRows'
     >
   >
   /** Default column definition merged under every table's own `defaultColumnDef` */

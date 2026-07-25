@@ -68,4 +68,27 @@ describe('Row selection scope', () => {
     table.toggleAllPageRowsSelected(true)
     expect(Object.keys(getState().rowSelection).sort()).toEqual(['1', '2'])
   })
+
+  // The handler form mirrors row.getToggleSelectedHandler(): it ignores its
+  // event argument, so wiring it straight to onChange still TOGGLES rather than
+  // reading the event object as the `value` flag (which is always truthy).
+  it('getToggleAllRowsSelectedHandler toggles instead of reading the event as value', () => {
+    const { table, getState } = makeTable(data, cols)
+    const handler = table.getToggleAllRowsSelectedHandler()
+    handler({ target: { checked: false } })
+    expect(Object.keys(getState().rowSelection).sort()).toEqual(['1', '2', '3', '4'])
+    handler({ target: { checked: true } })
+    expect(getState().rowSelection).toEqual({})
+  })
+
+  it('getToggleAllPageRowsSelectedHandler toggles only the current page', () => {
+    const { table, getState } = makeTable(data, cols, {
+      initialState: { pagination: { pageIndex: 0, pageSize: 2 } },
+    })
+    const handler = table.getToggleAllPageRowsSelectedHandler()
+    handler(new Event('change'))
+    expect(Object.keys(getState().rowSelection).sort()).toEqual(['1', '2'])
+    handler(new Event('change'))
+    expect(getState().rowSelection).toEqual({})
+  })
 })

@@ -32,7 +32,8 @@
     "./mono.css": "./dist/themes/mono.css",
     "./tokens.css": "./dist/tokens.css",
     "./rtl.css": "./dist/rtl.css",
-    "./tailwind.css": "./dist/tailwind.css"
+    "./tailwind.css": "./dist/tailwind.css",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"

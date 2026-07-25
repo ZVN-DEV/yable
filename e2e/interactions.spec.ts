@@ -615,6 +615,66 @@ test.describe('smart column width', () => {
       .poll(async () => (await amountHeader.boundingBox())?.width ?? 0, { timeout: 5000 })
       .toBeGreaterThan(placeholderWidth + 40)
   })
+
+  // A table where EVERY column has an explicit `size` has no auto columns, so
+  // the underflow waterfall had nothing to grow and left a dead band on the
+  // right that no policy could close.
+  test.describe('underflow on a fully sized table', () => {
+    const SIZED_TOTAL = 120 + 140 + 220
+
+    test('leave keeps the dead band (unchanged default)', async ({ page }) => {
+      const grid = page.getByTestId('auto-underflow-leave')
+      await expect(grid.locator('tbody tr').first()).toBeVisible()
+      const header = grid.locator('.yable-thead').first()
+      const width = (await header.boundingBox())?.width ?? 0
+      expect(Math.abs(width - SIZED_TOTAL)).toBeLessThanOrEqual(4)
+    })
+
+    for (const policy of ['stretch', 'stretch-last'] as const) {
+      test(`${policy} fills the container and keeps header and body aligned`, async ({ page }) => {
+        const grid = page.getByTestId(`auto-underflow-${policy}`)
+        const scroller = grid.locator('.yable-virtual-scroll-container')
+        await expect(scroller).toBeVisible()
+        await expect(grid.locator('tbody tr').first()).toBeVisible()
+
+        const { overflow, headerW, clientW } = await scroller.evaluate((n) => {
+          const header = n.querySelector('.yable-thead')
+          return {
+            overflow: n.scrollWidth - n.clientWidth,
+            headerW: header ? (header as HTMLElement).getBoundingClientRect().width : 0,
+            clientW: n.clientWidth,
+          }
+        })
+
+        // Fills the container: no dead band, and no horizontal scrollbar either.
+        expect(headerW).toBeGreaterThanOrEqual(clientW - 2)
+        expect(headerW).toBeGreaterThan(SIZED_TOTAL + 100)
+        expect(overflow).toBeLessThanOrEqual(2)
+
+        // The CSS workaround for this (`min-width:100%`) let the sticky header
+        // and the virtualized body resolve the slack independently and drift.
+        // Solving it through columnSizing keeps every layer on one colgroup.
+        for (const id of ['code', 'region', 'notes']) {
+          const headerBox = await grid.locator(`th[data-column-id="${id}"]`).first().boundingBox()
+          const cellBox = await grid.locator(`td[data-column-id="${id}"]`).first().boundingBox()
+          expect(Math.abs((headerBox?.x ?? 0) - (cellBox?.x ?? -1))).toBeLessThanOrEqual(1)
+          expect(Math.abs((headerBox?.width ?? 0) - (cellBox?.width ?? -1))).toBeLessThanOrEqual(1)
+        }
+      })
+    }
+
+    test('stretch-last gives the slack to the last column only', async ({ page }) => {
+      const grid = page.getByTestId('auto-underflow-stretch-last')
+      await expect(grid.locator('tbody tr').first()).toBeVisible()
+
+      const width = async (id: string) =>
+        (await grid.locator(`th[data-column-id="${id}"]`).first().boundingBox())?.width ?? 0
+
+      expect(Math.abs((await width('code')) - 120)).toBeLessThanOrEqual(2)
+      expect(Math.abs((await width('region')) - 140)).toBeLessThanOrEqual(2)
+      expect(await width('notes')).toBeGreaterThan(220 + 100)
+    })
+  })
 })
 
 // The resize handle (visual bar AND pointer hit zone) must sit ON the column

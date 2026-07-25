@@ -102,7 +102,16 @@ export function Table<TData extends RowData>({
   const theme = themeProp ?? profileTableProps?.theme ?? providerTableProps?.theme
   const direction = directionProp ?? profileTableProps?.direction ?? providerTableProps?.direction
   const ariaLabel = ariaLabelProp ?? profileTableProps?.ariaLabel ?? providerTableProps?.ariaLabel
-  const resolvedClickableRows = clickableRows ?? profileTableProps?.clickableRows
+  // `clickableRows` is a VISUAL affordance (pointer cursor, hover treatment).
+  // It defaults on when the table was given an `onRowClick` handler, so rows
+  // that do something on click look like it without a second opt-in at this
+  // layer. `clickableRows={false}` still wins, and the `row:click` event fires
+  // either way (see TableRow).
+  const resolvedClickableRows =
+    clickableRows ??
+    profileTableProps?.clickableRows ??
+    providerTableProps?.clickableRows ??
+    Boolean(table.options.onRowClick)
   const resolvedStatusBar = statusBar ?? profileTableProps?.statusBar
   const resolvedSidebar = sidebar ?? profileTableProps?.sidebar
   const resolvedSidebarPanels = sidebarPanels ??

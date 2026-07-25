@@ -9,7 +9,7 @@
    ============================================================================ */
 
 .yable-theme-default,
-.yable[data-theme="default"] {
+.yable[data-theme='default'] {
   /* Surface — ultra-clean white with barely-there alternation */
   --yable-bg: #ffffff;
   --yable-bg-header: #fafbfc;
@@ -49,30 +49,30 @@
 
   /* Pagination — pill-style */
   --yable-pagination-button-radius: 8px;
+
+  /* Header typography */
+  --yable-header-letter-spacing: normal;
+  --yable-font-size-header: var(--yable-font-size-sm);
 }
 
 /* Default theme header — clean divider line only */
 .yable-theme-default .yable-th,
-.yable[data-theme="default"] .yable-th {
+.yable[data-theme='default'] .yable-th {
   border-bottom-color: var(--yable-border-color-strong);
-  text-transform: none;
-  letter-spacing: normal;
-  font-size: var(--yable-font-size-sm);
-  font-weight: var(--yable-font-weight-medium);
   color: var(--yable-text-secondary);
 }
 
 /* Subtle row separator */
 .yable-theme-default .yable-tr:not(:last-child) .yable-td,
-.yable[data-theme="default"] .yable-tr:not(:last-child) .yable-td {
+.yable[data-theme='default'] .yable-tr:not(:last-child) .yable-td {
   border-bottom-color: var(--yable-border-color);
 }
 
 /* ── Default Dark Mode ───────────────────────────────────────────────────── */
 
 @media (prefers-color-scheme: dark) {
-  .yable-theme-default:not([data-yable-theme="light"]),
-  .yable[data-theme="default"]:not([data-yable-theme="light"]) {
+  .yable-theme-default:not([data-yable-theme='light']),
+  .yable[data-theme='default']:not([data-yable-theme='light']) {
     --yable-bg: #0c0e14;
     --yable-bg-header: #111318;
     --yable-bg-footer: #111318;
@@ -99,8 +99,8 @@
   }
 }
 
-[data-yable-theme="dark"] .yable-theme-default,
-[data-yable-theme="dark"] .yable[data-theme="default"] {
+[data-yable-theme='dark'] .yable-theme-default,
+[data-yable-theme='dark'] .yable[data-theme='default'] {
   --yable-bg: #0c0e14;
   --yable-bg-header: #111318;
   --yable-bg-footer: #111318;

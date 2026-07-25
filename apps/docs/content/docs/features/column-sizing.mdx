@@ -23,7 +23,7 @@ policy, or an object to tune it.
   autoColumnWidth={{
     sampleSize: 100,          // rows sampled for measurement (default 100)
     overflow: 'fit',          // 'fit' | 'scroll' (default 'fit')
-    underflow: 'leave',       // 'leave' | 'distribute' | 'stretch' (default 'leave')
+    underflow: 'leave',       // 'leave' | 'distribute' | 'stretch' | 'stretch-last' (default 'leave')
     fitThreshold: 0.15,       // compress instead of scroll when overflow ≤ 15% (default 0 = off)
   }}
 />
@@ -74,11 +74,28 @@ When natural widths sum to **less** than the container:
   proportionally so the container fills **exactly** — never a gutter. Use this on
   modal/settings tables with a few capped columns where a trailing dead gutter
   looks broken.
+- **`stretch-last`** — the entire remainder goes to the **last visible column**,
+  ignoring its `maxSize`. Every other column keeps its exact width. Use this when
+  one trailing column (a title, a notes field) should absorb the slack.
 
 Both `distribute` and `stretch` are total-preserving: final widths sum to the
 container width (with the ±1px rounding remainder folded into the last grown
 column), except `distribute` when every column is capped, which intentionally
 leaves the remainder as a gutter.
+
+<Callout type="info">
+**Fully sized tables fill too.** Growth normally targets auto-sized columns. A table where **every** column has an
+explicit `size` has none, so `distribute` and `stretch` used to have nothing to
+grow and left a dead band on the right no matter what you set. When there are no
+auto columns, every visible column participates instead, so a fully-sized table
+fills its container. `stretch-last` always targets the last column, auto or not.
+
+Solving this in the sizing layer rather than with CSS matters: the widths flow
+through `columnSizing`, so the sticky header, the body, the virtualized inner
+table, and pinned offsets all read the same numbers. A blanket
+`.yable-table { min-width: 100% }` lets the header and the virtualized body
+resolve the slack independently and drift out of alignment.
+</Callout>
 
 ### Per-column opt-out
 

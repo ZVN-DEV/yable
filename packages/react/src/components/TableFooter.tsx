@@ -26,7 +26,13 @@ export function TableFooter<TData extends RowData>({ table }: TableFooterProps<T
                 : (footerDef ?? null)
 
             return (
-              <td key={header.id} className="yable-td" colSpan={header.colSpan}>
+              <td
+                key={header.id}
+                className="yable-td"
+                data-column-id={header.column.id}
+                data-align={header.column.columnDef.align || undefined}
+                colSpan={header.colSpan}
+              >
                 {content}
               </td>
             )

@@ -11,7 +11,7 @@
    ============================================================================ */
 
 .yable-theme-rose,
-.yable[data-theme="rose"] {
+.yable[data-theme='rose'] {
   /* Surface — warm parchment, not pink */
   --yable-bg: #fefcfb;
   --yable-bg-header: #faf5f3;
@@ -84,28 +84,22 @@
     rgba(168, 126, 118, 0.05) 37%,
     rgba(168, 126, 118, 0.025) 63%
   );
-}
 
-/* Header — warm muted rose, editorial feel */
-.yable-theme-rose .yable-th,
-.yable[data-theme="rose"] .yable-th {
-  text-transform: none;
-  letter-spacing: normal;
-  font-size: var(--yable-font-size-sm);
-  font-weight: var(--yable-font-weight-medium);
-  color: var(--yable-text-header);
+  /* Header typography: warm muted rose, editorial feel */
+  --yable-header-letter-spacing: normal;
+  --yable-font-size-header: var(--yable-font-size-sm);
 }
 
 .yable-theme-rose .yable-tr:not(:last-child) .yable-td,
-.yable[data-theme="rose"] .yable-tr:not(:last-child) .yable-td {
+.yable[data-theme='rose'] .yable-tr:not(:last-child) .yable-td {
   border-bottom-color: var(--yable-border-color);
 }
 
 /* ── Rose Dark Mode ─────────────────────────────────────────────────────── */
 
 @media (prefers-color-scheme: dark) {
-  .yable-theme-rose:not([data-yable-theme="light"]),
-  .yable[data-theme="rose"]:not([data-yable-theme="light"]) {
+  .yable-theme-rose:not([data-yable-theme='light']),
+  .yable[data-theme='rose']:not([data-yable-theme='light']) {
     --yable-bg: #110d0d;
     --yable-bg-header: #1a1414;
     --yable-bg-footer: #1a1414;
@@ -154,8 +148,8 @@
   }
 }
 
-[data-yable-theme="dark"] .yable-theme-rose,
-[data-yable-theme="dark"] .yable[data-theme="rose"] {
+[data-yable-theme='dark'] .yable-theme-rose,
+[data-yable-theme='dark'] .yable[data-theme='rose'] {
   --yable-bg: #110d0d;
   --yable-bg-header: #1a1414;
   --yable-bg-footer: #1a1414;

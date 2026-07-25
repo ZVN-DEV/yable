@@ -63,6 +63,8 @@ const yableTailwindPreset = {
       },
       fontFamily: {
         yable: [cssVar('yable-font-family')],
+        'yable-header': [cssVar('yable-font-family-header')],
+        'yable-cell': [cssVar('yable-font-family-cell')],
       },
       fontSize: {
         yable: [cssVar('yable-font-size'), { lineHeight: cssVar('yable-line-height') }],

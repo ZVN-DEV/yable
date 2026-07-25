@@ -63,6 +63,8 @@
 
   /* ── Typography ─────────────────────────────────────────────────── */
   --font-yable: var(--yable-font-family);
+  --font-yable-header: var(--yable-font-family-header);
+  --font-yable-cell: var(--yable-font-family-cell);
   --text-yable: var(--yable-font-size);
   --text-yable-sm: var(--yable-font-size-sm);
   --text-yable-header: var(--yable-font-size-header);

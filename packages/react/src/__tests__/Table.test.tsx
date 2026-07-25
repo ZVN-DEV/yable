@@ -91,6 +91,36 @@ function SelectableTable() {
   return <Table table={table} />
 }
 
+function AlignedTable() {
+  const table = useTable<TestRow>({
+    data: testData,
+    columns: [
+      col.accessor('name', { header: 'Name' }),
+      col.accessor('age', { header: 'Age', align: 'right', footer: 'Total' }),
+    ],
+    getRowId: (row) => row.id,
+  })
+
+  return <Table table={table} footer />
+}
+
+function RowClickTable({
+  onRowClick,
+  clickableRows,
+}: {
+  onRowClick: NonNullable<Parameters<typeof useTable<TestRow>>[0]['onRowClick']>
+  clickableRows?: boolean
+}) {
+  const table = useTable<TestRow>({
+    data: testData,
+    columns,
+    getRowId: (row) => row.id,
+    onRowClick,
+  })
+
+  return <Table table={table} clickableRows={clickableRows} />
+}
+
 function HeaderEventsTable({
   onHeaderClick,
   onHeaderContextMenu,
@@ -165,6 +195,63 @@ describe('Table', () => {
     expect(onHeaderContextMenu).toHaveBeenCalledWith(
       expect.objectContaining({ column: expect.objectContaining({ id: 'name' }) }),
     )
+  })
+
+  // One `align` on the column def has to reach the header, the body, and the
+  // footer — otherwise it is no better than a per-cell style.
+  it('emits data-align on the header, body, and footer cells of a column', () => {
+    const { container } = render(<AlignedTable />)
+
+    expect(container.querySelector('th[data-column-id="age"]')).toHaveAttribute(
+      'data-align',
+      'right',
+    )
+    expect(container.querySelector('td[data-column-id="age"]')).toHaveAttribute(
+      'data-align',
+      'right',
+    )
+    expect(container.querySelector('tfoot td[data-column-id="age"]')).toHaveAttribute(
+      'data-align',
+      'right',
+    )
+
+    // Unaligned columns stay clean rather than emitting a default.
+    expect(container.querySelector('th[data-column-id="name"]')).not.toHaveAttribute('data-align')
+  })
+
+  // `onRowClick` used to require a SECOND opt-in (`clickableRows` on the Table
+  // element) before the event fired at all, so wiring it through `useTable`
+  // alone did nothing. The flag is now purely visual.
+  it('fires onRowClick from useTable without a Table-level clickableRows flag', () => {
+    const onRowClick = vi.fn()
+    render(<RowClickTable onRowClick={onRowClick} />)
+
+    fireEvent.click(screen.getByText('Alice').closest('tr')!)
+
+    expect(onRowClick).toHaveBeenCalledWith(
+      expect.objectContaining({ row: expect.objectContaining({ id: '1' }) }),
+    )
+  })
+
+  it('marks rows clickable when an onRowClick handler is present', () => {
+    render(<RowClickTable onRowClick={vi.fn()} />)
+
+    expect(screen.getByText('Alice').closest('tr')).toHaveAttribute('data-clickable', 'true')
+  })
+
+  it('leaves rows unmarked with no handler, and honours an explicit opt-out', () => {
+    const { unmount } = render(<TestTable />)
+    expect(screen.getByText('Alice').closest('tr')).not.toHaveAttribute('data-clickable')
+    unmount()
+
+    const onRowClick = vi.fn()
+    render(<RowClickTable onRowClick={onRowClick} clickableRows={false} />)
+    const row = screen.getByText('Alice').closest('tr')!
+    expect(row).not.toHaveAttribute('data-clickable')
+
+    // Opting out of the affordance must not opt out of the event.
+    fireEvent.click(row)
+    expect(onRowClick).toHaveBeenCalledTimes(1)
   })
 
   it('renders NoRowsOverlay when data is an empty array', () => {

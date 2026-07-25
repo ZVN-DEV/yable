@@ -79,6 +79,22 @@ describe('Sorting', () => {
     expect(nameHeader).toHaveAttribute('aria-sort', 'descending')
   })
 
+  // `data-sorted` mirrors aria-sort so themes can target the active column
+  // without depending on the sort indicator's internal markup.
+  it('mirrors the sort direction onto data-sorted', async () => {
+    const user = userEvent.setup()
+    render(<SortableTable />)
+
+    const nameHeader = screen.getByRole('columnheader', { name: /Name/ })
+    expect(nameHeader).not.toHaveAttribute('data-sorted')
+
+    await user.click(nameHeader)
+    expect(nameHeader).toHaveAttribute('data-sorted', 'asc')
+
+    await user.click(nameHeader)
+    expect(nameHeader).toHaveAttribute('data-sorted', 'desc')
+  })
+
   it('sorts row data in ascending order after click', async () => {
     const user = userEvent.setup()
     render(<SortableTable />)
@@ -104,9 +120,7 @@ describe('Sorting', () => {
     await user.click(nameHeader)
 
     const cells = screen.getAllByRole('gridcell')
-    const nameValues = cells
-      .filter((_cell, i) => i % 2 === 0)
-      .map((cell) => cell.textContent)
+    const nameValues = cells.filter((_cell, i) => i % 2 === 0).map((cell) => cell.textContent)
 
     expect(nameValues).toEqual(['Charlie', 'Bob', 'Alice'])
   })

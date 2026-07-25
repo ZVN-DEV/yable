@@ -99,6 +99,14 @@ function renderHeader<TData extends RowData>(table: Table<TData>): string {
   return html
 }
 
+/**
+ * `data-align` for a column's `align`, or '' when unset. Whitelisted rather than
+ * interpolated so an untrusted column def can never inject an attribute.
+ */
+function alignAttribute(align: unknown): string {
+  return align === 'left' || align === 'center' || align === 'right' ? ` data-align="${align}"` : ''
+}
+
 function renderHeaderCell<TData extends RowData>(header: Header<TData, unknown>): string {
   if (header.isPlaceholder) {
     // SECURITY: Safe — colSpan is numeric from internal state
@@ -134,6 +142,12 @@ function renderHeaderCell<TData extends RowData>(header: Header<TData, unknown>)
           : undefined
   const ariaSortAttr = ariaSort ? ` aria-sort="${ariaSort}"` : ''
 
+  // SECURITY: Safe — align is a 'left' | 'center' | 'right' union from the column
+  // def; anything else is dropped rather than interpolated.
+  const alignAttr = alignAttribute(column.columnDef.align)
+  // SECURITY: Safe — sortDir is 'asc' | 'desc' | false from internal state
+  const sortedAttr = sortDir ? ` data-sorted="${sortDir}"` : ''
+
   const headerDef = column.columnDef.header
   type HeaderRenderer = (ctx: HeaderContext<TData, unknown>) => unknown
   const content =
@@ -159,7 +173,7 @@ function renderHeaderCell<TData extends RowData>(header: Header<TData, unknown>)
 
   // SECURITY: User data — content escaped via esc(), column.id escaped via escAttr() for data-attributes
   // SECURITY: Safe — sortable is boolean, colSpan is numeric
-  return `<th class="${classes}"${ariaSortAttr}${style ? ` style="${style}"` : ''} data-yable-column="${escAttr(column.id)}" data-yable-sortable="${sortable}" colspan="${header.colSpan}">${esc(content)}${sortIndicator}${resizeHandle}</th>`
+  return `<th class="${classes}"${ariaSortAttr}${style ? ` style="${style}"` : ''} data-yable-column="${escAttr(column.id)}" data-yable-sortable="${sortable}"${alignAttr}${sortedAttr} colspan="${header.colSpan}">${esc(content)}${sortIndicator}${resizeHandle}</th>`
 }
 
 // ---------------------------------------------------------------------------
@@ -237,6 +251,7 @@ function renderCell<TData extends RowData>(
 
   // SECURITY: Safe — getPinStyle returns internally computed CSS
   const style = pinned ? getPinStyle(column) : ''
+  const alignAttr = alignAttribute(column.columnDef.align)
 
   // Check if this cell should render a form element
   const editConfig = column.columnDef.editConfig
@@ -244,14 +259,14 @@ function renderCell<TData extends RowData>(
     if (editConfig) {
       const value = table.getPendingValue(cell.row.id, column.id) ?? cell.getValue()
       // SECURITY: User data — column.id and cell.row.id escaped via escAttr() for data-attributes
-      return `<td class="${classes}"${style ? ` style="${style}"` : ''} data-yable-cell="${escAttr(column.id)}" data-yable-row="${escAttr(cell.row.id)}">${renderFormElement(editConfig, value, cell.row.id, column.id)}</td>`
+      return `<td class="${classes}"${style ? ` style="${style}"` : ''} data-yable-cell="${escAttr(column.id)}" data-yable-row="${escAttr(cell.row.id)}"${alignAttr}>${renderFormElement(editConfig, value, cell.row.id, column.id)}</td>`
     }
   }
 
   // Regular cell value
   // SECURITY: User data — value escaped via esc(), column.id and cell.row.id escaped via escAttr()
   const value = cell.renderValue()
-  return `<td class="${classes}"${style ? ` style="${style}"` : ''} data-yable-cell="${escAttr(column.id)}" data-yable-row="${escAttr(cell.row.id)}">${esc(value)}</td>`
+  return `<td class="${classes}"${style ? ` style="${style}"` : ''} data-yable-cell="${escAttr(column.id)}" data-yable-row="${escAttr(cell.row.id)}"${alignAttr}>${esc(value)}</td>`
 }
 
 // ---------------------------------------------------------------------------

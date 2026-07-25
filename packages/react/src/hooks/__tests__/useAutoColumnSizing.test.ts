@@ -154,6 +154,125 @@ describe('computeAutoColumnWidths', () => {
     })
   })
 
+  // A fully-sized table has no auto columns, so the old distribute/stretch
+  // waterfall had nothing to grow and left a dead band on the right no matter
+  // which policy was set.
+  describe('underflow — table with no auto columns', () => {
+    it('stretch: falls back to all columns and fills the container exactly', () => {
+      const { widths, grownFixedIds } = computeAutoColumnWidths({
+        columns: [fixed('a', 100), fixed('b', 300)],
+        containerWidth: 800,
+        overflow: 'fit',
+        underflow: 'stretch',
+        canSquish: true,
+      })
+      expect(widths.a! + widths.b!).toBe(800)
+      expect(widths).toEqual({ a: 200, b: 600 })
+      expect(grownFixedIds.sort()).toEqual(['a', 'b'])
+    })
+
+    it('distribute: fills the container and honours maxSize as a hard cap', () => {
+      const { widths, grownFixedIds } = computeAutoColumnWidths({
+        columns: [
+          { id: 'a', natural: 100, auto: false, maxSize: 150 },
+          { id: 'b', natural: 100, auto: false },
+        ],
+        containerWidth: 600,
+        overflow: 'fit',
+        underflow: 'distribute',
+        canSquish: true,
+      })
+      expect(widths.a).toBe(150)
+      expect(widths.a! + widths.b!).toBe(600)
+      expect(grownFixedIds.sort()).toEqual(['a', 'b'])
+    })
+
+    it('leave: still leaves the gutter (opt-in policies only)', () => {
+      const { widths, grownFixedIds } = computeAutoColumnWidths({
+        columns: [fixed('a', 100), fixed('b', 300)],
+        containerWidth: 800,
+        overflow: 'fit',
+        underflow: 'leave',
+        canSquish: true,
+      })
+      expect(widths).toEqual({ a: 100, b: 300 })
+      expect(grownFixedIds).toEqual([])
+    })
+  })
+
+  describe('underflow — stretch-last', () => {
+    it('gives the whole remainder to the last column, others untouched', () => {
+      const { widths, grownFixedIds } = computeAutoColumnWidths({
+        columns: [fixed('a', 100), fixed('b', 200), fixed('c', 100)],
+        containerWidth: 800,
+        overflow: 'fit',
+        underflow: 'stretch-last',
+        canSquish: true,
+      })
+      expect(widths).toEqual({ a: 100, b: 200, c: 500 })
+      expect(grownFixedIds).toEqual(['c'])
+    })
+
+    it('targets the visually last column even when auto columns exist', () => {
+      const { widths, grownFixedIds } = computeAutoColumnWidths({
+        columns: [auto('a', 100), fixed('z', 100)],
+        containerWidth: 500,
+        overflow: 'fit',
+        underflow: 'stretch-last',
+        canSquish: true,
+      })
+      expect(widths).toEqual({ a: 100, z: 400 })
+      expect(grownFixedIds).toEqual(['z'])
+    })
+
+    it('ignores maxSize on the last column (the policy guarantees a fill)', () => {
+      const { widths } = computeAutoColumnWidths({
+        columns: [fixed('a', 100), { id: 'b', natural: 100, auto: false, maxSize: 150 }],
+        containerWidth: 600,
+        overflow: 'fit',
+        underflow: 'stretch-last',
+        canSquish: true,
+      })
+      expect(widths).toEqual({ a: 100, b: 500 })
+    })
+
+    it('does nothing when content already fills the container', () => {
+      const { widths, grownFixedIds } = computeAutoColumnWidths({
+        columns: [fixed('a', 250), fixed('b', 250)],
+        containerWidth: 500,
+        overflow: 'fit',
+        underflow: 'stretch-last',
+        canSquish: true,
+      })
+      expect(widths).toEqual({ a: 250, b: 250 })
+      expect(grownFixedIds).toEqual([])
+    })
+  })
+
+  describe('grownFixedIds', () => {
+    it('is empty when auto columns absorb the slack themselves', () => {
+      const { grownFixedIds } = computeAutoColumnWidths({
+        columns: [auto('a', 100), fixed('b', 100)],
+        containerWidth: 500,
+        overflow: 'fit',
+        underflow: 'stretch',
+        canSquish: true,
+      })
+      expect(grownFixedIds).toEqual([])
+    })
+
+    it('is empty on overflow, where no column grows', () => {
+      const { grownFixedIds } = computeAutoColumnWidths({
+        columns: [fixed('a', 400), fixed('b', 400)],
+        containerWidth: 500,
+        overflow: 'scroll',
+        underflow: 'stretch',
+        canSquish: true,
+      })
+      expect(grownFixedIds).toEqual([])
+    })
+  })
+
   describe('overflow — natural total exceeds container', () => {
     it('scroll: keeps natural widths (grid scrolls), no wrap', () => {
       const { widths, wrapColumnIds } = computeAutoColumnWidths({

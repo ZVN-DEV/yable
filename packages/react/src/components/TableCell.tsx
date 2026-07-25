@@ -189,6 +189,7 @@ export function TableCell<TData extends RowData>({
       data-pinned={pinned || undefined}
       data-cell-status={cellStatus !== 'idle' ? cellStatus : undefined}
       data-column-id={column.id}
+      data-align={column.columnDef.align || undefined}
       data-grouped={isGroupRow || undefined}
       data-row-index={rowIndex}
       data-column-index={columnIndex}

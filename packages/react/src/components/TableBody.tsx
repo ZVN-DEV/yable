@@ -508,14 +508,16 @@ function TableRowInner<TData extends RowData>({
         row.toggleSelected()
       }
 
-      if (clickable) {
-        table.events.emit('row:click', {
-          row,
-          event: e.nativeEvent,
-        } as any)
-      }
+      // Emitted regardless of `clickable`: that flag is a visual affordance, and
+      // gating the event on it silently swallowed `onRowClick` for anyone who
+      // wired the handler through `useTable` alone. `row:dblclick` and
+      // `row:contextmenu` below have always emitted unconditionally.
+      table.events.emit('row:click', {
+        row,
+        event: e.nativeEvent,
+      } as any)
     },
-    [clickable, table, row],
+    [table, row],
   )
 
   const handleDoubleClick = useCallback(

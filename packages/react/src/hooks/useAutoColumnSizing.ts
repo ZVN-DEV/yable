@@ -30,7 +30,7 @@ export interface ComputeAutoColumnWidthsOptions {
   columns: AutoSizeColumnInput[]
   containerWidth: number
   overflow: 'fit' | 'scroll'
-  underflow: 'leave' | 'distribute' | 'stretch'
+  underflow: 'leave' | 'distribute' | 'stretch' | 'stretch-last'
   /** Absolute floor a squished column may never drop below. Default 48. */
   hardMinWidth?: number
   /**
@@ -55,6 +55,13 @@ export interface ComputeAutoColumnWidthsResult {
   widths: Record<string, number>
   /** Auto columns that were squished below natural and must wrap their cells. */
   wrapColumnIds: string[]
+  /**
+   * Ids of NON-auto (explicitly sized / user-resized) columns that an underflow
+   * policy grew past their declared width. The caller must apply these too,
+   * otherwise a fully-sized table can never fill its container. Empty unless a
+   * no-auto-columns table ran a stretch policy.
+   */
+  grownFixedIds: string[]
   /**
    * True only when a real `fit` downgrade occurred: `overflow: 'fit'` was
    * requested, squish was disabled (`canSquish: false`, e.g. row virtualization),
@@ -110,14 +117,29 @@ export function computeAutoColumnWidths(
 
   // --- Underflow: natural content already fits the container -----------------
   if (naturalTotal <= containerWidth) {
-    if (
-      (underflow === 'distribute' || underflow === 'stretch') &&
-      autoColumns.length > 0 &&
-      containerWidth > naturalTotal
-    ) {
-      distributeExtraSpace(autoColumns, base, widths, containerWidth - naturalTotal, underflow)
+    const extra = containerWidth - naturalTotal
+    if (underflow === 'leave' || extra <= 0 || columns.length === 0) {
+      return { widths, wrapColumnIds: [], downgradedFit, grownFixedIds: [] }
     }
-    return { widths, wrapColumnIds: [], downgradedFit }
+
+    if (underflow === 'stretch-last') {
+      // The visually last column absorbs the whole remainder, so every other
+      // column keeps its exact width. Deliberately ignores `maxSize`: the policy
+      // exists to guarantee a filled container.
+      const last = columns[columns.length - 1]!
+      widths[last.id] = base.get(last.id)! + extra
+    } else {
+      // Growth normally targets auto columns. A table with none (every column
+      // explicitly sized) falls back to all columns — otherwise it could never
+      // fill its container and would keep a dead band on the right.
+      const participants = autoColumns.length > 0 ? autoColumns : columns
+      distributeExtraSpace(participants, base, widths, extra, underflow)
+    }
+
+    const grownFixedIds = columns
+      .filter((c) => !c.auto && widths[c.id] !== base.get(c.id))
+      .map((c) => c.id)
+    return { widths, wrapColumnIds: [], downgradedFit, grownFixedIds }
   }
 
   // --- Small-overflow compression (`fitThreshold`) ---------------------------
@@ -128,12 +150,12 @@ export function computeAutoColumnWidths(
   const overflowPx = naturalTotal - containerWidth
   if (fitThreshold > 0 && overflowPx <= fitThreshold * containerWidth) {
     squishAutoColumns(autoColumns, base, widths, overflowPx, hardMinWidth)
-    return { widths, wrapColumnIds: [], downgradedFit: false }
+    return { widths, wrapColumnIds: [], downgradedFit: false, grownFixedIds: [] }
   }
 
   // --- Overflow: `scroll` (or squish disabled) keeps natural widths ----------
   if (overflow === 'scroll' || !canSquish) {
-    return { widths, wrapColumnIds: [], downgradedFit }
+    return { widths, wrapColumnIds: [], downgradedFit, grownFixedIds: [] }
   }
 
   // --- Overflow: `fit` — squish auto columns to fit, taking from slack -------
@@ -146,7 +168,7 @@ export function computeAutoColumnWidths(
     hardMinWidth,
   )
 
-  return { widths, wrapColumnIds, downgradedFit }
+  return { widths, wrapColumnIds, downgradedFit, grownFixedIds: [] }
 }
 
 /**
@@ -444,6 +466,12 @@ export function useAutoColumnSizing<TData extends RowData>({
   // or a persisted/restored `columnSizing` value) so we never overwrite a width
   // we did not set — even a persisted one present on the very first mount.
   const autoWrittenRef = useRef<Map<string, number>>(new Map())
+  // Widths an underflow policy grew on NON-auto columns, as
+  // `id -> { applied, base }`. `base` is the column's declared width before the
+  // stretch. Without this, the next pass would read the stretched width back as
+  // the column's natural width and ratchet it upward on every resize, so the
+  // grid could never shrink back down.
+  const stretchWrittenRef = useRef<Map<string, { applied: number; base: number }>>(new Map())
   // One-shot guard so the `fit`-under-virtualization downgrade warns at most once.
   const warnedDowngradeRef = useRef(false)
 
@@ -466,6 +494,9 @@ export function useAutoColumnSizing<TData extends RowData>({
     // scroller inside TableBody with a private ref, so resolve it by class
     // lookup. The scroller usually mounts AFTER this effect (with the first
     // rows), so it is observed lazily on each update.
+    // Assigned below, past an early-return path that must not construct one;
+    // `update` closes over it before that point.
+    // eslint-disable-next-line prefer-const -- see above
     let observer: ResizeObserver | undefined
     let observedScroller: HTMLElement | null = null
     const update = () => {
@@ -589,9 +620,17 @@ export function useAutoColumnSizing<TData extends RowData>({
         !isExternallyProvenanced
 
       if (!isAuto) {
+        // Read through any stretch WE applied so the base stays the declared
+        // width. If the value no longer matches, something else (a user drag,
+        // restored state) owns it now and becomes the new base.
+        const size = column.getSize()
+        const stretched = stretchWrittenRef.current.get(column.id)
+        if (stretched && stretched.applied !== size) {
+          stretchWrittenRef.current.delete(column.id)
+        }
         return {
           id: column.id,
-          natural: column.getSize(),
+          natural: stretched && stretched.applied === size ? stretched.base : size,
           minSize: def.minSize,
           maxSize: def.maxSize,
           auto: false,
@@ -619,6 +658,7 @@ export function useAutoColumnSizing<TData extends RowData>({
       widths,
       wrapColumnIds: nextWrap,
       downgradedFit,
+      grownFixedIds,
     } = computeAutoColumnWidths({
       columns: inputs,
       containerWidth: fitWidth,
@@ -652,6 +692,34 @@ export function useAutoColumnSizing<TData extends RowData>({
         changed = true
       }
     }
+
+    // Non-auto columns an underflow policy grew. Applying them through
+    // `columnSizing` (rather than a CSS width override) keeps the sticky header,
+    // the body, the virtualized inner table, and pinned offsets on one set of
+    // numbers — they all read `getSize()` and the same shared colgroup.
+    const grown = new Set(grownFixedIds)
+    for (const input of inputs) {
+      if (input.auto) continue
+      const previous = stretchWrittenRef.current.get(input.id)
+      if (grown.has(input.id)) {
+        const width = widths[input.id]
+        if (typeof width !== 'number') continue
+        stretchWrittenRef.current.set(input.id, { applied: width, base: input.natural })
+        if (current[input.id] !== width) {
+          next[input.id] = width
+          changed = true
+        }
+      } else if (previous) {
+        // Stretched on an earlier pass, not any more (the container shrank or
+        // the policy changed): hand the column its declared width back.
+        stretchWrittenRef.current.delete(input.id)
+        if (current[input.id] !== previous.base) {
+          next[input.id] = previous.base
+          changed = true
+        }
+      }
+    }
+
     if (changed) {
       table.setColumnSizing(next)
     }

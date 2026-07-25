@@ -532,19 +532,21 @@ The object returned by `createTable()` or `useTable()`. All methods are grouped 
 
 ### Selection API
 
-| Method                              | Return     | Description                       |
-| ----------------------------------- | ---------- | --------------------------------- |
-| `getSelectedRowModel()`             | `RowModel` | Model of selected rows            |
-| `getFilteredSelectedRowModel()`     | `RowModel` | Selected rows (filtered)          |
-| `getGroupedSelectedRowModel()`      | `RowModel` | Selected rows (grouped)           |
-| `getIsAllRowsSelected()`            | `boolean`  | All rows selected?                |
-| `getIsSomeRowsSelected()`           | `boolean`  | Some (but not all) rows selected? |
-| `getIsAllPageRowsSelected()`        | `boolean`  | All current page rows selected?   |
-| `getIsSomePageRowsSelected()`       | `boolean`  | Some current page rows selected?  |
-| `toggleAllRowsSelected(value?)`     | `void`     | Select/deselect all rows          |
-| `toggleAllPageRowsSelected(value?)` | `void`     | Select/deselect current page rows |
-| `setRowSelection(updater)`          | `void`     | Set row selection state           |
-| `resetRowSelection(defaultState?)`  | `void`     | Reset row selection               |
+| Method                                  | Return            | Description                                  |
+| --------------------------------------- | ----------------- | -------------------------------------------- |
+| `getSelectedRowModel()`                 | `RowModel`        | Model of selected rows                       |
+| `getFilteredSelectedRowModel()`         | `RowModel`        | Selected rows (filtered)                     |
+| `getGroupedSelectedRowModel()`          | `RowModel`        | Selected rows (grouped)                      |
+| `getIsAllRowsSelected()`                | `boolean`         | All rows selected?                           |
+| `getIsSomeRowsSelected()`               | `boolean`         | Some (but not all) rows selected?            |
+| `getIsAllPageRowsSelected()`            | `boolean`         | All current page rows selected?              |
+| `getIsSomePageRowsSelected()`           | `boolean`         | Some current page rows selected?             |
+| `toggleAllRowsSelected(value?)`         | `void`            | Select/deselect all rows                     |
+| `toggleAllPageRowsSelected(value?)`     | `void`            | Select/deselect current page rows            |
+| `getToggleAllRowsSelectedHandler()`     | `(event) => void` | Event handler that toggles all rows          |
+| `getToggleAllPageRowsSelectedHandler()` | `(event) => void` | Event handler that toggles current page rows |
+| `setRowSelection(updater)`              | `void`            | Set row selection state                      |
+| `resetRowSelection(defaultState?)`      | `void`            | Reset row selection                          |
 
 ### Visibility API
 
@@ -1145,10 +1147,20 @@ interface ColumnDefExtensions<TData, TValue> {
   rowSpan?: (row: Row, rows: Row[], rowIndex: number) => number | undefined
 
   // Styling
+  align?: 'left' | 'center' | 'right'
   cellClassName?: string | ((ctx: CellContext) => string | undefined)
   headerClassName?: string
   footerClassName?: string
 }
+```
+
+`align` sets the horizontal alignment for the column's header, body, and footer
+cells at once, emitting `data-align` on each. Right-aligned body cells also get
+`font-variant-numeric: tabular-nums`, so numeric columns line up digit by digit
+without a per-cell style:
+
+```tsx
+columnHelper.accessor('amount', { header: 'Amount', align: 'right' })
 ```
 
 ### CellEditConfig
