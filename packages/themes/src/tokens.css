@@ -85,13 +85,28 @@
 
   /* ── Typography ────────────────────────────────────────────────────────── */
   --yable-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  /* Scoped family overrides: both inherit the root family unless set, so a
+     consumer can run e.g. mono data under sans headers without class hacks. */
+  --yable-font-family-header: var(--yable-font-family);
+  --yable-font-family-cell: var(--yable-font-family);
   --yable-font-size: 13px;
   --yable-font-size-sm: 12px;
   --yable-font-size-header: 12px;
   --yable-font-weight-normal: 400;
   --yable-font-weight-medium: 500;
   --yable-font-weight-semibold: 600;
+  --yable-font-weight-header: var(--yable-font-weight-medium);
+  --yable-header-text-transform: none;
+  --yable-header-letter-spacing: 0.02em;
   --yable-line-height: 1.5;
+  /* Sticky-header backdrop. `none` by default; pair a translucent
+     --yable-bg-header with e.g. `blur(8px)` for a frosted header. */
+  --yable-header-backdrop-filter: none;
+
+  /* ── Master-detail panel ───────────────────────────────────────────────── */
+  /* Inset edge tying an expanded panel to its parent row. Off (0) by default. */
+  --yable-detail-accent-width: 0px;
+  --yable-detail-accent-color: var(--yable-accent);
 
   /* ── Sizing ────────────────────────────────────────────────────────────── */
   --yable-row-height: auto;

@@ -62,10 +62,20 @@ interface ColumnDefExtensions<TData, TValue> {
   editConfig?: CellEditConfig
 
   // Styling
+  align?: 'left' | 'center' | 'right'
   cellClassName?: string | ((ctx: CellContext) => string | undefined)
   headerClassName?: string
   footerClassName?: string
 }
+```
+
+`align` sets the horizontal alignment for the column's header, body, and footer
+cells at once, emitting `data-align` on each. Right-aligned body cells also get
+`font-variant-numeric: tabular-nums`, so numeric columns line up digit by digit
+without a per-cell style:
+
+```tsx
+columnHelper.accessor('amount', { header: 'Amount', align: 'right' })
 ```
 
 ### CellEditConfig

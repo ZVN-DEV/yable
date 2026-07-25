@@ -399,7 +399,12 @@ function HeaderCell<TData extends RowData>({
       className={thClassName}
       style={style}
       data-column-id={column.id}
+      data-align={column.columnDef.align || undefined}
       data-sortable={canSort || undefined}
+      // Mirrors `aria-sort` as a plain attribute so themes can target the
+      // actively sorted header without reaching into the indicator's internals
+      // (`:has(.yable-sort-indicator[data-active='true'])`).
+      data-sorted={sortDirection || undefined}
       data-pinned={pinned || undefined}
       data-reorderable={(canReorder && !pinned) || undefined}
       data-reordering={(dragActive && !pinned) || undefined}

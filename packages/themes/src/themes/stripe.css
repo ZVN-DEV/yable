@@ -10,7 +10,7 @@
    ============================================================================ */
 
 .yable-theme-stripe,
-.yable[data-theme="stripe"] {
+.yable[data-theme='stripe'] {
   /* Surface — warm gray palette */
   --yable-bg: #ffffff;
   --yable-bg-header: #f6f8fa;
@@ -55,7 +55,6 @@
   /* Typography — Stripe's characteristic weights */
   --yable-font-size: 14px;
   --yable-font-size-sm: 13px;
-  --yable-font-size-header: 12px;
 
   /* Form controls — clean, precise */
   --yable-input-border: #d8dee4;
@@ -72,28 +71,29 @@
   /* Pagination */
   --yable-pagination-button-radius: 6px;
   --yable-pagination-button-bg-active: var(--yable-accent);
+
+  /* Header typography: uppercase labels with Stripe's signature style */
+  --yable-header-text-transform: uppercase;
+  --yable-header-letter-spacing: 0.05em;
+  --yable-font-size-header: 11px;
+  --yable-font-weight-header: var(--yable-font-weight-semibold);
 }
 
-/* Header — uppercase labels with Stripe's signature style */
 .yable-theme-stripe .yable-th,
-.yable[data-theme="stripe"] .yable-th {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 11px;
-  font-weight: var(--yable-font-weight-semibold);
+.yable[data-theme='stripe'] .yable-th {
   color: var(--yable-text-secondary);
   border-bottom: var(--yable-border-width) solid var(--yable-border-color-strong);
 }
 
 /* Rows — clean separators */
 .yable-theme-stripe .yable-tr:not(:last-child) .yable-td,
-.yable[data-theme="stripe"] .yable-tr:not(:last-child) .yable-td {
+.yable[data-theme='stripe'] .yable-tr:not(:last-child) .yable-td {
   border-bottom: var(--yable-border-width) solid var(--yable-border-color);
 }
 
 /* Outer border: crisp box-shadow instead of border for cleaner look */
 .yable-theme-stripe,
-.yable[data-theme="stripe"] {
+.yable[data-theme='stripe'] {
   border: none;
   box-shadow: var(--yable-shadow);
 }
@@ -101,8 +101,8 @@
 /* ── Stripe Dark Mode ────────────────────────────────────────────────────── */
 
 @media (prefers-color-scheme: dark) {
-  .yable-theme-stripe:not([data-yable-theme="light"]),
-  .yable[data-theme="stripe"]:not([data-yable-theme="light"]) {
+  .yable-theme-stripe:not([data-yable-theme='light']),
+  .yable[data-theme='stripe']:not([data-yable-theme='light']) {
     --yable-bg: #0a0d16;
     --yable-bg-header: #0f1221;
     --yable-bg-footer: #0f1221;
@@ -134,8 +134,8 @@
   }
 }
 
-[data-yable-theme="dark"] .yable-theme-stripe,
-[data-yable-theme="dark"] .yable[data-theme="stripe"] {
+[data-yable-theme='dark'] .yable-theme-stripe,
+[data-yable-theme='dark'] .yable[data-theme='stripe'] {
   --yable-bg: #0a0d16;
   --yable-bg-header: #0f1221;
   --yable-bg-footer: #0f1221;

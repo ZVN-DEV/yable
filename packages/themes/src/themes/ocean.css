@@ -11,7 +11,7 @@
    ============================================================================ */
 
 .yable-theme-ocean,
-.yable[data-theme="ocean"] {
+.yable[data-theme='ocean'] {
   /* Surface — barely tinted white, calm */
   --yable-bg: #fafcfb;
   --yable-bg-header: #f2f7f6;
@@ -89,28 +89,22 @@
   --yable-transition-fast: 120ms ease;
   --yable-transition: 180ms ease;
   --yable-transition-slow: 280ms ease;
-}
 
-/* Header — muted sage, understated authority */
-.yable-theme-ocean .yable-th,
-.yable[data-theme="ocean"] .yable-th {
-  text-transform: none;
-  letter-spacing: normal;
-  font-size: var(--yable-font-size-sm);
-  font-weight: var(--yable-font-weight-medium);
-  color: var(--yable-text-header);
+  /* Header typography: muted sage, understated authority */
+  --yable-header-letter-spacing: normal;
+  --yable-font-size-header: var(--yable-font-size-sm);
 }
 
 .yable-theme-ocean .yable-tr:not(:last-child) .yable-td,
-.yable[data-theme="ocean"] .yable-tr:not(:last-child) .yable-td {
+.yable[data-theme='ocean'] .yable-tr:not(:last-child) .yable-td {
   border-bottom-color: var(--yable-border-color);
 }
 
 /* ── Ocean Dark Mode ────────────────────────────────────────────────────── */
 
 @media (prefers-color-scheme: dark) {
-  .yable-theme-ocean:not([data-yable-theme="light"]),
-  .yable[data-theme="ocean"]:not([data-yable-theme="light"]) {
+  .yable-theme-ocean:not([data-yable-theme='light']),
+  .yable[data-theme='ocean']:not([data-yable-theme='light']) {
     --yable-bg: #0b1210;
     --yable-bg-header: #0f1916;
     --yable-bg-footer: #0f1916;
@@ -159,8 +153,8 @@
   }
 }
 
-[data-yable-theme="dark"] .yable-theme-ocean,
-[data-yable-theme="dark"] .yable[data-theme="ocean"] {
+[data-yable-theme='dark'] .yable-theme-ocean,
+[data-yable-theme='dark'] .yable[data-theme='ocean'] {
   --yable-bg: #0b1210;
   --yable-bg-header: #0f1916;
   --yable-bg-footer: #0f1916;

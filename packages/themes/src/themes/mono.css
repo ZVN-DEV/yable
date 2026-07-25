@@ -11,7 +11,7 @@
    ============================================================================ */
 
 .yable-theme-mono,
-.yable[data-theme="mono"] {
+.yable[data-theme='mono'] {
   /* Surface — true white, no warmth, no coolness */
   --yable-bg: #ffffff;
   --yable-bg-header: #f7f7f7;
@@ -91,36 +91,36 @@
     rgba(0, 0, 0, 0.04) 37%,
     rgba(0, 0, 0, 0.02) 63%
   );
+
+  /* Header typography: uppercase, tight tracking, Swiss typographic precision */
+  --yable-header-text-transform: uppercase;
+  --yable-header-letter-spacing: 0.08em;
+  --yable-font-weight-header: var(--yable-font-weight-semibold);
 }
 
-/* Header — uppercase, tight tracking, Swiss typographic precision */
 .yable-theme-mono .yable-th,
-.yable[data-theme="mono"] .yable-th {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: var(--yable-font-size-header);
-  font-weight: var(--yable-font-weight-semibold);
+.yable[data-theme='mono'] .yable-th {
   color: var(--yable-text-secondary);
   border-bottom: 1px solid var(--yable-border-color-strong);
 }
 
 /* Rows — precise 1px rule */
 .yable-theme-mono .yable-tr:not(:last-child) .yable-td,
-.yable[data-theme="mono"] .yable-tr:not(:last-child) .yable-td {
+.yable[data-theme='mono'] .yable-tr:not(:last-child) .yable-td {
   border-bottom: 1px solid var(--yable-border-color);
 }
 
 /* Outer border — clean frame */
 .yable-theme-mono,
-.yable[data-theme="mono"] {
+.yable[data-theme='mono'] {
   border: 1px solid var(--yable-border-color-strong);
 }
 
 /* ── Mono Dark Mode ─────────────────────────────────────────────────────── */
 
 @media (prefers-color-scheme: dark) {
-  .yable-theme-mono:not([data-yable-theme="light"]),
-  .yable[data-theme="mono"]:not([data-yable-theme="light"]) {
+  .yable-theme-mono:not([data-yable-theme='light']),
+  .yable[data-theme='mono']:not([data-yable-theme='light']) {
     --yable-bg: #0a0a0a;
     --yable-bg-header: #141414;
     --yable-bg-footer: #141414;
@@ -173,8 +173,8 @@
   }
 }
 
-[data-yable-theme="dark"] .yable-theme-mono,
-[data-yable-theme="dark"] .yable[data-theme="mono"] {
+[data-yable-theme='dark'] .yable-theme-mono,
+[data-yable-theme='dark'] .yable[data-theme='mono'] {
   --yable-bg: #0a0a0a;
   --yable-bg-header: #141414;
   --yable-bg-footer: #141414;

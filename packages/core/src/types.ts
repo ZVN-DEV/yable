@@ -210,6 +210,13 @@ export interface ColumnDefExtensions<TData extends RowData, TValue = unknown> {
   rowSpan?: (row: Row<TData>, rows: Row<TData>[], rowIndex: number) => number | undefined
 
   // Styling
+  /**
+   * Horizontal alignment for this column's header AND body cells. Emits
+   * `data-align` on both, so one declaration centralizes what would otherwise be
+   * a per-cell style. Right-aligned body cells also get tabular figures, which
+   * is what numeric columns want.
+   */
+  align?: 'left' | 'center' | 'right'
   cellClassName?: string | ((ctx: CellContext<TData, TValue>) => string | undefined)
   cellStyle?:
     | React.CSSProperties
@@ -930,6 +937,8 @@ export interface Table<TData extends RowData> {
   getIsSomePageRowsSelected: () => boolean
   toggleAllRowsSelected: (value?: boolean) => void
   toggleAllPageRowsSelected: (value?: boolean) => void
+  getToggleAllRowsSelectedHandler: () => (event: unknown) => void
+  getToggleAllPageRowsSelectedHandler: () => (event: unknown) => void
   setRowSelection: (updater: Updater<RowSelectionState>) => void
   resetRowSelection: (defaultState?: boolean) => void
   getCellSelectionRange: () => CellRange | null

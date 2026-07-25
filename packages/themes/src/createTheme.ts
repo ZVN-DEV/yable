@@ -39,13 +39,26 @@ export interface ThemeTokens {
 
   // Typography
   fontFamily?: string
+  /** Header font family. Inherits `fontFamily` unless set. */
+  fontFamilyHeader?: string
+  /** Body-cell font family. Inherits `fontFamily` unless set. */
+  fontFamilyCell?: string
   fontSize?: string
   fontSizeSm?: string
   fontSizeHeader?: string
   fontWeightNormal?: string
   fontWeightMedium?: string
   fontWeightSemibold?: string
+  /** Header font weight. Inherits `fontWeightMedium` unless set. */
+  fontWeightHeader?: string
+  headerTextTransform?: string
+  headerLetterSpacing?: string
+  headerBackdropFilter?: string
   lineHeight?: string
+
+  // Master-detail
+  detailAccentWidth?: string
+  detailAccentColor?: string
 
   // Sizing
   rowMinHeight?: string
@@ -106,12 +119,20 @@ const TOKEN_MAP: Record<string, string> = {
   headerPaddingX: '--yable-header-padding-x',
   headerPaddingY: '--yable-header-padding-y',
   fontFamily: '--yable-font-family',
+  fontFamilyHeader: '--yable-font-family-header',
+  fontFamilyCell: '--yable-font-family-cell',
   fontSize: '--yable-font-size',
   fontSizeSm: '--yable-font-size-sm',
   fontSizeHeader: '--yable-font-size-header',
   fontWeightNormal: '--yable-font-weight-normal',
   fontWeightMedium: '--yable-font-weight-medium',
   fontWeightSemibold: '--yable-font-weight-semibold',
+  fontWeightHeader: '--yable-font-weight-header',
+  headerTextTransform: '--yable-header-text-transform',
+  headerLetterSpacing: '--yable-header-letter-spacing',
+  headerBackdropFilter: '--yable-header-backdrop-filter',
+  detailAccentWidth: '--yable-detail-accent-width',
+  detailAccentColor: '--yable-detail-accent-color',
   lineHeight: '--yable-line-height',
   rowMinHeight: '--yable-row-min-height',
   headerMinHeight: '--yable-header-min-height',

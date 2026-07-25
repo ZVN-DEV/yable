@@ -473,6 +473,16 @@ export function createTable<TData extends RowData>(options: TableOptions<TData>)
         return next
       })
     },
+    getToggleAllRowsSelectedHandler: () => {
+      return (_e: unknown) => {
+        table.toggleAllRowsSelected()
+      }
+    },
+    getToggleAllPageRowsSelectedHandler: () => {
+      return (_e: unknown) => {
+        table.toggleAllPageRowsSelected()
+      }
+    },
     setRowSelection: (_updater: Updater<RowSelectionState>) => {},
     resetRowSelection: (defaultState?: boolean) => {
       table.setRowSelection(defaultState ? {} : table.getState().rowSelection)

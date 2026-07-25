@@ -57,7 +57,7 @@ columnHelper.display({
     <input
       type="checkbox"
       checked={table.getIsAllPageRowsSelected()}
-      onChange={table.toggleAllPageRowsSelected}
+      onChange={table.getToggleAllPageRowsSelectedHandler()}
     />
   ),
   cell: ({ row }) => (

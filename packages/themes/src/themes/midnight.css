@@ -11,7 +11,7 @@
    ============================================================================ */
 
 .yable-theme-midnight,
-.yable[data-theme="midnight"] {
+.yable[data-theme='midnight'] {
   /* Surface — truly deep navy, not just dark gray */
   --yable-bg: #080b16;
   --yable-bg-header: #0d1025;
@@ -106,32 +106,27 @@
 
 /* Header — alive with blue tint, crisp and technical */
 .yable-theme-midnight .yable-th,
-.yable[data-theme="midnight"] .yable-th {
-  text-transform: none;
-  letter-spacing: 0.02em;
-  font-size: var(--yable-font-size-header);
-  font-weight: var(--yable-font-weight-medium);
-  color: var(--yable-text-header);
+.yable[data-theme='midnight'] .yable-th {
   border-bottom: 1px solid var(--yable-border-color-strong);
 }
 
 /* Rows — razor-thin navy separators */
 .yable-theme-midnight .yable-tr:not(:last-child) .yable-td,
-.yable[data-theme="midnight"] .yable-tr:not(:last-child) .yable-td {
+.yable[data-theme='midnight'] .yable-tr:not(:last-child) .yable-td {
   border-bottom: 1px solid var(--yable-border-color);
 }
 
 /* Outer border — defined but not heavy */
 .yable-theme-midnight,
-.yable[data-theme="midnight"] {
+.yable[data-theme='midnight'] {
   border: 1px solid var(--yable-border-color-strong);
 }
 
 /* ── Midnight Light Variant ─────────────────────────────────────────────── */
 /* Light midnight: steel blue surfaces, deep blue accents — still technical */
 
-[data-yable-theme="light"] .yable-theme-midnight,
-[data-yable-theme="light"] .yable[data-theme="midnight"] {
+[data-yable-theme='light'] .yable-theme-midnight,
+[data-yable-theme='light'] .yable[data-theme='midnight'] {
   --yable-bg: #f8f9fc;
   --yable-bg-header: #eef1f8;
   --yable-bg-footer: #eef1f8;
@@ -182,8 +177,8 @@
 }
 
 @media (prefers-color-scheme: light) {
-  .yable-theme-midnight:not([data-yable-theme="dark"]),
-  .yable[data-theme="midnight"]:not([data-yable-theme="dark"]) {
+  .yable-theme-midnight:not([data-yable-theme='dark']),
+  .yable[data-theme='midnight']:not([data-yable-theme='dark']) {
     --yable-bg: #f8f9fc;
     --yable-bg-header: #eef1f8;
     --yable-bg-footer: #eef1f8;

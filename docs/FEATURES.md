@@ -792,7 +792,7 @@ columnHelper.display({
     <input
       type="checkbox"
       checked={table.getIsAllPageRowsSelected()}
-      onChange={table.toggleAllPageRowsSelected}
+      onChange={table.getToggleAllPageRowsSelectedHandler()}
     />
   ),
   cell: ({ row }) => (
@@ -1397,6 +1397,11 @@ const table = useTable({
   onHeaderClick: (event) => console.log('Header clicked:', event),
 })
 ```
+
+`onRowClick` fires on every row click, whether or not the `<Table>` element sets
+`clickableRows`. That prop is a purely visual affordance (pointer cursor, hover
+treatment) and defaults on when the table has an `onRowClick` handler; set
+`clickableRows={false}` to keep the handler but drop the affordance.
 
 ---
 

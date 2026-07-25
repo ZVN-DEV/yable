@@ -23,7 +23,7 @@ export function selectColumn<TData extends RowData>(
               el.indeterminate =
                 table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()
           }}
-          onChange={() => table.toggleAllPageRowsSelected()}
+          onChange={table.getToggleAllPageRowsSelectedHandler()}
           aria-label={headerAriaLabel}
         />
       </label>

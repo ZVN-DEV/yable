@@ -179,6 +179,48 @@ function AsyncMergeGrid() {
   )
 }
 
+// --- Underflow on a FULLY SIZED table --------------------------------------
+// Every column has an explicit `size`, so there are no auto columns to grow and
+// the sized total (480px) is far narrower than the 900px container. Before the
+// no-auto-columns fallback this left a dead band on the right that no underflow
+// policy could close. Row virtualization + sticky header are on because the
+// CSS workaround for the dead band (`min-width:100%`) let the header and the
+// virtualized body resolve the slack independently and drift out of alignment —
+// the spec asserts header and body cells stay column-aligned.
+
+interface SizedRow {
+  id: number
+  code: string
+  region: string
+  notes: string
+}
+
+const SIZED_ROWS: SizedRow[] = Array.from({ length: 60 }, (_, i) => ({
+  id: i + 1,
+  code: `SKU-${1000 + i}`,
+  region: ['Marlborough', 'Casablanca', 'Willamette'][i % 3]!,
+  notes: 'Bin check pending',
+}))
+
+const sizedCol = createColumnHelper<SizedRow>()
+const fullySizedColumns = [
+  sizedCol.accessor('code', { header: 'Code', size: 120 }),
+  sizedCol.accessor('region', { header: 'Region', size: 140 }),
+  sizedCol.accessor('notes', { header: 'Notes', size: 220 }),
+]
+
+function FullySizedGrid({ underflow }: { underflow: 'stretch' | 'stretch-last' | 'leave' }) {
+  const table = useTable<SizedRow>({
+    data: SIZED_ROWS,
+    columns: fullySizedColumns,
+    getRowId: (row) => String(row.id),
+    enableVirtualization: true,
+    virtualViewportHeight: 240,
+    rowHeight: 36,
+  })
+  return <Table table={table} autoColumnWidth={{ underflow }} stickyHeader bordered />
+}
+
 export default function AutoColumnWidthFixturePage() {
   return (
     <main style={{ padding: 24 }}>
@@ -199,9 +241,21 @@ export default function AutoColumnWidthFixturePage() {
         <h2>overflow: scroll</h2>
         <AutoGrid overflow="scroll" />
       </section>
-      <section data-testid="auto-formatted" style={{ width: 640 }}>
+      <section data-testid="auto-formatted" style={{ width: 640, marginBottom: 48 }}>
         <h2>autoSizeText (rendered-content measurement)</h2>
         <FormattedGrid />
+      </section>
+      <section data-testid="auto-underflow-leave" style={{ width: 900, marginBottom: 48 }}>
+        <h2>fully sized, underflow: leave</h2>
+        <FullySizedGrid underflow="leave" />
+      </section>
+      <section data-testid="auto-underflow-stretch" style={{ width: 900, marginBottom: 48 }}>
+        <h2>fully sized, underflow: stretch</h2>
+        <FullySizedGrid underflow="stretch" />
+      </section>
+      <section data-testid="auto-underflow-stretch-last" style={{ width: 900 }}>
+        <h2>fully sized, underflow: stretch-last</h2>
+        <FullySizedGrid underflow="stretch-last" />
       </section>
     </main>
   )
