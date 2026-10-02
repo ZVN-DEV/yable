@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
+import { LITTLE_FRIEND_ENABLED, LITTLE_FRIEND_SITE_KEY } from '@/lib/little-friend'
+import LittleFriendEvents from './little-friend'
 import './globals.css'
 import '@zvndev/yable-themes'
 import '@zvndev/yable-themes/default.css'
@@ -40,6 +42,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${body.variable} ${mono.variable}`} data-yable-theme="dark">
+      {LITTLE_FRIEND_ENABLED && (
+        <head>
+          <script
+            defer
+            src="https://cdn.littlefriend.io/lf.js"
+            data-site={LITTLE_FRIEND_SITE_KEY}
+            data-mode="journey"
+          />
+          <script
+            defer
+            src="https://cdn.littlefriend.io/lf-replay.js"
+            data-site={LITTLE_FRIEND_SITE_KEY}
+          />
+        </head>
+      )}
       <body
         style={{
           margin: 0,
@@ -51,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           MozOsxFontSmoothing: 'grayscale',
         }}
       >
+        {LITTLE_FRIEND_ENABLED && <LittleFriendEvents />}
         {children}
       </body>
     </html>
