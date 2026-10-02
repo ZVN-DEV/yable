@@ -35,6 +35,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <a
               href="https://github.com/ZVN-DEV/yable"
+              data-lf="docs.github"
               target="_blank"
               rel="noreferrer"
               className={s.topLink}
@@ -43,6 +44,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             </a>
             <a
               href="https://www.npmjs.com/package/@zvndev/yable-react"
+              data-lf="docs.npm"
               target="_blank"
               rel="noreferrer"
               className={s.topLink}

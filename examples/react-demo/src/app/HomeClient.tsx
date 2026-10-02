@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { track } from '@/lib/little-friend'
 import {
   useTable,
   Table,
@@ -698,7 +699,9 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
   const reducedMotion = useReducedMotion()
 
   const copyInstall = () => {
-    navigator.clipboard.writeText('npm i @zvndev/yable-react @zvndev/yable-themes')
+    navigator.clipboard
+      .writeText('npm i @zvndev/yable-react @zvndev/yable-themes')
+      .then(() => track('install.copy'))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -744,18 +747,19 @@ export default function HomeClient({ codeBlocks }: HomeClientProps) {
             </div>
 
             <div className={s.heroCtas}>
-              <Link href="/gallery" className={s.heroCtaPrimary}>
+              <Link href="/gallery" data-lf="cta.gallery" className={s.heroCtaPrimary}>
                 Explore the gallery<span aria-hidden="true">→</span>
               </Link>
-              <Link href="/docs/quickstart" className={s.heroCtaSecondary}>
+              <Link href="/docs/quickstart" data-lf="cta.docs" className={s.heroCtaSecondary}>
                 Read the docs<span aria-hidden="true">→</span>
               </Link>
-              <Link href="/drag-lab" className={s.heroCtaSecondary}>
+              <Link href="/drag-lab" data-lf="cta.drag_lab" className={s.heroCtaSecondary}>
                 <span className={s.heroCtaBadge}>New</span>
                 Try column drag<span aria-hidden="true">→</span>
               </Link>
               <a
                 href="https://github.com/ZVN-DEV/yable"
+                data-lf="cta.github"
                 target="_blank"
                 rel="noreferrer"
                 className={s.heroCtaSecondary}
